@@ -1,0 +1,14 @@
+{
+  "name": "@go-tech-frontend/lib",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "main": "./src/index.ts",
+  "packageManager": "pnpm@10.17.0",
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.4.0"
+  }
+}

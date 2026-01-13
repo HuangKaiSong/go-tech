@@ -1,0 +1,20 @@
+{
+	"name": "go-tech-frontend",
+	"version": "0.0.1",
+	"author": {
+		"name": "super_hks"
+	},
+	"scripts": {
+		"dev:h5": "pnpm --filter web-h5 run dev",
+		"build:h5": "pnpm --filter web-h5 run build",
+		"start:h5": "pnpm --filter web-h5 run start"
+	},
+	"dependencies": {
+		"tailwindcss-animate": "^1.0.7"
+	},
+	"devDependencies": {
+		"@tailwindcss/postcss": "^4",
+		"tailwindcss": "^4.1.18"
+	},
+	"packageManager": "pnpm@10.17.0"
+}
