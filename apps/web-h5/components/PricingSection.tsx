@@ -86,11 +86,9 @@ const PricingSection = () => {
           <Link href="/pricing-plan" className="text-base font-bold text-foreground hover:text-primary underline block">
             查看完整的定價方案
           </Link>
-          <Link href="/free-trial">
             <Button>
               立即開始14天免費試用
             </Button>
-          </Link>
         </div>
       </div>
     </section>

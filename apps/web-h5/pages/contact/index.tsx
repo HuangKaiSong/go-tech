@@ -114,13 +114,6 @@ const Contact = () => {
       {/* Success Dialog */}
       <Dialog open={showSuccess} onOpenChange={setShowSuccess}>
         <DialogContent className="sm:max-w-md text-center p-8">
-          <button
-            onClick={() => setShowSuccess(false)}
-            className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100"
-          >
-            <X className="h-5 w-5" />
-            <span className="sr-only">Close</span>
-          </button>
           <h2 className="text-2xl font-bold text-foreground mb-4">發送成功</h2>
           <p className="text-muted-foreground">
             我們看到後會第一時間跟您聯繫，請耐心等待並保持電話暢通。
