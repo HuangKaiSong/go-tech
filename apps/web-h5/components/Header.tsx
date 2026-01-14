@@ -44,48 +44,48 @@ const Header = ({ heroBg }: { heroBg?: string | StaticImageData }) => {
             <nav className="hidden  md:flex items-center justify-between gap-4">
               <Link
                 href="/core-advantages"
-                className="text-lg text-background hover:text-primary transition-colors col-span-1"
+                className="text-lg text-white hover:text-primary transition-colors col-span-1"
               >
                 核心優勢
               </Link>
-              <div className="h-10 border border-background"></div>
+              <div className="h-10 border border-white"></div>
               <Link
                 href="/service-plan"
-                className="text-lg text-background hover:text-primary transition-colors col-span-1"
+                className="text-lg text-white hover:text-primary transition-colors col-span-1"
               >
                 服務計劃
               </Link>
-              <div className="h-10 border border-background"></div>
+              <div className="h-10 border border-white"></div>
               <Link
                 href="/target-audience"
-                className="text-lg text-background hover:text-primary transition-colors col-span-1"
+                className="text-lg text-white hover:text-primary transition-colors col-span-1"
               >
                 適合人群
               </Link>
-              <div className="h-10 border border-background"></div>
+              <div className="h-10 border border-white"></div>
               <Link
                 href="/contact"
-                className="text-lg text-background hover:text-primary transition-colors col-span-1"
+                className="text-lg text-white hover:text-primary transition-colors col-span-1"
               >
                 聯繫我們
               </Link>
             </nav>
             <div className="grid grid-cols-3 text-sm">
-              <div className="flex items-end gap-2 text-background/90">
+              <div className="flex items-end gap-2 text-white">
                 <Phone className="w-12 h-12" />
                 <div className="flex flex-col">
                   <div>Call us</div>
                   <div>+652 8888 8888</div>
                 </div>
               </div>
-              <div className="flex items-end gap-2 text-background/90">
+              <div className="flex items-end gap-2 text-white">
                 <Mail className="w-12 h-12" />
                 <div className="flex flex-col">
                   <div>Mail to us</div>
                   <div>info@go-tech.com</div>
                 </div>
               </div>
-              <div className="flex items-end gap-2 text-background/90">
+              <div className="flex items-end gap-2 text-white">
                 <MapPin className="w-12 h-12" />
                 <div className="flex flex-col">
                   <div>Address</div>
@@ -102,7 +102,7 @@ const Header = ({ heroBg }: { heroBg?: string | StaticImageData }) => {
                 <>
                 <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                   <SheetTrigger asChild>
-                    <button className="flex items-center gap-2 text-background hover:text-primary transition-colors cursor-pointer">
+                    <button className="flex items-center gap-2 text-white hover:text-primary transition-colors cursor-pointer">
                       <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
                         <User className="w-4 h-4 text-primary" />
                       </div>
@@ -157,7 +157,7 @@ const Header = ({ heroBg }: { heroBg?: string | StaticImageData }) => {
                   </Button>
                 </Link>
               )}
-              <div className="flex flex-row gap-2 text-background text-sm items-center">
+              <div className="flex flex-row gap-2 text-white text-sm items-center">
                 <div>繁簡</div>
                 <ArrowRightLeft className="w-4 h-4" />
               </div>
