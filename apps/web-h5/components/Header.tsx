@@ -151,7 +151,7 @@ const Header = ({ heroBg }: { heroBg?: string | StaticImageData }) => {
               </Sheet>
                 </>
               ) : (
-                <Link href="/login">
+                <Link href="/account/login">
                   <Button className="px-10" size="sm">
                     {t("login")}
                   </Button>

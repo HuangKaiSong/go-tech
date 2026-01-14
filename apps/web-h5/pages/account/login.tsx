@@ -102,14 +102,14 @@ const Login = () => {
 
         <div className="flex items-center justify-between mt-6 text-sm">
           <div className="flex gap-6">
-            <Link href="#" className="text-foreground underline hover:text-primary transition-colors">
+            <Link href="/account/forget-password" className="text-foreground underline hover:text-primary transition-colors">
               忘記密碼?
             </Link>
             <Link href="#" className="text-foreground underline hover:text-primary transition-colors">
               無法登入?
             </Link>
           </div>
-          <Link href="/register" className="text-foreground underline hover:text-primary transition-colors">
+          <Link href="/account/register" className="text-foreground underline hover:text-primary transition-colors">
             註冊新帳戶
           </Link>
         </div>
