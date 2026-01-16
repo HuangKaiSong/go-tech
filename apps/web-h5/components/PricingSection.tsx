@@ -1,6 +1,6 @@
 import { Button, Card, CardContent, CardFooter, CardHeader } from "./ui";
 import { ChevronRight } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/Link";
 
 const pricingPlans = [
   {

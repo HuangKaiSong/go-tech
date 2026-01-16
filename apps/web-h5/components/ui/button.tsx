@@ -4,6 +4,7 @@ import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@go-tech-frontend/lib";
+import { useIframeContext } from "@/contexts/IframeContext";
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center shrink-0 select-none align-top text-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
@@ -38,10 +39,39 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, onClick, ...props }, ref) => {
+    const { hasIframe } = useIframeContext();
+
+    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+      // 如果在 iframe 中且没有被显式禁用，则阻止点击
+      if (hasIframe && !props.disabled) {
+        e.preventDefault();
+        console.warn('在 iframe 中按钮点击被阻止');
+        return;
+      }
+      
+      // 如果有原始的 onClick 处理程序，则调用它
+      if (onClick) {
+        onClick(e);
+      }
+    };
     
     const Comp = asChild ? Slot : "button";
-    return <Comp  disabled={props.disabled} data-accent-color={props.color} data-disabled={props.disabled || undefined} className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />;
+    const isActuallyDisabled = props.disabled || hasIframe; // 如果在 iframe 中则禁用按钮
+
+    return <Comp 
+      disabled={isActuallyDisabled}
+      data-accent-color={props.color}
+      data-disabled={isActuallyDisabled || undefined}
+      data-iframe={hasIframe} // 添加 iframe 状态数据属性用于样式
+      className={cn(
+        buttonVariants({ variant, size, className }),
+        hasIframe ? "cursor-not-allowed opacity-60" : "" // 如果在 iframe 中添加视觉提示
+      )}
+      ref={ref}
+      onClick={handleClick}
+      {...props}
+    />;
   },
 );
 Button.displayName = "Button";

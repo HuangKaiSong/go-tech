@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useRouter } from 'next/router'
-import Link from "next/link";
+import Link from "@/components/Link";
 import Image from "next/image";
 
 import { Eye, EyeOff, X } from "lucide-react";

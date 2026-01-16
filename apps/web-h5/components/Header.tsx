@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/Link";
 import Image, { StaticImageData } from "next/image";
 import { Settings, Phone, Mail, MapPin, User, Package, LogOut, Crown, ArrowRightLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";

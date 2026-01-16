@@ -1,5 +1,5 @@
 import { Button } from "./ui";
-import Link from "next/link";
+import Link from "@/components/Link";
 import homeOffice from "@/assets/home-office.jpg";
 
 const StatsSection = () => {
