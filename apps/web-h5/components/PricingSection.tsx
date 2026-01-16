@@ -44,15 +44,17 @@ const PricingSection = () => {
       <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {pricingPlans.map((plan, index) => (
-            <Card 
-              key={index} 
+            <Card
+              key={index}
               className="relative overflow-hidden transition-all duration-300 group/card cursor-pointer border border-border hover:border-primary hover:shadow-xl"
             >
               <CardHeader className="text-center pb-2">
-                <h3 className="text-xl font-bold text-foreground">{plan.name}</h3>
+                <h3 className="text-xl font-bold text-foreground">
+                  {plan.name}
+                </h3>
                 <p className="text-sm text-muted-foreground">{plan.subtitle}</p>
               </CardHeader>
-              
+
               <CardContent className="text-center pt-4">
                 <div className="mb-2">
                   <span className="text-sm text-muted-foreground line-through">
@@ -61,15 +63,19 @@ const PricingSection = () => {
                 </div>
                 <div className="flex items-baseline justify-center gap-1 mb-2">
                   <span className="text-sm text-muted-foreground">低至：</span>
-                  <span className="text-3xl font-bold text-primary">{plan.price}</span>
-                  <span className="text-sm text-muted-foreground">{plan.priceSuffix}</span>
+                  <span className="text-3xl font-bold text-primary">
+                    {plan.price}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    {plan.priceSuffix}
+                  </span>
                 </div>
                 <p className="text-xs text-muted-foreground">{plan.period}</p>
               </CardContent>
-              
+
               <CardFooter className="pt-4">
                 <Link href="/service-plan" className="w-full">
-                  <Button 
+                  <Button
                     variant="outline"
                     className="w-full group transition-all duration-300 group-hover/card:bg-primary group-hover/card:text-primary-foreground group-hover/card:border-primary"
                   >
@@ -81,14 +87,17 @@ const PricingSection = () => {
             </Card>
           ))}
         </div>
-        
+
         <div className="text-center mt-10 space-y-1">
-          <Link href="/pricing-plan" className="text-base font-bold text-foreground hover:text-primary underline block">
+          <Link
+            href="/pricing-plan"
+            className="text-base font-bold text-foreground hover:text-primary underline block"
+          >
             查看完整的定價方案
           </Link>
-            <Button>
-              立即開始14天免費試用
-            </Button>
+          <Link href="/free-trial">
+            <Button>立即開始14天免費試用</Button>
+          </Link>
         </div>
       </div>
     </section>
