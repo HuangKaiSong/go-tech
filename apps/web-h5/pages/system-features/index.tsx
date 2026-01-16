@@ -2,7 +2,6 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import SystemFeaturesHero from '@/assets/system-features.webp'
 import { 
   Users, 
   Building2, 
@@ -17,6 +16,7 @@ import {
   RefreshCw,
   PenTool
 } from "lucide-react";
+import SystemFeaturesHero from '@/assets/system-features.webp'
 
 const features = [
   { icon: Users, label: "人事管理" },

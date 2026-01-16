@@ -50,6 +50,13 @@ const Header = ({ heroBg }: { heroBg?: string | StaticImageData }) => {
               </Link>
               <div className="h-10 border border-white"></div>
               <Link
+                href="/system-features"
+                className="text-lg text-white hover:text-primary transition-colors col-span-1"
+              >
+                查看系統功能
+              </Link>
+              <div className="h-10 border border-white"></div>
+              <Link
                 href="/service-plan"
                 className="text-lg text-white hover:text-primary transition-colors col-span-1"
               >
