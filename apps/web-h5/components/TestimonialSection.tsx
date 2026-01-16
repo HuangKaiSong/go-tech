@@ -1,10 +1,12 @@
 import homeOffice from "@/assets/home-office.jpg";
+import { useIframeContext } from "@/contexts/IframeContext";
 import Image from "next/image";
 
 const TestimonialSection = () => {
+  const { hasIframe } = useIframeContext()
   return (
     <section className="py-16 bg-background">
-      <div className="container mx-auto px-4">
+      <div className={`container mx-auto px-4 ${hasIframe ? 'cursor-editor' : ''}`}>
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div>
             <div className="text-6xl text-primary/20 font-serif mb-4">"</div>

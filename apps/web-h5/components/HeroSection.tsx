@@ -1,10 +1,13 @@
 
 import Image from "next/image";
 import heroBackground from '@/assets/background.webp'
+import { useIframeContext } from "@/contexts/IframeContext";
 
 const HeroSection = () => {
+  const { hasIframe } = useIframeContext()
+
   return (
-    <section className="relative min-h-150 w-full flex items-center pt-25">
+    <section className={`relative min-h-150 w-full flex items-center pt-25 ${hasIframe ? 'cursor-editor' : ''}`}>
       <Image 
         src={heroBackground}
         alt="Beautiful house at sunset"

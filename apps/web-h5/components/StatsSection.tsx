@@ -1,8 +1,10 @@
 import { Button } from "./ui";
 import Link from "@/components/Link";
 import homeOffice from "@/assets/home-office.jpg";
+import { useIframeContext } from "@/contexts/IframeContext";
 
 const StatsSection = () => {
+  const { hasIframe } = useIframeContext()
   return (
     <section className="py-16 relative overflow-hidden">
       {/* Background Image */}
@@ -12,7 +14,7 @@ const StatsSection = () => {
       />
       <div className="absolute inset-0 bg-secondary/90" />
       
-      <div className="container mx-auto px-4 relative z-10">
+      <div className={`container mx-auto px-4 relative z-10 ${hasIframe ? 'cursor-editor' : ''}`}>
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div>
             <h3 className="text-sm font-semibold text-primary mb-2">

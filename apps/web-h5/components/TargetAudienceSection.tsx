@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Button } from "./ui";
 import individualOwner from "@/assets/individual-owner.jpg";
 import investorProperty from "@/assets/investor-property.jpg";
+import { useIframeContext } from "@/contexts/IframeContext";
 
 const audiences = [
   {
@@ -32,6 +33,8 @@ const audiences = [
 ];
 
 const TargetAudienceSection = () => {
+  const { hasIframe } = useIframeContext()
+
   return (
     <section className="py-16 bg-secondary">
       <div className="container mx-auto px-4">
@@ -46,7 +49,7 @@ const TargetAudienceSection = () => {
           </Link>
         </div>
         
-        <div className="space-y-8">
+        <div className={`space-y-8 ${hasIframe ? 'cursor-editor' : ''}`}>
           {audiences.map((audience, index) => (
             <div 
               key={index}

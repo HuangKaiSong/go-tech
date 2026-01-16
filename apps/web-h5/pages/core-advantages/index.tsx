@@ -11,8 +11,11 @@ import advantage3 from "@/assets/advantage-3.jpg";
 import advantage4 from "@/assets/advantage-4.jpg";
 import advantage5 from "@/assets/advantage-5.jpg";
 import advantage6 from "@/assets/advantage-6.jpg";
+import { useIframeContext } from "@/contexts/IframeContext";
 
 const CoreAdvantages = () => {
+  const { hasIframe } = useIframeContext()
+
   const advantages = [
     {
       image: advantage1,
@@ -57,7 +60,7 @@ const CoreAdvantages = () => {
       <Header heroBg={coreHero} />
       
       {/* Hero Section */}
-      <section className="relative min-h-[60vh] flex items-center">
+      <section className={`relative min-h-[60vh] flex items-center ${hasIframe ? 'cursor-editor' : ''}`}>
         <div className="absolute inset-0">
           <Image 
             src={coreHero}
@@ -80,7 +83,7 @@ const CoreAdvantages = () => {
             租賃管理系統介紹
           </h2>
           
-          <div className="grid md:grid-cols-2 gap-12 items-start">
+          <div className={`grid md:grid-cols-2 gap-12 items-start ${hasIframe ? 'cursor-editor' : ''}`}>
             {/* Left Column */}
             <div>
               <h3 className="text-2xl font-bold text-foreground mb-4">租賃管理系統</h3>
@@ -159,7 +162,7 @@ const CoreAdvantages = () => {
             優勢介紹
           </h2>
           
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className={`grid md:grid-cols-2 gap-12 items-center ${hasIframe ? 'cursor-editor' : ''}`}>
             {/* Left - Image */}
             <div className="rounded-lg overflow-hidden">
               <Image 
@@ -219,7 +222,7 @@ const CoreAdvantages = () => {
             我們的優勢
           </h2>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
+          <div className={`grid md:grid-cols-2 lg:grid-cols-3 gap-10 ${hasIframe ? 'cursor-editor' : ''}`}>
             {advantages.map((advantage, index) => (
               <div key={index} className="group bg-card rounded-xl overflow-hidden shadow-lg border border-border hover:shadow-xl transition-shadow duration-300">
                 <div className="overflow-hidden">

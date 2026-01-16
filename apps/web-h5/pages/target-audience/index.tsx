@@ -6,6 +6,7 @@ import audienceIndividual from "@/assets/audience-individual.jpg";
 import audienceInvestor from "@/assets/audience-investor.jpg";
 import audienceOverseas from "@/assets/audience-overseas.jpg";
 import audienceBanner from "@/assets/audience-banner.jpg";
+import { useIframeContext } from "@/contexts/IframeContext";
 
 const audiences = [
   {
@@ -92,11 +93,13 @@ const comparisonData = [
 ];
 
 const TargetAudience = () => {
+  const { hasIframe } = useIframeContext();
+
   return (
     <div className="min-h-screen bg-background">
       <Header heroBg={audienceBanner} />
       {/* Hero Section */}
-      <section className="relative py-24 md:py-32">
+      <section className={`relative py-24 md:py-32 ${hasIframe ? 'cursor-editor' : ''}`}>
         <Image 
           src={audienceBanner}
           alt="Target audience background"
@@ -116,7 +119,7 @@ const TargetAudience = () => {
       {/* Audience Cards */}
       <section className="py-16 bg-secondary">
         <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className={`grid md:grid-cols-3 gap-8 ${hasIframe ? 'cursor-editor' : ''}`}>
             {audiences.map((audience, index) => (
               <div 
                 key={index}
@@ -151,7 +154,7 @@ const TargetAudience = () => {
       {/* Features Section */}
       <section className="py-16 bg-background">
         <div className="container mx-auto px-4">
-          <div className="space-y-8">
+          <div className={`space-y-8 ${hasIframe ? 'cursor-editor' : ''}`}>
             {features.map((feature, index) => (
               <div 
                 key={index}
@@ -183,7 +186,7 @@ const TargetAudience = () => {
       <section className="py-16 bg-secondary">
         <div className="container mx-auto px-4">
           <div className="overflow-x-auto">
-            <table className="w-full bg-background rounded-xl overflow-hidden shadow-lg">
+            <table className={`w-full bg-background rounded-xl overflow-hidden shadow-lg ${hasIframe ? 'cursor-editor' : ''}`}>
               <thead>
                 <tr>
                   <th className="p-4 text-left font-semibold text-foreground bg-muted">

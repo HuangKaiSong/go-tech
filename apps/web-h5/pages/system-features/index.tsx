@@ -17,6 +17,7 @@ import {
   PenTool
 } from "lucide-react";
 import SystemFeaturesHero from '@/assets/system-features.webp'
+import { useIframeContext } from "@/contexts/IframeContext";
 
 const features = [
   { icon: Users, label: "人事管理" },
@@ -34,12 +35,14 @@ const features = [
 ];
 
 const SystemFeatures = () => {
+  const { hasIframe } = useIframeContext();
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header heroBg={SystemFeaturesHero} />
       
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 md:pb-32">
+      <section className={`relative pt-32 pb-20 md:pb-32 ${hasIframe ? 'cursor-editor' : ''}`}>
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{
@@ -76,7 +79,7 @@ const SystemFeatures = () => {
               更全面更完善的功能，能夠更快捷方便管理你的物業。
             </p>
             
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-10">
+            <div className={`grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-10 ${hasIframe ? 'cursor-editor' : ''}`}>
               {features.map((feature, index) => (
                 <div key={index} className="flex flex-col items-start">
                   <div 
