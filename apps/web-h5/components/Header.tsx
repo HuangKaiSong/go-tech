@@ -9,9 +9,11 @@ import { ni18nConfig } from "@/ni18n.config";
 import { GetServerSideProps } from "next";
 import { loadTranslations } from "ni18n";
 import { useState } from "react";
+import { useIframeContext } from "@/contexts/IframeContext";
 
 const Header = ({ heroBg }: { heroBg?: string | StaticImageData }) => {
   const { t } = useTranslation("common");
+  const { hasIframe } = useIframeContext();
 
   const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -36,7 +38,7 @@ const Header = ({ heroBg }: { heroBg?: string | StaticImageData }) => {
         <div className="container h-full mx-auto flex flex-row items-center gap-10">
           {/* logo */}
           <Link href="/">
-            <Image src={Logo} alt="logo" className="w-40" />
+            <Image src={Logo} alt="logo" className={`w-40 ${hasIframe ? 'cursor-editor' : ''}`} />
           </Link>
           {/* menu */}
           <div className="flex-1 flex flex-col h-full py-4 justify-between">
@@ -78,21 +80,21 @@ const Header = ({ heroBg }: { heroBg?: string | StaticImageData }) => {
               </Link>
             </nav>
             <div className="grid grid-cols-3 text-sm">
-              <div className="flex items-end gap-2 text-white">
+              <div className={`flex items-end gap-2 text-white ${hasIframe ? 'cursor-editor' : ''}`}>
                 <Phone className="w-12 h-12" />
                 <div className="flex flex-col">
                   <div>Call us</div>
                   <div>+652 8888 8888</div>
                 </div>
               </div>
-              <div className="flex items-end gap-2 text-white">
+              <div className={`flex items-end gap-2 text-white ${hasIframe ? 'cursor-editor' : ''}`}>
                 <Mail className="w-12 h-12" />
                 <div className="flex flex-col">
                   <div>Mail to us</div>
                   <div>info@go-tech.com</div>
                 </div>
               </div>
-              <div className="flex items-end gap-2 text-white">
+              <div className={`flex items-end gap-2 text-white ${hasIframe ? 'cursor-editor' : ''}`}>
                 <MapPin className="w-12 h-12" />
                 <div className="flex flex-col">
                   <div>Address</div>
