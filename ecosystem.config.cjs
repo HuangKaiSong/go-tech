@@ -11,7 +11,8 @@ module.exports = {
         'start:h5'
       ],
       env: {
-        NODE_ENV: 'production'
+        NODE_ENV: 'production',
+        VITE_H5_SITE_URL: 'http://192.168.0.202:3200'
       }
     }
   ]
