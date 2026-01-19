@@ -6,11 +6,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/hooks/use-auth";
 import { ChevronDown, LogOut, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const AdminHeader = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const handleLogout = () => {
     navigate('/login', { replace: true })
   }
@@ -22,10 +24,10 @@ const AdminHeader = () => {
           <Avatar className="h-8 w-8">
             <AvatarImage src="" />
             <AvatarFallback className="bg-primary text-primary-foreground text-sm">
-              JR
+              {user.sub.slice(0, 2)}
             </AvatarFallback>
           </Avatar>
-          <span className="text-sm font-medium text-foreground">Jennifer Reid</span>
+          <span className="text-sm font-medium text-foreground">{user.sub}</span>
           <ChevronDown className="w-4 h-4 text-muted-foreground" />
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-48">
