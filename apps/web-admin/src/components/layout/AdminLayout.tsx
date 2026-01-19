@@ -47,14 +47,13 @@ const AdminLayout = () => {
       } else if (config.headers instanceof Headers) {
         // Headers实例无需处理
       } else {
-        // 普通对象形式的headers
-        config.headers = { ...config.headers };
+        config.headers = new Headers(config.headers);
       }
       
       // 添加认证token到请求头
       if (token) {
         if (config.headers instanceof Headers) {
-          config.headers.set('Authorization', `Bearer ${token}`);
+          config.headers.append('Authorization', `Bearer ${token}`);
         }
       }
       
