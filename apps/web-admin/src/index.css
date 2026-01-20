@@ -6,8 +6,6 @@
 @custom-variant dark (&:where(.dark, .dark *));
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
-@layer base {
-
 @theme {
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
@@ -91,7 +89,6 @@
     }
   }
 }
-}
 
 
 /* 设置滚动条 */
@@ -109,4 +106,9 @@
     transparent
   ); /* Darker gray for the thumb */
   border-radius: 5px;
+}
+
+html, :host {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
 }
