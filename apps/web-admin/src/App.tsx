@@ -1,6 +1,5 @@
 import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster as Sonner, TooltipProvider } from "@go-tech-frontend/ui";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { GlobalProvider } from "./store/global";
 import { Suspense } from "react";
