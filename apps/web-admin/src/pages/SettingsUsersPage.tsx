@@ -161,26 +161,28 @@ const EditUserDialog = ({ user, open, setOpen, refetch }: {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle className="text-center">
+          <DialogTitle className="text-center text-xl font-medium text-foreground">
             {user.id ? '修改用戶' : '新增用戶'}
           </DialogTitle>
         </DialogHeader>
         
+        {!user.id && (
+          <div className="relative">
+            <Label className="block text-lg font-medium text-foreground mb-2">
+              用戶名稱
+            </Label>
+            <Input
+              value={userFormData.username}
+              onChange={(e) => {
+                setUser({...userFormData, username: e.target.value})
+              }}
+              className="h-10 text-base border-border pr-12"
+            />
+          </div>
+        )}
         <div className="relative">
           <Label className="block text-lg font-medium text-foreground mb-2">
-            用戶名稱 <span className="text-primary">:</span>
-          </Label>
-          <Input
-            value={userFormData.username}
-            onChange={(e) => {
-              setUser({...userFormData, username: e.target.value})
-            }}
-            className="h-10 text-base border-border pr-12"
-          />
-        </div>
-        <div className="relative">
-          <Label className="block text-lg font-medium text-foreground mb-2">
-            暱稱 <span className="text-primary">:</span>
+            暱稱
           </Label>
           <Input
             value={userFormData.nickName}
@@ -190,30 +192,48 @@ const EditUserDialog = ({ user, open, setOpen, refetch }: {
             className="h-10 text-base border-border pr-12"
           />
         </div>
-        <div className="relative">
-          <Label className="block text-lg font-medium text-foreground mb-2">
-            郵箱 <span className="text-primary">:</span>
-          </Label>
-          <Input
-            value={userFormData.email}
-            onChange={(e) => {
-              setUser({...userFormData, email: e.target.value})
-            }}
-            className="h-10 text-base border-border pr-12"
-          />
-        </div>
-        <div className="relative">
-          <Label className="block text-lg font-medium text-foreground mb-2">
-            personalPhone <span className="text-primary">:</span>
-          </Label>
-          <Input
-            value={userFormData.personalPhone}
-            onChange={(e) => {
-              setUser({...userFormData, personalPhone: e.target.value})
-            }}
-            className="h-10 text-base border-border pr-12"
-          />
-        </div>
+        {
+          userFormData.id ? null : (
+            <>
+              <div className="relative">
+                <Label className="block text-lg font-medium text-foreground mb-2">
+                  郵箱
+                </Label>
+                <Input
+                  value={userFormData.email}
+                  onChange={(e) => {
+                    setUser({...userFormData, email: e.target.value})
+                  }}
+                  className="h-10 text-base border-border pr-12"
+                />
+              </div>
+              <div className="relative">
+                <Label className="block text-lg font-medium text-foreground mb-2">
+                  個人電話
+                </Label>
+                <Input
+                  value={userFormData.personalPhone}
+                  onChange={(e) => {
+                    setUser({...userFormData, personalPhone: e.target.value})
+                  }}
+                  className="h-10 text-base border-border pr-12"
+                />
+              </div>
+              <div className="relative">
+                <Label className="block text-lg font-medium text-foreground mb-2">
+                  密碼
+                </Label>
+                <Input
+                  value={userFormData.password}
+                  onChange={(e) => {
+                    setUser({...userFormData, password: e.target.value})
+                  }}
+                  className="h-10 text-base border-border pr-12"
+                />
+              </div>
+            </>
+          )
+        }
         <DialogFooter className="flex justify-between items-center">
           <Button variant="outline" onClick={() => setOpen(false)}>
             <span>取消</span>
