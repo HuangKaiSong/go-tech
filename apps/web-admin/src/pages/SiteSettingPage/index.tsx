@@ -1,4 +1,4 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@go-tech-frontend/ui";
 import { MonitorCog } from "lucide-react";
 import HomeContent from "./HomeContent";
 import CoreAdvantages from "./SystemFeatures";

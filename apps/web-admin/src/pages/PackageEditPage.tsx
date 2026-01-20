@@ -1,10 +1,7 @@
 import { Package, ChevronDown, ChevronRight, ArrowLeft } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
+import { Input, Checkbox, Button, Switch } from "@go-tech-frontend/ui";
 import { mockPackages, PackageItem } from "@/mocks/packages";
 
 interface FeatureItem {

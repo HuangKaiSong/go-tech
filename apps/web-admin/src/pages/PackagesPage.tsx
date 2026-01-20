@@ -1,17 +1,15 @@
 import { Package } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 import {
+  Button,
+  Switch,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import {
   Pagination,
   PaginationContent,
   PaginationItem,
@@ -19,7 +17,7 @@ import {
   PaginationNext,
   PaginationPrevious,
   PaginationEllipsis,
-} from "@/components/ui/pagination";
+} from "@go-tech-frontend/ui";
 import { mockPackages } from "@/mocks/packages";
 
 const PackagesPage = () => {

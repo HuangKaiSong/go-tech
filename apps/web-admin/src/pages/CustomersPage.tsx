@@ -1,143 +1,28 @@
 import { useState } from "react";
 import { Users, Search, RotateCcw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
+  Button,
+  Input,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import {
   Pagination,
   PaginationContent,
   PaginationItem,
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination";
-
-// Mock data
-const mockCustomers = [
-  {
-    id: "3453452345",
-    name: "張先生",
-    phone: "9825 3973",
-    email: "XXXXX@126.com",
-    company: "Company",
-    type: "註冊會員",
-    registerDate: "12/08/2025",
-  },
-  {
-    id: "3453452345",
-    name: "張先生",
-    phone: "9825 3973",
-    email: "XXXXX@126.com",
-    company: "Company",
-    type: "黃金會員",
-    registerDate: "12/08/2025",
-  },
-  {
-    id: "3453452345",
-    name: "張先生",
-    phone: "9825 3973",
-    email: "XXXXX@126.com",
-    company: "Company",
-    type: "註冊會員",
-    registerDate: "12/08/2025",
-  },
-  {
-    id: "3453452345",
-    name: "張先生",
-    phone: "9825 3973",
-    email: "XXX@hotmail.com",
-    company: "Company",
-    type: "黃金會員",
-    registerDate: "12/08/2025",
-  },
-  {
-    id: "3453452345",
-    name: "張先生",
-    phone: "9825 3973",
-    email: "XXXXX@126.com",
-    company: "Company",
-    type: "註冊會員",
-    registerDate: "12/08/2025",
-  },
-  {
-    id: "3453452345",
-    name: "張先生",
-    phone: "9825 3973",
-    email: "XXX@hotmail.com",
-    company: "Company",
-    type: "黃金會員",
-    registerDate: "12/08/2025",
-  },
-  {
-    id: "3453452345",
-    name: "張先生",
-    phone: "9825 3973",
-    email: "XXX@hotmail.com",
-    company: "Company",
-    type: "註冊會員",
-    registerDate: "12/08/2025",
-  },
-  {
-    id: "3453452345",
-    name: "張先生",
-    phone: "9825 3973",
-    email: "XXXXX@126.com",
-    company: "Company",
-    type: "黃金會員",
-    registerDate: "12/08/2025",
-  },
-  {
-    id: "3453452345",
-    name: "張先生",
-    phone: "9825 3973",
-    email: "XXXXX@126.com",
-    company: "Company",
-    type: "黃金會員",
-    registerDate: "12/08/2025",
-  },
-  {
-    id: "3453452345",
-    name: "張先生",
-    phone: "9825 3973",
-    email: "XXXXX@126.com",
-    company: "Company",
-    type: "註冊會員",
-    registerDate: "12/08/2025",
-  },
-  {
-    id: "3453452345",
-    name: "張先生",
-    phone: "9825 3973",
-    email: "XXXXX@126.com",
-    company: "Company",
-    type: "黃金會員",
-    registerDate: "12/08/2025",
-  },
-  {
-    id: "3453452345",
-    name: "張先生",
-    phone: "9825 3973",
-    email: "XXXXX@126.com",
-    company: "Company",
-    type: "註冊會員",
-    registerDate: "12/08/2025",
-  },
-];
+} from "@go-tech-frontend/ui";
+import { mockCustomers } from "@/mocks/customers";
 
 const CustomersPage = () => {
   const navigate = useNavigate();

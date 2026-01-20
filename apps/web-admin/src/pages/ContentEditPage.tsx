@@ -1,13 +1,13 @@
 import { FileImage, ArrowLeft, Upload, Trash2 } from "lucide-react";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import {
+  Button,
+  Input,
+  Textarea,
+  Label,
+  Card, CardContent, CardHeader, CardTitle,
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -17,7 +17,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+} from "@go-tech-frontend/ui";
 
 const mockContentData: Record<string, {
   id: string;

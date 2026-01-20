@@ -1,10 +1,6 @@
 import { FileImage, ArrowLeft, Upload } from "lucide-react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button, Input, Textarea, Label, Card, CardContent, CardHeader, CardTitle } from "@go-tech-frontend/ui";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 

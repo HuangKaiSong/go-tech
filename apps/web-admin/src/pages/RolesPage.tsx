@@ -1,14 +1,14 @@
 import { Shield, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
+  Button,
+  Badge,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+} from "@go-tech-frontend/ui";
 
 const mockRoles = [
   {

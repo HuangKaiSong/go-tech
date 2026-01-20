@@ -1,31 +1,27 @@
 import { UserCog, Search, RotateCcw } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import {
+  Input,
+  Button,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import {
   Pagination,
   PaginationContent,
   PaginationItem,
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination";
+} from "@go-tech-frontend/ui";
 
 const mockSystemUsers = [
   { id: "TC000001", name: "張先生", phone: "9825 3973", email: "XXXXX@126.com", packageType: "黃金套餐", addon: "租務系統｜會計系統", packageExpiry: "2025/12/31", packageStatus: "有效", isRenewal: true },

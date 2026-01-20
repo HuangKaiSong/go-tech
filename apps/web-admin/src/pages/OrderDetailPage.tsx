@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { FileText, ArrowLeft, Image } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
+  Button,
+  Badge,
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@go-tech-frontend/ui";
 
 // Mock order detail data with enhanced structure
 const mockOrderDetails: Record<string, {

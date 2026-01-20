@@ -1,14 +1,14 @@
 import { Users, ArrowLeft, ExternalLink } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import {
+  Button,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@go-tech-frontend/ui";
 
 // Mock customer data
 const mockCustomerDetail = {

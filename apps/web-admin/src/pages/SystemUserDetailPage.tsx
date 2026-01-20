@@ -1,14 +1,14 @@
 import { ArrowLeft, UserCog } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import {
+  Button,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@go-tech-frontend/ui";
 
 const mockSystemUsers = [
   { id: "TC000001", name: "張先生", phone: "9825 3973", email: "XXXXX@126.com", packageType: "黃金套餐", addon: "租務系統｜會計系統", amount: "$1080", paymentMethod: "轉賬", paymentTime: "12/08/2025 10:00:23", status: "已支付" },
