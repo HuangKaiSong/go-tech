@@ -11,6 +11,7 @@ import {
   ChevronDown,
   ChevronRight,
 } from "lucide-react";
+import Logo from '@/assets/images/Gotech_Logo.webp';
 
 interface MenuItem {
   title: string;
@@ -71,12 +72,13 @@ const AdminSidebar = () => {
     <aside className="w-50 min-h-screen bg-sidebar border-r border-sidebar-border flex flex-col">
       {/* Logo */}
       <div className="flex items-center justify-center py-6 border-b border-sidebar-border">
-        <div className="flex flex-col items-center gap-2">
+        {/* <div className="flex flex-col items-center gap-2">
           <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
             <Settings className="w-8 h-8 text-primary" />
           </div>
           <span className="text-sm font-semibold text-primary">Go Techs</span>
-        </div>
+        </div> */}
+        <img alt="logo" loading="lazy" width="85" height="85" decoding="async" src={Logo}></img>
       </div>
 
       {/* Navigation */}
