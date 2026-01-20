@@ -8,13 +8,14 @@ export default defineConfig(({ mode,  }) => {
   const { VITE_PROXY_PREFIX, VITE_PROXY_TARGET } = env
 
   return {
-    plugins: [react({
-      babel: {
-        plugins: [
-          "babel-plugin-react-compiler"
-        ]
-      }
-    })],
+    plugins: [
+      react({ 
+        babel: { plugins: ['babel-plugin-react-compiler'] }, 
+      }).map((p) => ({ 
+        ...p, 
+        applyToEnvironment: (e) => e.name === 'client', 
+      })), 
+    ],
     resolve: {
       alias: {
         "@": resolve(__dirname, "./src"),
@@ -30,6 +31,12 @@ export default defineConfig(({ mode,  }) => {
         },
       }
     },
+    optimizeDeps: {
+      include: ['react', 'react-dom'],
+    },
+    css: {
+      devSourcemap: false,
+    },
     build: {
       rollupOptions: {
         input: {
@@ -40,9 +47,17 @@ export default defineConfig(({ mode,  }) => {
           chunkFileNames: "static/js/[name]-[hash].js",
           entryFileNames: "static/js/[name]-[hash].js",
           assetFileNames: "static/[ext]/[name]-[hash].[ext]",
-
+          manualChunks: {
+            react: ['react', 'react-dom'],
+            router: ['react-router-dom'],
+            ui: ['@go-tech-frontend/ui'],
+            icon: ['lucide-react']
+          },
         },
       },
     },
+    define: {
+      __DEV__: false,
+    }
   }
 })
