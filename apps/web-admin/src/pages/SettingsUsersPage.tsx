@@ -130,6 +130,9 @@ const EditUserDialog = ({ user, open, setOpen, refetch }: {
       } else {
         url += `/go-tech/platform/admin/add`
       }
+
+      filteredData.roleIds = [1];
+
       const response = await fetch(url, {
         method: 'POST',
         headers: {

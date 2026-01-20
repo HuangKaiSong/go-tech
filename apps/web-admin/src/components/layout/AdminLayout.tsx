@@ -54,6 +54,7 @@ const AdminLayout = () => {
       if (token) {
         if (config.headers instanceof Headers) {
           config.headers.append('Authorization', `Bearer ${token}`);
+          config.headers.append('Language', 'zh-TW')
         }
       }
       
