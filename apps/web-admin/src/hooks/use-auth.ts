@@ -18,12 +18,30 @@ function parseJwtPayload(token: string | null): any | null {
       return null;
     }
 
-    // 解码 payload 部分（第二部分）
-    const payload = parts[1];
-    // Base64 解码
-    const decodedPayload = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+    // 获取 payload 部分并转换为标准 Base64 格式
+    let payload = parts[1];
     
-    return JSON.parse(decodedPayload);
+    // 将 Base64 URL 安全编码转换为标准 Base64 编码
+    payload = payload.replace(/-/g, '+').replace(/_/g, '/');
+    // 添加缺少的填充字符
+    while (payload.length % 4) {
+      payload += '=';
+    }
+
+    if (typeof TextDecoder !== 'undefined') {
+      const binaryString = atob(payload);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      const utf8String = new TextDecoder().decode(bytes, { stream: true });
+      return JSON.parse(utf8String);
+    } else {
+      // 兼容旧浏览器的方法
+      const binaryString = window.atob(payload);
+      const utf8String = decodeURIComponent(escape(binaryString));
+      return JSON.parse(utf8String);
+    }
   } catch (error) {
     console.error('Error parsing token:', error);
     return null;
@@ -46,8 +64,8 @@ function isTokenExpired(token: string | null): boolean {
 }
 
 export function useAuth() {
-  const [token, setToken] = useLocalStorageState(TOKEN_KEY, {
-    defaultValue: null,
+  const [token, setToken] = useLocalStorageState<string | undefined>(TOKEN_KEY, {
+    defaultValue: undefined,
     listenStorageChange: true
   })
 

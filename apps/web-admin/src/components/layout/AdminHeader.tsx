@@ -12,8 +12,13 @@ import { useNavigate } from "react-router-dom";
 
 const AdminHeader = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, setToken } = useAuth();
+  if (!user) {
+    return null;
+  }
+  
   const handleLogout = () => {
+    setToken(undefined)
     navigate('/login', { replace: true })
   }
 
@@ -22,12 +27,12 @@ const AdminHeader = () => {
       <DropdownMenu>
         <DropdownMenuTrigger className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <Avatar className="h-8 w-8">
-            <AvatarImage src="" />
+            <AvatarImage src={user.icon} />
             <AvatarFallback className="bg-primary text-primary-foreground text-sm">
               {user.sub.slice(0, 2)}
             </AvatarFallback>
           </Avatar>
-          <span className="text-sm font-medium text-foreground">{user.sub}</span>
+          <span className="text-sm font-medium text-foreground">{user.nickname}</span>
           <ChevronDown className="w-4 h-4 text-muted-foreground" />
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-48">
