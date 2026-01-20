@@ -12,12 +12,5 @@
 		"build:admin": "pnpm --filter web-admin run build",
 		"preview:admin": "pnpm --filter web-admin run preview"
 	},
-	"dependencies": {
-		"tailwindcss-animate": "^1.0.7"
-	},
-	"devDependencies": {
-		"@tailwindcss/postcss": "^4",
-		"tailwindcss": "^4.1.18"
-	},
 	"packageManager": "pnpm@10.17.0"
 }

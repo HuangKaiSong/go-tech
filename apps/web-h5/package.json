@@ -9,7 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@go-tech-frontend/styles": "../../styles",
+    "@go-tech-frontend/styles": "workspace:*",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",
     "@radix-ui/react-aspect-ratio": "^1.1.7",

@@ -1,0 +1,21 @@
+{
+  "name": "@go-tech-frontend/styles",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "files": [
+    "./src/index.css",
+    "./src/variables.css"
+  ],
+  "packageManager": "pnpm@10.17.0",
+  "dependencies": {
+    "@go-tech-frontend/ui": "workspace:*",
+		"tailwindcss-animate": "^1.0.7"
+	},
+	"devDependencies": {
+		"@tailwindcss/postcss": "^4",
+		"tailwindcss": "^4.1.18"
+	}
+}
