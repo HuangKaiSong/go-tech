@@ -1,11 +1,13 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  DropdownMenuTrigger
+} from "@go-tech-frontend/ui";
 import { useAuth } from "@/hooks/use-auth";
 import { ChevronDown, LogOut, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";

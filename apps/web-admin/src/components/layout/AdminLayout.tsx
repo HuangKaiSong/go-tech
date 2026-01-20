@@ -1,4 +1,4 @@
-import { Outlet, Route, Router, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import AdminSidebar from "./AdminSidebar";
 import AdminHeader from "./AdminHeader";
 import { useAuth } from "@/hooks/use-auth";

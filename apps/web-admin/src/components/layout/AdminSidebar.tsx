@@ -6,8 +6,6 @@ import {
   FileText,
   UserCog,
   Gift,
-  Percent,
-  Ticket,
   Package,
   Settings,
   ChevronDown,

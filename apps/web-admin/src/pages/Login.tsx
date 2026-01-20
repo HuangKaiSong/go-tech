@@ -1,5 +1,4 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input"
+import { Button, Input } from "@go-tech-frontend/ui";
 import { useAuth } from "@/hooks/use-auth";
 import Dotline from "@/hooks/use-dotline"
 import { useMutation } from "@tanstack/react-query";
