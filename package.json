@@ -9,7 +9,8 @@
 		"build:h5": "pnpm --filter web-h5 run build",
 		"start:h5": "pnpm --filter web-h5 run start",
 		"dev:admin": "pnpm --filter web-admin run dev",
-		"build:admin": "pnpm --filter web-admin run build"
+		"build:admin": "pnpm --filter web-admin run build",
+		"preview:admin": "pnpm --filter web-admin run preview"
 	},
 	"dependencies": {
 		"tailwindcss-animate": "^1.0.7"
