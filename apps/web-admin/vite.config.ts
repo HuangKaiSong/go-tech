@@ -21,6 +21,7 @@ export default defineConfig(({ mode,  }) => {
       },
     },
     server: {
+      host: "0.0.0.0",
       proxy: {
         [VITE_PROXY_PREFIX]: {
           target: VITE_PROXY_TARGET,
