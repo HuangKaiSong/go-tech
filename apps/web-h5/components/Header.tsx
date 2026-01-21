@@ -4,7 +4,7 @@ import { Settings, Phone, Mail, MapPin, User, Package, LogOut, Crown, ArrowRight
 import { useTranslation } from "react-i18next";
 import Logo from "@/assets/Gotech_Logo.webp";
 
-import { Button, Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui";
+import { Button, Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@go-tech-frontend/ui";
 import { ni18nConfig } from "@/ni18n.config";
 import { GetServerSideProps } from "next";
 import { loadTranslations } from "ni18n";

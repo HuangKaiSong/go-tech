@@ -1,4 +1,4 @@
-@import '@go-tech-frontend/styles/index.css';
+@import '@go-tech-frontend/styles/src/index.css';
 
 [data-iframe="true"] .restricted-element {
   opacity: 0.6;
