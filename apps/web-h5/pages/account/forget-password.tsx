@@ -2,8 +2,7 @@ import { useState } from "react";
 import Link from "@/components/Link";
 import Image from "next/image";
 import { X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button, Input } from "@go-tech-frontend/ui";
 import Logo from "@/assets/Gotech_Logo.webp";
 import authBgImg from '@/assets/background.webp'
 import { toast } from "sonner";

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Button } from "@/components/ui/button";
+import { Button } from "@go-tech-frontend/ui";
 import { Check, Minus, Plus, Users, FileText, Building, Droplets, Clock, Calendar, LayoutDashboard, Receipt, Monitor, CreditCard } from "lucide-react";
 import servicePlanBg from "@/assets/service-plan-bg.jpg";
 import { GetStaticPaths, GetStaticProps } from "next";

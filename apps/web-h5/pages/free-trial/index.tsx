@@ -1,7 +1,6 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button, Input } from "@go-tech-frontend/ui";
 import { useState } from "react";
 import { CheckCircle } from "lucide-react";
 import { useRouter } from "next/router";

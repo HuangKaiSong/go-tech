@@ -1,17 +1,26 @@
-import { useState } from "react";
-import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Separator, Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui";
-import { User, Lock, ArrowLeft, Eye, EyeOff } from "lucide-react";
-import { toast } from "sonner";
+import Header from "@/components/Header";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Input,
+  Separator,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@go-tech-frontend/ui";
+import { ArrowLeft, Eye, EyeOff, Lock, User } from "lucide-react";
 import { useRouter } from "next/router";
+import { useState } from "react";
+import { toast } from "sonner";
 
 const Settings = () => {
-  const router = useRouter()
-  
+  const router = useRouter();
+
   // 個人資料狀態
   const [profileData, setProfileData] = useState({
     name: "王小明",
@@ -32,18 +41,24 @@ const Settings = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isPasswordLoading, setIsPasswordLoading] = useState(false);
 
-  const handleProfileChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setProfileData(prev => ({ ...prev, [field]: e.target.value }));
-  };
+  const handleProfileChange =
+    (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      setProfileData(prev => ({ ...prev, [field]: e.target.value }));
+    };
 
-  const handlePasswordChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPasswordData(prev => ({ ...prev, [field]: e.target.value }));
-  };
+  const handlePasswordChange =
+    (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      setPasswordData(prev => ({ ...prev, [field]: e.target.value }));
+    };
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!profileData.name.trim() || !profileData.email.trim() || !profileData.phone.trim()) {
+
+    if (
+      !profileData.name.trim() ||
+      !profileData.email.trim() ||
+      !profileData.phone.trim()
+    ) {
       toast.error("請填寫所有必填欄位");
       return;
     }
@@ -58,12 +73,12 @@ const Settings = () => {
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!passwordData.currentPassword.trim()) {
       toast.error("請輸入當前密碼");
       return;
     }
-    
+
     if (!passwordData.newPassword.trim()) {
       toast.error("請輸入新密碼");
       return;
@@ -73,7 +88,7 @@ const Settings = () => {
       toast.error("新密碼長度至少為6個字符");
       return;
     }
-    
+
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       toast.error("兩次輸入的新密碼不一致");
       return;
@@ -95,11 +110,11 @@ const Settings = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
+
       {/* Hero Section */}
       <section className="relative py-6 bg-[#FFF8F5]">
         <div className="container mx-auto px-4">
-          <button 
+          <button
             onClick={() => router.back()}
             className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4"
           >
@@ -109,10 +124,12 @@ const Settings = () => {
           <h1 className="text-3xl md:text-4xl font-bold text-primary">
             帳戶設定
           </h1>
-          <p className="text-muted-foreground mt-2">管理您的個人資料與安全設定</p>
+          <p className="text-muted-foreground mt-2">
+            管理您的個人資料與安全設定
+          </p>
         </div>
       </section>
-      
+
       {/* Settings Content */}
       <section className="py-8 bg-background">
         <div className="container mx-auto px-4">
@@ -233,10 +250,16 @@ const Settings = () => {
                           />
                           <button
                             type="button"
-                            onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                            onClick={() =>
+                              setShowCurrentPassword(!showCurrentPassword)
+                            }
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                           >
-                            {showCurrentPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                            {showCurrentPassword ? (
+                              <EyeOff className="w-5 h-5" />
+                            ) : (
+                              <Eye className="w-5 h-5" />
+                            )}
                           </button>
                         </div>
                       </div>
@@ -259,7 +282,11 @@ const Settings = () => {
                             onClick={() => setShowNewPassword(!showNewPassword)}
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                           >
-                            {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                            {showNewPassword ? (
+                              <EyeOff className="w-5 h-5" />
+                            ) : (
+                              <Eye className="w-5 h-5" />
+                            )}
                           </button>
                         </div>
                       </div>
@@ -279,10 +306,16 @@ const Settings = () => {
                           />
                           <button
                             type="button"
-                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            onClick={() =>
+                              setShowConfirmPassword(!showConfirmPassword)
+                            }
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                           >
-                            {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                            {showConfirmPassword ? (
+                              <EyeOff className="w-5 h-5" />
+                            ) : (
+                              <Eye className="w-5 h-5" />
+                            )}
                           </button>
                         </div>
                       </div>
@@ -312,7 +345,7 @@ const Settings = () => {
           </div>
         </div>
       </section>
-      
+
       <Footer />
     </div>
   );

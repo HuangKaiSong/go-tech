@@ -1,6 +1,6 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Button } from "@/components/ui";
+import { Button } from "@go-tech-frontend/ui";
 import { Check, Minus } from "lucide-react";
 
 const pricingData = {

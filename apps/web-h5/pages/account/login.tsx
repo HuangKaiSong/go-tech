@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button, Input } from "@go-tech-frontend/ui";
 import { toast } from "sonner";
 import { useRouter } from 'next/router'
 import Link from "@/components/Link";
