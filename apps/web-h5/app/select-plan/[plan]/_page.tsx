@@ -133,7 +133,8 @@ const SelectPlan = ({ plan }: { plan: string }) => {
   };
 
   const handleNext = () => {
-    router.push("/confirm-order", {});
+    router.push("/confirm-order", {
+    });
   };
 
   return (
