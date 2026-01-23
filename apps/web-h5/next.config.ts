@@ -4,11 +4,14 @@ const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
   reactStrictMode: false,
-  i18n: {
-    defaultLocale: 'hk',
-    locales: ['hk', 'en'],
-    localeDetection: false,
-  }
+  async rewrites() {
+    return [
+      {
+        source: '/go-tech/:path*',
+        destination: process.env.NEXT_PUBLIC_API_URL + '/go-tech/:path*', // 替换为实际后端地址
+      },
+    ]
+  },
 };
 
 export default nextConfig;

@@ -1,0 +1,19 @@
+@import "@go-tech-frontend/styles/src/index.css";
+
+[data-iframe="true"] .restricted-element {
+  opacity: 0.6;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+[data-iframe="true"] .restricted-link {
+  color: #9ca3af !important;
+  pointer-events: none;
+  text-decoration: line-through;
+}
+
+[data-iframe="true"] .cursor-editor {
+  cursor:
+    url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImhzbCgyNCA5NSUgNTMlKSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik05LjY3MSA0LjEzNmEyLjM0IDIuMzQgMCAwIDEgNC42NTkgMCAyLjM0IDIuMzQgMCAwIDAgMy4zMTkgMS45MTUgMi4zNCAyLjM0IDAgMCAxIDIuMzMgNC4wMzMgMi4zNCAyLjM0IDAgMCAwIDAgMy44MzEgMi4zNCAyLjM0IDAgMCAxLTIuMzMgNC4wMzMgMi4zNCAyLjM0IDAgMCAwLTMuMzE5IDEuOTE1IDIuMzQgMi4zNCAwIDAgMS00LjY1OSAwIDIuMzQgMi4zNCAwIDAgMC0zLjMyLTEuOTE1IDIuMzQgMi4zNCAwIDAgMS0yLjMzLTQuMDMzIDIuMzQgMi4zNCAwIDAgMCAwLTMuODMxQTIuMzQgMi4zNCAwIDAgMSA2LjM1IDYuMDUxYTIuMzQgMi4zNCAwIDAgMCAzLjMxOS0xLjkxNSIvPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjMiLz48L3N2Zz4="),
+    auto;
+}
