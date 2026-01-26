@@ -1,15 +1,14 @@
-import { Package, ChevronDown, ChevronRight, ArrowLeft } from "lucide-react";
-import { useState, useEffect } from "react";
+import { PackageItem } from "@/mocks/packages";
+import { Button, Checkbox, Input, Switch, toast } from "@go-tech-frontend/ui";
+import { useMutation, useQueries } from "@tanstack/react-query";
+import { ArrowLeft, ChevronDown, ChevronRight, Package } from "lucide-react";
+import { useEffect, useReducer } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Input, Checkbox, Button, Switch } from "@go-tech-frontend/ui";
-import { mockPackages, PackageItem } from "@/mocks/packages";
 
 interface FeatureItem {
   id: string;
   label: string;
-  gold: boolean;
-  platinum: boolean;
-  diamond: boolean;
+  checked: boolean;
 }
 
 interface FeatureGroup {
@@ -19,130 +18,321 @@ interface FeatureGroup {
   items: FeatureItem[];
 }
 
-const initialFeatureGroups: FeatureGroup[] = [
-  {
-    id: "management",
-    title: "管理層",
-    expanded: true,
-    items: [
-      { id: "menu", label: "菜單列表", gold: true, platinum: true, diamond: true },
-      { id: "role", label: "角色列表", gold: true, platinum: true, diamond: true },
-      { id: "business", label: "業務字典", gold: true, platinum: true, diamond: true },
-      { id: "user", label: "使用者列表", gold: false, platinum: true, diamond: true },
-      { id: "dept", label: "部門列表", gold: false, platinum: false, diamond: false },
-      { id: "venue", label: "場地列表", gold: false, platinum: true, diamond: true },
-      { id: "contract", label: "合同簽批", gold: false, platinum: true, diamond: false },
-      { id: "price", label: "標準價格列表", gold: true, platinum: true, diamond: true },
-      { id: "system", label: "系統文件設定", gold: true, platinum: true, diamond: true },
-    ],
+interface PackageState {
+  packageData: PackageItem | null;
+  status: number;
+  featureGroups: FeatureGroup[];
+  priceSettings: {
+    price: number;
+    addUnitPrice?: number;
+    rentSysPrice?: number;
+    venueSysPrice?: number;
+    accountingSysPrice?: number;
+    custServiceSysPrice?: number;
+  };
+}
+
+type PackageAction =
+  | { type: "SET_PACKAGE_DATA"; payload: PackageItem }
+  | { type: "SET_STATUS"; payload: number }
+  | { type: "SET_FEATURE_GROUPS"; payload: FeatureGroup[] }
+  | {
+      type: "UPDATE_PRICE_SETTING";
+      field: keyof PackageState["priceSettings"];
+      value: number;
+    }
+  | { type: "RESET_STATE" };
+
+const packageReducer = (
+  state: PackageState,
+  action: PackageAction,
+): PackageState => {
+  switch (action.type) {
+    case "SET_PACKAGE_DATA":
+      return {
+        ...state,
+        packageData: action.payload,
+      };
+    case "SET_STATUS":
+      return {
+        ...state,
+        status: action.payload,
+      };
+    case "SET_FEATURE_GROUPS":
+      return {
+        ...state,
+        featureGroups: action.payload,
+      };
+    case "UPDATE_PRICE_SETTING":
+      return {
+        ...state,
+        priceSettings: {
+          ...state.priceSettings,
+          [action.field]: action.value,
+        },
+      };
+    case "RESET_STATE":
+      return defaultState;
+    default:
+      return state;
+  }
+};
+
+const defaultState: PackageState = {
+  packageData: {
+    packageName: "",
+    unitCount: 0,
+    price: 0,
+    addUnitPrice: undefined,
+    rentSysPrice: undefined,
+    venueSysPrice: undefined,
+    accountingSysPrice: undefined,
+    custServiceSysPrice: undefined,
+    status: 0,
+    packageItemList: [],
   },
-  {
-    id: "rental",
-    title: "租務部",
-    expanded: true,
-    items: [
-      { id: "agent", label: "代理列表", gold: false, platinum: true, diamond: true },
-      { id: "customer", label: "客戶列表", gold: false, platinum: false, diamond: false },
-      { id: "inquiry", label: "問盤列表", gold: false, platinum: false, diamond: false },
-      { id: "agreement", label: "合同列表", gold: false, platinum: true, diamond: false },
-      { id: "marketing", label: "營銷列表", gold: false, platinum: true, diamond: true },
-    ],
+  status: 0,
+  featureGroups: [],
+  priceSettings: {
+    price: 0,
+    addUnitPrice: undefined,
+    rentSysPrice: undefined,
+    venueSysPrice: undefined,
+    accountingSysPrice: undefined,
+    custServiceSysPrice: undefined,
   },
-  {
-    id: "facility",
-    title: "場務部",
-    expanded: true,
-    items: [
-      { id: "unit", label: "單位列表", gold: true, platinum: true, diamond: true },
-      { id: "utility", label: "水電列表", gold: false, platinum: true, diamond: false },
-      { id: "followup", label: "跟進列表", gold: false, platinum: true, diamond: true },
-      { id: "schedule", label: "日程", gold: true, platinum: true, diamond: true },
-    ],
-  },
-  {
-    id: "accounting",
-    title: "會計部",
-    expanded: true,
-    items: [
-      { id: "expense", label: "費用單列表", gold: false, platinum: false, diamond: true },
-      { id: "rental-tool", label: "租單工具", gold: false, platinum: true, diamond: true },
-      { id: "check", label: "支票列表", gold: true, platinum: true, diamond: true },
-    ],
-  },
-];
+};
 
 const PackageEditPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const [featureGroups, setFeatureGroups] = useState(initialFeatureGroups);
-  const [packageData, setPackageData] = useState<PackageItem | null>(null);
-  
-  // Form states initialized from package data
-  const [unitSettings] = useState({ gold: 25, platinum: 100, diamond: 400 });
-  const [priceSettings, setPriceSettings] = useState({ gold: "", platinum: "", diamond: "" });
-  const [addonPrices, setAddonPrices] = useState({
-    extraUnit: { gold: "", platinum: "", diamond: "" },
-    rentalSystem: { gold: "", platinum: "", diamond: "" },
-    facilitySystem: { gold: "", platinum: "", diamond: "" },
-    accountingSystem: { gold: "", platinum: "", diamond: "" },
-    customerService: { gold: "", platinum: "", diamond: "" },
-  });
-  const [status, setStatus] = useState(false);
+  const [state, dispatch] = useReducer(packageReducer, defaultState);
 
-  // Load package data when id changes
-  useEffect(() => {
-    if (id) {
-      const foundPackage = mockPackages.find(pkg => pkg.id === id);
-      if (foundPackage) {
-        setPackageData(foundPackage);
-        setStatus(foundPackage.status);
-        
-        // Initialize price settings based on package type
-        if (foundPackage.packageName === "黃金套餐") {
-          setPriceSettings({ gold: String(foundPackage.packagePrice), platinum: "", diamond: "" });
-          setAddonPrices({
-            extraUnit: { gold: String(foundPackage.extraUnitPrice), platinum: "", diamond: "" },
-            rentalSystem: { gold: String(foundPackage.rentalSystemPrice), platinum: "", diamond: "" },
-            facilitySystem: { gold: String(foundPackage.facilitySystemPrice), platinum: "", diamond: "" },
-            accountingSystem: { gold: String(foundPackage.accountingSystemPrice), platinum: "", diamond: "" },
-            customerService: { gold: String(foundPackage.customerServicePrice), platinum: "", diamond: "" },
-          });
-        } else if (foundPackage.packageName === "白金套餐") {
-          setPriceSettings({ gold: "", platinum: String(foundPackage.packagePrice), diamond: "" });
-          setAddonPrices({
-            extraUnit: { gold: "", platinum: String(foundPackage.extraUnitPrice), diamond: "" },
-            rentalSystem: { gold: "", platinum: String(foundPackage.rentalSystemPrice), diamond: "" },
-            facilitySystem: { gold: "", platinum: String(foundPackage.facilitySystemPrice), diamond: "" },
-            accountingSystem: { gold: "", platinum: String(foundPackage.accountingSystemPrice), diamond: "" },
-            customerService: { gold: "", platinum: String(foundPackage.customerServicePrice), diamond: "" },
-          });
-        } else if (foundPackage.packageName === "鑽石套餐") {
-          setPriceSettings({ gold: "", platinum: "", diamond: String(foundPackage.packagePrice) });
-          setAddonPrices({
-            extraUnit: { gold: "", platinum: "", diamond: String(foundPackage.extraUnitPrice) },
-            rentalSystem: { gold: "", platinum: "", diamond: String(foundPackage.rentalSystemPrice) },
-            facilitySystem: { gold: "", platinum: "", diamond: String(foundPackage.facilitySystemPrice) },
-            accountingSystem: { gold: "", platinum: "", diamond: String(foundPackage.accountingSystemPrice) },
-            customerService: { gold: "", platinum: "", diamond: String(foundPackage.customerServicePrice) },
-          });
-        }
+  const updateMun = useMutation({
+    mutationFn: async (data: PackageItem) => {
+      const response = await fetch(
+        `${import.meta.env.VITE_PROXY_PREFIX}/go-tech/platform/platformPackage/update`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        },
+      );
+      const result = await response.json();
+      return result;
+    },
+    onSuccess: (result) => {
+      if (result && result.code === 200) {
+        navigate("/packages", { replace: true });
+        return;
       }
+      toast.error(result.message || "更新失败");
+    },
+    onError: (error) => {
+      toast.error(error.message || "更新失败");
+    },
+  });
+
+  const createMutation = useMutation({
+    mutationFn: async (data: PackageItem) => {
+      const response = await fetch(
+        `${import.meta.env.VITE_PROXY_PREFIX}/go-tech/platform/platformPackage/add`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        },
+      );
+      const result = await response.json();
+      return result;
+    },
+    onSuccess: (result) => {
+      if (result && result.code === 200) {
+        navigate("/packages", { replace: true });
+        return;
+      }
+      toast.error(result.message || "更新失败");
+    },
+    onError: (error) => {
+      toast.error(error.message || "更新失败");
+    },
+  });
+
+  /**
+   * Load package data when id changes
+   */
+  const result = useQueries({
+    queries: [
+      {
+        queryKey: ["platform/platformPackage/detail", id],
+        enabled: !!id,
+        queryFn: async () => {
+          const response = await fetch(
+            `${import.meta.env.VITE_PROXY_PREFIX}/go-tech/platform/platformPackage/detail/${id}`,
+          );
+          const data = await response.json();
+          if (data.code !== 200) {
+            return [];
+          }
+
+          if (!data.data) {
+            return;
+          }
+          return data.data;
+        },
+      },
+      {
+        queryKey: ["platform/platformPackage/menuTree"],
+        queryFn: async () => {
+          const res = await fetch(
+            `${import.meta.env.VITE_PROXY_PREFIX}/go-tech/platform/platformPackage/menuTree`,
+          );
+          const response = await res.json();
+          if (response.code !== 200) {
+            return [];
+          }
+
+          if (!response.data) {
+            return [];
+          }
+
+          if (!Array.isArray(response.data)) {
+            return [];
+          }
+
+          return response.data.map((item) => {
+            return {
+              id: item.id,
+              title: item.title,
+              expanded: true,
+              items: item.children.map((child) => {
+                return {
+                  id: child.id,
+                  label: child.title,
+                  checked: false,
+                };
+              }),
+            };
+          });
+        },
+      },
+    ],
+    combine: ([detail, tree]) => {
+      const result = {
+        packageinfo: defaultState.packageData,
+        tree: [],
+      };
+      if (detail.status === "success") {
+        result.packageinfo = detail.data;
+      }
+      if (tree.status === "success") {
+        result.tree = tree.data;
+      }
+      return result;
+    },
+  });
+
+  useEffect(() => {
+    if (!result) return;
+    const { packageinfo, tree } = result;
+    if (packageinfo && tree) {
+      dispatch({
+        type: "SET_PACKAGE_DATA",
+        payload: packageinfo as unknown as PackageItem,
+      });
+      dispatch({ type: "SET_STATUS", payload: packageinfo.status });
+      dispatch({
+        type: "UPDATE_PRICE_SETTING",
+        field: "price", // 套餐价格
+        value: (packageinfo as any).price,
+      });
+      dispatch({
+        type: "UPDATE_PRICE_SETTING",
+        field: "addUnitPrice", // 附加 - 單位價格
+        value: (packageinfo as any).addUnitPrice,
+      });
+      dispatch({
+        type: "UPDATE_PRICE_SETTING",
+        field: "rentSysPrice", // 附加 - 租務系統價格
+        value: packageinfo.rentSysPrice,
+      });
+      dispatch({
+        type: "UPDATE_PRICE_SETTING",
+        field: "venueSysPrice", // 附加 - 租務系統價格
+        value: packageinfo.venueSysPrice,
+      });
+      dispatch({
+        type: "UPDATE_PRICE_SETTING",
+        field: "accountingSysPrice", // 附加 - 租務系統價格
+        value: packageinfo.accountingSysPrice,
+      });
+      dispatch({
+        type: "UPDATE_PRICE_SETTING",
+        field: "custServiceSysPrice", // 附加 - 租務系統價格
+        value: packageinfo.custServiceSysPrice,
+      });
+
+      // 设置菜单打 ✅ 逻辑
+      const haveids = ((packageinfo as any)?.packageItemList || [])
+        .filter((i) => i.status)
+        .map((i) => i.menuId);
+
+      const menuTree = tree.map((item) => {
+        const items =
+          item.items?.map((i) => ({
+            ...i,
+            checked: haveids.includes(i.id),
+          })) || [];
+        return {
+          ...item,
+          items,
+        };
+      });
+
+      dispatch({
+        type: "SET_FEATURE_GROUPS",
+        payload: menuTree,
+      });
     }
-  }, [id]);
+  }, [result]);
 
   const toggleGroup = (groupId: string) => {
-    setFeatureGroups(groups =>
-      groups.map(g =>
-        g.id === groupId ? { ...g, expanded: !g.expanded } : g
-      )
+    const featureGroup = state.featureGroups.map((g) =>
+      g.id === groupId ? { ...g, expanded: !g.expanded } : g,
     );
+    dispatch({
+      type: "SET_FEATURE_GROUPS",
+      payload: featureGroup,
+    });
+  };
+
+  const toggleFeature = (groupId: string, itemId: string) => {
+    const featureGroup = state.featureGroups.map((g) =>
+      g.id === groupId
+        ? {
+            ...g,
+            items: g.items.map((item) =>
+              item.id === itemId ? { ...item, checked: !item.checked } : item,
+            ),
+          }
+        : g,
+    );
+
+    dispatch({
+      type: "SET_FEATURE_GROUPS",
+      payload: featureGroup,
+    });
   };
 
   const handleBack = () => {
     navigate("/packages");
   };
 
-  if (!packageData) {
+  if (!state.packageData) {
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-3">
@@ -167,208 +357,281 @@ const PackageEditPage = () => {
         {/* Header with back button and save button */}
         <div className="flex items-center justify-between p-4 border-b border-border">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={handleBack}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground"
+              onClick={handleBack}
+            >
               <ArrowLeft className="w-4 h-4 mr-1" />
               返回
             </Button>
-            <span className="text-lg font-medium">編輯套餐內容</span>
+            <span className="text-lg font-medium">
+              {state.packageData.id ? "編輯" : "新增"}套餐內容 -{" "}
+              {state.packageData.packageName}
+            </span>
           </div>
-          <Button onClick={() => navigate("/packages")}>
+          <Button
+            loading={updateMun.isPending}
+            onClick={() => {
+              const packageItemList = state.featureGroups
+                .map((group) =>
+                  group.items.filter((feature) => feature.checked),
+                )
+                .flat()
+                .map((menu) => ({ menuId: menu.id, menuTitle: menu.label }));
+              const data: PackageItem = {
+                ...state.packageData,
+                ...state.priceSettings,
+                status: state.status,
+                packageItemList,
+              };
+              if (state.packageData.id) {
+                updateMun.mutate(data);
+              } else {
+                createMutation.mutate(data);
+              }
+            }}
+          >
             保存
           </Button>
         </div>
 
         {/* Package Info Header */}
-        <div className="grid grid-cols-5 bg-muted/50 border-b border-border">
-          <div className="p-4 font-medium text-center border-r border-border">訂單編號</div>
-          <div className="p-4 font-medium text-center border-r border-border">套餐名稱</div>
-          <div className="p-4 font-medium text-center border-r border-border">最大單位數量</div>
-          <div className="p-4 font-medium text-center border-r border-border">套餐狀態</div>
+        <div className="grid grid-cols-4 bg-muted/50 border-b border-border">
+          <div className="p-4 font-medium text-center border-r border-border">
+            套餐名稱
+          </div>
+          <div className="p-4 font-medium text-center border-r border-border">
+            最大單位數量
+          </div>
+          <div className="p-4 font-medium text-center border-r border-border">
+            套餐狀態
+          </div>
           <div className="p-4 font-medium text-center">套餐價格</div>
         </div>
-        <div className="grid grid-cols-5 border-b border-border">
-          <div className="p-4 text-center border-r border-border">{packageData.orderNo}</div>
-          <div className="p-4 text-center border-r border-border text-primary font-medium">{packageData.packageName}</div>
-          <div className="p-4 text-center border-r border-border">{packageData.maxUnits}</div>
-          <div className="p-4 flex justify-center border-r border-border">
-            <Switch checked={status} onCheckedChange={setStatus} />
+        <div className="grid grid-cols-4 border-b border-border">
+          <div className="p-4 flex justify-center items-center border-r border-border">
+            <Input
+              placeholder="輸入套餐名稱"
+              className="w-32 text-center"
+              value={state.packageData.packageName}
+              onChange={(e) => {
+                dispatch({
+                  type: "SET_PACKAGE_DATA",
+                  payload: {
+                    ...state.packageData,
+                    packageName: e.target.value,
+                  },
+                });
+              }}
+            />
           </div>
-          <div className="p-4 text-center">${packageData.packagePrice}</div>
-        </div>
 
-        {/* Package Tier Headers */}
-        <div className="grid grid-cols-4 bg-muted/30 border-b border-border">
-          <div className="p-4 font-medium text-center">套餐名稱</div>
-          <div className="p-4 font-medium text-center text-primary">黃金套餐</div>
-          <div className="p-4 font-medium text-center text-primary">鉑金套餐</div>
-          <div className="p-4 font-medium text-center text-primary">鑽石套餐</div>
+          <div className="p-4 flex justify-center items-center border-r border-border">
+            <Input
+              placeholder="輸入最大單位數量"
+              className="w-32 text-center"
+              value={state.packageData.unitCount}
+              onChange={(e) => {
+                if (e.target.value) {
+                  dispatch({
+                    type: "SET_PACKAGE_DATA",
+                    payload: {
+                      ...state.packageData,
+                      unitCount: parseFloat(e.target.value),
+                    },
+                  });
+                }
+              }}
+            />
+          </div>
+
+          <div className="p-4 flex justify-center items-center border-r border-border">
+            <Switch
+              checked={state.status === 1}
+              onCheckedChange={(checked) => {
+                dispatch({ type: "SET_STATUS", payload: checked ? 1 : 0 });
+              }}
+            />
+          </div>
+          <div className="p-4 flex justify-center border-r border-border">
+            <Input
+              placeholder="輸入價格"
+              className="w-32 text-center"
+              value={state.priceSettings.price}
+              onChange={(e) => {
+                if (e.target.value) {
+                  dispatch({
+                    type: "UPDATE_PRICE_SETTING",
+                    field: "price",
+                    value: parseFloat(e.target.value),
+                  });
+                }
+              }}
+            />
+          </div>
         </div>
 
         {/* Feature Content */}
         <div className="border-b border-border">
-          <div className="grid grid-cols-4">
-            <div className="p-4 font-medium flex items-start justify-center">套餐內容</div>
-            <div className="col-span-3">
-              {featureGroups.map((group) => (
-                <div key={group.id} className="border-b border-border last:border-b-0">
-                  <div className="grid grid-cols-3">
-                    {/* Gold Column */}
-                    <div className="p-3 border-r border-border">
-                      <button 
-                        onClick={() => toggleGroup(group.id)}
-                        className="flex items-center gap-2 text-primary font-medium mb-2"
-                      >
-                        {group.expanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                        {group.title}
-                      </button>
-                      {group.expanded && (
-                        <div className="space-y-2 pl-6">
-                          {group.items.map((item) => (
-                            <div key={item.id} className="flex items-center gap-2">
-                              <Checkbox checked={item.gold} className="data-[state=checked]:bg-primary data-[state=checked]:border-primary" />
-                              <span className="text-sm">{item.label}</span>
-                            </div>
-                          ))}
+          <div className="p-4 font-medium flex items-start justify-center bg-muted/30 border-r border-border">
+            套餐內容
+          </div>
+          <div className="">
+            {state.featureGroups.map((group) => (
+              <div
+                key={group.id}
+                className="border-b border-border last:border-b-0 flex justify-center"
+              >
+                <div className="p-3">
+                  <button
+                    onClick={() => toggleGroup(group.id)}
+                    className="flex items-center gap-2 text-primary font-medium mb-2"
+                  >
+                    {group.expanded ? (
+                      <ChevronDown className="w-4 h-4" />
+                    ) : (
+                      <ChevronRight className="w-4 h-4" />
+                    )}
+                    {group.title}
+                  </button>
+                  {group.expanded && (
+                    <div className="space-y-2 pl-6">
+                      {group.items.map((item) => (
+                        <div key={item.id} className="flex items-center gap-2">
+                          <Checkbox
+                            checked={item.checked}
+                            onCheckedChange={() =>
+                              toggleFeature(group.id, item.id)
+                            }
+                            className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                          />
+                          <span className="text-sm">{item.label}</span>
                         </div>
-                      )}
+                      ))}
                     </div>
-                    {/* Platinum Column */}
-                    <div className="p-3 border-r border-border">
-                      <button 
-                        onClick={() => toggleGroup(group.id)}
-                        className="flex items-center gap-2 text-primary font-medium mb-2"
-                      >
-                        {group.expanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                        {group.title}
-                      </button>
-                      {group.expanded && (
-                        <div className="space-y-2 pl-6">
-                          {group.items.map((item) => (
-                            <div key={item.id} className="flex items-center gap-2">
-                              <Checkbox checked={item.platinum} className="data-[state=checked]:bg-primary data-[state=checked]:border-primary" />
-                              <span className="text-sm">{item.label}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    {/* Diamond Column */}
-                    <div className="p-3">
-                      <button 
-                        onClick={() => toggleGroup(group.id)}
-                        className="flex items-center gap-2 text-primary font-medium mb-2"
-                      >
-                        {group.expanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                        {group.title}
-                      </button>
-                      {group.expanded && (
-                        <div className="space-y-2 pl-6">
-                          {group.items.map((item) => (
-                            <div key={item.id} className="flex items-center gap-2">
-                              <Checkbox checked={item.diamond} className="data-[state=checked]:bg-primary data-[state=checked]:border-primary" />
-                              <span className="text-sm">{item.label}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  )}
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Unit Settings */}
-        <div className="grid grid-cols-4 border-b border-border">
-          <div className="p-4 font-medium text-center">單位數量設定</div>
-          <div className="p-4 text-center">{unitSettings.gold}</div>
-          <div className="p-4 text-center">{unitSettings.platinum}</div>
-          <div className="p-4 text-center">{unitSettings.diamond}</div>
-        </div>
-
-        {/* Price Settings */}
-        <div className="grid grid-cols-4 border-b border-border">
-          <div className="p-4 font-medium text-center">套餐價格設定</div>
-          <div className="p-4 flex justify-center">
-            <Input 
-              placeholder="輸入價格" 
-              className="w-24 text-center"
-              value={priceSettings.gold}
-              onChange={(e) => setPriceSettings({...priceSettings, gold: e.target.value})}
-            />
-          </div>
-          <div className="p-4 flex justify-center">
-            <Input 
-              placeholder="輸入價格" 
-              className="w-24 text-center"
-              value={priceSettings.platinum}
-              onChange={(e) => setPriceSettings({...priceSettings, platinum: e.target.value})}
-            />
-          </div>
-          <div className="p-4 flex justify-center">
-            <Input 
-              placeholder="輸入價格" 
-              className="w-24 text-center"
-              value={priceSettings.diamond}
-              onChange={(e) => setPriceSettings({...priceSettings, diamond: e.target.value})}
-            />
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Addon Features Label */}
-        <div className="grid grid-cols-4 border-b border-border">
-          <div className="p-4 font-medium text-center">附加功能</div>
-          <div className="p-4"></div>
-          <div className="p-4"></div>
-          <div className="p-4"></div>
+        <div className="grid grid-cols-1 border-b border-border">
+          <div className="p-4 font-medium text-center bg-muted/30 border-r border-border">
+            附加功能
+          </div>
         </div>
 
         {/* Addon Prices */}
-        {[
-          { key: "extraUnit", label: "增加單位價格" },
-          { key: "rentalSystem", label: "附加租務系統價格" },
-          { key: "facilitySystem", label: "附加場務系統價格" },
-          { key: "accountingSystem", label: "附加會計系統價格" },
-          { key: "customerService", label: "附加客服系統價格" },
-        ].map((addon) => (
-          <div key={addon.key} className="grid grid-cols-4 border-b border-border last:border-b-0">
-            <div className="p-4 font-medium text-center">{addon.label}</div>
-            <div className="p-4 flex justify-center">
-              <Input 
-                placeholder="輸入價格" 
-                className="w-24 text-center"
-                value={addonPrices[addon.key as keyof typeof addonPrices].gold}
-                onChange={(e) => setAddonPrices({
-                  ...addonPrices, 
-                  [addon.key]: {...addonPrices[addon.key as keyof typeof addonPrices], gold: e.target.value}
-                })}
-              />
-            </div>
-            <div className="p-4 flex justify-center">
-              <Input 
-                placeholder="輸入價格" 
-                className="w-24 text-center"
-                value={addonPrices[addon.key as keyof typeof addonPrices].platinum}
-                onChange={(e) => setAddonPrices({
-                  ...addonPrices, 
-                  [addon.key]: {...addonPrices[addon.key as keyof typeof addonPrices], platinum: e.target.value}
-                })}
-              />
-            </div>
-            <div className="p-4 flex justify-center">
-              <Input 
-                placeholder="輸入價格" 
-                className="w-24 text-center"
-                value={addonPrices[addon.key as keyof typeof addonPrices].diamond}
-                onChange={(e) => setAddonPrices({
-                  ...addonPrices, 
-                  [addon.key]: {...addonPrices[addon.key as keyof typeof addonPrices], diamond: e.target.value}
-                })}
-              />
-            </div>
+        <div className="grid grid-cols-2 border-b border-border">
+          <div className="p-4 font-medium text-center bg-muted/30 border-r border-border">
+            增加單位價格
           </div>
-        ))}
+          <div className="p-4 flex justify-center">
+            <Input
+              placeholder="輸入價格"
+              className="w-32 text-center"
+              value={state.priceSettings.addUnitPrice}
+              onChange={(e) => {
+                if (e.target.value) {
+                  dispatch({
+                    type: "UPDATE_PRICE_SETTING",
+                    field: "addUnitPrice",
+                    value: parseFloat(e.target.value),
+                  });
+                }
+              }}
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 border-b border-border">
+          <div className="p-4 font-medium text-center bg-muted/30 border-r border-border">
+            附加租務系統價格
+          </div>
+          <div className="p-4 flex justify-center">
+            <Input
+              placeholder="輸入價格"
+              className="w-32 text-center"
+              value={state.priceSettings.rentSysPrice}
+              onChange={(e) => {
+                if (e.target.value) {
+                  dispatch({
+                    type: "UPDATE_PRICE_SETTING",
+                    field: "rentSysPrice",
+                    value: parseFloat(e.target.value),
+                  });
+                }
+              }}
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 border-b border-border">
+          <div className="p-4 font-medium text-center bg-muted/30 border-r border-border">
+            附加場務系統價格
+          </div>
+          <div className="p-4 flex justify-center">
+            <Input
+              placeholder="輸入價格"
+              className="w-32 text-center"
+              value={state.priceSettings.venueSysPrice}
+              onChange={(e) => {
+                if (e.target.value) {
+                  dispatch({
+                    type: "UPDATE_PRICE_SETTING",
+                    field: "venueSysPrice",
+                    value: parseFloat(e.target.value),
+                  });
+                }
+              }}
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 border-b border-border">
+          <div className="p-4 font-medium text-center bg-muted/30 border-r border-border">
+            附加會計系統價格
+          </div>
+          <div className="p-4 flex justify-center">
+            <Input
+              placeholder="輸入價格"
+              className="w-32 text-center"
+              value={state.priceSettings.accountingSysPrice}
+              onChange={(e) => {
+                if (e.target.value) {
+                  dispatch({
+                    type: "UPDATE_PRICE_SETTING",
+                    field: "accountingSysPrice",
+                    value: parseFloat(e.target.value),
+                  });
+                }
+              }}
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-2">
+          <div className="p-4 font-medium text-center bg-muted/30 border-r border-border">
+            附加客服系統價格
+          </div>
+          <div className="p-4 flex justify-center">
+            <Input
+              placeholder="輸入價格"
+              className="w-32 text-center"
+              type="number"
+              value={state.priceSettings.custServiceSysPrice}
+              onChange={(e) => {
+                if (e.target.value) {
+                  dispatch({
+                    type: "UPDATE_PRICE_SETTING",
+                    field: "custServiceSysPrice",
+                    value: parseFloat(e.target.value),
+                  });
+                }
+              }}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

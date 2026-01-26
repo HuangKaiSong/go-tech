@@ -1,25 +1,25 @@
-import { Users, Plus, EyeOff, Eye } from "lucide-react";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useMemo, useRef, useState } from "react";
-import { toast } from "sonner";
-import { useToggle } from "ahooks";
 import {
   Button,
-  Switch,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
   Input,
   Label,
+  Switch,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
-  Dialog, 
-  DialogContent, 
-  DialogFooter, 
-  DialogHeader, 
-  DialogTitle
+  TableRow
 } from "@go-tech-frontend/ui";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useToggle } from "ahooks";
+import { Eye, EyeOff, Plus, Users } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 
 interface User {
   id?: number;

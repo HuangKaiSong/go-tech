@@ -1,4 +1,4 @@
-import { Navigate, RouteObject } from 'react-router-dom'
+import { Navigate, RouteObject } from "react-router-dom";
 import { lazyPage } from "./lazy";
 
 import AdminLayout from "@/components/layout/AdminLayout";
@@ -10,7 +10,9 @@ const OrderDetailPage = lazyPage(() => import("@/pages/OrderDetailPage"));
 const CustomersPage = lazyPage(() => import("@/pages/CustomersPage"));
 const CustomerDetailPage = lazyPage(() => import("@/pages/CustomerDetailPage"));
 const SystemUsersPage = lazyPage(() => import("@/pages/SystemUsersPage"));
-const SystemUserDetailPage = lazyPage(() => import("@/pages/SystemUserDetailPage"));
+const SystemUserDetailPage = lazyPage(
+  () => import("@/pages/SystemUserDetailPage"),
+);
 const PromotionsPage = lazyPage(() => import("@/pages/PromotionsPage"));
 const PromoCodesPage = lazyPage(() => import("@/pages/PromoCodesPage"));
 const CouponsPage = lazyPage(() => import("@/pages/CouponsPage"));
@@ -26,92 +28,96 @@ const SiteSettingPage = lazyPage(() => import("@/pages/SiteSettingPage"));
 
 export const routes: RouteObject[] = [
   {
-    path: '/',
-    element: <Navigate to="/orders" replace />
+    path: "/",
+    element: <Navigate to="/orders" replace />,
   },
   {
     element: <AdminLayout />,
     children: [
       {
         path: "/orders",
-        element: <OrdersPage />
+        element: <OrdersPage />,
       },
       {
         path: "/orders/:id",
-        element: <OrderDetailPage />
+        element: <OrderDetailPage />,
       },
       {
-        path: '/customers',
-        element: <CustomersPage />
+        path: "/customers",
+        element: <CustomersPage />,
       },
       {
-        path: '/customers/:id',
-        element: <CustomerDetailPage />
+        path: "/customers/:id",
+        element: <CustomerDetailPage />,
       },
       {
-        path: '/system-users',
-        element: <SystemUsersPage />
+        path: "/system-users",
+        element: <SystemUsersPage />,
       },
       {
-        path: '/system-users/:id',
-        element: <SystemUserDetailPage />
+        path: "/system-users/:id",
+        element: <SystemUserDetailPage />,
       },
       {
-        path: '/promotions',
-        element: <PromotionsPage />
+        path: "/promotions",
+        element: <PromotionsPage />,
       },
       {
-        path: '/promo-codes',
-        element: <PromoCodesPage />
+        path: "/promo-codes",
+        element: <PromoCodesPage />,
       },
       {
-        path: '/coupons',
-        element: <CouponsPage />
+        path: "/coupons",
+        element: <CouponsPage />,
       },
       {
-        path: '/packages',
-        element: <PackagesPage />
+        path: "/packages",
+        element: <PackagesPage />,
       },
       {
-        path: '/packages/:id/edit',
-        element: <PackageEditPage />
+        path: "/packages/:id/edit",
+        element: <PackageEditPage />,
       },
       {
-        path: '/settings',
-        element: <SettingsPage />
+        path: "/packages/new",
+        element: <PackageEditPage />,
       },
       {
-        path: '/settings/roles',
-        element: <RolesPage />
+        path: "/settings",
+        element: <SettingsPage />,
       },
       {
-        path: '/settings/users',
-        element: <SettingsUsersPage />
+        path: "/settings/roles",
+        element: <RolesPage />,
       },
       {
-        path: '/settings/content',
-        element: <ContentPage />
+        path: "/settings/users",
+        element: <SettingsUsersPage />,
       },
       {
-        path: '/settings/content/add',
-        element: <ContentAddPage />
+        path: "/settings/content",
+        element: <ContentPage />,
       },
       {
-        path: '/settings/content/:id/edit',
-        element: <ContentEditPage />
+        path: "/settings/content/add",
+        element: <ContentAddPage />,
       },
       {
-        path: '/settings/site/h5',
-        element: <SiteSettingPage />
+        path: "/settings/content/:id/edit",
+        element: <ContentEditPage />,
       },
-    ]
+      {
+        path: "/settings/site/h5",
+        element: <SiteSettingPage />,
+      },
+    ],
   },
   {
     path: "/login",
-    element: <Login />
+    element: <Login />,
   },
   {
     path: "*",
-    element: <NotFound />
-  }
-]
+    element: <NotFound />,
+  },
+];
