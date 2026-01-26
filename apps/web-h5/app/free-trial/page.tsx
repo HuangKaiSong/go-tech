@@ -4,7 +4,7 @@ import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
 import { Button, Input } from "@go-tech-frontend/ui";
 import { CheckCircle } from "lucide-react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 const FreeTrial = () => {
