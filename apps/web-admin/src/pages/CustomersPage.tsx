@@ -1,9 +1,12 @@
-import { useState } from "react";
-import { Users, Search, RotateCcw } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import {
   Button,
   Input,
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
   Select,
   SelectContent,
   SelectItem,
@@ -15,31 +18,112 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
 } from "@go-tech-frontend/ui";
-import { mockCustomers } from "@/mocks/customers";
+import { useQuery } from "@tanstack/react-query";
+import { RotateCcw, Search, Users } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+interface Customer {
+  id: number;
+  custName: string;
+  email: string;
+  phone: string;
+  custCode: string;
+  companyName: string;
+  registerTime: string;
+}
+
+interface Reponse {
+  records: Customer[];
+  total: number;
+}
+
+const defaultSize = 10;
 
 const CustomersPage = () => {
   const navigate = useNavigate();
-  const [customerName, setCustomerName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [customerType, setCustomerType] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchParams, setSearchParams] = useState({
+    custName: "",
+    phone: "",
+    email: "",
+    vipLevel: "",
+  });
 
-  const handleReset = () => {
-    setCustomerName("");
-    setPhone("");
-    setEmail("");
-    setCustomerType("");
+  const { data, refetch } = useQuery<Reponse>({
+    queryKey: [
+      "platform/platformPackage/page",
+      currentPage.toString(),
+      defaultSize.toString(),
+      searchParams,
+    ],
+    queryFn: async () => {
+      try {
+        const url = new URL(
+          `${import.meta.env.VITE_PROXY_PREFIX}/go-tech/platform/platformCustomer/page`,
+          location.origin,
+        );
+        url.searchParams.append("current", currentPage.toString());
+        url.searchParams.append("size", defaultSize.toString());
+        Object.entries(searchParams).map(([key, value]) => {
+          if (value) {
+            url.searchParams.append(key, value);
+          }
+        });
+
+        const res = await fetch(url.toString());
+        const response = await res.json();
+        if (!response || !response.code || response.code !== 200) {
+          throw new Error("Failed to fetch data");
+        }
+
+        return response.data;
+      } catch (error) {
+        console.log(error);
+        return {
+          records: [],
+          total: 0,
+        };
+      }
+    },
+    initialData: () => {
+      return {
+        records: [],
+        total: 0,
+      };
+    },
+  });
+
+  const totalPages = Math.ceil(data.total / 10);
+
+  const generatePaginationItems = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+
+    return pages;
   };
 
-  const handleView = (customerId: string) => {
+  const handleReset = () => {
+    setSearchParams({
+      custName: "",
+      phone: "",
+      email: "",
+      vipLevel: "",
+    });
+  };
+
+  const handleView = (customerId: number) => {
     navigate(`/customers/${customerId}`);
   };
 
@@ -60,8 +144,13 @@ const CustomersPage = () => {
             </label>
             <Input
               placeholder="請輸入文字"
-              value={customerName}
-              onChange={(e) => setCustomerName(e.target.value)}
+              value={searchParams.custName}
+              onChange={(e) => {
+                setSearchParams({
+                  ...searchParams,
+                  custName: e.target.value,
+                });
+              }}
               className="w-40"
             />
           </div>
@@ -71,8 +160,13 @@ const CustomersPage = () => {
             </label>
             <Input
               placeholder="請輸入文字"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              value={searchParams.phone}
+              onChange={(e) => {
+                setSearchParams({
+                  ...searchParams,
+                  phone: e.target.value,
+                });
+              }}
               className="w-40"
             />
           </div>
@@ -82,8 +176,13 @@ const CustomersPage = () => {
             </label>
             <Input
               placeholder="請輸入文字"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={searchParams.email}
+              onChange={(e) => {
+                setSearchParams({
+                  ...searchParams,
+                  email: e.target.value,
+                });
+              }}
               className="w-40"
             />
           </div>
@@ -91,15 +190,23 @@ const CustomersPage = () => {
             <label className="text-sm text-muted-foreground whitespace-nowrap">
               客戶類型
             </label>
-            <Select value={customerType} onValueChange={setCustomerType}>
+            <Select
+              value={searchParams.vipLevel}
+              onValueChange={(e) => {
+                setSearchParams({
+                  ...searchParams,
+                  vipLevel: e,
+                });
+              }}
+            >
               <SelectTrigger className="w-32">
                 <SelectValue placeholder="請選擇" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="registered">註冊會員</SelectItem>
-                <SelectItem value="gold">黃金會員</SelectItem>
-                <SelectItem value="platinum">白金會員</SelectItem>
-                <SelectItem value="diamond">鑽石會員</SelectItem>
+                <SelectItem value="1">註冊會員</SelectItem>
+                <SelectItem value="2">黃金會員</SelectItem>
+                <SelectItem value="3">白金會員</SelectItem>
+                <SelectItem value="4">鑽石會員</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -121,29 +228,51 @@ const CustomersPage = () => {
         <Table>
           <TableHeader>
             <TableRow className="bg-table-header hover:bg-table-header">
-              <TableHead className="text-center font-medium">註冊時間</TableHead>
-              <TableHead className="text-center font-medium">客戶編號</TableHead>
-              <TableHead className="text-center font-medium">客戶名稱</TableHead>
-              <TableHead className="text-center font-medium">電話號碼</TableHead>
-              <TableHead className="text-center font-medium">電子郵箱</TableHead>
-              <TableHead className="text-center font-medium">公司名稱</TableHead>
-              <TableHead className="text-center font-medium">客戶類型</TableHead>
+              <TableHead className="text-center font-medium">
+                註冊時間
+              </TableHead>
+              <TableHead className="text-center font-medium">
+                客戶編號
+              </TableHead>
+              <TableHead className="text-center font-medium">
+                客戶名稱
+              </TableHead>
+              <TableHead className="text-center font-medium">
+                電話號碼
+              </TableHead>
+              <TableHead className="text-center font-medium">
+                電子郵箱
+              </TableHead>
+              <TableHead className="text-center font-medium">
+                公司名稱
+              </TableHead>
+              <TableHead className="text-center font-medium">
+                客戶類型
+              </TableHead>
               <TableHead className="text-center font-medium">操作</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {mockCustomers.map((customer, index) => (
+            {data.records.map((customer, index) => (
               <TableRow key={index} className="hover:bg-table-hover">
-                <TableCell className="text-center">{customer.registerDate}</TableCell>
-                <TableCell className="text-center">{customer.id}</TableCell>
-                <TableCell className="text-center">{customer.name}</TableCell>
+                <TableCell className="text-center">
+                  {customer.registerTime}
+                </TableCell>
+                <TableCell className="text-center">
+                  {customer.custCode}
+                </TableCell>
+                <TableCell className="text-center">
+                  {customer.custName}
+                </TableCell>
                 <TableCell className="text-center">{customer.phone}</TableCell>
                 <TableCell className="text-center">{customer.email}</TableCell>
-                <TableCell className="text-center">{customer.company}</TableCell>
-                <TableCell className="text-center">{customer.type}</TableCell>
                 <TableCell className="text-center">
-                  <Button 
-                    variant="link" 
+                  {customer.companyName}
+                </TableCell>
+                <TableCell className="text-center">註冊會員</TableCell>
+                <TableCell className="text-center">
+                  <Button
+                    variant="link"
                     className="text-primary p-0 h-auto"
                     onClick={() => handleView(customer.id)}
                   >
@@ -156,39 +285,46 @@ const CustomersPage = () => {
         </Table>
 
         {/* Pagination */}
-        <div className="flex justify-end p-4 border-t border-table-border">
+        <div className="flex justify-end p-4 border-t border-border">
           <Pagination>
             <PaginationContent>
               <PaginationItem>
-                <PaginationPrevious href="#" />
+                <PaginationPrevious
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (currentPage > 1) {
+                      setCurrentPage(currentPage - 1);
+                    }
+                  }}
+                />
               </PaginationItem>
-              {[1, 2, 3].map((page) => (
+
+              {generatePaginationItems().map((page) => (
                 <PaginationItem key={page}>
                   <PaginationLink
                     href="#"
                     isActive={currentPage === page}
-                    onClick={() => setCurrentPage(page)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setCurrentPage(page);
+                    }}
                   >
                     {page}
                   </PaginationLink>
                 </PaginationItem>
               ))}
+
               <PaginationItem>
-                <span className="px-2">...</span>
-              </PaginationItem>
-              {[8, 9, 10].map((page) => (
-                <PaginationItem key={page}>
-                  <PaginationLink
-                    href="#"
-                    isActive={currentPage === page}
-                    onClick={() => setCurrentPage(page)}
-                  >
-                    {page}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
-              <PaginationItem>
-                <PaginationNext href="#" />
+                <PaginationNext
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (currentPage < totalPages) {
+                      setCurrentPage(currentPage + 1);
+                    }
+                  }}
+                />
               </PaginationItem>
             </PaginationContent>
           </Pagination>

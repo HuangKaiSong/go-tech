@@ -16,7 +16,7 @@ import {
   TabsTrigger,
 } from "@go-tech-frontend/ui";
 import { ArrowLeft, Eye, EyeOff, Lock, User } from "lucide-react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
