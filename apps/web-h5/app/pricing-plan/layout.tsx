@@ -1,4 +1,4 @@
-import { httpClient } from "@/lib/http";
+import { HttpBaseResponse, httpClient } from "@/lib/http";
 import { unstable_cache } from "next/cache";
 import { cookies } from "next/headers";
 import PageClient from "./page";
@@ -80,7 +80,7 @@ type AddonKey =
   | "accountingSysPrice"
   | "custServiceSysPrice";
 
-const getCachedMenus = unstable_cache(
+const getCachedMenus = unstable_cache<(...args: any[]) => Promise<HttpBaseResponse<MenuType[]>>>(
   async (authToken: string) => {
     // 直接使用fetch而不是httpClient，避免使用cookies
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -106,7 +106,7 @@ const getCachedMenus = unstable_cache(
       );
     }
 
-    return response.json();
+    return await response.json();
   },
   ["menu-tree-cache"],
   { revalidate: 300 }
@@ -120,7 +120,6 @@ export default async function Page() {
   // 在缓存函数外部获取认证token
   const authToken = await getAuthToken();
   const menus = await getCachedMenus(authToken);
-  console.log(menus);
 
   const packages = await httpClient.get<Packages[]>(
     "/go-tech/platform/platformPackage/enabledList"

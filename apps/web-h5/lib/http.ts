@@ -1,8 +1,8 @@
 import { cookies } from "next/headers";
 
-interface HttpBaseResponse {
+export interface HttpBaseResponse<T = any> {
   code?: number;
-  data?: any;
+  data?: T;
   [key: string]: any
 }
 
@@ -17,7 +17,7 @@ export class Http {
     return apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
   }
 
-  async request<T = HttpBaseResponse>(endpoint: string, options: RequestInit = {}, params?: Record<string, string>): Promise<T> {
+  async request<T = any>(endpoint: string, options: RequestInit = {}, params?: Record<string, string>): Promise<T> {
     let fullEndpoint = endpoint;
 
     if (params) {
@@ -54,28 +54,28 @@ export class Http {
     }
   }
 
-  async post<T = HttpBaseResponse>(endpoint: string, data?: any, params?: Record<string, string>): Promise<T> {
-    return this.request<T>(endpoint, {
+  async post<T>(endpoint: string, data?: any, params?: Record<string, string>): Promise<HttpBaseResponse<T>> {
+    return this.request<HttpBaseResponse<T>>(endpoint, {
       method: 'POST',
       body: data ? JSON.stringify(data) : undefined,
     }, params);
   }
 
-  async get<T = HttpBaseResponse>(endpoint: string, params?: Record<string, string>): Promise<T> {
-    return this.request<T>(endpoint, {
+  async get<T>(endpoint: string, params?: Record<string, string>): Promise<HttpBaseResponse<T>> {
+    return this.request<HttpBaseResponse<T>>(endpoint, {
       method: 'GET',
     }, params);
   }
 
-  async put<T = HttpBaseResponse>(endpoint: string, data?: any): Promise<T> {
-    return this.request<T>(endpoint, {
+  async put<T>(endpoint: string, data?: any): Promise<HttpBaseResponse<T>> {
+    return this.request<HttpBaseResponse<T>>(endpoint, {
       method: 'PUT',
       body: data ? JSON.stringify(data) : undefined,
     });
   }
 
-  async delete<T = HttpBaseResponse>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint, {
+  async delete<T>(endpoint: string): Promise<HttpBaseResponse<T>> {
+    return this.request<HttpBaseResponse<T>>(endpoint, {
       method: 'DELETE',
     });
   }

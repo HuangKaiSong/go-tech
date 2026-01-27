@@ -1,112 +1,12 @@
-"use client";
+'use client'
 
 import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
 import { Button } from "@go-tech-frontend/ui";
 import { Check, Minus } from "lucide-react";
+import { PricingPlanData } from "./layout";
 
-const pricingData = {
-  plans: [
-    { name: "普通版", price: "$1,000", units: "25", extra: "$150/5個" },
-    { name: "升級版", price: "$3,200", units: "100", extra: "$130/5個" },
-    { name: "豪華版", price: "$12,000", units: "400", extra: "$100/5個" },
-  ],
-  categories: [
-    {
-      name: "管理層",
-      features: [
-        { name: "菜單列表", type: "基本功能", plans: [true, true, true] },
-        { name: "角色列表", type: "人事管理", plans: [true, true, true] },
-        { name: "選項設定", type: "基本功能", plans: [true, true, true] },
-        { name: "使用者列表", type: "人事管理", plans: [true, true, true] },
-        { name: "部門列表", type: "人事管理", plans: [true, true, true] },
-        { name: "場地列表", type: "場地管理", plans: [true, true, true] },
-        { name: "合同簽批", type: "租約管理", plans: [true, true, true] },
-        { name: "標準價格列表", type: "價格管理", plans: [true, true, true] },
-        { name: "系統文件設定", type: "基本功能", plans: [true, true, true] },
-        { name: "報表及分析", type: "基本功能", plans: [true, true, true] },
-      ],
-    },
-    {
-      name: "租務部",
-      features: [
-        { name: "代理列表", type: "代理管理", plans: [false, true, true] },
-        { name: "客戶列表", type: "租約管理", plans: [true, true, true] },
-        { name: "商舖列表", type: "升級營舖模組", plans: [false, false, true] },
-        { name: "合同列表", type: "租約管理", plans: [true, true, true] },
-        { name: "營銷列表", type: "升級營舖模組", plans: [false, false, true] },
-        {
-          name: "單位列表",
-          type: "單位以及租金管理",
-          plans: [true, true, true],
-        },
-        { name: "水電列表", type: "場地管理", plans: [true, true, true] },
-        { name: "跟進列表", type: "場地管理", plans: [true, true, true] },
-      ],
-    },
-    {
-      name: "場務部",
-      features: [
-        { name: "日程", type: "場地管理", plans: [true, true, true] },
-        { name: "客服列表", type: "升級客戶管理", plans: [false, true, true] },
-        { name: "客戶端", type: "升級客戶管理", plans: [false, true, true] },
-        {
-          name: "客戶端圖片管理",
-          type: "升級客戶管理",
-          plans: [false, false, true],
-        },
-        {
-          name: "客戶端消息管理",
-          type: "升級客戶管理",
-          plans: [false, false, true],
-        },
-        {
-          name: "場務手機版",
-          type: "升級場地管理",
-          plans: [false, false, false],
-        },
-        {
-          name: "列印跟進單",
-          type: "升級場地管理",
-          plans: [false, false, false],
-        },
-      ],
-    },
-    {
-      name: "會計部",
-      features: [
-        { name: "費用單列表", type: "會計功能", plans: [true, true, true] },
-        { name: "租單工具", type: "收租發票", plans: [true, true, true] },
-        { name: "支票列表", type: "會計功能", plans: [true, true, true] },
-        { name: "發票列表", type: "收租發票", plans: [true, true, true] },
-      ],
-    },
-  ],
-  addons: [
-    {
-      name: "升級營舖模組",
-      features: ["商舖列表", "營銷列表"],
-      prices: ["+$20 each", "+$15 each", "0"],
-    },
-    {
-      name: "升級場地管理",
-      features: ["手機版", "列印跟進單"],
-      prices: ["+$20 each", "+$15 each", "0"],
-    },
-    {
-      name: "升級會計",
-      features: [],
-      prices: ["+$50 each", "+$25 each", "+$15 each"],
-    },
-    {
-      name: "客服",
-      features: ["客服列表", "租客portal"],
-      prices: ["+$20 each", "+$20 each", "0"],
-    },
-  ],
-};
-
-const PricingPlan = () => {
+const PricingPlan = ({pricingData}: { pricingData: PricingPlanData }) => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -146,9 +46,9 @@ const PricingPlan = () => {
                     功能
                   </div>
                 </div>
-                {pricingData.plans.map((plan, index) => (
+                {pricingData.plans.map((plan) => (
                   <div
-                    key={index}
+                    key={plan.id}
                     className="p-4 border-r border-primary/40 last:border-r-0 grid grid-rows-7 text-center items-center"
                   >
                     <div className="row-span-3 text-3xl font-bold mb-1">
