@@ -97,7 +97,10 @@ const getCachedMenus = unstable_cache<(...args: any[]) => Promise<HttpBaseRespon
         "Content-Type": "application/json",
         Authorization: `Bearer ${authToken}`,
       },
-      cache: "force-cache", // 使用fetch的内置缓存
+      next: {
+        tags: ["menu-tree-cache"],
+        revalidate: 300
+      }
     });
 
     if (!response.ok) {
@@ -109,7 +112,10 @@ const getCachedMenus = unstable_cache<(...args: any[]) => Promise<HttpBaseRespon
     return await response.json();
   },
   ["menu-tree-cache"],
-  { revalidate: 300 }
+  {
+    tags: ["menu-tree-cache"],
+    revalidate: 300
+  }
 );
 async function getAuthToken() {
   const cookieStore = await cookies();
