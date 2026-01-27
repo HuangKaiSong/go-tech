@@ -277,9 +277,7 @@ const PackageEditPage = () => {
       });
 
       // 设置菜单打 ✅ 逻辑
-      const haveids = ((packageinfo as any)?.packageItemList || [])
-        .filter((i) => i.status)
-        .map((i) => i.menuId);
+      const haveids = (packageinfo?.packageItemList || []).map((i) => i.menuId);
 
       const menuTree = tree.map((item) => {
         const items =
