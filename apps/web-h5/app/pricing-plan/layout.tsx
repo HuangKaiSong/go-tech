@@ -1,6 +1,4 @@
-import { HttpBaseResponse, httpClient } from "@/lib/http";
-import { unstable_cache } from "next/cache";
-import { cookies } from "next/headers";
+import { HttpBaseResponse } from "@/lib/http";
 import PageClient from "./page";
 
 const pricingData = {
@@ -80,63 +78,29 @@ type AddonKey =
   | "accountingSysPrice"
   | "custServiceSysPrice";
 
-const getCachedMenus = unstable_cache<(...args: any[]) => Promise<HttpBaseResponse<MenuType[]>>>(
-  async (authToken: string) => {
-    // 直接使用fetch而不是httpClient，避免使用cookies
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    if (!apiUrl) {
-      throw new Error("NEXT_PUBLIC_API_URL is not defined");
-    }
+function getBaseUrl(): string {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-    const baseUrl = apiUrl.endsWith("/") ? apiUrl.slice(0, -1) : apiUrl;
-    const url = `${baseUrl}/go-tech/platform/platformPackage/menuTree`;
-
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${authToken}`,
-      },
-      next: {
-        tags: ["menu-tree-cache"],
-        revalidate: 300
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `API request failed: ${response.status} ${response.statusText}`
-      );
-    }
-
-    return await response.json();
-  },
-  ["menu-tree-cache"],
-  {
-    tags: ["menu-tree-cache"],
-    revalidate: 300
+  if (!apiUrl) {
+    throw new Error('NEXT_PUBLIC_API_URL is not defined');
   }
-);
-async function getAuthToken() {
-  const cookieStore = await cookies();
-  return cookieStore.get("GO_TECH_AUTH_TOKEN")?.value || "";
+
+  return apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
 }
 
 export default async function Page() {
+  const baseUrl = getBaseUrl()
   // 在缓存函数外部获取认证token
-  const authToken = await getAuthToken();
-  const menus = await getCachedMenus(authToken);
-
-  const packages = await httpClient.get<Packages[]>(
-    "/go-tech/platform/platformPackage/enabledList"
-  );
+  const menus = await fetch(`${baseUrl}/go-tech/platform/platformPackage/menuTree`).then(res => res.json()) as HttpBaseResponse<MenuType[]>;
+  
+  const packages = await fetch(`${baseUrl}/go-tech/platform/platformPackage/enabledList`).then(res => res.json()) as HttpBaseResponse<Packages[]>;
 
   if (packages.data?.length) {
     pricingData.plans = packages.data.map(pack => ({
       id: pack.id,
       name: pack.packageName,
-      price: `$${pack.price.toLocaleString("zh-CN")}`,
-      units: pack.unitCount.toLocaleString("zh-CN"),
+      price: `$${pack.price.toLocaleString("zh-Hans-CN")}`,
+      units: pack.unitCount.toLocaleString("zh-Hans-CN"),
       extra: "無",
     }));
 
@@ -148,7 +112,7 @@ export default async function Page() {
           const addonKey = addon.key as AddonKey;
           const priceValue = packageItem[addonKey];
           if (priceValue !== undefined) {
-            return `$${priceValue.toLocaleString("zh-CN")} each`;
+            return `$${priceValue.toLocaleString("zh-Hans-CN")} each`;
           }
         }
         return "0";

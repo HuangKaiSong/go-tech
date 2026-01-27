@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import 'server-only';
 
 export interface HttpBaseResponse<T = any> {
   code?: number;
@@ -42,7 +43,6 @@ export class Http {
       ...options,
       method: options.method,
       headers,
-      cache: 'no-store',
       body: options.body ? JSON.stringify(options.body) : null,
     };
 
