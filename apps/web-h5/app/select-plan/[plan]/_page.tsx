@@ -194,10 +194,7 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm text-muted-foreground"
                       style={{ backgroundColor: "#FAEEEB" }}
                     >
-                      {/* <feature.icon
-                        className="w-4 h-4"
-                        style={{ color: "#F9881E" }}
-                      /> */}
+                      {feature.menuIcon && (<svg className="svg-icon w-4 h-4 text-primary mr-1" aria-hidden="true"><use xlinkHref={`#icon-${feature.menuIcon}`} fill=""></use></svg>)}
                       <span>{feature.menuTitle}</span>
                     </div>
                   ))}

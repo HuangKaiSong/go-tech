@@ -47,7 +47,7 @@ export class Http {
 
     try {
       const response = await fetch(url, requestOptons);
-      return await response.json();
+      return await response.json() as T;
     } catch (error) {
       return Promise.reject(error);
     }
@@ -60,7 +60,7 @@ export class Http {
     }, params);
   }
 
-  async get<T>(endpoint: string, params?: Record<string, string>): Promise<HttpBaseResponse<T>> {
+  async get<T = any>(endpoint: string, params?: Record<string, string>): Promise<HttpBaseResponse<T>> {
     return this.request<HttpBaseResponse<T>>(endpoint, {
       method: 'GET',
     }, params);

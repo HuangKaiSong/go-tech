@@ -15,6 +15,7 @@ const pricingData = {
   categories: [] as {
     name: string;
     features: {
+      icon?: string;
       name: string;
       type: string;
       plans: boolean[];
@@ -120,7 +121,8 @@ export default async function Page() {
             });
             return {
               name: child.title,
-              type: "",
+              type: child.desc,
+              icon: child.icon,
               plans,
             };
           }) || [];

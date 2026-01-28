@@ -7,7 +7,7 @@ import PricingCard from './_renderPackage';
 type ExtendedPackages = Packages & {
   upgradeNote: string | null;
   newFeatures: { icon?: any; label: string }[];
-  newPackageItemList: { menuId: number; menuTitle: string }[];
+  newPackageItemList: { menuId: number; menuIcon: string; menuTitle: string }[];
 };
 
 const ServicePlan = async () => {
@@ -36,7 +36,8 @@ const ServicePlan = async () => {
       const newFeatureItems = cur.packageItemList.filter(
         item => !prevMenuItems.has(item.menuId)
       ).map(item => ({
-        label: item.menuTitle
+        label: item.menuTitle,
+        icon: item.menuIcon,
       }));
 
       const newPackageItemList = cur.packageItemList.filter(

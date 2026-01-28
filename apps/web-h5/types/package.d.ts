@@ -8,5 +8,5 @@ type Packages = {
   venueSysPrice: number;
   accountingSysPrice: number;
   custServiceSysPrice: number;
-  packageItemList: { menuId: number; menuTitle: string }[];
+  packageItemList: { menuId: number; menuIcon: string; menuTitle: string }[];
 };
