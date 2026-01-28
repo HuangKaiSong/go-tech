@@ -125,16 +125,55 @@ const Settings = ({user, token}: any) => {
     }
 
     setIsPasswordLoading(true);
-    // 模擬修改密碼
-    setTimeout(() => {
+    try {
+      const response = await fetch('/go-tech/platform/platformCustomer/resetPassword', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Type': 'platform_customer',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          password: passwordData.currentPassword,
+          newPassword: passwordData.newPassword,
+        })
+      })
+      if (!response.ok) {
+        const statusCode = response.status;
+        if (statusCode === 404) {
+          toast.error(`接口 /go-tech/platform/platformCustomer/resetPassword 未定义`);
+        } else {
+          throw new Error(`API request failed: ${statusCode} ${response.statusText}`);
+        }
+        return;
+      }
+
+      const result = await response.json();
+
+      if (result && result.code === 200) {
+        setPasswordData({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
+        toast.success("密碼修改成功");
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+      console.log(error);
+    } finally {
       setIsPasswordLoading(false);
-      setPasswordData({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      });
-      toast.success("密碼修改成功");
-    }, 1000);
+    }
+    // 模擬修改密碼
+    // setTimeout(() => {
+    //   setIsPasswordLoading(false);
+    //   setPasswordData({
+    //     currentPassword: "",
+    //     newPassword: "",
+    //     confirmPassword: "",
+    //   });
+    //   toast.success("密碼修改成功");
+    // }, 1000);
   };
 
   return (
