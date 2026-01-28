@@ -1,3 +1,4 @@
+// import { httpClient } from '@/lib/http';
 import { decodeJwt } from 'jose';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
@@ -62,6 +63,8 @@ export async function POST(req: NextRequest) {
       expires: expiresAt,
       path: '/',
     });
+
+    // const user = await httpClient.get('/go-tech/platform/platformCustomer/getInfo')
 
     return NextResponse.json(
       { success: true, data: payload },

@@ -33,6 +33,7 @@ export class Http {
     const authToken = cookieStore.get('GO_TECH_AUTH_TOKEN')?.value || '';
 
     const headers = new Headers(options.headers);
+    headers.set('User-Type', 'platform_customer')
     headers.set('Content-Type', 'application/json');
     if (authToken) {
       headers.append('Authorization', `Bearer ${authToken}`);

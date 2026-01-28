@@ -2,6 +2,7 @@
 
 import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Button,
   Card,
@@ -20,15 +21,16 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
-const Settings = () => {
+const Settings = ({user, token}: any) => {
+  const { setUser } = useAuth()
   const router = useRouter();
-
+  
   // 個人資料狀態
   const [profileData, setProfileData] = useState({
-    name: "王小明",
-    email: "user@example.com",
-    phone: "+852 1234 5678",
-    company: "科技有限公司",
+    custName: user.custName,
+    email: user.email,
+    phone: user.phone,
+    companyName: user.companyName,
   });
   const [isProfileLoading, setIsProfileLoading] = useState(false);
 
@@ -57,7 +59,7 @@ const Settings = () => {
     e.preventDefault();
 
     if (
-      !profileData.name.trim() ||
+      !profileData.custName.trim() ||
       !profileData.email.trim() ||
       !profileData.phone.trim()
     ) {
@@ -66,11 +68,37 @@ const Settings = () => {
     }
 
     setIsProfileLoading(true);
-    // 模擬保存
-    setTimeout(() => {
+
+    try {
+      const response = await fetch('/go-tech/platform/platformCustomer/update', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Type': 'platform_customer',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(profileData),
+      }).then(res => res.json()).catch(err => {
+        toast.error(err.message);
+      })
+      if (response.code === 200) {
+        fetch("/api/auth/signin", {
+          method: "POST",
+          body: JSON.stringify(response.data),
+        })
+          .then(res => res.json())
+          .then(res => {
+            setUser(res.data);
+            toast.success("個人資料已更新");
+          });
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+      console.log(error);
+      
+    } finally {
       setIsProfileLoading(false);
-      toast.success("個人資料已更新");
-    }, 1000);
+    }
   };
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
@@ -167,8 +195,8 @@ const Settings = () => {
                         <Input
                           type="text"
                           placeholder="請輸入您的姓名"
-                          value={profileData.name}
-                          onChange={handleProfileChange("name")}
+                          value={profileData.custName}
+                          onChange={handleProfileChange("custName")}
                           className="h-12"
                         />
                       </div>
@@ -206,8 +234,8 @@ const Settings = () => {
                         <Input
                           type="text"
                           placeholder="請輸入您的公司名稱"
-                          value={profileData.company}
-                          onChange={handleProfileChange("company")}
+                          value={profileData.companyName}
+                          onChange={handleProfileChange("companyName")}
                           className="h-12"
                         />
                       </div>
