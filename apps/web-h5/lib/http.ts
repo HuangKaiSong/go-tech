@@ -1,21 +1,19 @@
 import { cookies } from "next/headers";
 import 'server-only';
 
-export interface HttpBaseResponse<T = any> {
-  code?: number;
-  data?: T;
-  [key: string]: any
+export function getBaseUrl(): string {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+  if (!apiUrl) {
+    throw new Error('NEXT_PUBLIC_API_URL is not defined');
+  }
+
+  return apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
 }
 
 export class Http {
   private getBaseUrl(): string {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
-    if (!apiUrl) {
-      throw new Error('NEXT_PUBLIC_API_URL is not defined');
-    }
-
-    return apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
+    return getBaseUrl();
   }
 
   async request<T = any>(endpoint: string, options: RequestInit = {}, params?: Record<string, string>): Promise<T> {
