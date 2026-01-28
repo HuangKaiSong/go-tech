@@ -126,7 +126,7 @@ const Settings = ({user, token}: any) => {
 
     setIsPasswordLoading(true);
     try {
-      const response = await fetch('/go-tech/platform/platformCustomer/resetPassword', {
+      const response = await fetch('/go-tech/platform/platformCustomer/updatePwd', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -134,14 +134,14 @@ const Settings = ({user, token}: any) => {
           'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
-          password: passwordData.currentPassword,
+          oldPassword: passwordData.currentPassword,
           newPassword: passwordData.newPassword,
         })
       })
       if (!response.ok) {
         const statusCode = response.status;
         if (statusCode === 404) {
-          toast.error(`接口 /go-tech/platform/platformCustomer/resetPassword 未定义`);
+          toast.error(`接口 /go-tech/platform/platformCustomer/updatePwd 未定义`);
         } else {
           throw new Error(`API request failed: ${statusCode} ${response.statusText}`);
         }

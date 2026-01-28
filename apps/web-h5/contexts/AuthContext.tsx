@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { createContext, useContext, useState } from "react";
 
 type AuthContextType = {
@@ -18,12 +19,14 @@ export const AuthProvider = ({
   children: React.ReactNode;
   initialUser: User | null;
 }) => {
+  const router = useRouter()
   const [user, setUser] = useState<User | null>(initialUser);
 
   const logout = async () => {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
       setUser(null);
+      router.replace('/')
     } catch (error) {
       console.error("Error during logout:", error);
     }
