@@ -1,3 +1,5 @@
+'use client'
+
 import heroBackground from "@/assets/background.webp";
 import { useIframeContext } from "@/contexts/IframeContext";
 import Image from "next/image";

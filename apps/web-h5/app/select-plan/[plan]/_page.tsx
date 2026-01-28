@@ -91,19 +91,15 @@ const plansData = [
 
 // Value-added services
 const valueAddedServices = [
-  { id: "sales", name: "Sales Module（租務）", price: 20 },
-  { id: "followup", name: "跟進 Module（維務）", price: 20 },
-  { id: "xero", name: "Xero Module（會計）", price: 50 },
-  { id: "customer", name: "客服 Module（維務）", price: 20 },
-  { id: "units", name: "增加單位數量", price: 80 },
+  { id: "rentSysPrice", name: "Sales Module（租務）", price: 20 },
+  { id: "venueSysPrice", name: "跟進 Module（維務）", price: 20 },
+  { id: "accountingSysPrice", name: "Xero Module（會計）", price: 50 },
+  { id: "custServiceSysPrice", name: "客服 Module（維務）", price: 20 },
+  { id: "addUnitPrice", name: "增加單位數量", price: 80 },
 ];
 
-const SelectPlan = ({ plan }: { plan: string }) => {
+const SelectPlan = ({ plan }: { plan: Packages }) => {
   const router = useRouter();
-  const planId = typeof plan === "string" ? plan : "A";
-
-  const selectedPlan = plansData.find(p => p.id === planId) || plansData[0];
-
   const [needAddons, setNeedAddons] = useState(true);
   const [selectedServices, setSelectedServices] = useState<
     Record<string, number>
@@ -163,16 +159,16 @@ const SelectPlan = ({ plan }: { plan: string }) => {
                 <div className="w-1 h-8 bg-primary rounded-full mt-1"></div>
                 <div>
                   <h2 className="text-xl font-bold text-foreground">
-                    {selectedPlan.name}
+                    {plan.packageName}
                   </h2>
                 </div>
               </div>
               <div className="text-right">
                 <span className="text-2xl font-bold text-primary">
-                  ${selectedPlan.price.toLocaleString()}
+                  ${plan.price.toLocaleString()}
                 </span>
                 <span className="text-lg text-primary ml-1">
-                  {selectedPlan.currency}
+                  HKD
                 </span>
               </div>
             </div>
@@ -183,7 +179,7 @@ const SelectPlan = ({ plan }: { plan: string }) => {
                   套餐内容
                 </span>
                 <span className="text-sm text-foreground">
-                  {selectedPlan.subtitle}
+                  最多可創建{plan.unitCount}個單位
                 </span>
               </div>
 
@@ -192,17 +188,17 @@ const SelectPlan = ({ plan }: { plan: string }) => {
                   包含功能
                 </span>
                 <div className="flex flex-wrap gap-2">
-                  {selectedPlan.features.map((feature, index) => (
+                  {plan.packageItemList.map((feature, index) => (
                     <div
                       key={index}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm text-muted-foreground"
                       style={{ backgroundColor: "#FAEEEB" }}
                     >
-                      <feature.icon
+                      {/* <feature.icon
                         className="w-4 h-4"
                         style={{ color: "#F9881E" }}
-                      />
-                      <span>{feature.label}</span>
+                      /> */}
+                      <span>{feature.menuTitle}</span>
                     </div>
                   ))}
                 </div>
@@ -285,7 +281,13 @@ const SelectPlan = ({ plan }: { plan: string }) => {
 
                         <div className="flex items-center gap-4">
                           <span className="text-sm font-medium text-primary">
-                            +${service.price} HKD Each
+                            +{
+                              service.id === "rentSysPrice" ? plan.rentSysPrice :
+                              service.id === "venueSysPrice" ? plan.venueSysPrice :
+                              service.id === "accountingSysPrice" ? plan.accountingSysPrice :
+                              service.id === "custServiceSysPrice" ? plan.custServiceSysPrice :
+                              service.id === "addUnitPrice" ? plan.addUnitPrice : 0
+                            } HKD Each
                           </span>
 
                           {isSelected && (

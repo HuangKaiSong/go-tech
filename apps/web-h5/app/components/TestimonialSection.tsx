@@ -1,3 +1,5 @@
+'use client'
+
 import homeOffice from "@/assets/home-office.jpg";
 import { useIframeContext } from "@/contexts/IframeContext";
 import Image from "next/image";

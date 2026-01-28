@@ -1,4 +1,3 @@
-import { HttpBaseResponse } from "@/lib/http";
 import PageClient from "./page";
 
 const pricingData = {
@@ -51,26 +50,6 @@ const pricingData = {
 
 export type PricingPlanData = typeof pricingData;
 
-export type MenuType = {
-  id: number;
-  title: string;
-  parentId: number;
-  children?: MenuType[];
-};
-
-export type Packages = {
-  id: number;
-  packageName: string;
-  unitCount: number;
-  price: number;
-  addUnitPrice: number;
-  rentSysPrice: number;
-  venueSysPrice: number;
-  accountingSysPrice: number;
-  custServiceSysPrice: number;
-  packageItemList: { menuId: number; menuTitle: string }[];
-};
-
 // 定义addon key的联合类型
 type AddonKey =
   | "rentSysPrice"
@@ -93,10 +72,12 @@ export default async function Page() {
   // 在缓存函数外部获取认证token
   const menus = await fetch(`${baseUrl}/go-tech/platform/platformPackage/menuTree`).then(res => res.json()) as HttpBaseResponse<MenuType[]>;
   
-  const packages = await fetch(`${baseUrl}/go-tech/platform/platformPackage/enabledList`).then(res => res.json()) as HttpBaseResponse<Packages[]>;
+  const packagesData = await fetch(`${baseUrl}/go-tech/platform/platformPackage/enabledList`).then(res => res.json()) as HttpBaseResponse<Packages[]>;
 
-  if (packages.data?.length) {
-    pricingData.plans = packages.data.map(pack => ({
+  const packages = (packagesData?.data || []).slice(0, 3);
+
+  if (packages.length) {
+    pricingData.plans = packages.map(pack => ({
       id: pack.id,
       name: pack.packageName,
       price: `$${pack.price.toLocaleString("zh-Hans-CN")}`,
@@ -106,12 +87,12 @@ export default async function Page() {
 
     pricingData.addons = pricingData.addons.map(addon => {
       const prices = pricingData.plans.map(plan => {
-        const packageItem = packages.data?.find(p => p.id === plan.id);
+        const packageItem = packages.find(p => p.id === plan.id);
         if (packageItem) {
           // 使用类型断言确保类型安全
           const addonKey = addon.key as AddonKey;
           const priceValue = packageItem[addonKey];
-          if (priceValue !== undefined) {
+          if (priceValue && priceValue !== undefined) {
             return `$${priceValue.toLocaleString("zh-Hans-CN")} each`;
           }
         }
@@ -130,7 +111,7 @@ export default async function Page() {
           menu.children?.map(child => {
             // 根据每个套餐的 packageItemList 动态设置 plans
             const plans = pricingData.plans.map(plan => {
-              const packageItem = packages.data?.find(p => p.id === plan.id);
+              const packageItem = packages.find(p => p.id === plan.id);
               return (
                 packageItem?.packageItemList.some(
                   item => item.menuId === child.id

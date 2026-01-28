@@ -1,3 +1,5 @@
+'use client'
+
 import Link from "@/app/components/Link";
 import homeOffice from "@/assets/home-office.jpg";
 import { useIframeContext } from "@/contexts/IframeContext";

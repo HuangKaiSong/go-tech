@@ -1,3 +1,5 @@
+'use client'
+
 import { useIframeContext } from "@/contexts/IframeContext";
 import BaseLink, { LinkProps } from "next/link";
 import { ReactNode } from "react";

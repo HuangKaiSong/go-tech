@@ -14,7 +14,6 @@ import {
   User,
 } from "lucide-react";
 import Image, { StaticImageData } from "next/image";
-import { useTranslation } from "react-i18next";
 
 import { useAuth } from "@/contexts/AuthContext";
 import { useIframeContext } from "@/contexts/IframeContext";
@@ -29,7 +28,6 @@ import {
 import { useState } from "react";
 
 const Header = ({ heroBg }: { heroBg?: string | StaticImageData }) => {
-  const { t } = useTranslation("common");
   const { hasIframe } = useIframeContext();
   const { user, isLoggedIn, logout } = useAuth();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -191,7 +189,7 @@ const Header = ({ heroBg }: { heroBg?: string | StaticImageData }) => {
               ) : (
                 <Link href="/account/login">
                   <Button className="px-10" size="sm">
-                    {t("login")}
+                    登入
                   </Button>
                 </Link>
               )}

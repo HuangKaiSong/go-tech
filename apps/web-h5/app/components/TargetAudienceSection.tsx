@@ -1,3 +1,5 @@
+'use client'
+
 import Link from "@/app/components/Link";
 import individualOwner from "@/assets/individual-owner.jpg";
 import investorProperty from "@/assets/investor-property.jpg";
