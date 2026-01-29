@@ -3,6 +3,7 @@
 import Link from "@/app/components/Link";
 import Logo from "@/assets/Gotech_Logo.webp";
 import authBgImg from "@/assets/background.webp";
+import { sendToBetterStack } from "@/lib/betterstack-logger";
 import { useCountDown } from "@go-tech-frontend/lib";
 import { Button, Checkbox, Input } from "@go-tech-frontend/ui";
 import { X } from "lucide-react";
@@ -63,7 +64,7 @@ const Register = () => {
   const [countdown] = useCountDown({
     targetDate,
     onEnd() {
-      toast.success("倒數結束");
+      setTargetDate(undefined)
     },
   });
 
@@ -117,6 +118,9 @@ const Register = () => {
       toast.error(result.message);
     } catch (err) {
       console.log(err);
+      if (err instanceof Response) {
+        sendToBetterStack('error', err.statusText, { uri: `/go-tech/platform/platformCustomer/sendCode?email=${formData.email}`, extra: await err.json() })
+      }
       toast.error("驗證碼發送失敗，請稍後再試");
     } finally {
       setPending(false);
@@ -166,6 +170,9 @@ const Register = () => {
       setTargetDate(undefined);
     } catch (err) {
       console.log(err);
+      if (err instanceof Response) {
+        sendToBetterStack('error', err.statusText, { uri: `/go-tech/platform/platformCustomer/verify`, extra: await err.json(), body: result.data })
+      }
     } finally {
       setValidatedPending(false);
     }
@@ -232,6 +239,9 @@ const Register = () => {
       );
     } catch (err) {
       console.log(err);
+      if (err instanceof Response) {
+        sendToBetterStack('error', err.statusText, { uri: `/go-tech/platform/platformCustomer/register`, extra: await err.json(), body: result.data })
+      }
     } finally {
       setSignupPending(false);
     }

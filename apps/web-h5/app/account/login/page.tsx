@@ -8,6 +8,7 @@ import { useState } from "react";
 import Logo from "@/assets/Gotech_Logo.webp";
 import authBgImg from "@/assets/background.webp";
 import { useAuth } from "@/contexts/AuthContext";
+import { sendToBetterStack } from "@/lib/betterstack-logger";
 import { Eye, EyeOff, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -67,29 +68,13 @@ const Login = () => {
     } catch (error: Response | any) {
       if (error instanceof Response) {
         const err = await error.json();
+        sendToBetterStack('error', error.statusText, { extra: err, body: result.data })
         toast.error(err.message);
       }
     } finally {
       setIsLoading(false);
     }
   };
-
-  // useEffect(() => {
-  //   if (!state) return;
-  //   if (state.error) {
-  //     toast.error(state.error);
-  //     return;
-  //   }
-  //   if (state.success) {
-  //     fetch("/api/auth/signin", {
-  //       method: "POST",
-  //       body: JSON.stringify(state.data),
-  //     }).then(() => {
-  //       toast.success("登入成功！");
-  //       router.replace("/");
-  //     });
-  //   }
-  // }, [state]);
 
   return (
     <div className="min-h-screen relative flex items-center justify-center p-4">

@@ -3,12 +3,41 @@
 import Link from "@/app/components/Link";
 import Logo from "@/assets/Gotech_Logo.webp";
 import authBgImg from "@/assets/background.webp";
+import { sendToBetterStack } from "@/lib/betterstack-logger";
+import { useCountDown } from "@go-tech-frontend/lib";
 import { Button, Input } from "@go-tech-frontend/ui";
 import { X } from "lucide-react";
 import Image from "next/image";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import z from "zod";
+
+const sendCodeSchema = z.object({
+  account: z
+    .string()
+    .min(1, "請輸入邮箱")
+    .email({ message: "请输入正确的邮箱" })
+    .trim(),
+});
+
+const verificationCodeSchema = sendCodeSchema.extend({
+  verificationCode: z.string().min(1, "請輸入驗證碼"),
+});
+
+const forgetPwdVerifySchema = verificationCodeSchema.extend({
+  pwd: z
+    .string()
+    .min(6, "密码至少需要6位字符")
+    .regex(/[a-zA-Z]/, "至少包含一个字母")
+    .regex(/[0-9]/, "至少包含一个数字")
+    .regex(/[^a-zA-Z0-9]/, "包含至少一个特殊字符.")
+    .trim(),
+  verifyPwd: z.string().trim(),
+}).refine(data => data.pwd === data.verifyPwd, {
+  message: "密码不一致",
+  path: ["confirmPassword"],
+});
 
 const Register = () => {
   const router = useRouter();
@@ -22,66 +51,162 @@ const Register = () => {
   const [isSendingCode, setIsSendingCode] = useState(false);
   const [step, setStep] = useState(0);
 
+  const [targetDate, setTargetDate] = useState<number>();
+
+  const [countdown] = useCountDown({
+    targetDate,
+    onEnd() {
+      setTargetDate(undefined)
+    },
+  });
+
+  const isCodeButtonDisabled = isSendingCode || countdown > 0 || !formData.account;
+
   const handleChange =
     (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
       setFormData(prev => ({ ...prev, [field]: e.target.value }));
     };
 
   const handleSendCode = async () => {
-    if (!formData.account.trim()) {
-      toast.error("請先輸入您的電子郵箱/手機號碼");
+    // 倒计时中不允许再次发送
+    if (countdown > 0 || isSendingCode) return;
+
+    const result = sendCodeSchema.safeParse(formData);
+
+    if (!result.success) {
+      const message = result.error.errors.at(0)?.message || "";
+      toast.error(message);
       return;
     }
 
-    setIsSendingCode(true);
-    // Simulate sending code
-    setTimeout(() => {
-      setIsSendingCode(false);
-      toast.success("驗證碼已發送");
-    }, 1000);
+    try {
+      setIsSendingCode(true)
+
+      const response = await fetch(
+        `/go-tech/platform/platformCustomer/sendCode?email=${formData.account}`,
+        { method: "POST" }
+      );
+      const result = await response.json();
+
+      if (result && result.code && result.code === 200) {
+        toast.success("驗證碼已發送至您的郵箱");
+        setTargetDate(Date.now() + 60 * 1000);
+        return;
+      }
+      toast.error(result.message);
+    }  catch (err) {
+      console.log(err);
+      if (err instanceof Response) {
+        sendToBetterStack('error', err.statusText, { uri: `/go-tech/platform/platformCustomer/sendCode?email=${formData.account}`, extra: await err.json() })
+      }
+      toast.error("驗證碼發送失敗，請稍後再試");
+    } finally {
+      setIsSendingCode(false)
+    }
   };
 
-  const handlePrevSubmit = (e: React.FormEvent) => {
+  const handlePrevSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.account.trim()) {
-      toast.error("請填寫所有必填欄位");
+    const result = verificationCodeSchema.safeParse(formData);
+
+    if (!result.success) {
+      const message = result.error.errors.at(0)?.message || "";
+      toast.error(message);
       return;
     }
 
-    if (!formData.verificationCode.trim()) {
-      toast.error("請輸入驗證碼");
-      return;
-    }
+    try {
+      const response = await fetch(
+        "/go-tech/platform/platformCustomer/forgetPwdVerify",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: formData.account,
+            verificationCode: formData.verificationCode,
+          }),
+        }
+      );
 
-    setIsLoading(true);
-    // Simulate registration - replace with actual auth logic
-    setTimeout(() => {
-      setIsLoading(false);
+      const validatedResult = await response.json();
+
+      if (validatedResult.code !== 200) {
+        toast.error(validatedResult.message);
+        return;
+      }
       setStep(1);
-    }, 1000);
+      setTargetDate(undefined);
+    } catch (error) {
+      console.log(error);
+      if (error instanceof Response) {
+        sendToBetterStack('error', error.statusText, { uri: `/go-tech/platform/platformCustomer/verify`, extra: await error.json(), body: result.data })
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (step === 0) return;
 
-    if (!formData.pwd.trim() || !formData.verifyPwd.trim()) {
-      toast.error("請填寫所有必填欄位");
+    const result = forgetPwdVerifySchema.safeParse(formData);
+    
+    if (!result.success) {
+      const message = result.error.errors.at(0)?.message || "";
+      toast.error(message);
       return;
     }
-    if (formData.pwd !== formData.verifyPwd) {
-      toast.error("密碼和確認密碼不一致");
-      return;
-    }
+    try {
+      setIsLoading(true);
 
-    setIsLoading(true);
-    // Simulate registration - replace with actual auth logic
-    setTimeout(() => {
+      const response = await fetch(
+        "/go-tech/platform/platformCustomer/resetPwd",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: result.data.account,
+            password: result.data.pwd
+          }),
+        }
+      );
+
+      const signupResult = await response.json();
+      if (signupResult.code !== 200) {
+        toast.error(signupResult.message);
+        return;
+      }
+
+      toast.promise(
+        new Promise<boolean>(resolve => {
+          setTimeout(() => {
+            resolve(true);
+          }, 1000);
+        }),
+        {
+          loading: "重置密碼成功, 正在為您跳转登录页面...",
+          success: "跳轉成功, 請登入",
+          duration: 1000,
+          onAutoClose() {
+            toast.dismiss();
+            router.push("/account/login");
+          },
+        }
+      );
+    } catch (err) {
+      console.log(err);
+      if (err instanceof Response) {
+        sendToBetterStack('error', err.statusText, { uri: `/go-tech/platform/platformCustomer/resetPwd`, extra: await err.json(), body: result.data })
+      }
+    } finally {
       setIsLoading(false);
-      toast.success("重置成功！");
-      console.log(formData);
-    }, 1000);
+    }
   };
 
   return (
@@ -179,10 +304,14 @@ const Register = () => {
                 <Button
                   type="button"
                   onClick={handleSendCode}
-                  disabled={isSendingCode || !formData.account}
+                  disabled={isCodeButtonDisabled}
                   className="h-12 px-6 bg-primary text-primary-foreground hover:bg-primary/90 whitespace-nowrap"
                 >
-                  {isSendingCode ? "發送中..." : "發送驗證碼"}
+                  {isSendingCode
+                    ? "發送中..."
+                    : countdown > 0
+                      ? `${Math.ceil(countdown / 1000)}s 後重發`
+                      : "發送驗證碼"}
                 </Button>
               </div>
 

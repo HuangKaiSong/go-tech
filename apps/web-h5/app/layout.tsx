@@ -1,20 +1,9 @@
 import { AuthProvider } from "@/contexts/AuthContext";
 import { decodeJwt } from "jose";
 import type { Metadata } from "next";
-// import { Geist, Geist_Mono } from "next/font/google";
 import { cookies } from "next/headers";
 import Layout from "./components/Layout";
 import "./globals.css";
-
-// const geistSans = Geist({
-//   variable: "--font-geist-sans",
-//   subsets: ["latin"],
-// });
-
-// const geistMono = Geist_Mono({
-//   variable: "--font-geist-mono",
-//   subsets: ["latin"],
-// });
 
 export const metadata: Metadata = {
   title: "GO-TECH租務系統",
@@ -45,9 +34,6 @@ export default async function RootLayout({
 
   return (
     <html lang={language}>
-      {/* <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      > */}
       <body>
         <AuthProvider initialUser={user}>
           <Layout>{children}</Layout>
