@@ -70,69 +70,75 @@ function getBaseUrl(): string {
 
 export default async function Page() {
   const baseUrl = getBaseUrl()
-  // 在缓存函数外部获取认证token
-  const menus = await fetch(`${baseUrl}/go-tech/platform/platformPackage/menuTree`).then(res => res.json()) as HttpBaseResponse<MenuType[]>;
+  let packages: Packages[] = [];
+
+  try {
+    const menus = await fetch(`${baseUrl}/go-tech/platform/platformPackage/menuTree`).then(res => res.json()) as HttpBaseResponse<MenuType[]>;
+    
+    const packagesData = await fetch(`${baseUrl}/go-tech/platform/platformPackage/enabledList`).then(res => res.json()) as HttpBaseResponse<Packages[]>;
   
-  const packagesData = await fetch(`${baseUrl}/go-tech/platform/platformPackage/enabledList`).then(res => res.json()) as HttpBaseResponse<Packages[]>;
-
-  const packages = (packagesData?.data || []).slice(0, 3);
-
-  if (packages.length) {
-    pricingData.plans = packages.map(pack => ({
-      id: pack.id,
-      name: pack.packageName,
-      price: `$${pack.price.toLocaleString("zh-Hans-CN")}`,
-      units: pack.unitCount.toLocaleString("zh-Hans-CN"),
-      extra: "無",
-    }));
-
-    pricingData.addons = pricingData.addons.map(addon => {
-      const prices = pricingData.plans.map(plan => {
-        const packageItem = packages.find(p => p.id === plan.id);
-        if (packageItem) {
-          // 使用类型断言确保类型安全
-          const addonKey = addon.key as AddonKey;
-          const priceValue = packageItem[addonKey];
-          if (priceValue && priceValue !== undefined) {
-            return `$${priceValue.toLocaleString("zh-Hans-CN")} each`;
+    packages = (packagesData?.data || [])?.slice(0, 3);
+  
+    if (packages.length) {
+      pricingData.plans = packages.map(pack => ({
+        id: pack.id,
+        name: pack.packageName,
+        price: `$${pack.price.toLocaleString("zh-Hans-CN")}`,
+        units: pack.unitCount.toLocaleString("zh-Hans-CN"),
+        extra: "無",
+      }));
+  
+      pricingData.addons = pricingData.addons.map(addon => {
+        const prices = pricingData.plans.map(plan => {
+          const packageItem = packages.find(p => p.id === plan.id);
+          if (packageItem) {
+            // 使用类型断言确保类型安全
+            const addonKey = addon.key as AddonKey;
+            const priceValue = packageItem[addonKey];
+            if (priceValue && priceValue !== undefined) {
+              return `$${priceValue.toLocaleString("zh-Hans-CN")} each`;
+            }
           }
-        }
-        return "0";
-      });
-
-      return {
-        ...addon,
-        prices,
-      };
-    });
-
-    if (menus.data?.length) {
-      pricingData.categories = menus.data.map(menu => {
-        const features =
-          menu.children?.map(child => {
-            // 根据每个套餐的 packageItemList 动态设置 plans
-            const plans = pricingData.plans.map(plan => {
-              const packageItem = packages.find(p => p.id === plan.id);
-              return (
-                packageItem?.packageItemList.some(
-                  item => item.menuId === child.id
-                ) || false
-              );
-            });
-            return {
-              name: child.title,
-              type: child.desc,
-              icon: child.icon,
-              plans,
-            };
-          }) || [];
+          return "0";
+        });
+  
         return {
-          name: menu.title,
-          features,
+          ...addon,
+          prices,
         };
       });
+  
+      if (menus.data?.length) {
+        pricingData.categories = menus.data.map(menu => {
+          const features =
+            menu.children?.map(child => {
+              // 根据每个套餐的 packageItemList 动态设置 plans
+              const plans = pricingData.plans.map(plan => {
+                const packageItem = packages.find(p => p.id === plan.id);
+                return (
+                  packageItem?.packageItemList.some(
+                    item => item.menuId === child.id
+                  ) || false
+                );
+              });
+              return {
+                name: child.title,
+                type: child.desc,
+                icon: child.icon,
+                plans,
+              };
+            }) || [];
+          return {
+            name: menu.title,
+            features,
+          };
+        });
+      }
     }
+  } catch (error) {
+    console.log(error);
   }
+  // 在缓存函数外部获取认证token
 
   return <PageClient pricingData={pricingData} />;
 }

@@ -11,53 +11,60 @@ type ExtendedPackages = Packages & {
 };
 
 const ServicePlan = async () => {
+  let packages: ExtendedPackages[] = [];
   const baseUrl = getBaseUrl();
-  const packagesData = await fetch(`${baseUrl}/go-tech/platform/platformPackage/enabledList`, { next: { revalidate: 300 } }).then(res => res.json()) as HttpBaseResponse<Packages[]>;
 
-  const packages = (packagesData?.data || []).slice(0, 3).reduce((acc, cur, index, arr) => {
-    // 第一个套餐没有upgradeNote和newFeatures
-    if (index === 0) {
-      acc.push({
-        ...cur,
-        upgradeNote: null,
-        newFeatures: [],
-        newPackageItemList: cur.packageItemList,
-      });
-    } else {
-      // 与前一个套餐比较，获取新增功能
-      const prevPackage = arr[index - 1];
-      
-      const priceDiff = cur.price - prevPackage.price;
-
-      const unitDiff = cur.unitCount - prevPackage.unitCount;
-
-      // 获取当前套餐相对于前一个套餐的新功能
-      const prevMenuItems = new Set(prevPackage.packageItemList.map(item => item.menuId));
-      const newFeatureItems = cur.packageItemList.filter(
-        item => !prevMenuItems.has(item.menuId)
-      ).map(item => ({
-        label: item.menuTitle,
-        icon: item.menuIcon,
-      }));
-
-      const newPackageItemList = cur.packageItemList.filter(
-        item => prevMenuItems.has(item.menuId)
-      )
-
-      let upgradeNote: string | null = null;
-      if (priceDiff > 0) {
-        upgradeNote = `(加$${priceDiff}從${prevPackage.packageName}升級，增加${unitDiff}個單位)`;
+  try {
+    
+    const packagesData = await fetch(`${baseUrl}/go-tech/platform/platformPackage/enabledList`, { next: { revalidate: 300 } }).then(res => res.json()) as HttpBaseResponse<Packages[]>;
+  
+    packages = (packagesData?.data || [])?.slice(0, 3)?.reduce((acc, cur, index, arr) => {
+      // 第一个套餐没有upgradeNote和newFeatures
+      if (index === 0) {
+        acc.push({
+          ...cur,
+          upgradeNote: null,
+          newFeatures: [],
+          newPackageItemList: cur.packageItemList,
+        });
+      } else {
+        // 与前一个套餐比较，获取新增功能
+        const prevPackage = arr[index - 1];
+        
+        const priceDiff = cur.price - prevPackage.price;
+  
+        const unitDiff = cur.unitCount - prevPackage.unitCount;
+  
+        // 获取当前套餐相对于前一个套餐的新功能
+        const prevMenuItems = new Set(prevPackage.packageItemList.map(item => item.menuId));
+        const newFeatureItems = cur.packageItemList.filter(
+          item => !prevMenuItems.has(item.menuId)
+        ).map(item => ({
+          label: item.menuTitle,
+          icon: item.menuIcon,
+        }));
+  
+        const newPackageItemList = cur.packageItemList.filter(
+          item => prevMenuItems.has(item.menuId)
+        )
+  
+        let upgradeNote: string | null = null;
+        if (priceDiff > 0) {
+          upgradeNote = `(加$${priceDiff}從${prevPackage.packageName}升級，增加${unitDiff}個單位)`;
+        }
+  
+        acc.push({
+          ...cur,
+          upgradeNote,
+          newPackageItemList: newPackageItemList.length > 0 ? newPackageItemList : cur.packageItemList,
+          newFeatures: newFeatureItems
+        });
       }
-
-      acc.push({
-        ...cur,
-        upgradeNote,
-        newPackageItemList: newPackageItemList.length > 0 ? newPackageItemList : cur.packageItemList,
-        newFeatures: newFeatureItems
-      });
-    }
-    return acc;
-  }, [] as ExtendedPackages[])
+      return acc;
+    }, [] as ExtendedPackages[])
+  } catch (error) {
+    packages = []
+  }
 
   return (
     <div className="min-h-screen bg-background">

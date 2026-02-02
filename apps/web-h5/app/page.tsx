@@ -27,7 +27,7 @@ export default async function Home() {
   try {
     const baseUrl = getBaseUrl()
     const packagesData = await fetch(`${baseUrl}/go-tech/platform/platformPackage/enabledList`, { next: isDev ? undefined : { revalidate: 300 } }).then(res => res.json()) as HttpBaseResponse<Packages[]>;
-    packages = (packagesData?.data || []).slice(0, 3)
+    packages = (packagesData?.data || [])?.slice(0, 3)
   } catch (error) {
     console.log(error);
     packages = [];
