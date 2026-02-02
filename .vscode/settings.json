@@ -11,5 +11,17 @@
     "javascriptreact",
     "typescript",
     "typescriptreact"
-  ]
+  ],
+  "i18n-ally.sourceLanguage": "hk",
+  "i18n-ally.displayLanguage": "hk",
+  "i18n-ally.sortKeys": false,
+  "i18n-ally.indent": 2,
+  "i18n-ally.tabStyle": "space",
+  "i18n-ally.localesPaths": ["apps/**/locales"],
+  "i18n-ally.pathMatcher": "{locale}.json",
+  "commentTranslate.targetLanguage": "zh-TW",
+  "commentTranslate.hover.enabled": true,
+  "i18n-ally.editor.preferEditor": true,
+  "i18n-ally.keystyle": "flat",
+  "i18n-ally.enabledFrameworks": ["next-intl"]
 }

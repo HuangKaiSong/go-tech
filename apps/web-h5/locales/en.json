@@ -1,0 +1,10 @@
+{
+  "HomePage": {
+    "title": "Hello world!"
+  },
+  "Common": {
+    "login": "Sign in",
+    "logout": "Sign out",
+    "setting": "設定"
+  }
+}

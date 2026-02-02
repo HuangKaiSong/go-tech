@@ -3,7 +3,6 @@
 import Link from "@/app/components/Link";
 import Logo from "@/assets/Gotech_Logo.webp";
 import {
-  ArrowRightLeft,
   Crown,
   LogOut,
   Mail,
@@ -11,7 +10,7 @@ import {
   Package,
   Phone,
   Settings,
-  User,
+  User
 } from "lucide-react";
 import Image, { StaticImageData } from "next/image";
 
@@ -25,9 +24,13 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@go-tech-frontend/ui";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
+import LocaleSwitcher from "./LocaleSwitcher";
 
 const Header = ({ heroBg }: { heroBg?: string | StaticImageData }) => {
+  const t = useTranslations()
+  
   const { hasIframe } = useIframeContext();
   const { user, isLoggedIn, logout } = useAuth();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -173,14 +176,14 @@ const Header = ({ heroBg }: { heroBg?: string | StaticImageData }) => {
                           onClick={() => setIsSheetOpen(false)}
                         >
                           <Settings className="w-5 h-5 text-muted-foreground" />
-                          <span>設定</span>
+                          <span>{t('Common.setting')}</span>
                         </Link>
                         <button
                           onClick={handleLogout}
                           className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-destructive/10 text-destructive transition-colors"
                         >
                           <LogOut className="w-5 h-5" />
-                          <span>登出</span>
+                          <span>{t('Common.logout')}</span>
                         </button>
                       </div>
                     </SheetContent>
@@ -189,14 +192,11 @@ const Header = ({ heroBg }: { heroBg?: string | StaticImageData }) => {
               ) : (
                 <Link href="/account/login">
                   <Button className="px-10" size="sm">
-                    登入
+                    {t('Common.login')}
                   </Button>
                 </Link>
               )}
-              <div className="flex flex-row gap-2 text-white text-sm items-center">
-                <div>繁簡</div>
-                <ArrowRightLeft className="w-4 h-4" />
-              </div>
+              <LocaleSwitcher />
             </div>
             <div className="flex flex-row items-center">
               <div className="h-9 w-32 bg-background rounded-l-sm text-xs flex items-center justify-center cursor-pointer">

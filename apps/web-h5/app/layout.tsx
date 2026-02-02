@@ -1,6 +1,7 @@
 import { AuthProvider } from "@/contexts/AuthContext";
 import { decodeJwt } from "jose";
 import type { Metadata } from "next";
+import { NextIntlClientProvider } from 'next-intl';
 import { cookies } from "next/headers";
 import Layout from "./components/Layout";
 import "./globals.css";
@@ -21,7 +22,7 @@ export default async function RootLayout({
 }>) {
   const cookiesStore = await cookies();
 
-  const language = cookiesStore.get("GO_TECH_LANGUAGE")?.value || "zh-TW";
+  const language = cookiesStore.get("GO_TECH_LANGUAGE")?.value || "hk";
 
   const tokenExtists = cookiesStore.has("GO_TECH_AUTH_TOKEN");
   let user: User | null = null;
@@ -35,9 +36,11 @@ export default async function RootLayout({
   return (
     <html lang={language}>
       <body>
-        <AuthProvider initialUser={user}>
-          <Layout>{children}</Layout>
-        </AuthProvider>
+        <NextIntlClientProvider>
+          <AuthProvider initialUser={user}>
+            <Layout>{children}</Layout>
+          </AuthProvider>
+        </NextIntlClientProvider>
         <svg id="__svg__icons__dom__" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" style={{ position: 'absolute', width: '0px', height: '0px' }}>
           <symbol className="icon" viewBox="0 0 1024 1024" id="icon-monitor"><defs>
             <style>{`@font-face{font-family:rbicon;src:url(chrome-extension://dipiagiiohfljcicegpgffpbnjmgjcnf/fonts/rbicon.woff2) format("woff2");font-weight:400;font-style:normal}`}</style>

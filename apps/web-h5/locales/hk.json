@@ -1,0 +1,10 @@
+{
+  "HomePage": {
+    "title": "你好世界!"
+  },
+  "Common": {
+    "login": "登錄",
+    "logout": "登出",
+    "setting": "設定"
+  }
+}
