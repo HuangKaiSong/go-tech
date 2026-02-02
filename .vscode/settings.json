@@ -23,5 +23,6 @@
   "commentTranslate.hover.enabled": true,
   "i18n-ally.editor.preferEditor": true,
   "i18n-ally.keystyle": "flat",
-  "i18n-ally.enabledFrameworks": ["next-intl"]
+  "i18n-ally.enabledFrameworks": ["next-intl"],
+  "commentTranslate.source": "Google"
 }

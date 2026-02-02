@@ -25,14 +25,15 @@ import {
   SheetTrigger,
 } from "@go-tech-frontend/ui";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import LocaleSwitcher from "./LocaleSwitcher";
 
 const Header = ({ heroBg }: { heroBg?: string | StaticImageData }) => {
   const t = useTranslations()
-  
+  const router = useRouter()
   const { hasIframe } = useIframeContext();
-  const { user, isLoggedIn, logout } = useAuth();
+  const { user, isLoggedIn, logout, token } = useAuth();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const handleLogout = async () => {
@@ -204,7 +205,20 @@ const Header = ({ heroBg }: { heroBg?: string | StaticImageData }) => {
               </div>
               <Button
                 size="sm"
+                disabled={!isLoggedIn}
                 className="shadow-primary shadow-2xl -translate-x-1"
+                onClick={async() => {
+                  const taialHost = process.env.NEXT_PUBLIC_TRIAL_HOST
+                  const response = await fetch('/go-tech/platform/platformCustomer/trialCode', {
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${token}`,
+                      'User-type': 'platform_customer'
+                    }
+                  }).then(res => res.json())
+                  // 新开标签页
+                  window.open(`${taialHost}/callback/oauth?code=${response.data}`, '_blank')
+                }}
               >
                 免費試用
               </Button>

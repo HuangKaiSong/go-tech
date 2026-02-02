@@ -21,7 +21,7 @@ const signinSchema = z.object({
 
 const Login = () => {
   const router = useRouter();
-  const { setUser } = useAuth();
+  const { setUser, setToken } = useAuth();
   const [account, setAccount] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -60,6 +60,7 @@ const Login = () => {
         })
           .then(res => res.json())
           .then(res => {
+            setToken(signResponse.data.token)
             setUser(res.data);
             toast.success("登入成功！");
             router.replace("/");

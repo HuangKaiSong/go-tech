@@ -24,20 +24,18 @@ export default async function RootLayout({
 
   const language = cookiesStore.get("GO_TECH_LANGUAGE")?.value || "hk";
 
-  const tokenExtists = cookiesStore.has("GO_TECH_AUTH_TOKEN");
   let user: User | null = null;
-  if (tokenExtists) {
-    const token = cookiesStore.get("GO_TECH_AUTH_TOKEN")!.value;
-    const payload = decodeJwt(token) as User;
+  const token = cookiesStore.get("GO_TECH_AUTH_TOKEN")?.value;
 
-    user = payload;
+  if (token) {
+    user = decodeJwt(token) as User;
   }
 
   return (
     <html lang={language}>
       <body>
         <NextIntlClientProvider>
-          <AuthProvider initialUser={user}>
+          <AuthProvider initialUser={user} _token={token}>
             <Layout>{children}</Layout>
           </AuthProvider>
         </NextIntlClientProvider>

@@ -27,7 +27,7 @@ import {
   Users,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
@@ -122,6 +122,7 @@ const ConfirmOrder = () => {
   >(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const timeoutRefs = useRef<{[key: string]: NodeJS.Timeout | null}>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Customer info state
@@ -153,6 +154,14 @@ const ConfirmOrder = () => {
   const discount = Math.round(originalPrice * 0.2); // 20% discount example
   const totalPrice = originalPrice - discount;
 
+ useEffect(() => {
+    return () => {
+      Object.values(timeoutRefs.current).forEach(timeout => {
+        if (timeout) clearTimeout(timeout);
+      });
+    };
+  }, []);
+
   const handleGoBack = () => {
     router.push(`/select-plan/${planId}`);
   };
@@ -180,13 +189,19 @@ const ConfirmOrder = () => {
   };
 
   const handleCopy = async (text: string, field: string) => {
+    // 清理之前的timeout
+    if (timeoutRefs.current[field]) {
+      clearTimeout(timeoutRefs.current[field]!);
+      timeoutRefs.current[field] = null;
+    }
+
     try {
       // 检查是否在浏览器环境中
       if (typeof navigator === "undefined" || !navigator.clipboard) {
         await fallbackCopyTextToClipboard(text);
         setCopiedField(field);
         toast.success("已複製到剪貼板");
-        setTimeout(() => setCopiedField(null), 2000);
+        timeoutRefs.current[field] = setTimeout(() => setCopiedField(null), 2000);
         return;
       }
 
@@ -206,7 +221,7 @@ const ConfirmOrder = () => {
               await navigator.clipboard.writeText(text);
               setCopiedField(field);
               toast.success("已複製到剪貼板");
-              setTimeout(() => setCopiedField(null), 2000);
+              timeoutRefs.current[field] = setTimeout(() => setCopiedField(null), 2000);
               return;
             }
           }
@@ -215,20 +230,20 @@ const ConfirmOrder = () => {
           await navigator.clipboard.writeText(text);
           setCopiedField(field);
           toast.success("已複製到剪貼板");
-          setTimeout(() => setCopiedField(null), 2000);
+          timeoutRefs.current[field] = setTimeout(() => setCopiedField(null), 2000);
         } catch (clipboardError) {
           console.warn("Clipboard API failed, using fallback:", clipboardError);
           await fallbackCopyTextToClipboard(text);
           setCopiedField(field);
           toast.success("已複製到剪貼板");
-          setTimeout(() => setCopiedField(null), 2000);
+          timeoutRefs.current[field] = setTimeout(() => setCopiedField(null), 2000);
         }
       } else {
         // 非安全上下文，使用备用方法
         await fallbackCopyTextToClipboard(text);
         setCopiedField(field);
         toast.success("已複製到剪貼板");
-        setTimeout(() => setCopiedField(null), 2000);
+        timeoutRefs.current[field] = setTimeout(() => setCopiedField(null), 2000);
       }
     } catch (error) {
       console.error("复制操作失败:", error);
