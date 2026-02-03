@@ -201,6 +201,10 @@ const Header = ({ heroBg }: { heroBg?: string | StaticImageData }) => {
             </div>
             <div className="flex flex-row bg-background items-center rounded-l-sm rounded-r-lg">
               <div className="h-9 w-32 text-xs flex items-center justify-center cursor-pointer" onClick={() => {
+                if (hasIframe) {
+                  console.warn("在 iframe 中链接点击被阻止");
+                  return false;
+                }
                 if (!isLoggedIn) {
                   router.push('/account/login')
                 }
