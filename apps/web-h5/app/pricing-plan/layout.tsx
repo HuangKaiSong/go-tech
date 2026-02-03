@@ -77,7 +77,11 @@ export default async function Page() {
     
     const packagesData = await fetch(`${baseUrl}/go-tech/platform/platformPackage/enabledList`).then(res => res.json()) as HttpBaseResponse<Packages[]>;
   
-    packages = (packagesData?.data || [])?.slice(0, 3);
+    if (packagesData?.data && Array.isArray(packagesData?.data)) {
+      packages = ((packagesData?.data || [])?.slice(0, 3) || []);
+    } else {
+      packages = []
+    }
   
     if (packages.length) {
       pricingData.plans = packages.map(pack => ({

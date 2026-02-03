@@ -64,6 +64,7 @@ const ServicePlan = async () => {
     }, [] as ExtendedPackages[])
   } catch (error) {
     packages = []
+    console.log(error);
   }
 
   return (

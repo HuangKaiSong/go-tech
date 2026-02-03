@@ -26,10 +26,24 @@ export default async function Home() {
   let packages: Packages[] = [];
   try {
     const baseUrl = getBaseUrl()
-    const packagesData = await fetch(`${baseUrl}/go-tech/platform/platformPackage/enabledList`, { next: isDev ? undefined : { revalidate: 300 } }).then(res => res.json()) as HttpBaseResponse<Packages[]>;
-    packages = (packagesData?.data || [])?.slice(0, 3)
+    const response = await fetch(`${baseUrl}/go-tech/platform/platformPackage/enabledList`, { next: isDev ? undefined : { revalidate: 300 } });
+    
+    if (!response.ok) {
+      console.error(`API request failed with status ${response.status}`);
+      packages = [];
+    } else {
+      const packagesData = await response.json() as HttpBaseResponse<Packages[]>;
+      
+      // 检查响应是否包含正确的数据结构
+      if (packagesData && typeof packagesData === 'object' && Array.isArray(packagesData.data)) {
+        packages = packagesData.data.slice(0, 3);
+      } else {
+        console.warn('Unexpected API response format:', packagesData);
+        packages = [];
+      }
+    }
   } catch (error) {
-    console.log(error);
+    console.error('Error fetching packages:', error);
     packages = [];
   }
 

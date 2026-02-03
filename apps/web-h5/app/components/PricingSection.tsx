@@ -49,7 +49,7 @@ const PricingSection = ({ packages }: { packages: Packages[] }) => {
     <section className="py-16 bg-background">
       <div className="container mx-auto px-4">
         <div className="flex flex-row flex-wrap flex-auto gap-6 max-w-5xl mx-auto items-center justify-center">
-          {packages.map((plan, index) => (
+          {packages?.map((plan, index) => (
             <Card
               key={index}
               className="basis-3/10 relative overflow-hidden transition-all duration-300 group/card cursor-pointer border border-border hover:border-primary hover:shadow-xl"
