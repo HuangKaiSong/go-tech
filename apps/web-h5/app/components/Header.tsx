@@ -199,14 +199,18 @@ const Header = ({ heroBg }: { heroBg?: string | StaticImageData }) => {
               )}
               <LocaleSwitcher />
             </div>
-            <div className="flex flex-row items-center">
-              <div className="h-9 w-32 bg-background rounded-l-sm text-xs flex items-center justify-center cursor-pointer">
+            <div className="flex flex-row bg-background items-center rounded-l-sm rounded-r-lg">
+              <div className="h-9 w-32 text-xs flex items-center justify-center cursor-pointer" onClick={() => {
+                if (!isLoggedIn) {
+                  router.push('/account/login')
+                }
+              }}>
                 点击立即开始试用
               </div>
               <Button
                 size="sm"
                 disabled={!isLoggedIn}
-                className="shadow-primary shadow-2xl -translate-x-1"
+                className="shadow-primary shadow-2xl"
                 onClick={async() => {
                   const taialHost = process.env.NEXT_PUBLIC_TRIAL_HOST
                   const response = await fetch('/go-tech/platform/platformCustomer/trialCode', {
@@ -215,9 +219,14 @@ const Header = ({ heroBg }: { heroBg?: string | StaticImageData }) => {
                       'Authorization': `Bearer ${token}`,
                       'User-type': 'platform_customer'
                     }
-                  }).then(res => res.json())
-                  // 新开标签页
-                  window.open(`${taialHost}/callback/oauth?code=${response.data}`, '_blank')
+                  })
+                  if (response.ok) {
+                    const result = await response.json();
+                    if (result.code === 200) {
+                      // 新开标签页
+                      window.open(`${taialHost}/callback/oauth?code=${result.data}`, '_blank')
+                    }
+                  }
                 }}
               >
                 免費試用
