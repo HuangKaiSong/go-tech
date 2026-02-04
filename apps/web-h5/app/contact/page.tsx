@@ -28,7 +28,7 @@ const Page = () => {
     try {
       setPending(true);
       
-      const response = await fetch("/api/contact", {
+      const response = await fetch("/go-tech/platform/leaveMessage/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
