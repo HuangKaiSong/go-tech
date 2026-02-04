@@ -27,7 +27,6 @@ import {
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import LocaleSwitcher from "./LocaleSwitcher";
 
 const Header = ({ heroBg }: { heroBg?: string | StaticImageData }) => {
   const t = useTranslations()
@@ -47,6 +46,7 @@ const Header = ({ heroBg }: { heroBg?: string | StaticImageData }) => {
         <Image
           src={heroBg}
           alt="logo"
+          fill
           loading="eager"
           className="w-full h-150 absolute inset-0 -z-10 object-cover"
         />
@@ -197,7 +197,7 @@ const Header = ({ heroBg }: { heroBg?: string | StaticImageData }) => {
                   </Button>
                 </Link>
               )}
-              <LocaleSwitcher />
+              {/* <LocaleSwitcher /> */}
             </div>
             <div className="flex flex-row bg-background items-center rounded-l-sm rounded-r-lg">
               <div className="h-9 w-32 text-xs flex items-center justify-center cursor-pointer" onClick={() => {
@@ -209,7 +209,7 @@ const Header = ({ heroBg }: { heroBg?: string | StaticImageData }) => {
                   router.push('/account/login')
                 }
               }}>
-                点击立即开始试用
+                點擊立即開始試用
               </div>
               <Button
                 size="sm"
