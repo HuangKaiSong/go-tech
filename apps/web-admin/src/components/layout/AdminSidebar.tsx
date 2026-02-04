@@ -8,7 +8,6 @@ import {
   MessageSquareText,
   Package,
   Settings,
-  UserCog,
   Users,
 } from "lucide-react";
 import { useState } from "react";
@@ -24,7 +23,7 @@ interface MenuItem {
 const menuItems: MenuItem[] = [
   { title: "客戶列表", path: "/customers", icon: Users },
   { title: "訂單列表", path: "/orders", icon: FileText },
-  { title: "系統用戶列表", path: "/system-users", icon: UserCog },
+  // { title: "系統用戶列表", path: "/system-users", icon: UserCog },
   { title: "留言板", path: "/message-board", icon: MessageSquareText },
   {
     title: "優惠管理",
