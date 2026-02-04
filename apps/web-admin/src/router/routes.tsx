@@ -25,6 +25,7 @@ const ContentPage = lazyPage(() => import("@/pages/ContentPage"));
 const ContentAddPage = lazyPage(() => import("@/pages/ContentAddPage"));
 const ContentEditPage = lazyPage(() => import("@/pages/ContentEditPage"));
 const SiteSettingPage = lazyPage(() => import("@/pages/SiteSettingPage"));
+const MessageBoard = lazyPage(() => import("@/pages/MessageBoard"));
 
 export const routes: RouteObject[] = [
   {
@@ -109,6 +110,10 @@ export const routes: RouteObject[] = [
       {
         path: "/settings/site/h5",
         element: <SiteSettingPage />,
+      },
+      {
+        path: "/message-board",
+        element: <MessageBoard />,
       },
     ],
   },

@@ -1,17 +1,18 @@
-import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import Logo from "@/assets/images/Gotech_Logo.webp";
 import { cn } from "@go-tech-frontend/lib";
 import {
-  Users,
-  FileText,
-  UserCog,
-  Gift,
-  Package,
-  Settings,
   ChevronDown,
   ChevronRight,
+  FileText,
+  Gift,
+  MessageSquareText,
+  Package,
+  Settings,
+  UserCog,
+  Users,
 } from "lucide-react";
-import Logo from '@/assets/images/Gotech_Logo.webp';
+import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 
 interface MenuItem {
   title: string;
@@ -24,6 +25,7 @@ const menuItems: MenuItem[] = [
   { title: "客戶列表", path: "/customers", icon: Users },
   { title: "訂單列表", path: "/orders", icon: FileText },
   { title: "系統用戶列表", path: "/system-users", icon: UserCog },
+  { title: "留言板", path: "/message-board", icon: MessageSquareText },
   {
     title: "優惠管理",
     icon: Gift,
@@ -54,7 +56,7 @@ const AdminSidebar = () => {
     setExpandedMenus((prev) =>
       prev.includes(title)
         ? prev.filter((item) => item !== title)
-        : [...prev, title]
+        : [...prev, title],
     );
   };
 
@@ -78,7 +80,14 @@ const AdminSidebar = () => {
           </div>
           <span className="text-sm font-semibold text-primary">Go Techs</span>
         </div> */}
-        <img alt="logo" loading="lazy" width="85" height="85" decoding="async" src={Logo}></img>
+        <img
+          alt="logo"
+          loading="lazy"
+          width="85"
+          height="85"
+          decoding="async"
+          src={Logo}
+        ></img>
       </div>
 
       {/* Navigation */}
@@ -94,7 +103,7 @@ const AdminSidebar = () => {
                       "w-full flex items-center gap-3 px-4 py-3 text-sm transition-colors",
                       "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                       isChildActive(item.children) &&
-                        "text-sidebar-accent-foreground"
+                        "text-sidebar-accent-foreground",
                     )}
                   >
                     <item.icon className="w-5 h-5" />
@@ -115,7 +124,7 @@ const AdminSidebar = () => {
                               "block px-4 py-2 text-sm transition-colors rounded-md",
                               "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                               isActive(child.path) &&
-                                "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                                "bg-sidebar-accent text-sidebar-accent-foreground font-medium",
                             )}
                           >
                             {child.title}
@@ -132,7 +141,7 @@ const AdminSidebar = () => {
                     "flex items-center gap-3 px-4 py-3 text-sm transition-colors",
                     "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                     isActive(item.path) &&
-                      "bg-sidebar-accent text-sidebar-accent-foreground font-medium border-l-4 border-primary"
+                      "bg-sidebar-accent text-sidebar-accent-foreground font-medium border-l-4 border-primary",
                   )}
                 >
                   <item.icon className="w-5 h-5" />
