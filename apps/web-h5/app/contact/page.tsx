@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
@@ -10,6 +10,7 @@ import {
   Textarea,
 } from "@go-tech-frontend/ui";
 import { useState } from "react";
+import { toast } from "sonner";
 
 const Page = () => {
   const [formData, setFormData] = useState({
@@ -19,13 +20,48 @@ const Page = () => {
     message: "",
   });
   const [showSuccess, setShowSuccess] = useState(false);
+  const [pending, setPending] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Show success dialog
-    setShowSuccess(true);
-    // Reset form
-    setFormData({ name: "", email: "", phone: "", message: "" });
+
+    try {
+      setPending(true);
+      
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw response;
+      }
+
+      const result = await response.json();
+      if (result && result.code && result.code === 200) {
+        // Show success dialog
+        setShowSuccess(true);
+        // Reset form
+        setFormData({ name: "", email: "", phone: "", message: "" }); 
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      console.log(error);
+      if (error instanceof Response) {
+        if (error.ok) {
+          const result = await error.json();
+          toast.error(result.message);
+        } else {
+          toast.error("An error occurred while submitting the form.");
+        }
+      }
+    } finally {
+      setPending(false);
+    }
   };
 
   const handleChange = (
@@ -109,6 +145,7 @@ const Page = () => {
                 <Button
                   type="submit"
                   className="w-full max-w-xs mx-auto block h-12 text-lg"
+                  loading={pending}
                 >
                   發送
                 </Button>
