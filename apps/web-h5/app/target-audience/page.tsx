@@ -23,9 +23,9 @@ const audiences = [
     image: audienceInvestor,
   },
   {
-    title: "忙碌或不在本地的業主",
+    title: "地產物管集團",
     description:
-      "由於時間有限或身處異地，無法親自管理物業，需要一個可靠的方式遠程監督。",
+      "專為物業集團設計的智能管理平臺，打通從決策到服務的全鏈條，讓數據驅動運營、系統賦能團隊，實現降本增效與品質提升的一體化管理。",
     image: audienceOverseas,
   },
 ];
