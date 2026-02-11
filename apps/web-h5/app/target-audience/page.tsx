@@ -1,14 +1,14 @@
-"use client";
 
 import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
-import audienceBanner from "@/assets/audience-banner.jpg";
 import audienceIndividual from "@/assets/audience-individual.jpg";
 import audienceInvestor from "@/assets/audience-investor.jpg";
 import audienceOverseas from "@/assets/audience-overseas.jpg";
-import { useIframeContext } from "@/contexts/IframeContext";
 import { ChevronDown } from "lucide-react";
 import Image from "next/image";
+import { defaultTargetAudience } from "../components/blockDefaults";
+import HeroSection from "../components/HeroSection";
+import { loadPageBlocks } from "../lib/pageBlocks";
 
 const audiences = [
   {
@@ -106,14 +106,18 @@ const comparisonData = [
   },
 ];
 
-const TargetAudience = () => {
-  const { hasIframe } = useIframeContext();
+const TargetAudience = async () => {
+  const blocks = await loadPageBlocks("target-audience", defaultTargetAudience);
+  const heroBackground = blocks?.find((block) => block.type === 'hero')?.backgroundImage || '';
+
+  const hasIframe = false;
 
   return (
     <div className="min-h-screen bg-background">
-      <Header heroBg={audienceBanner} />
+      <Header heroBg={heroBackground} />
       {/* Hero Section */}
-      <section
+      <HeroSection initialBlocks={blocks} page="target-audience" />
+      {/* <section
         className={`relative py-24 md:py-32 ${hasIframe ? "cursor-editor" : ""}`}
       >
         <Image
@@ -128,7 +132,7 @@ const TargetAudience = () => {
           </h1>
           <p className="text-xl text-background/80">Target audience</p>
         </div>
-      </section>
+      </section> */}
 
       {/* Audience Cards */}
       <section className="py-16 bg-secondary">

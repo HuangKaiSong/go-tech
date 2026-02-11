@@ -1,38 +1,61 @@
 'use client'
 
-import heroBackground from "@/assets/background.webp";
+import { type PageBlock, PageBlocks } from "@/app/components/PageBlocks";
+import { defaultHomeBlocks } from "@/app/components/blockDefaults";
 import { useIframeContext } from "@/contexts/IframeContext";
-import Image from "next/image";
+import { useEffect, useMemo, useState } from "react";
 
-const HeroSection = () => {
+const HeroSection = ({ initialBlocks, page = 'home' }: { initialBlocks?: PageBlock[], page?: string }) => {
   const { hasIframe } = useIframeContext();
 
+  const mergeHeroDefaults = (nextBlocks: PageBlock[]) =>
+    nextBlocks.map((block) => {
+      return {
+        ...block,
+      };
+    });
+
+  const resolvedBlocks = useMemo(
+    () => mergeHeroDefaults(initialBlocks?.length ? initialBlocks : defaultHomeBlocks),
+    [initialBlocks],
+  );
+  const [blocks, setBlocks] = useState<PageBlock[]>(resolvedBlocks);
+
+  useEffect(() => {
+    setBlocks(resolvedBlocks);
+  }, [resolvedBlocks]);
+
+  useEffect(() => {
+    if (!hasIframe) return;
+
+    const handleMessage = (event: MessageEvent) => {
+      if (!event.data || event.data.type !== "SET_PAGE_BLOCKS") return;
+      if (event.data.page !== page) return;
+      if (!Array.isArray(event.data.blocks)) return;
+      setBlocks(mergeHeroDefaults(event.data.blocks as PageBlock[]));
+    };
+
+    window.addEventListener("message", handleMessage);
+
+    // 將當前模块推送到管理端以進行初始同步.
+    window.parent.postMessage(
+      {
+        type: "PAGE_BLOCKS_SYNC",
+        page: page,
+        blocks: mergeHeroDefaults(blocks),
+      },
+      "*",
+    );
+
+    return () => {
+      window.removeEventListener("message", handleMessage);
+    };
+  }, [hasIframe, blocks]);
+
   return (
-    <section
-      className={`relative min-h-150 w-full flex items-center pt-25 ${hasIframe ? "cursor-editor" : ""}`}
-    >
-      <Image
-        src={heroBackground}
-        alt="Beautiful house at sunset"
-        loading="eager"
-        className="absolute inset-0 w-full h-full object-cover"
-      />
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="max-w-xl">
-          <h1 className="text-5xl font-bold text-background leading-tight mb-4">
-            越多物業，
-            <br />
-            越易管理！
-          </h1>
-          <h2 className="text-5xl font-bold text-background mb-6">
-            GO-TECH租務系統
-          </h2>
-          <p className="text-primary text-3xl mb-8">
-            專注 分間單位、套房、簡樸房 租務系統。
-          </p>
-        </div>
-      </div>
-    </section>
+    <div className="min-h-150">
+      <PageBlocks blocks={blocks} hasIframe={hasIframe} />
+    </div>
   );
 };
 

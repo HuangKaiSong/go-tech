@@ -1,5 +1,3 @@
-"use client";
-
 import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
 import advantage1 from "@/assets/advantage-1.jpg";
@@ -9,14 +7,17 @@ import advantage4 from "@/assets/advantage-4.jpg";
 import advantage5 from "@/assets/advantage-5.jpg";
 import advantage6 from "@/assets/advantage-6.jpg";
 import advantageIntro from "@/assets/advantage-intro.jpg";
-import coreHero from "@/assets/core-hero.jpg";
 import coreOffice from "@/assets/core-office.jpg";
-import { useIframeContext } from "@/contexts/IframeContext";
 import { Settings, Shield, TrendingUp } from "lucide-react";
 import Image from "next/image";
+import { defaultCoreAdvantages } from "../components/blockDefaults";
+import HeroSection from "../components/HeroSection";
+import { loadPageBlocks } from "../lib/pageBlocks";
 
-export default function Page() {
-  const { hasIframe } = useIframeContext();
+export default async function Page() {
+  const blocks = await loadPageBlocks("core-advantages", defaultCoreAdvantages);
+
+  const hasIframe = false;
 
   const advantages = [
     {
@@ -66,12 +67,15 @@ export default function Page() {
     },
   ];
 
+  const heroBackground = blocks?.find((block) => block.type === 'hero')?.backgroundImage || '';
+
   return (
     <div className="min-h-screen bg-background">
-      <Header heroBg={coreHero} />
+      <Header heroBg={heroBackground} />
 
       {/* Hero Section */}
-      <section
+      <HeroSection initialBlocks={blocks} page="core-advantages" />
+      {/* <section
         className={`relative min-h-[60vh] flex items-center ${hasIframe ? "cursor-editor" : ""}`}
       >
         <div className="absolute inset-0">
@@ -87,7 +91,7 @@ export default function Page() {
             GO - PMS
           </h1>
         </div>
-      </section>
+      </section> */}
 
       {/* System Introduction Section */}
       <section className="py-20 bg-background">

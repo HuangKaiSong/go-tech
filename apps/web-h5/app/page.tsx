@@ -1,7 +1,8 @@
 
+import { defaultHomeBlocks } from "@/app/components/blockDefaults";
 import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
-import heroBackground from "@/assets/background.webp";
+import { loadPageBlocks } from "@/app/lib/pageBlocks";
 import HeroSection from "./components/HeroSection";
 import IntroSection from "./components/IntroSection";
 import PricingSection from "./components/PricingSection";
@@ -23,6 +24,7 @@ function getBaseUrl(): string {
 const isDev = process.env.NODE_ENV === 'development'
 
 export default async function Home() {
+  const blocks = await loadPageBlocks("home", defaultHomeBlocks);
   let packages: Packages[] = [];
   try {
     const baseUrl = getBaseUrl()
@@ -47,11 +49,13 @@ export default async function Home() {
     packages = [];
   }
 
+  const heroBackground = blocks?.find((block) => block.type === 'hero')?.backgroundImage || '';
+
   return (
     <div className="min-h-screen bg-background">
       <Header heroBg={heroBackground} />
       <main>
-        <HeroSection />
+        <HeroSection initialBlocks={blocks} />
         <IntroSection />
         <PricingSection packages={packages || []} />
         <TargetAudienceSection />

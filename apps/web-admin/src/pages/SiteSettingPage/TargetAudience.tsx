@@ -1,9 +1,23 @@
-const TargetAudience = () => {
-  return (
-    <div className="h-[calc(100vh-64px-48px-56px-56px)]">
-      <iframe src={`${import.meta.env.VITE_H5_SITE_URL}/target-audience`} width="100%" height="100%" frameBorder="0"></iframe>
-    </div>
-  )
-}
+import { useRef } from "react";
+import PanlEditor from "./PanlEditor";
 
-export default TargetAudience
+const TargetAudience = () => {
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
+
+  return (
+    <div className="h-[calc(100vh-64px-48px-56px-56px)] grid grid-cols-[minmax(0,1fr)_420px] gap-4">
+      <div className="h-full rounded-2xl border border-border overflow-hidden bg-background shadow-sm">
+        <iframe
+          ref={iframeRef}
+          src={`${import.meta.env.VITE_H5_SITE_URL}/target-audience`}
+          width="100%"
+          height="100%"
+          frameBorder="0"
+        ></iframe>
+      </div>
+      <PanlEditor iframeRef={iframeRef} />
+    </div>
+  );
+};
+
+export default TargetAudience;

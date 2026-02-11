@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
   reactStrictMode: false,
+  allowedDevOrigins: ['localhost:5173', '192.168.0.168:5173', '192.168.0.202:3201'],
   async rewrites() {
     return [
       {
@@ -13,6 +14,17 @@ const nextConfig: NextConfig = {
       },
     ]
   },
+  images: {
+    dangerouslyAllowLocalIP: true,
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'go-techs.com',
+        port: '',
+        pathname: '/go-tech/**',
+      }
+    ]
+  }
 };
 
 const withNextIntl = createNextIntlPlugin('./i18n/request.ts');

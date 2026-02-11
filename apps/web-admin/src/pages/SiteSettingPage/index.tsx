@@ -1,8 +1,8 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@go-tech-frontend/ui";
 import { MonitorCog } from "lucide-react";
+import CoreAdvantages from "./CoreAdvantages";
 import HomeContent from "./HomeContent";
-import CoreAdvantages from "./SystemFeatures";
-import SystemFeatures from "./CoreAdvantages";
+import SystemFeatures from "./SystemFeatures";
 import TargetAudience from "./TargetAudience";
 
 const SiteSettingPage = () => {
@@ -20,13 +20,22 @@ const SiteSettingPage = () => {
             <TabsTrigger value="home" className="flex items-center gap-2">
               首頁
             </TabsTrigger>
-            <TabsTrigger value="core-advantages" className="flex items-center gap-2">
+            <TabsTrigger
+              value="core-advantages"
+              className="flex items-center gap-2"
+            >
               核心優勢
             </TabsTrigger>
-            <TabsTrigger value="system-features" className="flex items-center gap-2">
+            <TabsTrigger
+              value="system-features"
+              className="flex items-center gap-2"
+            >
               查看系統功能
             </TabsTrigger>
-            <TabsTrigger value="target-audience" className="flex items-center gap-2">
+            <TabsTrigger
+              value="target-audience"
+              className="flex items-center gap-2"
+            >
               適合人群
             </TabsTrigger>
           </TabsList>
