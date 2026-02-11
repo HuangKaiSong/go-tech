@@ -1,10 +1,12 @@
-import { Button, Input } from "@go-tech-frontend/ui";
+import TechCursor from "@/components/TechCursor";
 import { useAuth } from "@/hooks/use-auth";
-import Dotline from "@/hooks/use-dotline"
+import Dotline from "@/hooks/use-dotline";
+import { Experience, StarrySky } from "@go-tech-frontend/three";
+import { Button, Input } from "@go-tech-frontend/ui";
 import { useMutation } from "@tanstack/react-query";
 import { useKeyPress } from "ahooks";
 import { Eye, EyeOff } from "lucide-react";
-import { useEffect, useState } from "react"
+import { Fragment, RefObject, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -16,25 +18,35 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const threeDom = useRef<HTMLCanvasElement | HTMLDivElement>(null);
+  const [effectType] = useState<"experience" | "starry" | "dotline">(() => {
+    const pick = Math.floor(Math.random() * 3);
+    if (pick === 0) return "experience";
+    if (pick === 1) return "starry";
+    return "dotline";
+  });
 
   // 获取来源页面路径
-  const from = location.state?.from || '/';
+  const from = location.state?.from || "/";
 
   const loginMutation = useMutation({
     mutationFn: async () => {
       if (!account || !password) {
         throw new Error("請填寫所有欄位");
       }
-      const response = await fetch(`${import.meta.env.VITE_PROXY_PREFIX}/go-tech/platform/admin/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `${import.meta.env.VITE_PROXY_PREFIX}/go-tech/platform/admin/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: account,
+            password,
+          }),
         },
-        body: JSON.stringify({
-          username: account,
-          password,
-        }),
-      })
+      );
       return response.json();
     },
     onMutate: () => {
@@ -44,35 +56,60 @@ const Login = () => {
       if (result && result.code === 200) {
         setIsLoading(false);
 
-        setToken(result.data.token)
+        setToken(result.data.token);
 
         navigate(from, { replace: true });
       } else {
         setIsLoading(false);
-        console.log(result);
-        
         toast.error(result.message);
       }
     },
     onError: (error) => {
-      toast.error(error.message);      
+      toast.error(error.message);
       setIsLoading(false);
-    }
-  })
+    },
+  });
 
-  useKeyPress(['Enter'], () => {
-    loginMutation.mutate()
-  })
+  useKeyPress(["Enter"], () => {
+    loginMutation.mutate();
+  });
 
   useEffect(() => {
-    new Dotline({ dom: 'dotline', cw: 2000, ch: 1000, ds: 150 }).start()
-  }, [])
+    if (effectType === "experience") {
+      const _experience = new Experience(threeDom.current as HTMLCanvasElement);
+      window._experience = _experience;
+    }
+    if (effectType === "starry") {
+      new StarrySky(threeDom.current, {
+        autoStart: true,
+        enableControls: process.env.NODE_ENV === "development",
+      });
+    }
+    if (effectType === "dotline") {
+      new Dotline({ dom: "dotline", cw: 2000, ch: 1000, ds: 150 }).start();
+    }
+  }, [effectType]);
 
   return (
     <div className="h-screen w-full overflow-hidden relative">
-      <canvas id="dotline"></canvas>
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-100 rounded-xl bg-light-50 shadow-xl p-10">
-        <h1 className="text-2xl font-bold text-center text-foreground mb-8">账户登录</h1>
+      {effectType === "experience" ? (
+        <Fragment>
+          <TechCursor />
+          <canvas
+            ref={threeDom as RefObject<HTMLCanvasElement>}
+            className="three-canvas relative inset-0 "
+            style={{ pointerEvents: "none", zIndex: -1 }}
+          />
+        </Fragment>
+      ) : effectType === "starry" ? (
+        <div ref={threeDom as RefObject<HTMLDivElement>}></div>
+      ) : (
+        <canvas id="dotline" className="absolute inset-0" />
+      )}
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-100 rounded-xl bg-white shadow-xl p-10">
+        <h1 className="text-2xl font-bold text-center text-foreground mb-8">
+          账户登录
+        </h1>
         <div className="space-y-6">
           <div>
             <Input
@@ -96,7 +133,11 @@ const Login = () => {
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
             >
-              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              {showPassword ? (
+                <EyeOff className="w-5 h-5" />
+              ) : (
+                <Eye className="w-5 h-5" />
+              )}
             </button>
           </div>
           <Button
@@ -107,11 +148,10 @@ const Login = () => {
           >
             {isLoading ? "登入中..." : "登入"}
           </Button>
-
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;

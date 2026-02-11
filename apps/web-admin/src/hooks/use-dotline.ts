@@ -17,15 +17,17 @@ interface Dot {
 }
 
 class Dotline {
-  private opt: Required<DotlineOptions>;
-  private c: HTMLCanvasElement;
-  private ctx: CanvasRenderingContext2D;
-  private dotSum: number;
-  private radius: number;
-  private disMax: number;
-  private color: string;
-  private dots: Dot[];
-  private animate: () => void;
+  public opt: Required<DotlineOptions>;
+  public c: HTMLCanvasElement;
+  public ctx: CanvasRenderingContext2D;
+  public dotSum: number;
+  public radius: number;
+  public disMax: number;
+  public color: string;
+  public dots: Dot[];
+  public animate: () => void;
+  public rafId: number | null = null;
+  public running = false;
 
   constructor(option: DotlineOptions = {}) {
     this.opt = this.extend(
@@ -66,8 +68,6 @@ class Dotline {
           window.setTimeout(callback, 1000 / 60);
         }) as (callback: FrameRequestCallback) => number;
 
-    const _self = this;
-
     // 增加鼠标效果
     const mousedot: Dot = {
       x: null as any,
@@ -88,15 +88,18 @@ class Dotline {
     };
 
     // 控制动画
-    this.animate = function () {
-      _self.ctx.clearRect(0, 0, _self.c.width, _self.c.height);
-      _self.drawLine([mousedot, ..._self.dots]);
-      RAF(_self.animate);
+    this.animate = () => {
+      if (!this.running) {
+        return;
+      }
+      this.ctx.clearRect(0, 0, this.c.width, this.c.height);
+      this.drawLine([mousedot, ...this.dots]);
+      this.rafId = RAF(this.animate);
     };
   }
 
   // 合并配置项，es6直接使用obj.assign();
-  private extend<T extends object>(o: T, e: Partial<T>): T {
+  public extend<T extends object>(o: T, e: Partial<T>): T {
     for (const key in e) {
       if (e[key] != null) {
         (o as any)[key] = e[key];
@@ -106,7 +109,7 @@ class Dotline {
   }
 
   // 设置线条颜色
-  private color2rgb(colorStr: string): string {
+  public color2rgb(colorStr: string): string {
     let red: number | null = null,
       green: number | null = null,
       blue: number | null = null;
@@ -129,7 +132,7 @@ class Dotline {
   }
 
   // 画点
-  private addDots(): void {
+  public addDots(): void {
     for (let i = 0; i < this.dotSum; i++) {
       // 参数
       const dot: Dot = {
@@ -143,7 +146,7 @@ class Dotline {
   }
 
   // 点运动
-  private move(dot: Dot): void {
+  public move(dot: Dot): void {
     dot.x += dot.ax;
     dot.y += dot.ay;
     // 点碰到边缘返回
@@ -156,11 +159,10 @@ class Dotline {
   }
 
   // 点之间画线
-  private drawLine(dots: Dot[]): void {
-    const _that = this;
+  public drawLine(dots: Dot[]): void {
     // 自己的思路：遍历两次所有的点，比较点之间的距离，函数的触发放在animate里
-    this.dots.forEach(function (dot) {
-      _that.move(dot);
+    this.dots.forEach((dot) => {
+      this.move(dot);
       for (let j = 0; j < dots.length; j++) {
         const nowDot = dots[j];
         if (
@@ -172,32 +174,42 @@ class Dotline {
         const dx = dot.x - nowDot.x; // 别的点坐标减当前点坐标
         const dy = dot.y - nowDot.y;
         const dc = dx * dx + dy * dy;
-        if (Math.sqrt(dc) > Math.sqrt(_that.disMax)) continue;
+        if (Math.sqrt(dc) > Math.sqrt(this.disMax)) continue;
         // 如果是鼠标，则让粒子向鼠标的位置移动
-        if (nowDot.label && Math.sqrt(dc) > Math.sqrt(_that.disMax) / 2) {
+        if (nowDot.label && Math.sqrt(dc) > Math.sqrt(this.disMax) / 2) {
           dot.x -= dx * 0.02;
           dot.y -= dy * 0.02;
         }
-        const ratio = (_that.disMax - dc) / _that.disMax;
-        _that.ctx.beginPath();
-        _that.ctx.lineWidth = ratio / 2;
-        _that.ctx.strokeStyle = `rgba(${_that.color}, ${parseFloat(
+        const ratio = (this.disMax - dc) / this.disMax;
+        this.ctx.beginPath();
+        this.ctx.lineWidth = ratio / 2;
+        this.ctx.strokeStyle = `rgba(${this.color}, ${parseFloat(
           (ratio + 0.2).toFixed(1)
         )})`;
-        _that.ctx.moveTo(dot.x, dot.y);
-        _that.ctx.lineTo(nowDot.x, nowDot.y);
-        _that.ctx.stroke(); // 不描边看不出效果
+        this.ctx.moveTo(dot.x, dot.y);
+        this.ctx.lineTo(nowDot.x, nowDot.y);
+        this.ctx.stroke(); // 不描边看不出效果
       }
     });
   }
 
   // 开始动画
   public start(): void {
-    const _that = this;
+    if (this.running) return;
+    this.running = true;
     this.addDots();
-    setTimeout(function () {
-      _that.animate();
+    setTimeout(() => {
+      this.animate();
     }, 100);
+  }
+
+  public stop(): void {
+    this.running = false;
+    if (this.rafId != null) {
+      cancelAnimationFrame(this.rafId);
+      this.rafId = null;
+    }
+    this.ctx.clearRect(0, 0, this.c.width, this.c.height);
   }
 }
 

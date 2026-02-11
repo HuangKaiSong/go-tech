@@ -12,6 +12,7 @@
   "dependencies": {
     "@go-tech-frontend/lib": "workspace:*",
     "@go-tech-frontend/styles": "workspace:*",
+    "@go-tech-frontend/three": "workspace:*",
     "@go-tech-frontend/ui": "workspace:*",
     "@hookform/resolvers": "^3.10.0",
     "@tanstack/react-query": "^5.83.0",
@@ -55,6 +56,7 @@
     "tailwindcss": "^4",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
-    "vite": "^7.2.4"
+    "vite": "^7.2.4",
+    "vite-plugin-glsl": "^1.5.5"
   }
 }
