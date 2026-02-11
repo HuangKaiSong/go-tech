@@ -16,6 +16,7 @@ const nextConfig: NextConfig = {
   },
   images: {
     dangerouslyAllowLocalIP: true,
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
