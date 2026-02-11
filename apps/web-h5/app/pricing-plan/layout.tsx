@@ -87,7 +87,7 @@ export default async function Page() {
       pricingData.plans = packages.map(pack => ({
         id: pack.id,
         name: pack.packageName,
-        price: `$${pack.price.toLocaleString("zh-Hans-CN")}`,
+        price: pack.price ? `$${pack.price.toLocaleString("zh-Hans-CN")}` : "敬請期待",
         units: pack.unitCount.toLocaleString("zh-Hans-CN"),
         extra: "無",
       }));

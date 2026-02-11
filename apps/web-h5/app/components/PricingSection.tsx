@@ -7,42 +7,7 @@ import {
   CardHeader,
 } from "@go-tech-frontend/ui";
 import { ChevronRight } from "lucide-react";
-
-const pricingPlans = [
-  {
-    name: "普通版",
-    subtitle: "適合1至3個物業的個人業主",
-    originalPrice: "$1,500",
-    price: "$1,000",
-    priceSuffix: "HKD",
-    period: "每年收費,年費收費",
-    features: ["基礎功能"],
-    cta: "了解更多 >",
-    variant: "outline" as const,
-  },
-  {
-    name: "升級版",
-    subtitle: "適合4至10個物業的投資業主",
-    originalPrice: "$4,000",
-    price: "$3,200",
-    priceSuffix: "HKD",
-    period: "每年收費,年費 +500 /unit",
-    features: ["進階功能"],
-    cta: "了解更多 >",
-    variant: "outline" as const,
-  },
-  {
-    name: "豪華版",
-    subtitle: "適合超過10個物業的企業業主",
-    originalPrice: "$15,000",
-    price: "$12,000",
-    priceSuffix: "HKD",
-    period: "每年收費,年費 +700 /unit",
-    features: ["完整功能"],
-    cta: "了解更多 >",
-    variant: "outline" as const,
-  },
-];
+import { Fragment } from 'react';
 
 const PricingSection = ({ packages }: { packages: Packages[] }) => {
   return (
@@ -68,13 +33,19 @@ const PricingSection = ({ packages }: { packages: Packages[] }) => {
                   </span>
                 </div>
                 <div className="flex items-baseline justify-center gap-1 mb-2">
-                  <span className="text-sm text-muted-foreground">低至：</span>
-                  <span className="text-3xl font-bold text-primary">
-                    ${plan.price}
-                  </span>
-                  <span className="text-sm text-muted-foreground">
-                    HKD
-                  </span>
+                  {plan.price ? (
+                    <Fragment>
+                      <span className="text-sm text-muted-foreground">低至：</span>
+                      <span className="text-3xl font-bold text-primary">
+                        ${plan.price}
+                      </span>
+                      <span className="text-sm text-muted-foreground">
+                        HKD
+                      </span>
+                    </Fragment>
+                  ) : (
+                    <div className="text-3xl font-bold text-primary">敬請期待</div>
+                  )}
                 </div>
                 <p className="text-xs text-muted-foreground">
                   <span>每年收費,年費收費</span>

@@ -4,27 +4,7 @@ import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
 import { Button } from "@go-tech-frontend/ui";
 import { Check, Minus } from "lucide-react";
-import dynamic from "next/dynamic";
 import { PricingPlanData } from "./layout";
-
-// 使用 dynamic 导入 SVG 图标
-const DynamicIcon = ({ 
-  iconName, 
-  ...props
-}: { 
-  iconName: string; 
-} & React.SVGProps<SVGSVGElement>) => {
-  const SvgComponent = dynamic(
-    () => import(`@/assets/icons/svg/${iconName}.svg`).then(module => module.default),
-    {
-      loading: () => <div className="w-4 h-4" />,
-      ssr: false
-    }
-  );
-
-  return <SvgComponent {...props} />;
-};
-
 
 const PricingPlan = ({pricingData}: { pricingData: PricingPlanData }) => {
   return (
