@@ -155,18 +155,10 @@ export const IframeProvider: React.FC<{
       }
       case "SET_BACKGROUND_IMAGE": {
         const url = event.data.url as string;
-        if (!url) {
-          document.body.style.backgroundImage = "";
-          document.body.style.backgroundSize = "";
-          document.body.style.backgroundPosition = "";
-          document.body.style.backgroundRepeat = "";
-          return;
+        const el = findTarget(event.data.id);
+        if (el && url) {
+          el.style.backgroundImage = `url(${url})`;
         }
-        document.body.style.backgroundImage = `url("${url}")`;
-        document.body.style.backgroundSize = "cover";
-        document.body.style.backgroundPosition = "center";
-        document.body.style.backgroundRepeat = "no-repeat";
-        break;
       }
       case "CLEAR_SELECTION": {
         clearAllSelections();

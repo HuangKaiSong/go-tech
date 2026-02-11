@@ -357,6 +357,7 @@ export default function PanlEditor({
 
   const handleApplyBackground = () => {
     postToIframe({
+      id: selectedElement.id,
       type: "SET_BACKGROUND_IMAGE",
       url: backgroundImageUrl,
     });
