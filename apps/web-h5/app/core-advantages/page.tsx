@@ -138,7 +138,7 @@ export default async function Page() {
                   <div>
                     <h4 className="font-bold text-foreground mb-2">核心功能</h4>
                     <p className="text-sm text-muted-foreground">
-                      除系統可訂製收租類系統維護外，還有廣泛多樣的數據管理，租約管理，財務管理，維修維護及通知功能等工具功能。
+                      除可按需要設定收租與維修管理外，系統亦提供數據管理、租約管理、財務管理、維修維護、通知提醒等常用工具，支援日常營運的一站式管理。
                     </p>
                   </div>
                 </div>
@@ -152,7 +152,7 @@ export default async function Page() {
                   <div>
                     <h4 className="font-bold text-foreground mb-2">提升效率</h4>
                     <p className="text-sm text-muted-foreground">
-                      通過自動化的流程，租賃管理系統能提供統計、少入手工流作，有相當程度內，在設定的賬本方便和進階。
+                      透過標準化流程與統一資料管理，協助快速統計與查核，減少手工記錄與重複輸入，令對賬、跟進與報表整理更省時、更準確。
                     </p>
                   </div>
                 </div>
@@ -166,7 +166,7 @@ export default async function Page() {
                   <div>
                     <h4 className="font-bold text-foreground mb-2">全面服務</h4>
                     <p className="text-sm text-muted-foreground">
-                      針對，多項提供服務包括完整報告公開服務，透明管理者為助進行設計，需及管理接收定期預定提供，連結訪問更多更享受更勝往後維持。
+                      提供多維度報表與管理視圖，提升透明度與可追溯性；並可按管理需要設定定期檢視與跟進安排，方便持續優化租務與物業表現。
                     </p>
                   </div>
                 </div>
@@ -212,7 +212,7 @@ export default async function Page() {
                       精準出租定價
                     </h4>
                     <p className="text-sm text-muted-foreground">
-                      經智能型的消費、學校街道附近的估價和歷史的分析，找到適的租金定價，最大化投資回報率。
+                      結合周邊配套（如交通、學校、商圈）與歷史租賃表現等資料作參考，協助制定更合理的租金策略，提升出租成功率與回報表現。
                     </p>
                   </div>
                 </div>
@@ -220,9 +220,9 @@ export default async function Page() {
                 <div className="flex gap-4">
                   <span className="text-primary font-bold text-xl">02</span>
                   <div>
-                    <h4 className="font-bold text-foreground mb-2">靈活性</h4>
+                    <h4 className="font-bold text-foreground mb-2">靈活擴展</h4>
                     <p className="text-sm text-muted-foreground">
-                      無論是管理單個物業，還是管理整個物業組合和銷售計劃區內的業務，它都是很有效率的建議您進行一次完整的投資回報規劃。
+                      不論管理單一物業或多個物業組合，皆可用同一套管理架構統一處理；有助於規劃租務安排與回報目標，支援不同成長階段的需要。
                     </p>
                   </div>
                 </div>
@@ -230,9 +230,9 @@ export default async function Page() {
                 <div className="flex gap-4">
                   <span className="text-primary font-bold text-xl">03</span>
                   <div>
-                    <h4 className="font-bold text-foreground mb-2">多功能性</h4>
+                    <h4 className="font-bold text-foreground mb-2">多功能整合</h4>
                     <p className="text-sm text-muted-foreground">
-                      在物業管理的許多領域可同時完成，除不少入工工作，就能完成轉租，它能讓您操完的的遊，都提供操作指南理念，我們更可提合式，它不只是管理價值。
+                      將招租、租約、收租、維修、財務與文件等工作集中管理，減少人手記錄與跨平台往返；同時保留完整紀錄，讓跟進更有條理、管理更專業。
                     </p>
                   </div>
                 </div>
