@@ -175,16 +175,10 @@ const Login = () => {
       <div className="absolute bottom-0 left-0 right-0 bg-foreground/80 py-4">
         <div className="flex justify-center gap-8 text-sm text-background/80">
           <Link href="#" className="hover:text-background transition-colors">
-            安全佈告欄
-          </Link>
-          <Link href="#" className="hover:text-background transition-colors">
             使用條款
           </Link>
           <Link href="#" className="hover:text-background transition-colors">
             隱私條例
-          </Link>
-          <Link href="#" className="hover:text-background transition-colors">
-            幫助中心
           </Link>
         </div>
       </div>
