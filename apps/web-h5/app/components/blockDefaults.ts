@@ -1,4 +1,7 @@
 import { PageBlock } from "@/app/components/PageBlocks";
+import audienceIndividual from "@/assets/audience-individual.jpg";
+import audienceInvestor from "@/assets/audience-investor.jpg";
+import audienceOverseas from "@/assets/audience-overseas.jpg";
 // import audienceBanner from "@/assets/audience-banner.jpg";
 // import heroBackground from "https://go-techs.com/go-tech/2026/02/11/background.webp";
 // import coreHero from "https://go-techs.com/go-tech/2026/02/11/core-hero.jpg";
@@ -140,3 +143,27 @@ export const defaultTargetAudience: PageBlock[] = [
     backgroundImage: "https://go-techs.com/go-tech/2026/02/11/audience-banner.jpg"
   }
 ]
+
+
+export const audiences = [
+  {
+    title: "擁有出租物業的個人業主",
+    description: "管理一至數個出租單位，需要處理租戶溝通、租金收取和維修訴求。",
+    image: audienceIndividual,
+    align: "left" as const,
+  },
+  {
+    title: "擁有多元物業組合的投資型業主",
+    description:
+      "管理多個物業（住宅、商業或混合用途），需要追蹤不同物業的收入、支出和租賃狀況。",
+    image: audienceInvestor,
+    align: "right" as const,
+  },
+  {
+    title: "地產物管集團",
+    description:
+      "專為物業集團設計的智能管理平臺，打通從決策到服務的全鏈條，讓數據驅動運營、系統賦能團隊，實現降本增效與品質提升的一體化管理。",
+    image: audienceOverseas,
+    align: "left" as const,
+  },
+];

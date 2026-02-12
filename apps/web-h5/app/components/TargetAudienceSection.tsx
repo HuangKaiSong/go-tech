@@ -1,39 +1,10 @@
 'use client'
 
+import { audiences } from '@/app/components/blockDefaults';
 import Link from "@/app/components/Link";
-import individualOwner from "@/assets/individual-owner.jpg";
-import investorProperty from "@/assets/investor-property.jpg";
 import { useIframeContext } from "@/contexts/IframeContext";
 import { Button } from "@go-tech-frontend/ui";
 import Image from "next/image";
-
-const audiences = [
-  {
-    number: "01",
-    title: "Individual Owner",
-    subtitle: "持有1至3個物業的個人業主",
-    description:
-      "管理一次兩到三個, 並打通程序實現同步, 簡化管理, 讓一切井然有序。",
-    image: individualOwner,
-    align: "left" as const,
-  },
-  {
-    number: "02",
-    title: "Investor Owner",
-    subtitle: "持有多只物業或結合物業投資業主",
-    description: "投資一兩棟物業? 所有物業資料在雲端集中處理, 讓投資更輕鬆。",
-    image: investorProperty,
-    align: "right" as const,
-  },
-  {
-    number: "03",
-    title: "Body Property Owner",
-    subtitle: "長期租賃不在本地的海外業主",
-    description: "遙距管理物業? 隨時隨地透過系統查看物業狀況, 讓管理無距離。",
-    image: individualOwner,
-    align: "left" as const,
-  },
-];
 
 const TargetAudienceSection = () => {
   const { hasIframe } = useIframeContext();
@@ -73,14 +44,11 @@ const TargetAudienceSection = () => {
               <div className="w-full md:w-3/5 p-6 md:p-10">
                 <div className="flex items-start gap-4">
                   <span className="text-4xl font-bold text-primary opacity-50">
-                    {audience.number}
+                    {index + 1}
                   </span>
                   <div>
-                    <h3 className="text-lg font-semibold text-muted-foreground mb-1">
-                      {audience.title}
-                    </h3>
                     <h4 className="text-xl font-bold text-foreground mb-3">
-                      {audience.subtitle}
+                      {audience.title}
                     </h4>
                     <p className="text-muted-foreground leading-relaxed">
                       {audience.description}
