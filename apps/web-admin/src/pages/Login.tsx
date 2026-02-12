@@ -1,7 +1,7 @@
 import TechCursor from "@/components/TechCursor";
 import { useAuth } from "@/hooks/use-auth";
 import Dotline from "@/hooks/use-dotline";
-import { Experience, StarrySky } from "@go-tech-frontend/three";
+import { Experience } from "@go-tech-frontend/three";
 import { Button, Input } from "@go-tech-frontend/ui";
 import { useMutation } from "@tanstack/react-query";
 import { useKeyPress } from "ahooks";
@@ -18,11 +18,10 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const threeDom = useRef<HTMLCanvasElement | HTMLDivElement>(null);
+  const threeDom = useRef<HTMLCanvasElement>(null);
   const [effectType] = useState<"experience" | "starry" | "dotline">(() => {
     const pick = Math.floor(Math.random() * 3);
     if (pick === 0) return "experience";
-    if (pick === 1) return "starry";
     return "dotline";
   });
 
@@ -76,14 +75,8 @@ const Login = () => {
 
   useEffect(() => {
     if (effectType === "experience") {
-      const _experience = new Experience(threeDom.current as HTMLCanvasElement);
+      const _experience = new Experience(threeDom.current);
       window._experience = _experience;
-    }
-    if (effectType === "starry") {
-      new StarrySky(threeDom.current, {
-        autoStart: true,
-        enableControls: process.env.NODE_ENV === "development",
-      });
     }
     if (effectType === "dotline") {
       new Dotline({ dom: "dotline", cw: 2000, ch: 1000, ds: 150 }).start();
@@ -101,8 +94,6 @@ const Login = () => {
             style={{ pointerEvents: "none", zIndex: -1 }}
           />
         </Fragment>
-      ) : effectType === "starry" ? (
-        <div ref={threeDom as RefObject<HTMLDivElement>}></div>
       ) : (
         <canvas id="dotline" className="absolute inset-0" />
       )}

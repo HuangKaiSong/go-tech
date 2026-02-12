@@ -1,10 +1,15 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { FileText, Search, RotateCcw, Eye, Receipt } from "lucide-react";
+import { initialOrders, Order } from "@/mocks/orders";
 import {
-  Button,
   Badge,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
   Input,
+  Pagination,
   Select,
   SelectContent,
   SelectItem,
@@ -16,21 +21,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
 } from "@go-tech-frontend/ui";
-import { initialOrders, Order } from "@/mocks/orders";
-
+import { Eye, FileText, Receipt, RotateCcw, Search } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const OrdersPage = () => {
   const navigate = useNavigate();
@@ -61,11 +55,13 @@ const OrdersPage = () => {
 
   const handleConfirmPayment = () => {
     if (selectedOrder) {
-      setOrders(orders.map(order => 
-        order.id === selectedOrder.id 
-          ? { ...order, status: "已支付" }
-          : order
-      ));
+      setOrders(
+        orders.map((order) =>
+          order.id === selectedOrder.id
+            ? { ...order, status: "已支付" }
+            : order,
+        ),
+      );
       setConfirmDialogOpen(false);
       setSelectedOrder(null);
     }
@@ -73,11 +69,13 @@ const OrdersPage = () => {
 
   const handleRejectPayment = () => {
     if (selectedOrder) {
-      setOrders(orders.map(order => 
-        order.id === selectedOrder.id 
-          ? { ...order, status: "已取消" }
-          : order
-      ));
+      setOrders(
+        orders.map((order) =>
+          order.id === selectedOrder.id
+            ? { ...order, status: "已取消" }
+            : order,
+        ),
+      );
       setConfirmDialogOpen(false);
       setSelectedOrder(null);
     }
@@ -86,13 +84,32 @@ const OrdersPage = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "已支付":
-        return <Badge variant="outline" className="text-success border-success">已支付</Badge>;
+        return (
+          <Badge variant="outline" className="text-success border-success">
+            已支付
+          </Badge>
+        );
       case "待確認":
-        return <Badge variant="outline" className="text-warning border-warning">待確認</Badge>;
+        return (
+          <Badge variant="outline" className="text-warning border-warning">
+            待確認
+          </Badge>
+        );
       case "已取消":
-        return <Badge variant="outline" className="text-destructive border-destructive">已取消</Badge>;
+        return (
+          <Badge
+            variant="outline"
+            className="text-destructive border-destructive"
+          >
+            已取消
+          </Badge>
+        );
       default:
-        return <Badge variant="outline" className="text-primary border-primary">未支付</Badge>;
+        return (
+          <Badge variant="outline" className="text-primary border-primary">
+            未支付
+          </Badge>
+        );
     }
   };
 
@@ -178,16 +195,36 @@ const OrdersPage = () => {
         <Table>
           <TableHeader>
             <TableRow className="bg-table-header hover:bg-table-header">
-              <TableHead className="text-center font-medium">訂單編號</TableHead>
-              <TableHead className="text-center font-medium">客戶名稱</TableHead>
-              <TableHead className="text-center font-medium">電話號碼</TableHead>
-              <TableHead className="text-center font-medium">電子郵箱</TableHead>
-              <TableHead className="text-center font-medium">套餐類型</TableHead>
-              <TableHead className="text-center font-medium">附加內容</TableHead>
-              <TableHead className="text-center font-medium">訂單金額</TableHead>
-              <TableHead className="text-center font-medium">支付方式</TableHead>
-              <TableHead className="text-center font-medium">支付時間</TableHead>
-              <TableHead className="text-center font-medium">訂單狀態</TableHead>
+              <TableHead className="text-center font-medium">
+                訂單編號
+              </TableHead>
+              <TableHead className="text-center font-medium">
+                客戶名稱
+              </TableHead>
+              <TableHead className="text-center font-medium">
+                電話號碼
+              </TableHead>
+              <TableHead className="text-center font-medium">
+                電子郵箱
+              </TableHead>
+              <TableHead className="text-center font-medium">
+                套餐類型
+              </TableHead>
+              <TableHead className="text-center font-medium">
+                附加內容
+              </TableHead>
+              <TableHead className="text-center font-medium">
+                訂單金額
+              </TableHead>
+              <TableHead className="text-center font-medium">
+                支付方式
+              </TableHead>
+              <TableHead className="text-center font-medium">
+                支付時間
+              </TableHead>
+              <TableHead className="text-center font-medium">
+                訂單狀態
+              </TableHead>
               <TableHead className="text-center font-medium">操作</TableHead>
             </TableRow>
           </TableHeader>
@@ -201,14 +238,20 @@ const OrdersPage = () => {
                 <TableCell className="text-center">{order.package}</TableCell>
                 <TableCell className="text-center">{order.addons}</TableCell>
                 <TableCell className="text-center">{order.amount}</TableCell>
-                <TableCell className="text-center">{order.paymentMethod}</TableCell>
-                <TableCell className="text-center">{order.paymentTime}</TableCell>
-                <TableCell className="text-center">{getStatusBadge(order.status)}</TableCell>
+                <TableCell className="text-center">
+                  {order.paymentMethod}
+                </TableCell>
+                <TableCell className="text-center">
+                  {order.paymentTime}
+                </TableCell>
+                <TableCell className="text-center">
+                  {getStatusBadge(order.status)}
+                </TableCell>
                 <TableCell className="text-center">
                   <div className="flex items-center justify-center gap-2">
                     {order.status === "待確認" && (
-                      <Button 
-                        variant="link" 
+                      <Button
+                        variant="link"
                         className="text-warning p-0 h-auto gap-1"
                         onClick={() => handleOpenConfirmDialog(order)}
                       >
@@ -216,8 +259,8 @@ const OrdersPage = () => {
                         確認
                       </Button>
                     )}
-                    <Button 
-                      variant="link" 
+                    <Button
+                      variant="link"
                       className="text-primary p-0 h-auto gap-1"
                       onClick={() => handleView(order.id)}
                     >
@@ -233,41 +276,14 @@ const OrdersPage = () => {
 
         {/* Pagination */}
         <div className="flex justify-end p-4 border-t border-table-border">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious href="#" />
-              </PaginationItem>
-              {[1, 2, 3].map((page) => (
-                <PaginationItem key={page}>
-                  <PaginationLink
-                    href="#"
-                    isActive={currentPage === page}
-                    onClick={() => setCurrentPage(page)}
-                  >
-                    {page}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
-              <PaginationItem>
-                <span className="px-2">...</span>
-              </PaginationItem>
-              {[8, 9, 10].map((page) => (
-                <PaginationItem key={page}>
-                  <PaginationLink
-                    href="#"
-                    isActive={currentPage === page}
-                    onClick={() => setCurrentPage(page)}
-                  >
-                    {page}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
-              <PaginationItem>
-                <PaginationNext href="#" />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
+          <Pagination
+            total={orders.length}
+            pageSize={10}
+            current={currentPage}
+            onChange={(page, size) => {
+              setCurrentPage(page);
+            }}
+          ></Pagination>
         </div>
       </div>
 
@@ -276,11 +292,9 @@ const OrdersPage = () => {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>確認支付憑證</DialogTitle>
-            <DialogDescription>
-              請核實以下訂單資訊及支付憑證
-            </DialogDescription>
+            <DialogDescription>請核實以下訂單資訊及支付憑證</DialogDescription>
           </DialogHeader>
-          
+
           {selectedOrder && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3 text-sm">
@@ -298,24 +312,35 @@ const OrdersPage = () => {
                 </div>
                 <div>
                   <span className="text-muted-foreground">訂單金額：</span>
-                  <span className="font-medium text-primary">{selectedOrder.amount}</span>
+                  <span className="font-medium text-primary">
+                    {selectedOrder.amount}
+                  </span>
                 </div>
                 <div>
                   <span className="text-muted-foreground">支付方式：</span>
-                  <span className="font-medium">{selectedOrder.paymentMethod}</span>
+                  <span className="font-medium">
+                    {selectedOrder.paymentMethod}
+                  </span>
                 </div>
                 <div>
                   <span className="text-muted-foreground">提交時間：</span>
-                  <span className="font-medium">{selectedOrder.paymentTime}</span>
+                  <span className="font-medium">
+                    {selectedOrder.paymentTime}
+                  </span>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <span className="text-sm text-muted-foreground">支付憑證：</span>
+                <span className="text-sm text-muted-foreground">
+                  支付憑證：
+                </span>
                 <div className="border border-border rounded-lg overflow-hidden">
-                  <img 
-                    src={selectedOrder.paymentProof || "https://via.placeholder.com/400x300"} 
-                    alt="支付憑證" 
+                  <img
+                    src={
+                      selectedOrder.paymentProof ||
+                      "https://via.placeholder.com/400x300"
+                    }
+                    alt="支付憑證"
                     className="w-full h-48 object-cover"
                   />
                 </div>
@@ -324,12 +349,14 @@ const OrdersPage = () => {
           )}
 
           <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={handleRejectPayment} className="text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground">
+            <Button
+              variant="outline"
+              onClick={handleRejectPayment}
+              className="text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground"
+            >
               拒絕
             </Button>
-            <Button onClick={handleConfirmPayment}>
-              確認支付
-            </Button>
+            <Button onClick={handleConfirmPayment}>確認支付</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

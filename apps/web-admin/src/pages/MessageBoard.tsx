@@ -1,10 +1,5 @@
 import {
   Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
   Table,
   TableBody,
   TableCell,
@@ -34,12 +29,13 @@ const defaultSize = 10;
 
 const MessageBoard = () => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(defaultSize);
 
   const { data, refetch } = useQuery<Reponse>({
     queryKey: [
       "platform/leaveMessage/page",
       currentPage.toString(),
-      defaultSize.toString(),
+      pageSize.toString(),
     ],
     queryFn: async () => {
       try {
@@ -48,7 +44,7 @@ const MessageBoard = () => {
           location.origin,
         );
         url.searchParams.append("current", currentPage.toString());
-        url.searchParams.append("size", defaultSize.toString());
+        url.searchParams.append("size", pageSize.toString());
 
         const res = await fetch(url.toString());
         const response = await res.json();
@@ -95,25 +91,6 @@ const MessageBoard = () => {
       refetch();
     },
   });
-
-  const totalPages = Math.ceil(data.total / 10);
-
-  const generatePaginationItems = () => {
-    const pages = [];
-    const maxVisiblePages = 5;
-    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-    const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-
-    if (endPage - startPage + 1 < maxVisiblePages) {
-      startPage = Math.max(1, endPage - maxVisiblePages + 1);
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
-    }
-
-    return pages;
-  };
 
   return (
     <div className="space-y-6">
@@ -162,48 +139,15 @@ const MessageBoard = () => {
 
         {/* Pagination */}
         <div className="flex justify-end p-4 border-t border-border">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (currentPage > 1) {
-                      setCurrentPage(currentPage - 1);
-                    }
-                  }}
-                />
-              </PaginationItem>
-
-              {generatePaginationItems().map((page) => (
-                <PaginationItem key={page}>
-                  <PaginationLink
-                    href="#"
-                    isActive={currentPage === page}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setCurrentPage(page);
-                    }}
-                  >
-                    {page}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
-
-              <PaginationItem>
-                <PaginationNext
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (currentPage < totalPages) {
-                      setCurrentPage(currentPage + 1);
-                    }
-                  }}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
+          <Pagination
+            pageSize={pageSize}
+            current={currentPage}
+            total={data?.total || 0}
+            onChange={(page, size) => {
+              setPageSize(size);
+              setCurrentPage(page);
+            }}
+          />
         </div>
       </div>
     </div>
