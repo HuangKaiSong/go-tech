@@ -6,7 +6,7 @@ import authBgImg from "@/assets/background.webp";
 import { sendToBetterStack } from "@/lib/betterstack-logger";
 import { useCountDown } from "@go-tech-frontend/lib";
 import { Button, Checkbox, Input } from "@go-tech-frontend/ui";
-import { X } from "lucide-react";
+import { CircleAlert, X } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -45,9 +45,10 @@ const signupSchema2 = signupSchema
     password: z
       .string()
       .min(6, "密码至少需要6位字符")
-      .regex(/[a-zA-Z]/, "至少包含一个字母")
-      .regex(/[0-9]/, "至少包含一个数字")
-      .regex(/[^a-zA-Z0-9]/, "包含至少一个特殊字符.")
+      .regex(
+        /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).+$/,
+        "密码需至少包含一个字母、一个数字和一个特殊字符"
+      )
       .trim(),
     confirmPassword: z.string().trim(),
   })
@@ -287,15 +288,21 @@ const Register = () => {
         >
           {step === 1 ? (
             <>
-              <div className="flex items-center gap-2">
-                <span className="text-destructive">*</span>
-                <Input
-                  type="text"
-                  placeholder="請輸入密碼"
-                  value={formData.password}
-                  onChange={handleChange("password")}
-                  className="h-12 text-base border-border flex-1"
-                />
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-destructive">*</span>
+                  <Input
+                    type="text"
+                    placeholder="請輸入密碼"
+                    value={formData.password}
+                    onChange={handleChange("password")}
+                    className="h-12 text-base border-border flex-1"
+                  />
+                </div>
+                <p className="text-xs text-gray-400 mt-2 ml-5 flex items-center gap-1">
+                  <CircleAlert className="w-3.5 h-3.5" />
+                  密码需至少包含一个字母、一个数字和一个特殊字符
+                </p>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-destructive">*</span>
