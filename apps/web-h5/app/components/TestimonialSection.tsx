@@ -18,20 +18,21 @@ const TestimonialSection = () => {
               更標準，更高效的管理方式
             </h3>
             <p className="text-muted-foreground mb-4 leading-relaxed">
-              業務流程更為正規，更專業
+              業務流程更規範、更專業，讓租務管理有章可循、執行一致。
             </p>
 
-            <div className="space-y-3 mb-6">
-              <p className="text-foreground font-medium">
-                <span className="text-primary">✓</span>{" "}
-                資訊同步，原來操作幾幾去尋
-              </p>
-              <p className="text-muted-foreground text-sm">多終端同步，TPOA</p>
+            <div className="space-y-3 mb-6 text-sm text-muted-foreground">
+              <div >
+                - 資訊集中與同步：所有物業、租約、收租、維修與文件資料統一管理，減少四處翻查與重複輸入。
+              </div>
+              <div>
+                - 多終端使用：支援電腦與手機等多裝置操作，隨時查看與跟進。
+              </div>
+              <div>
+                - 節省人力成本：以清晰流程與集中管理減少人手投入，提升整體處理效率，讓租務管理更便捷、更高效。
+              </div>
             </div>
 
-            <p className="text-foreground leading-relaxed">
-              節省人力成本，讓租務管理更便捷，更高效
-            </p>
           </div>
 
           <div className="rounded-xl overflow-hidden shadow-lg">
