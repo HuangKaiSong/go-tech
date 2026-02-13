@@ -25,4 +25,8 @@
   position: relative;
   fill: currentColor;
   vertical-align: -2px;
+  font-size: 14px;
+  list-style: none;
+  white-space: nowrap;
+  line-height: 56px;  
 }

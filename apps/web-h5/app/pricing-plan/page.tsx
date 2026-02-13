@@ -7,6 +7,11 @@ import { Check, Minus } from "lucide-react";
 import { PricingPlanData } from "./layout";
 
 const PricingPlan = ({pricingData}: { pricingData: PricingPlanData }) => {
+  const getIconHref = (value: string) => {
+    const normalized = value.trim().replace(/^#/, '').replace(/^icon-/, '');
+    return `#icon-${normalized}`;
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -100,7 +105,11 @@ const PricingPlan = ({pricingData}: { pricingData: PricingPlanData }) => {
                               </div>
                             )}
                             <div className="flex-1 h-full flex flex-row items-center justify-center text-foreground border-primary/40">
-                              {feature.icon && <svg className="svg-icon text-primary mr-1" aria-hidden="true"><use xlinkHref={`#icon-${feature.icon}`} fill=""></use></svg>}
+                              {feature.icon && (
+                                <svg className="svg-icon text-primary mr-1" aria-hidden="true">
+                                  <use href={getIconHref(feature.icon)} xlinkHref={getIconHref(feature.icon)}></use>
+                                </svg>
+                              )}
                               <div>{feature.name}</div>
                             </div>
                           </div>

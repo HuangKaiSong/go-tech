@@ -104,6 +104,10 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
   const [selectedServices, setSelectedServices] = useState<
     Record<string, number>
   >({});
+  const getIconHref = (value: string) => {
+    const normalized = value.trim().replace(/^#/, '').replace(/^icon-/, '');
+    return `#icon-${normalized}`;
+  };
 
   const toggleService = (serviceId: string) => {
     setSelectedServices(prev => {
@@ -194,7 +198,11 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm text-muted-foreground"
                       style={{ backgroundColor: "#FAEEEB" }}
                     >
-                      {feature.menuIcon && (<svg className="svg-icon w-4 h-4 text-primary mr-1" aria-hidden="true"><use xlinkHref={`#icon-${feature.menuIcon}`} fill=""></use></svg>)}
+                      {feature.menuIcon && (
+                        <svg className="svg-icon w-4 h-4 text-primary mr-1" aria-hidden="true">
+                          <use href={getIconHref(feature.menuIcon)} xlinkHref={getIconHref(feature.menuIcon)}></use>
+                        </svg>
+                      )}
                       <span>{feature.menuTitle}</span>
                     </div>
                   ))}

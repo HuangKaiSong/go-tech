@@ -1,8 +1,8 @@
 import fg from 'fast-glob'
 import { readFile } from 'fs/promises'
 import { basename, extname, relative, resolve } from 'path'
-import { optimize } from 'svgo'
 import SVGCompiler from 'svg-baker'
+import { optimize } from 'svgo'
 import {
   SVG_DOM_ID,
   SVG_ICONS_CLIENT,
@@ -90,9 +90,10 @@ async function parseSvgToSymbol(
   id: string,
   path: string,
 ) {
+  const content = svgCode.replace(/stroke="[a-zA-Z#0-9]*"/, 'stroke="currentColor"')
   const symbol = await compiler.addSymbol({
     path,
-    content: svgCode,
+    content,
     id,
   })
   return symbol.render()

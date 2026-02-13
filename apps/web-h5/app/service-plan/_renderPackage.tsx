@@ -13,6 +13,10 @@ type ExtendedPackages = Packages & {
 
 export default function Page({ packages }: { packages: ExtendedPackages[] }) {
   const router = useRouter();
+  const getIconHref = (value: string) => {
+    const normalized = value.trim().replace(/^#/, '').replace(/^icon-/, '');
+    return `#icon-${normalized}`;
+  };
 
   const handleSelectPlan = (plan: ExtendedPackages) => {
     const price = plan.price;
@@ -100,7 +104,11 @@ export default function Page({ packages }: { packages: ExtendedPackages[] }) {
                         key={fIndex}
                         className={`flex items-center gap-3 py-2 px-2 ${fIndex % 2 === 1 ? "bg-[#F5F5F5]" : ""}`}
                       >
-                        {feature.menuIcon && (<svg className="svg-icon w-4 h-4 text-primary mr-1" aria-hidden="true"><use xlinkHref={`#icon-${feature.menuIcon}`} fill=""></use></svg>)}
+                        {feature.menuIcon && (
+                          <svg className="svg-icon w-4 h-4 text-primary mr-1" aria-hidden="true">
+                            <use href={getIconHref(feature.menuIcon)} xlinkHref={getIconHref(feature.menuIcon)}></use>
+                          </svg>
+                        )}
                         {/* <feature.icon className="w-4 h-4 text-primary" /> */}
                         <span className="text-sm text-muted-foreground">
                           {feature.menuTitle}
@@ -118,7 +126,11 @@ export default function Page({ packages }: { packages: ExtendedPackages[] }) {
                             key={fIndex}
                             className={`flex items-center gap-3 py-2 px-2 ${fIndex % 2 === 1 ? "bg-[#F5F5F5]" : ""}`}
                           >
-                            {feature.icon && (<svg className="svg-icon w-4 h-4 text-primary mr-1" aria-hidden="true"><use xlinkHref={`#icon-${feature.icon}`} fill=""></use></svg>)}
+                            {feature.icon && (
+                              <svg className="svg-icon w-4 h-4 text-primary mr-1" aria-hidden="true">
+                                <use href={getIconHref(feature.icon)} xlinkHref={getIconHref(feature.icon)}></use>
+                              </svg>
+                            )}
                             <span className="text-sm text-muted-foreground">
                               {feature.label}
                             </span>
