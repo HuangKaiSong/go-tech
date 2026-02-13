@@ -6,7 +6,7 @@ import authBgImg from "@/assets/background.webp";
 import { sendToBetterStack } from "@/lib/betterstack-logger";
 import { useCountDown } from "@go-tech-frontend/lib";
 import { Button, Input } from "@go-tech-frontend/ui";
-import { X } from "lucide-react";
+import { CircleAlert, X } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -29,9 +29,10 @@ const forgetPwdVerifySchema = verificationCodeSchema.extend({
   pwd: z
     .string()
     .min(6, "密码至少需要6位字符")
-    .regex(/[a-zA-Z]/, "至少包含一个字母")
-    .regex(/[0-9]/, "至少包含一个数字")
-    .regex(/[^a-zA-Z0-9]/, "包含至少一个特殊字符.")
+    .regex(
+      /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).+$/,
+      "密码需至少包含一个字母、一个数字和一个特殊字符"
+    )
     .trim(),
   verifyPwd: z.string().trim(),
 }).refine(data => data.pwd === data.verifyPwd, {
@@ -259,6 +260,10 @@ const Register = () => {
                   className="h-12 text-base border-border flex-1"
                 />
               </div>
+               <p className="text-xs text-gray-400 mt-2 ml-5 flex items-center gap-1">
+                  <CircleAlert className="w-3.5 h-3.5" />
+                  密码需至少包含一个字母、一个数字和一个特殊字符
+                </p>
               <div className="flex items-center gap-2">
                 <span className="text-destructive">*</span>
                 <Input
@@ -283,7 +288,7 @@ const Register = () => {
                 <span className="text-destructive">*</span>
                 <Input
                   type="text"
-                  placeholder="請輸入您的電子郵箱/手機號碼"
+                  placeholder="請輸入您的電子郵箱"
                   value={formData.account}
                   onChange={handleChange("account")}
                   className="h-12 text-base border-border flex-1"

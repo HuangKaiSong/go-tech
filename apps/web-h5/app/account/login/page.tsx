@@ -155,12 +155,6 @@ const Login = () => {
             >
               忘記密碼?
             </Link>
-            <Link
-              href="#"
-              className="text-foreground underline hover:text-primary transition-colors"
-            >
-              無法登入?
-            </Link>
           </div>
           <Link
             href="/account/register"
