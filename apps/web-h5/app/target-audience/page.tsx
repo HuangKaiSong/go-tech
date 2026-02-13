@@ -54,28 +54,28 @@ const features = [
 const comparisonData = [
   {
     category: "招租",
-    traditional: "單独作事門門台溝及推想，提供有數路服申請。",
-    system: "一鍵多門台發布，佔程財的操業，再交對溝。",
+    traditional: "分散在不同平台發佈與回覆，資料難統一、易遺漏。",
+    system: "多平台招租資訊集中管理，線索與進度清晰可跟進。",
   },
   {
     category: "收租",
-    traditional: "每月手動發送銀行發端去預組，機不安請好管情。",
-    system: "自動發送提醒，佔線支付，自動精理核計。",
+    traditional: "逐一通知、手動對賬，追租費時且容易出錯。",
+    system: "租金狀態統一記錄，支援提醒與對賬管理，收租更有序。",
   },
   {
     category: "維修",
-    traditional: "設芸開直/超緒條端，查士回時線超系然出增。",
-    system: "維護在效溝交，照片詢論過購，資段格化報。",
+    traditional: "以訊息往來為主，照片／報價／進度分散，難追蹤。",
+    system: "維修個案集中建檔，支援上傳相片與紀錄，進度清楚可查。",
   },
   {
     category: "財務",
-    traditional: "手門紀紀或Excel表格，無結選則，時科機區。",
-    system: "自己發育分收，手建機器，佔定一單了然。",
+    traditional: "依賴 Excel / 手寫紀錄，分類不一，難即時掌握收支。",
+    system: "收支分類與明細集中整理，報表更清晰，便於核算。",
   },
   {
     category: "文件",
-    traditional: "紙質合同和發整核發，查找相機，變交失。",
-    system: "所有文件線子化保障紙辦，分全法訊解保留。",
+    traditional: "紙本／散落保存，查找困難，存在遺失風險。",
+    system: "合約與文件集中電子化管理，檢索更快、保存更穩妥。",
   },
   {
     category: "風險",
