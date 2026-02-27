@@ -105,7 +105,7 @@ const Header = ({ heroBg }: { heroBg?: string | StaticImageData }) => {
               >
                 <Phone className="w-12 h-12" />
                 <div className="flex flex-col">
-                  <div>Call us</div>
+                  <div>Call Us</div>
                   <div>+652 8888 8888</div>
                 </div>
               </div>
@@ -114,7 +114,7 @@ const Header = ({ heroBg }: { heroBg?: string | StaticImageData }) => {
               >
                 <Mail className="w-12 h-12" />
                 <div className="flex flex-col">
-                  <div>Mail to us</div>
+                  <div>Mail To Us</div>
                   <div>info@go-techs.com</div>
                 </div>
               </div>

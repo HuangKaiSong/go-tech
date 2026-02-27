@@ -53,7 +53,7 @@ const Footer = () => {
           <div>
             <ul className="space-y-2 text-sm text-background/70">
               <li>
-                <a href="/account/login" className="hover:text-primary transition-colors">
+                <a href="/free-trial" className="hover:text-primary transition-colors">
                   立即試用
                 </a>
               </li>
