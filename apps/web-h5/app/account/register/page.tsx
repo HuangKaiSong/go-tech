@@ -103,6 +103,11 @@ const Register = () => {
 
   const isCodeButtonDisabled =
     pending || countdown > 0 || !formData.email || emailChecking || emailExists;
+  const isEmailAvailable =
+    !!formData.email &&
+    checkedEmail === formData.email &&
+    !emailChecking &&
+    !emailExists;
 
   const parseEmailExists = (result: any) => {
     if (typeof result?.data === "boolean") return !result.data;
@@ -421,14 +426,59 @@ const Register = () => {
 
               <div className="flex items-center gap-2">
                 <span className="text-destructive">*</span>
-                <Input
-                  type="email"
-                  placeholder="請輸入您的電子郵箱"
-                  value={formData.email}
-                  onChange={handleChange("email")}
-                  onBlur={handleEmailBlur}
-                  className="h-12 text-base border-border flex-1"
-                />
+                <div className="relative flex-1">
+                  <Input
+                    type="email"
+                    placeholder="請輸入您的電子郵箱"
+                    value={formData.email}
+                    onChange={handleChange("email")}
+                    onBlur={handleEmailBlur}
+                    className="h-12 text-base border-border pr-11"
+                  />
+                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
+                    {isEmailAvailable ? (
+                      <svg key={checkedEmail} viewBox="0 0 24 24" className="h-5 w-5">
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="9"
+                          fill="none"
+                          stroke="#22c55e"
+                          strokeWidth="2"
+                          strokeDasharray="57"
+                          strokeDashoffset="57"
+                        >
+                          <animate
+                            attributeName="stroke-dashoffset"
+                            from="57"
+                            to="0"
+                            dur="0.22s"
+                            fill="freeze"
+                          />
+                        </circle>
+                        <path
+                          d="M8 12.5L10.8 15.3L16.5 9.8"
+                          fill="none"
+                          stroke="#22c55e"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeDasharray="24"
+                          strokeDashoffset="24"
+                        >
+                          <animate
+                            attributeName="stroke-dashoffset"
+                            from="24"
+                            to="0"
+                            begin="0.16s"
+                            dur="0.2s"
+                            fill="freeze"
+                          />
+                        </path>
+                      </svg>
+                    ) : null}
+                  </span>
+                </div>
               </div>
               {emailChecking ? (
                 <p className="text-xs text-gray-400 ml-5 -mt-2">正在驗證郵箱...</p>
