@@ -57,6 +57,8 @@ const signupSchema2 = signupSchema
     path: ["confirmPassword"],
   });
 
+const EXISTING_EMAIL_MESSAGE = "該郵箱已被註冊，請直接登入或使用忘記密碼。";
+
 const Register = () => {
   const router = useRouter();
 
@@ -72,6 +74,9 @@ const Register = () => {
   const [pending, setPending] = useState(false);
   const [validatedPending, setValidatedPending] = useState(false);
   const [signupPending, setSignupPending] = useState(false);
+  const [emailChecking, setEmailChecking] = useState(false);
+  const [emailExists, setEmailExists] = useState(false);
+  const [checkedEmail, setCheckedEmail] = useState("");
 
   const [formData, setFormData] = useState({
     name: "",
@@ -87,10 +92,78 @@ const Register = () => {
 
   const handleChange =
     (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-      setFormData(prev => ({ ...prev, [field]: e.target.value }));
+      const value = e.target.value;
+      setFormData(prev => ({ ...prev, [field]: value }));
+
+      if (field === "email") {
+        setEmailExists(false);
+        setCheckedEmail("");
+      }
     };
 
-  const isCodeButtonDisabled = pending || countdown > 0 || !formData.email;
+  const isCodeButtonDisabled =
+    pending || countdown > 0 || !formData.email || emailChecking || emailExists;
+
+  const parseEmailExists = (result: any) => {
+    if (typeof result?.data === "boolean") return !result.data;
+    const message = `${result?.message || result?.msg || ""}`.toLowerCase();
+    if (message.includes("exist") || message.includes("已存在") || message.includes("已注冊")) {
+      return true;
+    }
+    if (message.includes("not exist") || message.includes("available")) {
+      return false;
+    }
+    return null;
+  };
+
+  const checkEmailExists = async (email: string) => {
+    if (!email) return false;
+
+    if (checkedEmail === email) {
+      return emailExists;
+    }
+
+    setEmailChecking(true);
+    try {
+      const response = await fetch(
+        `/go-tech/platform/platformCustomer/emailExistVerify?email=${encodeURIComponent(email)}`,
+        { method: "POST" }
+      );
+      const result = await response.json();
+      const exists = parseEmailExists(result);
+      
+      setCheckedEmail(email);
+
+      if (exists === null) {
+        setEmailExists(false);
+        return false;
+      }
+
+      setEmailExists(exists);
+      if (exists) {
+        toast.error(EXISTING_EMAIL_MESSAGE);
+      }
+      return exists;
+    } catch (err) {
+      console.log(err);
+      if (err instanceof Response) {
+        sendToBetterStack("error", err.statusText, {
+          uri: `/go-tech/platform/platformCustomer/checkEmail?email=${email}`,
+          extra: await err.json(),
+        });
+      }
+      return false;
+    } finally {
+      setEmailChecking(false);
+    }
+  };
+
+  const handleEmailBlur = async () => {
+    const result = verificationCodeSchema.safeParse({ email: formData.email });
+    if (!result.success) return;
+    await checkEmailExists(result.data.email);
+  };
+
   const handleSendCode = async () => {
     // 倒计时中不允许再次发送
     if (countdown > 0 || pending) return;
@@ -100,6 +173,11 @@ const Register = () => {
     if (!result.success) {
       const message = result.error.errors.at(0)?.message || "";
       toast.error(message);
+      return;
+    }
+
+    if (emailExists) {
+      toast.error(EXISTING_EMAIL_MESSAGE);
       return;
     }
 
@@ -136,6 +214,12 @@ const Register = () => {
     if (!result.success) {
       const message = result.error.errors.at(0)?.message || "";
       toast.error(message);
+      return;
+    }
+
+    const exists = await checkEmailExists(result.data.email);
+    if (exists) {
+      toast.error(EXISTING_EMAIL_MESSAGE);
       return;
     }
 
@@ -342,9 +426,15 @@ const Register = () => {
                   placeholder="請輸入您的電子郵箱"
                   value={formData.email}
                   onChange={handleChange("email")}
+                  onBlur={handleEmailBlur}
                   className="h-12 text-base border-border flex-1"
                 />
               </div>
+              {emailChecking ? (
+                <p className="text-xs text-gray-400 ml-5 -mt-2">正在驗證郵箱...</p>
+              ) : emailExists ? (
+                <p className="text-xs text-destructive ml-5 -mt-2">{EXISTING_EMAIL_MESSAGE}</p>
+              ) : null}
 
               <div className="flex items-center gap-2">
                 <span className="text-destructive">*</span>
