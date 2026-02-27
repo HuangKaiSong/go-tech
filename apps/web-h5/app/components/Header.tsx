@@ -6,7 +6,6 @@ import {
   Crown,
   LogOut,
   Mail,
-  MapPin,
   Package,
   Phone,
   Settings,
@@ -100,9 +99,9 @@ const Header = ({ heroBg }: { heroBg?: string | StaticImageData }) => {
                 聯繫我們
               </Link>
             </nav>
-            <div className="grid grid-cols-3 text-sm">
+            <div className="grid grid-cols-2 text-sm">
               <div
-                className={`flex items-end gap-2 text-white ${hasIframe ? "cursor-editor" : ""}`}
+                className={`flex items-center justify-center gap-2 text-white ${hasIframe ? "cursor-editor" : ""}`}
               >
                 <Phone className="w-12 h-12" />
                 <div className="flex flex-col">
@@ -111,21 +110,12 @@ const Header = ({ heroBg }: { heroBg?: string | StaticImageData }) => {
                 </div>
               </div>
               <div
-                className={`flex items-end gap-2 text-white ${hasIframe ? "cursor-editor" : ""}`}
+                className={`flex items-center justify-center gap-2 text-white ${hasIframe ? "cursor-editor" : ""}`}
               >
                 <Mail className="w-12 h-12" />
                 <div className="flex flex-col">
                   <div>Mail to us</div>
-                  <div>info@go-tech.com</div>
-                </div>
-              </div>
-              <div
-                className={`flex items-end gap-2 text-white ${hasIframe ? "cursor-editor" : ""}`}
-              >
-                <MapPin className="w-12 h-12" />
-                <div className="flex flex-col">
-                  <div>Address</div>
-                  <div>香港九龍觀塘道123號</div>
+                  <div>info@go-techs.com</div>
                 </div>
               </div>
             </div>

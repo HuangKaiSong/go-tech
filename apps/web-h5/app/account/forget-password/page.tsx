@@ -262,7 +262,7 @@ const Register = () => {
               </div>
                <p className="text-xs text-gray-400 mt-2 ml-5 flex items-center gap-1">
                   <CircleAlert className="w-3.5 h-3.5" />
-                  密码需至少包含一个字母、一个数字和一个特殊字符
+                  密碼需至少包含一個字母、一個數字和一個特殊字符
                 </p>
               <div className="flex items-center gap-2">
                 <span className="text-destructive">*</span>

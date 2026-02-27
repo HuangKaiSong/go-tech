@@ -168,11 +168,11 @@ const Login = () => {
       {/* Footer */}
       <div className="absolute bottom-0 left-0 right-0 bg-foreground/80 py-4">
         <div className="flex justify-center gap-8 text-sm text-background/80">
-          <Link href="#" className="hover:text-background transition-colors">
-            使用條款
+          <Link href="/legal-agreement/terms/terms-of-use" className="hover:text-background transition-colors">
+            服務條款
           </Link>
-          <Link href="#" className="hover:text-background transition-colors">
-            隱私條例
+          <Link href="/legal-agreement/terms/privacy" className="hover:text-background transition-colors">
+            私隱政策
           </Link>
         </div>
       </div>
