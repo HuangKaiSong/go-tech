@@ -1,12 +1,13 @@
 import { AuthProvider } from "@/contexts/AuthContext";
 import { createSvgSpriteHtml } from "@/plugins/createSvgIcons";
+import { existsSync } from "fs";
 import { decodeJwt } from "jose";
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from 'next-intl';
 import { cookies } from "next/headers";
-import { existsSync } from "fs";
 import { resolve } from "path";
 import Layout from "./components/Layout";
+import LocaleInitializer from "./components/LocaleInitializer";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -24,8 +25,16 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const cookiesStore = await cookies();
-
-  const language = cookiesStore.get("GO_TECH_LANGUAGE")?.value || "hk";
+  const supportedLocales = ['hk', 'en'] as const;
+  type SupportedLocale = (typeof supportedLocales)[number];
+  const isSupportedLocale = (value: string | undefined): value is SupportedLocale =>
+    supportedLocales.includes(value as SupportedLocale);
+  const defaultLocale = isSupportedLocale(process.env.GO_TECH_LANGUAGE)
+    ? process.env.GO_TECH_LANGUAGE
+    : 'hk';
+  const cookieLocale = cookiesStore.get("GO_TECH_LANGUAGE")?.value;
+  const language = isSupportedLocale(cookieLocale) ? cookieLocale : defaultLocale;
+  const shouldInitLocale = !isSupportedLocale(cookieLocale);
 
   let user: User | null = null;
   const token = cookiesStore.get("GO_TECH_AUTH_TOKEN")?.value;
@@ -49,6 +58,7 @@ export default async function RootLayout({
   return (
     <html lang={language}>
       <body>
+        {shouldInitLocale ? <LocaleInitializer locale={language} /> : null}
         <div
           aria-hidden="true"
           dangerouslySetInnerHTML={{ __html: svgSpriteHtml }}
