@@ -487,9 +487,13 @@ function Audiences({
         audience.querySelector('[data-block-role="img"]') as HTMLImageElement
       )?.getAttribute("src") || "";
     let prevSrc = initialSrc;
+    const h5SiteUrl = import.meta.env.VITE_H5_SITE_URL;
 
-    if (initialSrc.startsWith("/_next")) {
-      prevSrc = `/h5-hook${initialSrc}`;
+    if (initialSrc.startsWith("http")) {
+      prevSrc = initialSrc;
+    }
+    if (initialSrc.startsWith("/")) {
+      prevSrc = `${h5SiteUrl}${initialSrc}`;
     }
 
     return {

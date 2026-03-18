@@ -152,6 +152,12 @@ export const isBackgroundEligible = (tagName?: string) => {
   return tag === "body" || tag === "section" || tag === "div";
 };
 
+/**
+ * 
+ * @param {string} rawUrl 图片地址 包含网络和绝对地址, 绝对地址需要组合 h5SiteUrl
+ * @param {string} fileName 文件名称
+ * @returns {File}
+ */
 export async function fetchAndConvertToFile(
   rawUrl: string,
   fileName: string = "image.jpg",
@@ -160,11 +166,11 @@ export async function fetchAndConvertToFile(
   let url = rawUrl;
 
   // Use admin dev proxy to avoid cross-origin preflight for H5 assets.
-  if (!rawUrl.startsWith("http")) {
-    const normalized = rawUrl.startsWith("/") ? rawUrl : `/${rawUrl}`;
-    url = `/h5-hook${normalized}`;
-  } else if (h5SiteUrl) {
-    url = rawUrl;
+  if (rawUrl.startsWith("http")) {
+    url = rawUrl
+  }
+  if (rawUrl.startsWith("/")) {
+    url = `${h5SiteUrl}${rawUrl}`;
   }
 
   const response = await fetch(url);

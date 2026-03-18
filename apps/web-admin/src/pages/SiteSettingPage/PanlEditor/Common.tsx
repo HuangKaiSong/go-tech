@@ -63,31 +63,17 @@ export default function Common({
 
   useAsyncEffect(async () => {
     if (!isLogo || !initialSrc) return;
-
+    let prevSrc = initialSrc;
     try {
       fileRef.current = await fetchAndConvertToFile(initialSrc);
+      prevSrc = URL.createObjectURL(fileRef.current);
     } catch (error) {
       fileRef.current = new File([], "logo.webp", { type: "image/webp" });
     }
     const h5SiteUrl = import.meta.env.VITE_H5_SITE_URL;
-    let prevSrc = initialSrc;
 
-    if (!initialSrc.startsWith("http")) {
-      const normalized = initialSrc.startsWith("/")
-        ? initialSrc
-        : `/${initialSrc}`;
-      prevSrc = `/h5-hook${normalized}`;
-    } else if (h5SiteUrl) {
-      try {
-        const h5 = new URL(h5SiteUrl);
-        const target = new URL(initialSrc);
-        if (h5.origin === target.origin) {
-          prevSrc = `/h5-hook${target.pathname}${target.search}`;
-        }
-      } catch {
-        // fallback to the original absolute URL when parsing fails
-        prevSrc = initialSrc;
-      }
+    if (initialSrc.startsWith("/")) {
+      prevSrc = `${h5SiteUrl}${initialSrc}`;
     }
 
     setFileList([
@@ -97,7 +83,7 @@ export default function Common({
         previewUrl: prevSrc,
         status: "success",
         progress: 100,
-        url: prevSrc,
+        url: initialSrc,
       },
     ]);
   }, [isLogo, initialSrc]);

@@ -165,11 +165,12 @@ function Editor({
   useAsyncEffect(async () => {
     if (orignBgImg) {
       file.current = await fetchAndConvertToFile(orignBgImg);
+
       setFileList([
         {
           id: new Date().getTime().toString(),
           file: file.current,
-          previewUrl: orignBgImg,
+          previewUrl: URL.createObjectURL(file.current),
           status: "success",
           progress: 100,
           url: orignBgImg,
