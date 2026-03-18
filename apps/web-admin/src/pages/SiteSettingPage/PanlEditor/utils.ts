@@ -164,16 +164,7 @@ export async function fetchAndConvertToFile(
     const normalized = rawUrl.startsWith("/") ? rawUrl : `/${rawUrl}`;
     url = `/h5-hook${normalized}`;
   } else if (h5SiteUrl) {
-    try {
-      const h5 = new URL(h5SiteUrl);
-      const target = new URL(rawUrl);
-      if (h5.origin === target.origin) {
-        url = `/h5-hook${target.pathname}${target.search}`;
-      }
-    } catch {
-      // fallback to the original absolute URL when parsing fails
-      url = rawUrl;
-    }
+    url = rawUrl;
   }
 
   const response = await fetch(url);
