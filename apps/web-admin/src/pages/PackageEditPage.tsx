@@ -9,12 +9,15 @@ interface FeatureItem {
   id: string;
   label: string;
   checked: boolean;
+  level: number;
+  children?: FeatureItem[];
 }
 
 interface FeatureGroup {
   id: string;
   title: string;
   expanded: boolean;
+  level: number;
   items: FeatureItem[];
 }
 
@@ -204,18 +207,27 @@ const PackageEditPage = () => {
             return [];
           }
 
+          const mapMenuItem = (node: any): FeatureItem => {
+            return {
+              id: node.id,
+              label: node.title,
+              checked: false,
+              level: node.level,
+              children: Array.isArray(node.children)
+                ? node.children.map(mapMenuItem)
+                : [],
+            };
+          };
+
           return response.data.map((item) => {
             return {
               id: item.id,
               title: item.title,
+              level: item.level,
               expanded: true,
-              items: item.children.map((child) => {
-                return {
-                  id: child.id,
-                  label: child.title,
-                  checked: false,
-                };
-              }),
+              items: Array.isArray(item.children)
+                ? item.children.map(mapMenuItem)
+                : [],
             };
           });
         },
@@ -279,17 +291,18 @@ const PackageEditPage = () => {
       // 设置菜单打 ✅ 逻辑
       const haveids = (packageinfo?.packageItemList || []).map((i) => i.menuId);
 
-      const menuTree = tree.map((item) => {
-        const items =
-          item.items?.map((i) => ({
-            ...i,
-            checked: haveids.includes(i.id),
-          })) || [];
-        return {
+      const markChecked = (items: FeatureItem[]): FeatureItem[] => {
+        return items.map((item) => ({
           ...item,
-          items,
-        };
-      });
+          checked: haveids.includes(item.id),
+          children: item.children ? markChecked(item.children) : [],
+        }));
+      };
+
+      const menuTree = tree.map((item) => ({
+        ...item,
+        items: markChecked(item.items || []),
+      }));
 
       dispatch({
         type: "SET_FEATURE_GROUPS",
@@ -309,13 +322,22 @@ const PackageEditPage = () => {
   };
 
   const toggleFeature = (groupId: string, itemId: string) => {
+    const toggleItemChecked = (items: FeatureItem[]): FeatureItem[] =>
+      items.map((item) => {
+        if (item.id === itemId) {
+          return { ...item, checked: !item.checked };
+        }
+        return {
+          ...item,
+          children: item.children ? toggleItemChecked(item.children) : [],
+        };
+      });
+
     const featureGroup = state.featureGroups.map((g) =>
       g.id === groupId
         ? {
             ...g,
-            items: g.items.map((item) =>
-              item.id === itemId ? { ...item, checked: !item.checked } : item,
-            ),
+            items: toggleItemChecked(g.items),
           }
         : g,
     );
@@ -328,6 +350,35 @@ const PackageEditPage = () => {
 
   const handleBack = () => {
     navigate("/packages");
+  };
+
+  const renderFeatureItems = (
+    items: FeatureItem[],
+    groupId: string,
+    depth = 0,
+  ) => {
+    return (
+      <div
+        className={depth === 0 ? "space-y-2 pl-6" : "space-y-2"}
+        style={depth === 0 ? undefined : { paddingLeft: depth * 16 }}
+      >
+        {items.map((item) => (
+          <div key={item.id} className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                checked={item.checked}
+                onCheckedChange={() => toggleFeature(groupId, item.id)}
+                className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+              />
+              <span className="text-sm">{item.label}</span>
+            </div>
+            {item.children && item.children.length > 0
+              ? renderFeatureItems(item.children, groupId, depth + 1)
+              : null}
+          </div>
+        ))}
+      </div>
+    );
   };
 
   if (!state.packageData) {
@@ -372,12 +423,41 @@ const PackageEditPage = () => {
           <Button
             loading={updateMun.isPending}
             onClick={() => {
-              const packageItemList = state.featureGroups
-                .map((group) =>
-                  group.items.filter((feature) => feature.checked),
-                )
-                .flat()
-                .map((menu) => ({ menuId: menu.id, menuTitle: menu.label }));
+              const packageItemListMap = new Map<
+                string,
+                { menuId: string; menuTitle: string; level: number }
+              >();
+              const addMenu = (
+                menuId: string,
+                menuTitle: string,
+                level: number,
+              ) => {
+                packageItemListMap.set(menuId, { menuId, menuTitle, level });
+              };
+
+              const collectChecked = (items: FeatureItem[]): boolean => {
+                let hasChecked = false;
+                items.forEach((item) => {
+                  const childChecked = item.children
+                    ? collectChecked(item.children)
+                    : false;
+                  if (item.checked || childChecked) {
+                    addMenu(item.id, item.label, item.level);
+                    hasChecked = true;
+                  }
+                });
+                return hasChecked;
+              };
+
+              state.featureGroups.forEach((group) => {
+                const hasChecked = collectChecked(group.items);
+                if (hasChecked) {
+                  addMenu(group.id, group.title, group.level);
+                }
+              });
+              const packageItemList = Array.from(packageItemListMap.values());
+              console.log(packageItemList);
+
               const data: PackageItem = {
                 ...state.packageData,
                 ...state.priceSettings,
@@ -494,22 +574,7 @@ const PackageEditPage = () => {
                     )}
                     {group.title}
                   </button>
-                  {group.expanded && (
-                    <div className="space-y-2 pl-6">
-                      {group.items.map((item) => (
-                        <div key={item.id} className="flex items-center gap-2">
-                          <Checkbox
-                            checked={item.checked}
-                            onCheckedChange={() =>
-                              toggleFeature(group.id, item.id)
-                            }
-                            className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                          />
-                          <span className="text-sm">{item.label}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  {group.expanded && renderFeatureItems(group.items, group.id)}
                 </div>
               </div>
             ))}

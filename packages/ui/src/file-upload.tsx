@@ -1,10 +1,17 @@
+import { cn } from "@go-tech-frontend/lib";
+import {
+  AlertCircle,
+  Download,
+  FileImage,
+  Upload,
+  X,
+  ZoomIn,
+} from "lucide-react";
 import * as React from "react";
-import { useState, useRef, useCallback } from "react";
-import { cn } from "@/lib/utils";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "./button";
 import { Dialog, DialogContent, DialogTitle } from "./dialog";
-import { Upload, X, ZoomIn, Download, FileImage, AlertCircle } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "./sonner";
 
 export interface UploadedFile {
   id: string;
@@ -13,6 +20,7 @@ export interface UploadedFile {
   status: "uploading" | "success" | "error";
   progress: number;
   errorMessage?: string;
+  url?: string;
 }
 
 export interface FileUploadProps {
@@ -30,6 +38,9 @@ export interface FileUploadProps {
   className?: string;
   /** Whether the component is disabled */
   disabled?: boolean;
+
+  headers?: Record<string, string>;
+  list?: UploadedFile[];
 }
 
 const FileUpload: React.FC<FileUploadProps> = ({
@@ -38,26 +49,33 @@ const FileUpload: React.FC<FileUploadProps> = ({
   maxCount = 5,
   maxSizeMB = 10,
   onChange,
+  headers,
   className,
   disabled = false,
+  list,
 }) => {
-  const [files, setFiles] = useState<UploadedFile[]>([]);
+  const isControlled = list !== undefined;
+  const [internalFiles, setInternalFiles] = useState<UploadedFile[]>(
+    list ?? [],
+  );
+  const files = isControlled ? list : internalFiles;
   const [previewFile, setPreviewFile] = useState<UploadedFile | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const { toast } = useToast();
 
   const updateFiles = useCallback(
     (newFiles: UploadedFile[]) => {
-      setFiles(newFiles);
+      if (!isControlled) {
+        setInternalFiles(newFiles);
+      }
       onChange?.(newFiles);
     },
-    [onChange]
+    [isControlled, onChange],
   );
 
   const validateFile = (file: File): string | null => {
     if (acceptTypes.length > 0 && !acceptTypes.includes(file.type)) {
-      return `不支援的檔案類型：${file.name}`;
+      return `不支援的類型：${file.name}`;
     }
     if (file.size > maxSizeMB * 1024 * 1024) {
       return `檔案 ${file.name} 超過 ${maxSizeMB}MB 限制`;
@@ -78,16 +96,28 @@ const FileUpload: React.FC<FileUploadProps> = ({
     });
   };
 
-  const uploadToServer = async (uploadFile: UploadedFile): Promise<UploadedFile> => {
+  const uploadToServer = async (
+    uploadFile: UploadedFile,
+  ): Promise<UploadedFile> => {
     if (!uploadUrl) return simulateUpload(uploadFile);
 
     const formData = new FormData();
     formData.append("file", uploadFile.file);
 
     try {
-      const response = await fetch(uploadUrl, { method: "POST", body: formData });
+      const response = await fetch(uploadUrl, {
+        method: "POST",
+        body: formData,
+        headers,
+      });
       if (!response.ok) throw new Error(`上傳失敗：${response.statusText}`);
-      return { ...uploadFile, status: "success", progress: 100 };
+      const result = await response.json();
+      return {
+        ...uploadFile,
+        ...result.data,
+        status: "success",
+        progress: 100,
+      };
     } catch (error) {
       return {
         ...uploadFile,
@@ -103,20 +133,26 @@ const FileUpload: React.FC<FileUploadProps> = ({
     const remaining = maxCount - files.length;
 
     if (remaining <= 0) {
-      toast({ title: "數量限制", description: `最多只能上傳 ${maxCount} 個檔案`, variant: "destructive" });
+      toast.warning("數量限制", {
+        description: `最多只能上傳 ${maxCount} 個`,
+      });
       return;
     }
 
     const toProcess = fileArray.slice(0, remaining);
     if (fileArray.length > remaining) {
-      toast({ title: "部分檔案被忽略", description: `已達到上限，僅處理前 ${remaining} 個檔案` });
+      toast.warning("部分檔案被忽略", {
+        description: `已達到上限，僅處理前 ${remaining} 個檔案`,
+      });
     }
 
     const validFiles: UploadedFile[] = [];
     for (const file of toProcess) {
       const error = validateFile(file);
       if (error) {
-        toast({ title: "檔案驗證失敗", description: error, variant: "destructive" });
+        toast.error("檔案驗證失敗", {
+          description: error,
+        });
         continue;
       }
       validFiles.push({
@@ -166,20 +202,28 @@ const FileUpload: React.FC<FileUploadProps> = ({
     <div className={cn("space-y-4", className)}>
       {/* Drop zone */}
       <div
-        onDragOver={(e) => { e.preventDefault(); if (!disabled) setIsDragging(true); }}
+        onDragOver={(e) => {
+          e.preventDefault();
+          if (!disabled) setIsDragging(true);
+        }}
         onDragLeave={() => setIsDragging(false)}
         onDrop={onDrop}
         onClick={() => !disabled && inputRef.current?.click()}
         className={cn(
           "border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors",
-          isDragging ? "border-primary bg-primary/5" : "border-border hover:border-primary/50",
-          disabled && "opacity-50 cursor-not-allowed"
+          isDragging
+            ? "border-primary bg-primary/5"
+            : "border-border hover:border-primary/50",
+          disabled && "opacity-50 cursor-not-allowed",
         )}
       >
         <Upload className="w-8 h-8 mx-auto text-muted-foreground mb-3" />
-        <p className="text-sm text-muted-foreground mb-1">拖拽檔案到此處或點擊上傳</p>
+        <p className="text-sm text-muted-foreground mb-1">
+          拖拽檔案到此處或點擊上傳
+        </p>
         <p className="text-xs text-muted-foreground">
-          支援 {acceptTypes.map((t) => t.split("/")[1]?.toUpperCase()).join("、")} | 
+          支援{" "}
+          {acceptTypes.map((t) => t.split("/")[1]?.toUpperCase()).join("、")} |
           單檔最大 {maxSizeMB}MB | 最多 {maxCount} 個
         </p>
         <input
@@ -197,10 +241,17 @@ const FileUpload: React.FC<FileUploadProps> = ({
       {files.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
           {files.map((file) => (
-            <div key={file.id} className="group relative border border-border rounded-lg overflow-hidden bg-card">
+            <div
+              key={file.id}
+              className="group relative border border-border rounded-lg overflow-hidden bg-card"
+            >
               <div className="aspect-square relative">
                 {file.file.type.startsWith("image/") ? (
-                  <img src={file.previewUrl} alt={file.file.name} className="w-full h-full object-cover" />
+                  <img
+                    src={file.previewUrl}
+                    alt={file.file.name}
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-muted">
                     <FileImage className="w-10 h-10 text-muted-foreground" />
@@ -212,9 +263,14 @@ const FileUpload: React.FC<FileUploadProps> = ({
                   <div className="absolute inset-0 bg-background/70 flex items-center justify-center">
                     <div className="w-3/4">
                       <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                        <div className="h-full bg-primary rounded-full transition-all animate-pulse" style={{ width: "60%" }} />
+                        <div
+                          className="h-full bg-primary rounded-full transition-all animate-pulse"
+                          style={{ width: "60%" }}
+                        />
                       </div>
-                      <p className="text-xs text-center mt-1 text-muted-foreground">上傳中...</p>
+                      <p className="text-xs text-center mt-1 text-muted-foreground">
+                        上傳中...
+                      </p>
                     </div>
                   </div>
                 )}
@@ -227,10 +283,20 @@ const FileUpload: React.FC<FileUploadProps> = ({
                 {/* Action overlay */}
                 {file.status === "success" && (
                   <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                    <Button size="icon" variant="secondary" className="h-8 w-8" onClick={() => setPreviewFile(file)}>
+                    <Button
+                      size="icon"
+                      variant="secondary"
+                      className="h-8 w-8"
+                      onClick={() => setPreviewFile(file)}
+                    >
                       <ZoomIn className="w-4 h-4" />
                     </Button>
-                    <Button size="icon" variant="secondary" className="h-8 w-8" onClick={() => handleDownload(file)}>
+                    <Button
+                      size="icon"
+                      variant="secondary"
+                      className="h-8 w-8"
+                      onClick={() => handleDownload(file)}
+                    >
                       <Download className="w-4 h-4" />
                     </Button>
                   </div>
@@ -246,8 +312,12 @@ const FileUpload: React.FC<FileUploadProps> = ({
               </button>
 
               <div className="px-2 py-1.5">
-                <p className="text-xs truncate text-foreground">{file.file.name}</p>
-                <p className="text-[10px] text-muted-foreground">{(file.file.size / 1024).toFixed(0)} KB</p>
+                <p className="text-xs truncate text-foreground">
+                  {file.file.name}
+                </p>
+                <p className="text-[10px] text-muted-foreground">
+                  {(file.file.size / 1024).toFixed(0)} KB
+                </p>
               </div>
             </div>
           ))}
@@ -266,8 +336,14 @@ const FileUpload: React.FC<FileUploadProps> = ({
                 className="w-full max-h-[75vh] object-contain rounded"
               />
               <div className="flex items-center justify-between px-2 pb-1">
-                <span className="text-sm text-muted-foreground truncate">{previewFile.file.name}</span>
-                <Button size="sm" variant="outline" onClick={() => handleDownload(previewFile)}>
+                <span className="text-sm text-muted-foreground truncate">
+                  {previewFile.file.name}
+                </span>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleDownload(previewFile)}
+                >
                   <Download className="w-4 h-4 mr-1" /> 下載
                 </Button>
               </div>

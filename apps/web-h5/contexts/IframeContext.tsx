@@ -8,6 +8,47 @@ interface IframeContextType {
 
 const IframeContext = createContext<IframeContextType | undefined>(undefined);
 
+const SNAPSHOT_STYLE_KEYS = [
+  "font-size",
+  "color",
+  "text-align",
+  "line-height",
+  "padding",
+  "margin",
+  "background-image",
+  "background-color",
+  "width",
+  "height",
+  "bottom",
+  "border-radius",
+] as const;
+
+const snapshotComputedStyles = (element: HTMLElement) => {
+  const view = element.ownerDocument.defaultView;
+  if (!view) return {};
+  const computed = view.getComputedStyle(element);
+  return SNAPSHOT_STYLE_KEYS.reduce<Record<string, string>>((acc, key) => {
+    const value = computed.getPropertyValue(key);
+    if (value) acc[key] = value;
+    return acc;
+  }, {});
+};
+
+const buildSnapshotOuterHtml = (element: HTMLElement) => {
+  const clone = element.cloneNode(true) as HTMLElement;
+  const sourceNodes = [element, ...Array.from(element.querySelectorAll("*"))];
+  const cloneNodes = [clone, ...Array.from(clone.querySelectorAll("*"))];
+
+  sourceNodes.forEach((sourceNode, index) => {
+    const cloneNode = cloneNodes[index] as HTMLElement | undefined;
+    if (!cloneNode || !(sourceNode instanceof HTMLElement)) return;
+    const styles = snapshotComputedStyles(sourceNode);
+    cloneNode.setAttribute("data-computed-style", JSON.stringify(styles));
+  });
+
+  return clone.outerHTML;
+};
+
 export const IframeProvider: React.FC<{
   children: ReactNode;
   hasIframe: boolean;
@@ -48,10 +89,6 @@ export const IframeProvider: React.FC<{
       const id = ensureElementId(elementWithCursorEditor as HTMLElement);
       selectedIdRef.current = id;
       applySelectedStyle(elementWithCursorEditor as HTMLElement);
-      const computedStyle = window.getComputedStyle(
-        elementWithCursorEditor as HTMLElement
-      );
-      
       const tagName = elementWithCursorEditor.tagName.toLowerCase();
 
       const elementInfo = {
@@ -59,21 +96,9 @@ export const IframeProvider: React.FC<{
         className: elementWithCursorEditor.className || '',
         rect: elementWithCursorEditor.getBoundingClientRect(),
         innerHTML: elementWithCursorEditor.innerHTML || '',
-        outerHTML: elementWithCursorEditor.outerHTML || '',
+        outerHTML: buildSnapshotOuterHtml(elementWithCursorEditor as HTMLElement),
+        styles: snapshotComputedStyles(elementWithCursorEditor as HTMLElement),
         dataset: { ...(elementWithCursorEditor as HTMLElement).dataset },
-        styles: {
-          fontSize: computedStyle.fontSize,
-          color: computedStyle.color,
-          backgroundColor: computedStyle.backgroundColor,
-          backgroundImage: computedStyle.backgroundImage,
-          width: computedStyle.width,
-          height: computedStyle.height,
-          borderRadius: computedStyle.borderRadius,
-          padding: computedStyle.padding,
-          margin: computedStyle.margin,
-          textAlign: computedStyle.textAlign,
-          lineHeight: computedStyle.lineHeight,
-        },
         id,
         timestamp: Date.now(),
       };
@@ -93,10 +118,50 @@ export const IframeProvider: React.FC<{
   const handleMessage = (event: MessageEvent) => {
     if (!hasIframe || !event.data?.type) return;
 
-    const findTarget = (id?: string) => {
-      if (!id) return null;
-      const el = document.querySelector(`[data-cursor-id="${id}"]`);
-      return el instanceof HTMLElement ? el : null;
+    const findTarget = (target?: {
+      id?: string;
+      role?: string;
+      block?: { id?: string; role?: string; seq?: string | number };
+    }) => {
+      if (!target) return null;
+
+      const block = target.block;
+      const blockId = block?.id;
+      const blockRole = block?.role;
+      const blockSeq = block?.seq;
+
+      if (blockId && blockRole && blockSeq !== undefined && blockSeq !== null) {
+        const byBlockRoleAndSeq = document.querySelector(
+          `[data-block-id="${blockId}"][data-block-role="${blockRole}"][data-block-seq="${String(blockSeq)}"]`,
+        );
+        if (byBlockRoleAndSeq instanceof HTMLElement) return byBlockRoleAndSeq;
+      }
+
+      if (blockId && blockRole) {
+        const byBlockAndRole = document.querySelector(
+          `[data-block-id="${blockId}"][data-block-role="${blockRole}"]`,
+        );
+        if (byBlockAndRole instanceof HTMLElement) return byBlockAndRole;
+      }
+
+      if (blockId) {
+        const byBlock = document.querySelector(`[data-block-id="${blockId}"]`);
+        if (byBlock instanceof HTMLElement) return byBlock;
+      }
+
+      if (target.id) {
+        const byCursorId = document.querySelector(
+          `[data-cursor-id="${target.id}"]`,
+        );
+        if (byCursorId instanceof HTMLElement) return byCursorId;
+      }
+
+      if (target.role) {
+        const byRole = document.querySelector(`[data-block-role="${target.role}"]`);
+        if (byRole instanceof HTMLElement) return byRole;
+      }
+
+      return null;
     };
 
     const applyStyle = (el: HTMLElement, style: Record<string, unknown>) => {
@@ -114,12 +179,12 @@ export const IframeProvider: React.FC<{
 
     switch (event.data.type) {
       case "UPDATE_ELEMENT_TEXT": {
-        const el = findTarget(event.data.id);
+        const el = findTarget(event.data);
         if (el) el.textContent = event.data.text ?? "";
         break;
       }
       case "UPDATE_ELEMENT_STYLE": {
-        const el = findTarget(event.data.id);
+        const el = findTarget(event.data);
         if (el && event.data.style) {
           applyStyle(el, event.data.style);
         }
@@ -134,7 +199,7 @@ export const IframeProvider: React.FC<{
         if (event.data.style) {
           applyStyle(el, event.data.style);
         }
-        const parent = findTarget(event.data.parentId) || document.body;
+        const parent = findTarget({ id: event.data.parentId }) || document.body;
         parent.appendChild(el);
         applySelectedStyle(el);
         break;
@@ -148,17 +213,36 @@ export const IframeProvider: React.FC<{
         if (event.data.style) {
           applyStyle(el, event.data.style);
         }
-        const parent = findTarget(event.data.parentId) || document.body;
+        const parent = findTarget({ id: event.data.parentId }) || document.body;
         parent.appendChild(el);
         applySelectedStyle(el);
         break;
       }
       case "SET_BACKGROUND_IMAGE": {
         const url = event.data.url as string;
-        const el = findTarget(event.data.id);
+        const el = findTarget(event.data);
         if (el && url) {
           el.style.backgroundImage = `url(${url})`;
         }
+        break;
+      }
+      case "UPDATE_ELEMENT_ATTR": {
+        const el = findTarget(event.data);
+        const attr = event.data.attr as string;
+        const value = event.data.value as string;
+        if (el && attr && value !== undefined && value !== null) {
+          el.setAttribute(attr, String(value));
+          if (attr === "src" && el instanceof HTMLImageElement) {
+            el.src = String(value);
+          }
+        }
+        break;
+      }
+      case "SET_ELEMENT": {
+        const el = findTarget(event.data);
+        if (!el) break;
+        el.innerHTML = event.data.element
+        break;
       }
       case "CLEAR_SELECTION": {
         clearAllSelections();
@@ -172,11 +256,19 @@ export const IframeProvider: React.FC<{
   useEffect(() => {
     if (!hasIframe) return;
 
-    document.addEventListener('click', handleClick)
+    // .cursor-editor
+    const editors = document.getElementsByClassName('cursor-editor')
+    Array.prototype.map.call(editors, (el) => {
+      el.addEventListener('click', handleClick)
+    })
+    // document.addEventListener('click', handleClick)
     window.addEventListener("message", handleMessage);
 
     return () => {
-      document.removeEventListener('click', handleClick)
+      Array.prototype.map.call(editors, (el) => {
+        el.removeEventListener('click', handleClick)
+      })
+      // document.removeEventListener('click', handleClick)
       window.removeEventListener("message", handleMessage);
     }
   }, [hasIframe])

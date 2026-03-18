@@ -2,11 +2,9 @@
 
 import Link from "@/app/components/Link";
 import homeOffice from "@/assets/home-office.jpg";
-import { useIframeContext } from "@/contexts/IframeContext";
 import { Button } from "@go-tech-frontend/ui";
 
 const StatsSection = () => {
-  const { hasIframe } = useIframeContext();
   return (
     <section className="py-16 relative overflow-hidden">
       {/* Background Image */}
@@ -17,7 +15,7 @@ const StatsSection = () => {
       <div className="absolute inset-0 bg-secondary/90" />
 
       <div
-        className={`container mx-auto px-4 relative z-10 ${hasIframe ? "cursor-editor" : ""}`}
+        className={`container mx-auto px-4 relative z-10`}
       >
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div>

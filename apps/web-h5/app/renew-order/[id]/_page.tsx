@@ -3,6 +3,10 @@
 import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
 import Link from "@/app/components/Link";
+import Fps from "@/app/components/payment/Fps";
+import { OrderItemTypeEnum, OrderTypeEnum } from "@/app/constants/order";
+import { PayTypeEnum } from "@/app/constants/payment";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Badge,
   Button,
@@ -13,10 +17,13 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  Input,
   Label,
   RadioGroup,
   RadioGroupItem,
   Separator,
+  toast,
+  UploadedFile,
 } from "@go-tech-frontend/ui";
 import {
   ArrowLeft,
@@ -33,7 +40,7 @@ import {
   Settings,
   Users,
 } from "lucide-react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 // 模擬訂單數據
@@ -74,17 +81,23 @@ const mockOrders: Record<
 };
 
 const renewalOptions = [
-  { id: "1year", label: "續費1年", months: 12, discount: 0 },
-  { id: "2years", label: "續費2年", months: 24, discount: 0.1 },
-  { id: "3years", label: "續費3年", months: 36, discount: 0.15 },
+  { id: "1month", label: "續費1个月", months: 1, discount: 0 },
+  { id: "2month", label: "續費2个月", months: 2, discount: 0 },
+  { id: "3month", label: "續費3个月", months: 3, discount: 0 },
+  { id: "custom", label: "自定义月数", months: 1, discount: 0 },
 ];
 
-const RenewOrder = ({ id }: { id: string }) => {
-  const router = useRouter();
-  const order = id ? mockOrders[id as string] : null;
+const RenewOrder = ({ id, detail }: { id: string, detail: any }) => {
+  const router = useRouter()
+  const order = detail
+  const { token } = useAuth()
 
-  const [selectedPeriod, setSelectedPeriod] = useState("1year");
+  const [selectedPeriod, setSelectedPeriod] = useState("1month");
+  const [customMonths, setCustomMonths] = useState(1);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<
+      PayTypeEnum | null
+    >(null);
 
   if (!order) {
     return (
@@ -106,26 +119,90 @@ const RenewOrder = ({ id }: { id: string }) => {
   }
 
   const selectedOption = renewalOptions.find(opt => opt.id === selectedPeriod)!;
-  const yearlyPrice = order.price;
-  const years = selectedOption.months / 12;
-  const originalPrice = yearlyPrice * years;
+  const selectedMonths =
+    selectedOption.id === "custom" ? customMonths : selectedOption.months;
+  const yearlyPrice = order.platformPackageDto?.price || 0;
+  const months = selectedMonths;
+  const originalPrice = yearlyPrice * months;
   const discountAmount = originalPrice * selectedOption.discount;
   const finalPrice = originalPrice - discountAmount;
 
   // 計算新到期日
-  const currentExpiry = new Date(order.expiryDate);
+  const currentExpiry = new Date(order.expireDate);
   const newExpiry = new Date(currentExpiry);
-  newExpiry.setMonth(newExpiry.getMonth() + selectedOption.months);
+  newExpiry.setMonth(newExpiry.getMonth() + selectedMonths);
 
   const handleConfirmPayment = () => {
     setShowPaymentDialog(true);
   };
 
-  const handlePaymentSelect = (method: string) => {
+
+  const handleBackToPaymentMethods = () => {
+    setSelectedPaymentMethod(null);
+  };
+
+  const handlePaymentSelect = (method: PayTypeEnum) => {
     console.log("Selected payment method:", method);
     setShowPaymentDialog(false);
     // 這裡可以跳轉到支付頁面或顯示成功訊息
     router.push("/my-orders");
+  };
+
+  const handleFpsPaymentConfirm = async (voucherFile: UploadedFile) => {
+    toast.dismiss()
+    const toastId = toast.loading("创建订单中...");
+    const orderInfo = {
+      orderType: OrderTypeEnum.RENEWAL,
+      payType: selectedPaymentMethod,
+      originalOrder: detail.orderNo,
+      orderItems: [{
+        packageId: detail.platformPackageDto?.id,
+        itemType: OrderItemTypeEnum.PACKAGE,
+        itemName: detail?.platformPackageDto?.packageName,
+        price: detail?.platformPackageDto?.price,
+        count: months
+      }]
+    }
+    
+    const requestHeaders = new Headers({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+      'User-Type': 'platform_customer'
+    })
+
+    try {
+      // 创建订单
+      const orderResponse = await fetch('/go-tech/platform/packageOrder/add', {
+        method: 'POST',
+        headers: requestHeaders,
+        body: JSON.stringify(orderInfo)
+      }).then(res => res.json()).catch(err => { throw err })
+      if (orderResponse.code === 200) {
+        toast.success('续费成功', { id: toastId })
+        const orderId = orderResponse.data;
+        if (orderInfo.payType === PayTypeEnum.FPS) {
+          // 上传凭证
+          await fetch('/go-tech/platform/packageOrder/payEvidence', {
+            method: 'POST',
+            headers: requestHeaders,
+            body: JSON.stringify({
+              id: orderId,
+              payEvidence: voucherFile.url
+            })
+          }).catch(err => { throw err }).then(res => res.json())
+        }
+    
+        setShowPaymentDialog(false);
+        setSelectedPaymentMethod(null);
+        router.push("/my-orders");
+        toast.success("支付憑證已提交，我們將在確認後為您開通服務");
+      } else {
+        toast.error(orderResponse.message);
+      }
+    } catch (error) {
+      console.log(error);
+      
+    }
   };
 
   return (
@@ -167,9 +244,9 @@ const RenewOrder = ({ id }: { id: string }) => {
                       <Settings className="w-6 h-6 text-primary" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-bold">{order.planName}</h2>
+                      <h2 className="text-xl font-bold">{order.packageName}</h2>
                       <p className="text-sm text-muted-foreground">
-                        {order.planSubtitle}
+                        最多可創建{order.platformPackageDto?.unitCount}個單位
                       </p>
                     </div>
                   </div>
@@ -181,16 +258,20 @@ const RenewOrder = ({ id }: { id: string }) => {
               <CardContent>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
                   <Clock className="w-4 h-4" />
-                  <span>當前到期日：{order.expiryDate}</span>
+                  <span>當前到期日：{order.expireDate}</span>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                  {order.features.slice(0, 6).map((feature, idx) => (
+                  {order.platformPackageDto?.packageItemList?.map((feature: any) => (
                     <div
-                      key={idx}
+                      key={feature.id}
                       className="flex items-center gap-2 py-1.5 px-2 rounded bg-[#FAEEEB]"
                     >
-                      <feature.icon className="w-4 h-4 text-[#F9881E]" />
-                      <span className="text-xs">{feature.label}</span>
+                      {feature.menuIcon && (
+                        <svg className="svg-icon w-4 h-4 text-primary mr-1" aria-hidden="true">
+                          <use href={`#icon-${feature.menuIcon}`} xlinkHref={`#icon-${feature.menuIcon}`}></use>
+                        </svg>
+                      )}
+                      <span className="text-xs">{feature.menuTitle}</span>
                     </div>
                   ))}
                 </div>
@@ -209,8 +290,9 @@ const RenewOrder = ({ id }: { id: string }) => {
                   className="space-y-3"
                 >
                   {renewalOptions.map(option => {
-                    const years = option.months / 12;
-                    const price = yearlyPrice * years;
+                    const optionMonths =
+                      option.id === "custom" ? customMonths : option.months;
+                    const price = yearlyPrice * optionMonths;
                     const discount = price * option.discount;
                     const final = price - discount;
 
@@ -228,6 +310,26 @@ const RenewOrder = ({ id }: { id: string }) => {
                           <RadioGroupItem value={option.id} id={option.id} />
                           <Label htmlFor={option.id} className="cursor-pointer">
                             <span className="font-medium">{option.label}</span>
+                            {option.id === "custom" && (
+                              <span className="ml-2 inline-flex items-center gap-2">
+                                <Input
+                                  type="number"
+                                  min={1}
+                                  className="w-20 h-8 text-center"
+                                  value={customMonths}
+                                  onClick={() => setSelectedPeriod("custom")}
+                                  onChange={(e) => {
+                                    const value = Math.max(
+                                      1,
+                                      parseInt(e.target.value || "1", 10),
+                                    );
+                                    setCustomMonths(value);
+                                    setSelectedPeriod("custom");
+                                  }}
+                                />
+                                <span className="text-sm">个月</span>
+                              </span>
+                            )}
                             {option.discount > 0 && (
                               <Badge
                                 variant="secondary"
@@ -263,7 +365,7 @@ const RenewOrder = ({ id }: { id: string }) => {
               <CardContent className="space-y-4">
                 <div className="flex justify-between items-center">
                   <span>
-                    {order.planName} × {years}年
+                    {order.packageName} × {months}月
                   </span>
                   <span>
                     ${originalPrice.toLocaleString()} {order.currency}
@@ -291,7 +393,7 @@ const RenewOrder = ({ id }: { id: string }) => {
                 <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
                   <CheckCircle className="w-4 h-4 text-green-500" />
                   <span>
-                    續費後新到期日：{newExpiry.toISOString().split("T")[0]}
+                    預計續費後新到期日：{newExpiry?.toISOString()?.split("T")?.[0]}
                   </span>
                 </div>
               </CardContent>
@@ -329,33 +431,66 @@ const RenewOrder = ({ id }: { id: string }) => {
       </section>
 
       {/* 支付方式選擇 Dialog */}
-      <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
-        <DialogContent className="sm:max-w-md">
+      <Dialog
+        open={showPaymentDialog}
+        onOpenChange={open => {
+          setShowPaymentDialog(open);
+          if (!open) {
+            setSelectedPaymentMethod(null);
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>選擇支付方式</DialogTitle>
+            <DialogTitle className="text-center text-xl">
+              {selectedPaymentMethod === PayTypeEnum.FPS
+                ? "FPS 轉數快支付"
+                : "選擇支付方式"}
+            </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="text-center mb-4">
-              <p className="text-2xl font-bold text-primary">
-                ${finalPrice.toLocaleString()} {order.currency}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {order.planName} 續費{years}年
-              </p>
+
+          {selectedPaymentMethod === PayTypeEnum.FPS ? (
+            <Fps
+              price={finalPrice}
+              handleBackToPaymentMethods={handleBackToPaymentMethods}
+              handleFpsPaymentConfirm={handleFpsPaymentConfirm}
+            />
+          ) : (
+            <div className="grid gap-4 py-4">
+              <Button
+                variant="outline"
+                disabled
+                onClick={() => setSelectedPaymentMethod(PayTypeEnum.WechatPay)}
+                className="h-14 text-lg justify-start gap-4 hover:bg-green-50 hover:border-green-500 hover:text-primary"
+              >
+                <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                  <span className="text-white text-sm font-bold">微</span>
+                </div>
+                微信支付
+              </Button>
+              <Button
+                variant="outline"
+                disabled
+                onClick={() => setSelectedPaymentMethod(PayTypeEnum.Alipay)}
+                className="h-14 text-lg justify-start gap-4 hover:bg-blue-50 hover:border-blue-500 hover:text-primary"
+              >
+                <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                  <span className="text-white text-sm font-bold">支</span>
+                </div>
+                支付寶支付
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setSelectedPaymentMethod(PayTypeEnum.FPS)}
+                className="h-14 text-lg justify-start gap-4 hover:bg-orange-50 hover:border-orange-500 hover:text-primary"
+              >
+                <div className="w-8 h-8 bg-linear-to-br from-orange-400 to-orange-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">FPS</span>
+                </div>
+                FPS 轉數快
+              </Button>
             </div>
-            <Button
-              className="w-full h-14 text-lg bg-[#07C160] hover:bg-[#07C160]/90"
-              onClick={() => handlePaymentSelect("wechat")}
-            >
-              微信支付
-            </Button>
-            <Button
-              className="w-full h-14 text-lg bg-[#1677FF] hover:bg-[#1677FF]/90"
-              onClick={() => handlePaymentSelect("alipay")}
-            >
-              支付寶支付
-            </Button>
-          </div>
+          )}
         </DialogContent>
       </Dialog>
 

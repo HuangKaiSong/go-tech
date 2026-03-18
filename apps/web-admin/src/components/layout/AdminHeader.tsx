@@ -1,3 +1,4 @@
+import { useAuth } from "@/hooks/use-auth";
 import {
   Avatar,
   AvatarFallback,
@@ -6,9 +7,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger
+  DropdownMenuTrigger,
 } from "@go-tech-frontend/ui";
-import { useAuth } from "@/hooks/use-auth";
 import { ChevronDown, LogOut, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -18,11 +18,11 @@ const AdminHeader = () => {
   if (!user) {
     return null;
   }
-  
+
   const handleLogout = () => {
-    setToken(undefined)
-    navigate('/login', { replace: true })
-  }
+    setToken(undefined);
+    navigate("/login", { replace: true });
+  };
 
   return (
     <header className="h-16 bg-card border-b border-border flex items-center justify-end px-6">
@@ -31,10 +31,12 @@ const AdminHeader = () => {
           <Avatar className="h-8 w-8">
             <AvatarImage src={user.icon} />
             <AvatarFallback className="bg-primary text-primary-foreground text-sm">
-              {user.sub.slice(0, 2)}
+              {user.sub?.slice(0, 2)}
             </AvatarFallback>
           </Avatar>
-          <span className="text-sm font-medium text-foreground">{user.nickname}</span>
+          <span className="text-sm font-medium text-foreground">
+            {user.nickname}
+          </span>
           <ChevronDown className="w-4 h-4 text-muted-foreground" />
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-48">

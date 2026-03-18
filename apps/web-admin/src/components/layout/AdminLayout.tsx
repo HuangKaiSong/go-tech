@@ -37,6 +37,7 @@ const AdminLayout = () => {
 
     // 在fetch中添加header头
     window.fetch = async (...args: [RequestInfo | URL, RequestInit?]) => {
+      // eslint-disable-next-line prefer-const
       let [resource, config] = args;
 
       if (!config) {

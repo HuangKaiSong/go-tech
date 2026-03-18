@@ -9,9 +9,9 @@ import Logo from "@/assets/Gotech_Logo.webp";
 import authBgImg from "@/assets/background.webp";
 import { useAuth } from "@/contexts/AuthContext";
 import { sendToBetterStack } from "@/lib/betterstack-logger";
+import { toast } from "@go-tech-frontend/ui";
 import { Eye, EyeOff, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import z from "zod";
 
 const signinSchema = z.object({
@@ -21,7 +21,7 @@ const signinSchema = z.object({
 
 const Login = () => {
   const router = useRouter();
-  const { setUser, setToken } = useAuth();
+  const { setUser, setToken, refetchTenants } = useAuth();
   const [account, setAccount] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -62,6 +62,7 @@ const Login = () => {
           .then(res => {
             setToken(signResponse.data.token)
             setUser(res.data);
+            refetchTenants(signResponse.data.token)
             toast.success("登入成功！");
             router.replace("/");
           });

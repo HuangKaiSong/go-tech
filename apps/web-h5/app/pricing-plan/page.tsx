@@ -104,7 +104,7 @@ const PricingPlan = ({pricingData}: { pricingData: PricingPlanData }) => {
                                 </div>
                               </div>
                             )}
-                            <div className="flex-1 h-full flex flex-row items-center justify-center text-foreground border-primary/40">
+                            <div className="flex-1 h-full flex flex-row items-center justify-center text-block/70 border-primary/40">
                               {feature.icon && (
                                 <svg className="svg-icon text-primary mr-1" aria-hidden="true">
                                   <use href={getIconHref(feature.icon)} xlinkHref={getIconHref(feature.icon)}></use>

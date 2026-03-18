@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 import { useLayoutEffect } from "react";
-import { toast } from "sonner";
+import { toast } from "@go-tech-frontend/ui";
 import { useIframeContext } from "../../contexts/IframeContext";
 
 interface Props {

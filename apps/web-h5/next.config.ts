@@ -1,18 +1,54 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from 'next-intl/plugin';
+import { Rewrite } from "next/dist/lib/load-custom-routes";
 
 const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
   reactStrictMode: false,
-  allowedDevOrigins: ['localhost:5173', '192.168.0.168:5173', '192.168.0.202:3201'],
-  async rewrites() {
+  allowedDevOrigins: ['localhost:5173', '192.168.0.168:5173', '192.168.0.202:3201', 'admin.go-techs.com'],
+  async headers() {
     return [
+      {
+        source: "/_next/:path*",
+        headers: [
+          {
+            key: "Access-Control-Allow-Origin",
+            value: "*", // Set your origin
+          },
+          {
+            key: "Access-Control-Allow-Methods",
+            value: "GET, POST, PUT, DELETE, OPTIONS",
+          },
+          {
+            key: "Access-Control-Allow-Headers",
+            value: "Content-Type, Authorization",
+          },
+        ],
+      },
+    ];
+  },
+  async rewrites() {
+    const proxy: Rewrite[] = [
       {
         source: '/go-tech/:path*',
         destination: process.env.NEXT_PUBLIC_API_URL + '/go-tech/:path*', // 替换为实际后端地址
       },
+      {
+        source: '/pms-resource/:path*',
+        destination: process.env.NEXT_PUBLIC_API_URL + '/pms-resource/:path*', // 替换为实际后端地址
+      },
     ]
+
+    // if (process.env.NODE_ENV === 'development') {
+    //   proxy.unshift(
+    //     {
+    //       source: '/pms-resource/web-back/minio/upload',
+    //       destination: 'http://192.168.0.202:7171/pms-resource/web-back/minio/upload'
+    //     },
+    //   )
+    // }
+    return proxy
   },
   images: {
     dangerouslyAllowLocalIP: true,

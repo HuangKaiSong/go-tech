@@ -48,6 +48,7 @@ export const defaultSystemFeaturesBlocks: PageBlock[] = [
     id: "hero",
     type: "hero",
     title: "GO-PMS功能",
+    titleSecondary: '',
     subtitle: "探索GO-PMS 的一系列功能，旨在簡化您的租務需求。",
     subtitleStyle: {
       fontSize: '1.125rem',
@@ -97,6 +98,7 @@ export const defaultCoreAdvantages: PageBlock[] = [
       color: "white",
       letterSpacing: "0.05em"
     },
+    titleSecondary: '',
     subtitle: "",
     contentStyle: {
       width: '100%',
@@ -116,6 +118,7 @@ export const defaultTargetAudience: PageBlock[] = [
     id: "target-audience-hero",
     type: "hero",
     title: "適合人群",
+    titleSecondary: '',
     titleStyle: {
       fontSize: "3rem",
       fontWeight: 700,
@@ -150,20 +153,20 @@ export const audiences = [
     title: "擁有出租物業的個人業主",
     description: "管理一至數個出租單位，需要處理租戶溝通、租金收取和維修訴求。",
     image: audienceIndividual,
-    align: "left" as const,
+    sort: 9
   },
   {
     title: "擁有多元物業組合的投資型業主",
     description:
       "管理多個物業（住宅、商業或混合用途），需要追蹤不同物業的收入、支出和租賃狀況。",
     image: audienceInvestor,
-    align: "right" as const,
+    sort: 8
   },
   {
     title: "地產物管集團",
     description:
       "專為物業集團設計的智能管理平臺，打通從決策到服務的全鏈條，讓數據驅動運營、系統賦能團隊，實現降本增效與品質提升的一體化管理。",
     image: audienceOverseas,
-    align: "left" as const,
+    sort: 7
   },
 ];

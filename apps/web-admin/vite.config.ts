@@ -2,6 +2,7 @@ import react from '@vitejs/plugin-react';
 import { resolve } from "path";
 import { defineConfig, loadEnv } from 'vite';
 import glsl from 'vite-plugin-glsl';
+import { VitePWA } from 'vite-plugin-pwa';
 
 // https://vite.dev/config/
 export default defineConfig(({ mode, }) => {
@@ -17,6 +18,31 @@ export default defineConfig(({ mode, }) => {
         ...p,
         applyToEnvironment: (e) => e.name === 'client',
       })),
+      VitePWA({
+        injectRegister: 'auto',
+        registerType: 'prompt',
+        devOptions: { enabled: false },
+        workbox: {
+          cleanupOutdatedCaches: true,
+          navigateFallback: '/index.html',
+          runtimeCaching: [
+            {
+              urlPattern: /\/api\//,
+              handler: 'NetworkFirst',
+              options: {
+                cacheName: 'go-techs-admin-v1-api',
+              },
+            },
+            {
+              urlPattern: /^https:\/\/cdnjs\.cloudflare\.com\//,
+              handler: 'NetworkFirst',
+              options: {
+                cacheName: 'go-techs-admin-v1-cdn',
+              },
+            },
+          ],
+        },
+      })
     ],
     resolve: {
       alias: {
@@ -26,6 +52,11 @@ export default defineConfig(({ mode, }) => {
     server: {
       host: "0.0.0.0",
       proxy: {
+        '/api/pms-resource/web-back/minio/upload': {
+          target: 'http://192.168.0.202:7171',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api\/pms-resource\/web-back\/minio\/upload/, '/pms-resource/web-back/minio/upload'),
+        },
         [VITE_PROXY_PREFIX]: {
           target: VITE_PROXY_TARGET,
           changeOrigin: true,

@@ -1,10 +1,38 @@
-import { mkdir, writeFile } from "fs/promises";
+import { mkdir, readFile, writeFile } from "fs/promises";
 import { NextResponse } from "next/server";
 import path from "path";
 
 type Payload = {
   page: string;
   blocks: unknown[];
+};
+
+export const GET = async (request: Request) => {
+  const { searchParams } = new URL(request.url);
+  const page = searchParams.get("page");
+  if (!page) {
+    return NextResponse.json(
+      { ok: false, error: "Missing page parameter" },
+      { status: 400 },
+    );
+  }
+
+  try {
+    const filePath = path.join(
+      process.cwd(),
+      "public",
+      "page-blocks",
+      `${page}.json`,
+    );
+    const content = await readFile(filePath, "utf-8");
+    return NextResponse.json({
+      code: 200,
+      message: "获取成功",
+      data: JSON.parse(content),
+    });
+  } catch {
+    return NextResponse.json(null, { status: 404 });
+  }
 };
 
 export const POST = async (request: Request) => {

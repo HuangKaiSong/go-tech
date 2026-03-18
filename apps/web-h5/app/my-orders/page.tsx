@@ -3,6 +3,7 @@
 import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
 import Link from "@/app/components/Link";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Badge,
   Button,
@@ -15,6 +16,7 @@ import {
   DialogTitle,
   Separator,
 } from "@go-tech-frontend/ui";
+import { useAsyncEffect } from "ahooks";
 import {
   ArrowUpCircle,
   Building,
@@ -29,8 +31,7 @@ import {
   Package,
   Plus,
   Settings,
-  ShoppingCart,
-  Users,
+  Users
 } from "lucide-react";
 import { useState } from "react";
 
@@ -145,6 +146,9 @@ const getStatusColor = (status: string) => {
 };
 
 const MyOrders = () => {
+  const { token } = useAuth()
+
+  const [orderList, setOrderList] = useState<any[]>([])
   const [showAddonsDialog, setShowAddonsDialog] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [selectedServices, setSelectedServices] = useState<
@@ -277,6 +281,26 @@ const MyOrders = () => {
     return getUpgradePrice() + calculateUpgradeAddonsTotal();
   };
 
+  useAsyncEffect(async() => {
+    try {
+      const data = await fetch('/go-tech/platform/packageOrder/myOrders', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Type': 'platform_customer',
+          'Authorization': `Bearer ${token}`,
+        },
+      }).then(res => res.json())
+      if (data.code === 200) {
+        setOrderList(data.data)
+      }
+      
+    } catch (error) {
+      console.log(error);
+      setOrderList([])
+    }
+  }, [])
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -298,7 +322,7 @@ const MyOrders = () => {
       <section className="py-12 bg-background">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto space-y-6">
-            {mockOrders.length === 0 ? (
+            {orderList?.length === 0 ? (
               <Card className="text-center py-12">
                 <CardContent>
                   <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
@@ -312,9 +336,9 @@ const MyOrders = () => {
                 </CardContent>
               </Card>
             ) : (
-              mockOrders.map(order => (
+              orderList?.map(order => (
                 <Card
-                  key={order.id}
+                  key={order.orderNo}
                   className="border border-border hover:shadow-lg transition-shadow"
                 >
                   <CardHeader className="pb-4">
@@ -323,23 +347,23 @@ const MyOrders = () => {
                         <div className="flex items-center gap-3 mb-2">
                           <Settings className="w-6 h-6 text-primary" />
                           <h3 className="text-xl font-bold text-foreground">
-                            {order.planName}
+                            {order.platformPackageDto?.packageName}
                           </h3>
                           <Badge className={getStatusColor(order.status)}>
                             {order.statusLabel}
                           </Badge>
                         </div>
                         <p className="text-sm text-muted-foreground">
-                          {order.planSubtitle}
+                          最多可創建{order.platformPackageDto?.unitCount}個單位
                         </p>
                       </div>
                       <div className="text-right">
                         <div className="text-2xl font-bold text-primary">
-                          {order.price}{" "}
-                          <span className="text-base">{order.currency}</span>
+                          {order.finalAmount}{" "}
+                          <span className="text-base">HKD</span>
                         </div>
                         <p className="text-xs text-muted-foreground">
-                          訂單編號：{order.id}
+                          訂單編號：{order.orderNo}
                         </p>
                       </div>
                     </div>
@@ -357,26 +381,26 @@ const MyOrders = () => {
                             <span className="text-muted-foreground">
                               下單日期
                             </span>
-                            <span>{order.orderDate}</span>
+                            <span>{order.createTime}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-muted-foreground">
                               到期日期
                             </span>
-                            <span>{order.expiryDate}</span>
+                            <span>{order.expireDate || '-'}</span>
                           </div>
-                          {order.addons.length > 0 && (
+                          {order.orderItems?.filter((item: any) => item.itemType !== 1)?.length > 0 && (
                             <div className="pt-2 border-t border-foreground/30">
                               <span className="text-muted-foreground">
                                 增值服務：
                               </span>
-                              {order.addons.map((addon, idx) => (
+                              {order.orderItems?.filter((item: any) => item.itemType !== 1)?.map((addon: any) => (
                                 <div
-                                  key={idx}
+                                  key={addon.id}
                                   className="flex justify-between mt-1"
                                 >
                                   <span>
-                                    {addon.name} x{addon.quantity}
+                                    {addon.itemName} x{addon.count}
                                   </span>
                                   <span>{addon.price}</span>
                                 </div>
@@ -392,17 +416,25 @@ const MyOrders = () => {
                           包含功能
                         </h4>
                         <div className="grid grid-cols-2 gap-2">
-                          {order.features.map((feature, fIndex) => (
-                            <div
-                              key={fIndex}
-                              className="flex items-center gap-2 py-1.5 px-2 rounded bg-[#FAEEEB]"
-                            >
-                              <feature.icon className="w-4 h-4 text-[#F9881E]" />
-                              <span className="text-xs text-muted-foreground">
-                                {feature.label}
-                              </span>
-                            </div>
-                          ))}
+                          {order.platformPackageDto?.packageItemList?.map((feature: any) => {
+                            if (feature.level >= 2) return null
+                            return (
+                              <div
+                                key={feature.id}
+                                className="flex items-center gap-2 py-1.5 px-2 rounded bg-[#FAEEEB]"
+                              >
+                                {/* <feature.icon className="w-4 h-4 text-[#F9881E]" /> */}
+                                {feature.menuIcon && (
+                                  <svg className="svg-icon w-4 h-4 text-primary mr-1" aria-hidden="true">
+                                    <use href={`#icon-${feature.menuIcon}`} xlinkHref={`#icon-${feature.menuIcon}`}></use>
+                                  </svg>
+                                )}
+                                <span className="text-xs text-muted-foreground">
+                                  {feature.menuTitle}
+                                </span>
+                              </div>
+                            )
+                          })}
                         </div>
                       </div>
                     </div>
@@ -415,9 +447,8 @@ const MyOrders = () => {
                           查看詳情
                         </Button>
                       </Link>
-                      {order.status === "active" && (
                         <>
-                          <Button
+                          {/* <Button
                             variant="outline"
                             size="sm"
                             className="gap-2"
@@ -436,12 +467,11 @@ const MyOrders = () => {
                               <ArrowUpCircle className="w-4 h-4" />
                               套餐升級
                             </Button>
-                          )}
+                          )} */}
                           <Link href={`/renew-order/${order.id}`}>
                             <Button size="sm">續費</Button>
                           </Link>
                         </>
-                      )}
                       {order.status === "expired" && (
                         <Link href="/service-plan">
                           <Button size="sm">重新訂購</Button>

@@ -15,8 +15,7 @@ const ServicePlan = async () => {
   const baseUrl = getBaseUrl();
 
   try {
-    
-    const packagesData = await fetch(`${baseUrl}/go-tech/platform/platformPackage/enabledList`, { next: { revalidate: 300 } }).then(res => res.json()) as HttpBaseResponse<Packages[]>;
+    const packagesData = await fetch(`${baseUrl}/go-tech/platform/platformPackage/enabledList`).then(res => res.json()) as HttpBaseResponse<Packages[]>;
   
     packages = (packagesData?.data || [])?.slice(0, 3)?.reduce((acc, cur, index, arr) => {
       // 第一个套餐没有upgradeNote和newFeatures

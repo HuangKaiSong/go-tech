@@ -8,9 +8,9 @@ import {
   DialogContent,
   Input,
   Textarea,
+  toast,
 } from "@go-tech-frontend/ui";
 import { useState } from "react";
-import { toast } from "sonner";
 
 const Page = () => {
   const [formData, setFormData] = useState({
@@ -84,7 +84,7 @@ const Page = () => {
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label className="block text-lg font-medium text-foreground mb-2">
+                <label className="block text-lg font-medium text-gray-700 mb-2">
                   姓名 <span className="text-primary">*</span>
                 </label>
                 <Input
@@ -98,7 +98,7 @@ const Page = () => {
               </div>
 
               <div>
-                <label className="block text-lg font-medium text-foreground mb-2">
+                <label className="block text-lg font-medium text-gray-700 mb-2">
                   電子郵箱 <span className="text-primary">*</span>
                 </label>
                 <Input
@@ -113,7 +113,7 @@ const Page = () => {
               </div>
 
               <div>
-                <label className="block text-lg font-medium text-foreground mb-2">
+                <label className="block text-lg font-medium text-gray-700 mb-2">
                   聯繫電話 <span className="text-primary">*</span>
                 </label>
                 <Input
@@ -128,7 +128,7 @@ const Page = () => {
               </div>
 
               <div>
-                <label className="block text-lg font-medium text-foreground mb-2">
+                <label className="block text-lg font-medium text-gray-700 mb-2">
                   您想說的 <span className="text-primary">*</span>
                 </label>
                 <Textarea
@@ -160,7 +160,7 @@ const Page = () => {
       {/* Success Dialog */}
       <Dialog open={showSuccess} onOpenChange={setShowSuccess}>
         <DialogContent className="sm:max-w-md text-center p-8">
-          <h2 className="text-2xl font-bold text-foreground mb-4">發送成功</h2>
+          <h2 className="text-2xl font-bold text-gray-700 mb-4">發送成功</h2>
           <p className="text-muted-foreground">
             我們看到後會第一時間跟您聯繫，請耐心等待並保持電話暢通。
           </p>

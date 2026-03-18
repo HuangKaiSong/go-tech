@@ -52,14 +52,14 @@ const FreeTrial = () => {
             <div className="grid md:grid-cols-2 gap-8">
               {/* Benefits */}
               <div className="bg-primary/5 rounded-lg p-8">
-                <h2 className="text-xl font-bold text-foreground mb-6">
+                <h2 className="text-xl font-bold text-gray-700 mb-6">
                   試用包含
                 </h2>
                 <ul className="space-y-4">
                   {trialBenefits.map((benefit, index) => (
                     <li key={index} className="flex items-center gap-3">
                       <CheckCircle className="w-5 h-5 text-primary shrink-0" />
-                      <span className="text-foreground">{benefit}</span>
+                      <span className="text-gray-700">{benefit}</span>
                     </li>
                   ))}
                 </ul>
@@ -67,12 +67,12 @@ const FreeTrial = () => {
 
               {/* Form */}
               <div className="bg-white rounded-lg shadow-lg p-8">
-                <h2 className="text-xl font-bold text-foreground mb-6">
+                <h2 className="text-xl font-bold text-gray-700 mb-6">
                   填寫資料
                 </h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       姓名 <span className="text-primary">*</span>
                     </label>
                     <Input
@@ -86,7 +86,7 @@ const FreeTrial = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       電子郵箱 <span className="text-primary">*</span>
                     </label>
                     <Input
@@ -101,7 +101,7 @@ const FreeTrial = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       聯繫電話 <span className="text-primary">*</span>
                     </label>
                     <Input
@@ -116,7 +116,7 @@ const FreeTrial = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       公司名稱
                     </label>
                     <Input

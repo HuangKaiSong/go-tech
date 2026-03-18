@@ -28,7 +28,7 @@ export default async function Home() {
   let packages: Packages[] = [];
   try {
     const baseUrl = getBaseUrl()
-    const response = await fetch(`${baseUrl}/go-tech/platform/platformPackage/enabledList`, { next: isDev ? undefined : { revalidate: 300 } });
+    const response = await fetch(`${baseUrl}/go-tech/platform/platformPackage/enabledList`);
     
     if (!response.ok) {
       console.error(`API request failed with status ${response.status}`);
@@ -53,15 +53,15 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header heroBg={heroBackground} />
+      <Header heroBg={heroBackground} initialBlocks={blocks} />
       <main>
         <HeroSection initialBlocks={blocks} />
-        <IntroSection />
+        <IntroSection initialBlocks={blocks} />
         <PricingSection packages={packages || []} />
-        <TargetAudienceSection />
+        <TargetAudienceSection initialBlocks={blocks} />
         <StepsSection />
         <StatsSection />
-        <TestimonialSection />
+        <TestimonialSection initialBlocks={blocks} />
       </main>
 
       <Footer />

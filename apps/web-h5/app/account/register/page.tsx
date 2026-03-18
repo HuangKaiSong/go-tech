@@ -10,7 +10,7 @@ import { CircleAlert, X } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@go-tech-frontend/ui";
 import z from "zod";
 
 const verificationCodeSchema = z.object({

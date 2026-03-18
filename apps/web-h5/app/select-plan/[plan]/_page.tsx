@@ -4,90 +4,14 @@ import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
 import servicePlanBg from "@/assets/service-plan-bg.jpg";
 import { Button } from "@go-tech-frontend/ui";
+import { useSessionStorageState } from "ahooks";
 import {
-  Building,
-  Calendar,
   Check,
-  Clock,
-  CreditCard,
-  Droplets,
-  FileText,
-  LayoutDashboard,
   Minus,
-  Monitor,
-  Plus,
-  Receipt,
-  Users,
+  Plus
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-
-// Plan data with features
-const plansData = [
-  {
-    id: "A",
-    name: "服务计划套餐A",
-    subtitle: "最多可創建25個單位",
-    price: 1000,
-    currency: "HKD",
-    features: [
-      { icon: Users, label: "管理層" },
-      { icon: FileText, label: "代理列表" },
-      { icon: Users, label: "客戶列表" },
-      { icon: FileText, label: "合同列表(線上&線下合同)" },
-      { icon: Building, label: "單位列表" },
-      { icon: Droplets, label: "水電列表" },
-      { icon: Clock, label: "水電列表" },
-      { icon: Calendar, label: "日程" },
-      { icon: LayoutDashboard, label: "dashboard" },
-      { icon: Receipt, label: "費用單列表" },
-      { icon: Monitor, label: "租單列表" },
-      { icon: CreditCard, label: "支票列印列表" },
-    ],
-  },
-  {
-    id: "B",
-    name: "服务计划套餐B",
-    subtitle: "最多可創建100個單位",
-    price: 3200,
-    currency: "HKD",
-    features: [
-      { icon: Users, label: "管理層" },
-      { icon: FileText, label: "代理列表" },
-      { icon: Users, label: "客戶列表" },
-      { icon: FileText, label: "合同列表(線上&線下合同)" },
-      { icon: Building, label: "單位列表" },
-      { icon: Droplets, label: "水電列表" },
-      { icon: Clock, label: "跟進列表" },
-      { icon: Calendar, label: "日程" },
-      { icon: LayoutDashboard, label: "dashboard" },
-      { icon: Receipt, label: "費用單列表" },
-      { icon: Monitor, label: "租單列表" },
-      { icon: CreditCard, label: "支票列印列表" },
-    ],
-  },
-  {
-    id: "C",
-    name: "服务计划套餐C",
-    subtitle: "最多可創建400個單位",
-    price: 12000,
-    currency: "HKD",
-    features: [
-      { icon: Users, label: "管理層" },
-      { icon: FileText, label: "代理列表" },
-      { icon: Users, label: "客戶列表" },
-      { icon: FileText, label: "合同列表(線上&線下合同)" },
-      { icon: Building, label: "單位列表" },
-      { icon: Droplets, label: "水電列表" },
-      { icon: Clock, label: "跟進列表" },
-      { icon: Calendar, label: "日程" },
-      { icon: LayoutDashboard, label: "dashboard" },
-      { icon: Receipt, label: "費用審列表" },
-      { icon: Monitor, label: "租單列表" },
-      { icon: CreditCard, label: "支票列印列表" },
-    ],
-  },
-];
+import { useEffect, useState } from "react";
 
 // Value-added services
 const valueAddedServices = [
@@ -101,9 +25,17 @@ const valueAddedServices = [
 const SelectPlan = ({ plan }: { plan: Packages }) => {
   const router = useRouter();
   const [needAddons, setNeedAddons] = useState(true);
-  const [selectedServices, setSelectedServices] = useState<
+  const [hasMounted, setHasMounted] = useState(false);
+  const [selectedServices, setSelectedServices] = useSessionStorageState<
     Record<string, number>
-  >({});
+  >('user-selected-services', {
+    defaultValue: {},
+    listenStorageChange: true,
+  });
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+  const selectedServicesSafe = hasMounted ? (selectedServices ?? {}) : {};
   const getIconHref = (value: string) => {
     const normalized = value.trim().replace(/^#/, '').replace(/^icon-/, '');
     return `#icon-${normalized}`;
@@ -111,7 +43,7 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
 
   const toggleService = (serviceId: string) => {
     setSelectedServices(prev => {
-      if (prev[serviceId] !== undefined) {
+      if (prev && prev[serviceId] !== undefined) {
         const newState = { ...prev };
         delete newState[serviceId];
         return newState;
@@ -122,7 +54,7 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
 
   const updateQuantity = (serviceId: string, delta: number) => {
     setSelectedServices(prev => {
-      const current = prev[serviceId] || 1;
+      const current = prev![serviceId] || 1;
       const newValue = Math.max(1, current + delta);
       return { ...prev, [serviceId]: newValue };
     });
@@ -133,8 +65,7 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
   };
 
   const handleNext = () => {
-    router.push("/confirm-order", {
-    });
+    router.push(`/confirm-order/${plan.id}`);
   };
 
   return (
@@ -158,11 +89,11 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
         <div className="container mx-auto px-4 max-w-5xl">
           {/* Plan Details Card */}
           <div className="bg-white rounded-lg border border-border p-6 mb-6">
-            <div className="flex justify-between items-start mb-6">
-              <div className="flex items-start gap-3">
+            <div className="flex justify-between items-center mb-6">
+              <div className="flex items-center gap-3">
                 <div className="w-1 h-8 bg-primary rounded-full mt-1"></div>
                 <div>
-                  <h2 className="text-xl font-bold text-foreground">
+                  <h2 className="text-xl font-bold text-gray-700">
                     {plan.packageName}
                   </h2>
                 </div>
@@ -182,7 +113,7 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
                 <span className="text-sm font-medium text-muted-foreground min-w-15">
                   套餐内容
                 </span>
-                <span className="text-sm text-foreground">
+                <span className="text-sm text-gray-700">
                   最多可創建{plan.unitCount}個單位
                 </span>
               </div>
@@ -216,7 +147,7 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
             <div className="flex justify-between items-center mb-4">
               <div className="flex items-center gap-3">
                 <div className="w-1 h-6 bg-primary rounded-full"></div>
-                <h3 className="text-lg font-bold text-foreground">增值服务</h3>
+                <h3 className="text-lg font-bold text-gray-700">增值服务</h3>
               </div>
 
               <div className="flex border border-border rounded-full overflow-hidden">
@@ -251,15 +182,16 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
                   <span className="text-primary">（可多選）</span>
                 </p>
 
-                <div className="space-y-3">
+                <div className="space-y-3" suppressHydrationWarning>
                   {valueAddedServices.map(service => {
                     const isSelected =
-                      selectedServices[service.id] !== undefined;
-                    const quantity = selectedServices[service.id] || 0;
+                      selectedServicesSafe[service.id] !== undefined;
+                    const quantity = selectedServicesSafe[service.id] || 0;
 
                     return (
                       <div
                         key={service.id}
+                        suppressHydrationWarning
                         className={`flex items-center justify-between p-4 rounded-lg border transition-colors ${
                           isSelected
                             ? "border-primary bg-primary/5"
@@ -279,7 +211,7 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
                               <Check className="w-3 h-3 text-white" />
                             )}
                           </button>
-                          <span className="text-sm text-foreground">
+                          <span className="text-sm text-gray-700">
                             {service.name}
                           </span>
                         </div>
@@ -299,7 +231,7 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
                             <div className="flex items-center gap-2">
                               <button
                                 onClick={() => updateQuantity(service.id, -1)}
-                                className="w-8 h-8 rounded border border-border flex items-center justify-center hover:bg-muted transition-colors"
+                                className="w-8 h-8 rounded border border-border flex items-center justify-center hover:bg-muted hover:text-foreground transition-colors"
                               >
                                 <Minus className="w-4 h-4" />
                               </button>
@@ -308,7 +240,7 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
                               </span>
                               <button
                                 onClick={() => updateQuantity(service.id, 1)}
-                                className="w-8 h-8 rounded border border-border flex items-center justify-center hover:bg-muted transition-colors"
+                                className="w-8 h-8 rounded border border-border flex items-center justify-center hover:bg-muted hover:text-foreground transition-colors"
                               >
                                 <Plus className="w-4 h-4" />
                               </button>

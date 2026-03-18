@@ -6,8 +6,19 @@ import { useIframeContext } from "@/contexts/IframeContext";
 import { Button } from "@go-tech-frontend/ui";
 import Image from "next/image";
 
-const TargetAudienceSection = () => {
+const TargetAudienceSection = ({
+  initialBlocks
+}: {
+  initialBlocks?: any[]
+}) => {
   const { hasIframe } = useIframeContext();
+
+  const blocks = initialBlocks?.find(item => item.type === 'audiences' && item.id === 'home-audiences')
+  const dynamicAudiences = blocks?.audiences?.map((item: any) => ({
+    ...item,
+    image: item.initialSrc,
+  }))
+
 
   return (
     <section className="py-16 bg-secondary">
@@ -23,20 +34,27 @@ const TargetAudienceSection = () => {
           </Link>
         </div>
 
-        <div className={`space-y-8 ${hasIframe ? "cursor-editor" : ""}`}>
-          {audiences.map((audience, index) => (
+        <div className={`space-y-8 ${hasIframe ? "cursor-editor" : ""}`} data-block-id="audiences" data-block-role="Target Audience">
+          {(dynamicAudiences || audiences).map((audience: any, index: number) => (
             <div
               key={index}
+              data-block-id="home-audiences"
+              data-block-role="audiences"
+              data-block-seq={audience.sort}
               className={`flex flex-col ${
-                audience.align === "right"
+                index % 2 === 1
                   ? "md:flex-row-reverse"
                   : "md:flex-row"
               } gap-6 items-center bg-background rounded-xl overflow-hidden shadow-sm`}
             >
-              <div className="w-full md:w-2/5 h-64 md:h-80">
+              <div className="w-full md:w-2/5 h-64 md:h-80 relative">
                 <Image
+                  data-block-id="home-audiences"
+                  data-block-role="img"
+                  data-block-seq={audience.sort}
                   src={audience.image}
                   alt={audience.title}
+                  fill
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -47,10 +65,14 @@ const TargetAudienceSection = () => {
                     {index + 1}
                   </span>
                   <div>
-                    <h4 className="text-xl font-bold text-foreground mb-3">
+                    <h4 className="text-xl font-bold text-foreground mb-3"   data-block-id="home-audiences"
+                  data-block-role="title"
+                  data-block-seq={audience.sort}>
                       {audience.title}
                     </h4>
-                    <p className="text-muted-foreground leading-relaxed">
+                    <p className="text-muted-foreground leading-relaxed"   data-block-id="home-audiences"
+                  data-block-role="description"
+                  data-block-seq={audience.sort}>
                       {audience.description}
                     </p>
                   </div>

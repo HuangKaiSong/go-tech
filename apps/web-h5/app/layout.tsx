@@ -1,4 +1,5 @@
 import { AuthProvider } from "@/contexts/AuthContext";
+import { getBaseUrl } from "@/lib/http";
 import { createSvgSpriteHtml } from "@/plugins/createSvgIcons";
 import { existsSync } from "fs";
 import { decodeJwt } from "jose";
@@ -36,11 +37,20 @@ export default async function RootLayout({
   const language = isSupportedLocale(cookieLocale) ? cookieLocale : defaultLocale;
   const shouldInitLocale = !isSupportedLocale(cookieLocale);
 
+  let tenants: Tenant[] = [];
   let user: User | null = null;
   const token = cookiesStore.get("GO_TECH_AUTH_TOKEN")?.value;
 
   if (token) {
     user = decodeJwt(token) as User;
+    const baseUrl = getBaseUrl()
+    await fetch(`${baseUrl}/go-tech/platform/packageOrder/myTenants`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }).then((res) => res.json()).then((data) => {
+      tenants = data?.data || [];
+    });
   }
 
   const iconDirCandidates = [
@@ -62,13 +72,12 @@ export default async function RootLayout({
         <div
           aria-hidden="true"
           dangerouslySetInnerHTML={{ __html: svgSpriteHtml }}
-        />
+        ></div>
         <NextIntlClientProvider>
-          <AuthProvider initialUser={user} _token={token}>
+          <AuthProvider _tenants={tenants} initialUser={user} _token={token}>
             <Layout>{children}</Layout>
           </AuthProvider>
         </NextIntlClientProvider>
-        
       </body>
     </html>
   );

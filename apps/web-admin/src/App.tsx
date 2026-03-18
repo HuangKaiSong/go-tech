@@ -1,10 +1,10 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner, TooltipProvider } from "@go-tech-frontend/ui";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { GlobalProvider } from "./store/global";
 import { Suspense } from "react";
-import { RouterProvider } from 'react-router-dom'
+import { RouterProvider } from "react-router-dom";
 import { router } from "./router";
+import { GlobalProvider } from "./store/global";
 
 const queryClient = new QueryClient();
 const LoadingSpinner = () => (

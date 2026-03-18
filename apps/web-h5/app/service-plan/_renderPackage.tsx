@@ -92,7 +92,7 @@ export default function Page({ packages }: { packages: ExtendedPackages[] }) {
                       包含功能
                     </span>
                     {plan.upgradeNote && (
-                      <p className="text-xs text-primary mt-1">
+                      <p className="text-xs text-primary/80 mt-1">
                         {plan.upgradeNote}
                       </p>
                     )}
@@ -102,7 +102,7 @@ export default function Page({ packages }: { packages: ExtendedPackages[] }) {
                     {plan.newPackageItemList.map((feature, fIndex) => (
                       <div
                         key={fIndex}
-                        className={`flex items-center gap-3 py-2 px-2 ${fIndex % 2 === 1 ? "bg-[#F5F5F5]" : ""}`}
+                        className={`flex items-center gap-3 py-2 px-2 ${fIndex % 2 === 1 ? "bg-secondary" : ""}`}
                       >
                         {feature.menuIcon && (
                           <svg className="svg-icon w-4 h-4 text-primary mr-1" aria-hidden="true">
@@ -124,7 +124,7 @@ export default function Page({ packages }: { packages: ExtendedPackages[] }) {
                         {plan.newFeatures.map((feature, fIndex) => (
                           <div
                             key={fIndex}
-                            className={`flex items-center gap-3 py-2 px-2 ${fIndex % 2 === 1 ? "bg-[#F5F5F5]" : ""}`}
+                            className={`flex items-center gap-3 py-2 px-2 ${fIndex % 2 === 1 ? "bg-secondary" : ""}`}
                           >
                             {feature.icon && (
                               <svg className="svg-icon w-4 h-4 text-primary mr-1" aria-hidden="true">

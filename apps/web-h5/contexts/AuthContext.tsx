@@ -10,6 +10,8 @@ type AuthContextType = {
   logout: () => void;
   token: string | undefined;
   setToken: (token: string | undefined) => void;
+  tenants: Tenant[],
+  refetchTenants: (token: string) => void
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -17,15 +19,18 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export const AuthProvider = ({
   children,
   initialUser,
-  _token
+  _token,
+  _tenants
 }: {
   children: React.ReactNode;
   initialUser: User | null;
   _token: string | undefined;
+  _tenants: Tenant[]
 }) => {
   const router = useRouter()
   const [user, setUser] = useState<User | null>(initialUser);
   const [token, setToken] = useState<string | undefined>(_token);
+  const [tenants, setTenants] = useState<Tenant[]>(_tenants)
 
   const logout = async () => {
     try {
@@ -34,6 +39,20 @@ export const AuthProvider = ({
       router.replace('/')
     } catch (error) {
       console.error("Error during logout:", error);
+    }
+  };
+
+  const refetchTenants = async (voucher: string) => {
+    try {
+      const response = await fetch("/go-tech/platform/packageOrder/myTenants", {
+        headers: {
+          Authorization: `Bearer ${voucher}`,
+        },
+      });
+      const data = await response.json();
+      setTenants(data?.data || [])
+    } catch (error) {
+      console.error("Error fetching tenants:", error);
     }
   };
 
@@ -46,6 +65,8 @@ export const AuthProvider = ({
         logout,
         token,
         setToken,
+        tenants,
+        refetchTenants
       }}
     >
       {children}

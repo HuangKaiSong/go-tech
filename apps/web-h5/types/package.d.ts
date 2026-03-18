@@ -8,5 +8,19 @@ type Packages = {
   venueSysPrice: number;
   accountingSysPrice: number;
   custServiceSysPrice: number;
-  packageItemList: { menuId: number; menuIcon: string; menuTitle: string }[];
+  packageItemList: { menuId: number; menuIcon: string; menuTitle: string, level: number }[];
 };
+
+type Tenant = {
+  /**
+   * 租户ID
+   * @type {string}
+   */
+  tenantId: string;
+  /**
+   * 租户名称
+   * @type {string}
+   */
+  tenantName: string;
+  [key: string]: any
+}

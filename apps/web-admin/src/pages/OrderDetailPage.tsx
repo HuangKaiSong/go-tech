@@ -1,200 +1,92 @@
-import { useState } from "react";
-import { FileText, ArrowLeft, Image } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
+import { OrderStatusEnum } from "@/constants/order";
+import { PayTypelabel } from "@/constants/payment";
+import { OrderDetail as Detail } from "@/mocks/orders";
 import {
-  Button,
   Badge,
+  Button,
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@go-tech-frontend/ui";
+import { useQuery } from "@tanstack/react-query";
+import { ArrowLeft, FileText, Image } from "lucide-react";
+import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
-// Mock order detail data with enhanced structure
-const mockOrderDetails: Record<string, {
-  id: string;
-  customer: string;
-  phone: string;
-  email: string;
-  companyName: string;
-  customerType: string;
-  package: {
-    name: string;
-    price: number;
-    maxUnits: number;
-    features: string[];
-  };
-  addons: {
-    name: string;
-    price: number;
-    quantity: number;
-  }[];
-  originalPrice: number;
-  discount: number;
-  totalAmount: number;
-  paymentMethod: string;
-  paymentTime: string;
-  status: string;
-  createTime: string;
-  paymentInfo?: {
-    bankName: string;
-    accountName: string;
-    accountNumber: string;
-    transferTime: string;
-    referenceNumber: string;
-  };
-  paymentProof?: string;
-}> = {
-  "TC000001": {
-    id: "TC000001",
-    customer: "陳先生",
-    phone: "01234567",
-    email: "1234578@Gmail.com",
-    companyName: "12843646.cn",
-    customerType: "公司",
-    package: {
-      name: "服务计划套餐A",
-      price: 1000,
-      maxUnits: 25,
-      features: ["管理層", "代理列表", "客戶列表", "合同列表(線上&線下合同)", "單位列表", "水電列表", "水電列表", "日程", "dashboard", "費用單列表", "租單列表", "支票列印列表"],
-    },
-    addons: [
-      { name: "Sales Module（租務）", price: 60, quantity: 3 },
-    ],
-    originalPrice: 1060,
-    discount: 212,
-    totalAmount: 848,
-    paymentMethod: "轉賬",
-    paymentTime: "12/08/2025 10:00:23",
-    status: "已支付",
-    createTime: "12/08/2025 09:30:00",
-    paymentInfo: {
-      bankName: "中國銀行",
-      accountName: "陳大明",
-      accountNumber: "****1234",
-      transferTime: "12/08/2025 09:45:00",
-      referenceNumber: "TRF202508120001",
-    },
-    paymentProof: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600",
-  },
-  "TC000002": {
-    id: "TC000002",
-    customer: "李先生",
-    phone: "9825 3973",
-    email: "XXXXX@126.com",
-    companyName: "李氏有限公司",
-    customerType: "公司",
-    package: {
-      name: "白金套餐",
-      price: 2800,
-      maxUnits: 50,
-      features: ["管理層", "代理列表", "客戶列表", "合同列表", "單位列表", "水電列表", "日程", "dashboard", "費用單列表", "租單列表", "支票列印列表", "報表系統"],
-    },
-    addons: [
-      { name: "場務系統", price: 200, quantity: 1 },
-      { name: "增加單位", price: 28, quantity: 10 },
-    ],
-    originalPrice: 3280,
-    discount: 0,
-    totalAmount: 3280,
-    paymentMethod: "網銀",
-    paymentTime: "12/08/2025 10:00:23",
-    status: "待確認",
-    createTime: "12/08/2025 09:00:00",
-    paymentInfo: {
-      bankName: "匯豐銀行",
-      accountName: "李大華",
-      accountNumber: "****5678",
-      transferTime: "12/08/2025 09:30:00",
-      referenceNumber: "TRF202508120002",
-    },
-    paymentProof: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=600",
-  },
-  "TC000003": {
-    id: "TC000003",
-    customer: "王先生",
-    phone: "9825 3973",
-    email: "XXXXX@126.com",
-    companyName: "",
-    customerType: "個人",
-    package: {
-      name: "鑽石套餐",
-      price: 10000,
-      maxUnits: 100,
-      features: ["管理層", "代理列表", "客戶列表", "合同列表", "單位列表", "水電列表", "日程", "dashboard", "費用單列表", "租單列表", "支票列印列表", "報表系統", "會計系統", "租務系統"],
-    },
-    addons: [
-      { name: "租務系統", price: 1000, quantity: 1 },
-      { name: "會計系統", price: 1080, quantity: 1 },
-    ],
-    originalPrice: 12080,
-    discount: 0,
-    totalAmount: 12080,
-    paymentMethod: "",
-    paymentTime: "",
-    status: "未支付",
-    createTime: "12/08/2025 08:30:00",
-  },
-  "TC000004": {
-    id: "TC000004",
-    customer: "劉先生",
-    phone: "9825 3973",
-    email: "XXXXX@126.com",
-    companyName: "劉氏集團",
-    customerType: "公司",
-    package: {
-      name: "白金套餐",
-      price: 2800,
-      maxUnits: 50,
-      features: ["管理層", "代理列表", "客戶列表", "合同列表", "單位列表", "水電列表", "日程", "dashboard"],
-    },
-    addons: [
-      { name: "場務系統", price: 200, quantity: 1 },
-      { name: "增加單位", price: 28, quantity: 10 },
-    ],
-    originalPrice: 3280,
-    discount: 0,
-    totalAmount: 3280,
-    paymentMethod: "網銀",
-    paymentTime: "12/08/2025 10:00:23",
-    status: "已支付",
-    createTime: "12/08/2025 08:00:00",
-    paymentInfo: {
-      bankName: "渣打銀行",
-      accountName: "劉建國",
-      accountNumber: "****9012",
-      transferTime: "12/08/2025 07:45:00",
-      referenceNumber: "TRF202508120004",
-    },
-    paymentProof: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=600",
-  },
-};
+type Reponse = {} & Detail;
 
 const OrderDetailPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [proofPreviewOpen, setProofPreviewOpen] = useState(false);
 
-  const orderDetail = mockOrderDetails[id || "TC000001"] || mockOrderDetails["TC000001"];
+  const { data: orderDetail } = useQuery<Reponse>({
+    queryKey: ["platform/packageOrder/detail/", id],
+    queryFn: async () => {
+      try {
+        const url = `${import.meta.env.VITE_PROXY_PREFIX}/go-tech/platform/packageOrder/detail/${id}`;
+
+        const res = await fetch(url);
+        const response = await res.json();
+        if (!response || !response.code || response.code !== 200) {
+          throw new Error("Failed to fetch data");
+        }
+
+        return response.data;
+      } catch (error) {
+        console.log(error);
+        return {};
+      }
+    },
+    initialData: () => {
+      return {} as Detail;
+    },
+  });
 
   const handleBack = () => {
     navigate(-1);
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: OrderStatusEnum) => {
     switch (status) {
-      case "已支付":
-        return <Badge variant="outline" className="text-success border-success">已支付</Badge>;
-      case "待確認":
-        return <Badge variant="outline" className="text-warning border-warning">待確認</Badge>;
-      case "已取消":
-        return <Badge variant="outline" className="text-destructive border-destructive">已取消</Badge>;
+      case OrderStatusEnum.COMPLETED:
+        return (
+          <Badge variant="outline" className="text-success border-success">
+            已支付
+          </Badge>
+        );
+      case OrderStatusEnum.PROCESSING:
+        return (
+          <Badge variant="outline" className="text-warning border-warning">
+            待確認
+          </Badge>
+        );
+      case OrderStatusEnum.CANCELED:
+        return (
+          <Badge
+            variant="outline"
+            className="text-destructive border-destructive"
+          >
+            已取消
+          </Badge>
+        );
       default:
-        return <Badge variant="outline" className="text-primary border-primary">未支付</Badge>;
+        return (
+          <Badge variant="outline" className="text-primary border-primary">
+            未支付
+          </Badge>
+        );
     }
   };
 
-  const hasPaymentInfo = orderDetail.paymentInfo || orderDetail.paymentProof;
+  const hasPaymentInfo = orderDetail.payTime || orderDetail.payEvidence;
+  const orderPackage = orderDetail.orderItems?.find(
+    (item) => item.itemType === 1,
+  );
+  const otherService = orderDetail.orderItems?.filter(
+    (item) => item.itemType !== 1,
+  );
 
   return (
     <div className="space-y-6">
@@ -206,11 +98,7 @@ const OrderDetailPage = () => {
             訂單列表/<span className="text-muted-foreground">訂單詳情</span>
           </h1>
         </div>
-        <Button 
-          variant="outline" 
-          className="gap-2"
-          onClick={handleBack}
-        >
+        <Button variant="outline" className="gap-2" onClick={handleBack}>
           <ArrowLeft className="w-4 h-4" />
           返回
         </Button>
@@ -227,19 +115,21 @@ const OrderDetailPage = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-y-4 gap-x-8">
             <div className="flex items-center gap-2">
               <span className="text-muted-foreground">訂單編號：</span>
-              <span className="font-medium">{orderDetail.id}</span>
+              <span className="font-medium">{orderDetail.orderNo}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-muted-foreground">支付方式：</span>
-              <span className="font-medium">{orderDetail.paymentMethod || "-"}</span>
+              <span className="font-medium">
+                {PayTypelabel[orderDetail.payType] || "-"}
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-muted-foreground">支付時間：</span>
-              <span className="font-medium">{orderDetail.paymentTime || "-"}</span>
+              <span className="font-medium">{orderDetail.payTime || "-"}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-muted-foreground">訂單狀態：</span>
-              {getStatusBadge(orderDetail.status)}
+              {getStatusBadge(orderDetail.orderStatus)}
             </div>
           </div>
         </div>
@@ -253,19 +143,22 @@ const OrderDetailPage = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-y-4 gap-x-8">
             <div className="flex items-center gap-2">
               <span className="text-muted-foreground">客戶名稱：</span>
-              <span className="font-medium">{orderDetail.customer}</span>
+              <span className="font-medium">{orderDetail.custName}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-muted-foreground">電子郵箱：</span>
-              <span className="font-medium">{orderDetail.email}</span>
+              <span className="font-medium">{orderDetail.custEmail}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-muted-foreground">聯繫電話：</span>
-              <span className="font-medium">{orderDetail.phone}</span>
+              <span className="font-medium">{orderDetail.custPhone}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-muted-foreground">公司名稱：</span>
-              <span className="font-medium">{orderDetail.companyName || "-"}</span>
+              <span className="font-medium">
+                {" "}
+                -{/* {orderDetail?.companyName || "-"} */}
+              </span>
             </div>
           </div>
         </div>
@@ -277,37 +170,47 @@ const OrderDetailPage = () => {
               <div className="w-1 h-5 bg-primary rounded-full" />
               <h3 className="text-base font-medium">支付信息</h3>
             </div>
-            
+
             {/* Payment Method Details - Display directly */}
-            {orderDetail.paymentInfo && (
+            {/* {orderDetail.paymentInfo && (
               <div className="grid grid-cols-2 md:grid-cols-5 gap-y-4 gap-x-8 mb-4">
                 <div className="flex items-center gap-2">
                   <span className="text-muted-foreground">銀行名稱：</span>
-                  <span className="font-medium">{orderDetail.paymentInfo.bankName}</span>
+                  <span className="font-medium">
+                    {orderDetail.paymentInfo.bankName}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-muted-foreground">賬戶名稱：</span>
-                  <span className="font-medium">{orderDetail.paymentInfo.accountName}</span>
+                  <span className="font-medium">
+                    {orderDetail.paymentInfo.accountName}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-muted-foreground">賬戶號碼：</span>
-                  <span className="font-medium">{orderDetail.paymentInfo.accountNumber}</span>
+                  <span className="font-medium">
+                    {orderDetail.paymentInfo.accountNumber}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-muted-foreground">轉賬時間：</span>
-                  <span className="font-medium">{orderDetail.paymentInfo.transferTime}</span>
+                  <span className="font-medium">
+                    {orderDetail.paymentInfo.transferTime}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-muted-foreground">參考編號：</span>
-                  <span className="font-medium">{orderDetail.paymentInfo.referenceNumber}</span>
+                  <span className="font-medium">
+                    {orderDetail.paymentInfo.referenceNumber}
+                  </span>
                 </div>
               </div>
-            )}
+            )} */}
 
             {/* Payment Proof Button */}
-            {orderDetail.paymentProof && (
-              <Button 
-                variant="outline" 
+            {orderDetail.payEvidence && (
+              <Button
+                variant="outline"
                 className="gap-2"
                 onClick={() => setProofPreviewOpen(true)}
               >
@@ -323,51 +226,69 @@ const OrderDetailPage = () => {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="w-1 h-5 bg-primary rounded-full" />
-              <h3 className="text-base font-medium">{orderDetail.package.name}</h3>
+              <h3 className="text-base font-medium">
+                {orderPackage?.itemName}
+              </h3>
             </div>
             <span className="text-xl font-bold text-foreground">
-              ${orderDetail.package.price.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">HKD</span>
+              ${orderPackage?.price?.toLocaleString()}{" "}
+              <span className="text-sm font-normal text-muted-foreground">
+                HKD
+              </span>
             </span>
           </div>
-          
+
           <div className="space-y-4">
             <div>
               <span className="text-sm text-muted-foreground">套餐內容</span>
-              <span className="text-primary ml-4 text-sm">最多可創建{orderDetail.package.maxUnits}個單位</span>
+              <span className="text-primary ml-4 text-sm">
+                最多可創建{orderDetail.platformPackageDto?.unitCount}個單位
+              </span>
             </div>
-            
+
             <div>
-              <span className="text-sm text-muted-foreground mb-2 block">包含功能</span>
+              <span className="text-sm text-muted-foreground mb-2 block">
+                包含功能
+              </span>
               <div className="flex flex-wrap gap-2">
-                {orderDetail.package.features.map((feature, index) => (
-                  <Badge 
-                    key={index} 
-                    variant="outline" 
-                    className="bg-background border-border text-foreground font-normal px-3 py-1.5 rounded-md"
-                  >
-                    {feature}
-                  </Badge>
-                ))}
+                {orderDetail.platformPackageDto?.packageItemList?.map(
+                  (feature, index) => {
+                    return feature.level <= 1 ? (
+                      <Badge
+                        key={index}
+                        variant="outline"
+                        className="bg-background border-border text-foreground font-normal px-3 py-1.5 rounded-md"
+                      >
+                        {feature.menuTitle}
+                      </Badge>
+                    ) : null;
+                  },
+                )}
               </div>
             </div>
           </div>
         </div>
 
         {/* Addons Section */}
-        {orderDetail.addons.length > 0 && (
+        {otherService?.length > 0 && (
           <div className="px-6 py-4 border-b border-border">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-1 h-5 bg-primary rounded-full" />
               <h3 className="text-base font-medium">增值服务</h3>
             </div>
-            
+
             <div className="space-y-3">
-              {orderDetail.addons.map((addon, index) => (
-                <div key={index} className="flex items-center justify-between py-2">
-                  <span className="text-foreground">{addon.name}</span>
+              {otherService?.map((addon, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between py-2"
+                >
+                  <span className="text-foreground">{addon.itemName}</span>
                   <div className="flex items-center gap-6">
                     <span className="text-foreground">${addon.price}</span>
-                    <span className="text-muted-foreground">數量 {addon.quantity}</span>
+                    <span className="text-muted-foreground">
+                      數量 {addon.count}
+                    </span>
                   </div>
                 </div>
               ))}
@@ -383,15 +304,21 @@ const OrderDetailPage = () => {
           <div className="flex items-center gap-8 flex-wrap">
             <div>
               <span className="text-muted-foreground">原價：</span>
-              <span className="font-bold text-foreground">${orderDetail.originalPrice.toLocaleString()}HKD</span>
+              <span className="font-bold text-foreground">
+                ${orderDetail.orderAmount?.toLocaleString()}HKD
+              </span>
             </div>
             <div>
               <span className="text-muted-foreground">優惠：</span>
-              <span className="font-bold text-foreground">${orderDetail.discount.toLocaleString()}HKD</span>
+              <span className="font-bold text-foreground">
+                ${orderDetail.discountAmount?.toLocaleString()}HKD
+              </span>
             </div>
             <div>
               <span className="text-muted-foreground">總計：</span>
-              <span className="font-bold text-primary text-xl">${orderDetail.totalAmount.toLocaleString()} HKD</span>
+              <span className="font-bold text-primary text-xl">
+                ${orderDetail.finalAmount?.toLocaleString()} HKD
+              </span>
             </div>
           </div>
         </div>
@@ -406,12 +333,12 @@ const OrderDetailPage = () => {
               支付憑證
             </DialogTitle>
           </DialogHeader>
-          
-          {orderDetail.paymentProof && (
+
+          {orderDetail.payEvidence && (
             <div className="relative">
-              <img 
-                src={orderDetail.paymentProof} 
-                alt="支付憑證" 
+              <img
+                src={orderDetail.payEvidence}
+                alt="支付憑證"
                 className="w-full h-auto rounded-lg"
               />
             </div>

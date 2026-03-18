@@ -19,7 +19,7 @@ import {
 import { ArrowLeft, Eye, EyeOff, Lock, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@go-tech-frontend/ui";
 
 const Settings = ({user, token}: any) => {
   const { setUser } = useAuth()
