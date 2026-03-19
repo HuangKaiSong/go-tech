@@ -35,15 +35,15 @@ const ServicePlan = async () => {
         const unitDiff = cur.unitCount - prevPackage.unitCount;
   
         // 获取当前套餐相对于前一个套餐的新功能
-        const prevMenuItems = new Set(prevPackage.packageItemList.map(item => item.menuId));
-        const newFeatureItems = cur.packageItemList.filter(
+        const prevMenuItems = new Set(prevPackage.packageItemList?.map(item => item.menuId) || []);
+        const newFeatureItems = cur.packageItemList?.filter(
           item => !prevMenuItems.has(item.menuId)
-        ).map(item => ({
+        )?.map(item => ({
           label: item.menuTitle,
           icon: item.menuIcon,
         }));
   
-        const newPackageItemList = cur.packageItemList.filter(
+        const newPackageItemList = cur.packageItemList?.filter(
           item => prevMenuItems.has(item.menuId)
         )
   
@@ -55,7 +55,7 @@ const ServicePlan = async () => {
         acc.push({
           ...cur,
           upgradeNote,
-          newPackageItemList: newPackageItemList.length > 0 ? newPackageItemList : cur.packageItemList,
+          newPackageItemList: newPackageItemList?.length > 0 ? newPackageItemList : cur.packageItemList,
           newFeatures: newFeatureItems
         });
       }

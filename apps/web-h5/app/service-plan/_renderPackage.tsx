@@ -99,7 +99,7 @@ export default function Page({ packages }: { packages: ExtendedPackages[] }) {
                   </div>
 
                   <div className="text-left">
-                    {plan.newPackageItemList.map((feature, fIndex) => (
+                    {plan.newPackageItemList?.map((feature, fIndex) => (
                       <div
                         key={fIndex}
                         className={`flex items-center gap-3 py-2 px-2 ${fIndex % 2 === 1 ? "bg-secondary" : ""}`}
@@ -116,12 +116,12 @@ export default function Page({ packages }: { packages: ExtendedPackages[] }) {
                       </div>
                     ))}
 
-                    {plan.newFeatures.length > 0 && (
+                    {plan.newFeatures?.length > 0 && (
                       <>
                         <div className="pt-2 pb-1 px-2 text-xs text-primary font-medium text-center">
                           以下為新增功能：
                         </div>
-                        {plan.newFeatures.map((feature, fIndex) => (
+                        {plan.newFeatures?.map((feature, fIndex) => (
                           <div
                             key={fIndex}
                             className={`flex items-center gap-3 py-2 px-2 ${fIndex % 2 === 1 ? "bg-secondary" : ""}`}
