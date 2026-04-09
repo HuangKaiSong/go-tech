@@ -1,5 +1,7 @@
 
 import { getBaseUrl } from "@/lib/http";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import PageClient from "./_page";
 
 export default async function ConfirmOrderPage({
@@ -7,6 +9,11 @@ export default async function ConfirmOrderPage({
 }: {
   params: { plan: string } | Promise<{ plan: string }>;
 }) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('GO_TECH_AUTH_TOKEN')?.value;
+  if (!token) {
+    return redirect('/account/login')
+  }
 
   const { plan } = await params;
   const baseUrl = getBaseUrl();
