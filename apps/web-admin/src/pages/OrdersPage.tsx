@@ -743,13 +743,13 @@ const OrdersPage = () => {
             </p>
             {/* 选择客户 */}
             <div className="space-y-3">
-              <Label htmlFor="plan">选择客户</Label>
+              <Label htmlFor="plan">選擇客户</Label>
               <Select
                 value={client}
                 onValueChange={(value) => setClient(value)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="请选择客户" />
+                  <SelectValue placeholder="请選擇客户" />
                 </SelectTrigger>
                 <SelectContent>
                   <div className="p-2">

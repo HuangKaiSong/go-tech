@@ -178,7 +178,7 @@ const RenewOrder = ({ id, detail }: { id: string, detail: any }) => {
         body: JSON.stringify(orderInfo)
       }).then(res => res.json()).catch(err => { throw err })
       if (orderResponse.code === 200) {
-        toast.success('续费成功', { id: toastId })
+        toast.success('續費成功', { id: toastId })
         const orderId = orderResponse.data;
         if (orderInfo.payType === PayTypeEnum.FPS) {
           // 上传凭证

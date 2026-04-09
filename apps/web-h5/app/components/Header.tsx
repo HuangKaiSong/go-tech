@@ -75,7 +75,7 @@ const SelectTenant = ({
         <DialogContent className="w-3xl">
           <DialogHeader className="mb-4">
             <DialogTitle className="flex items-center justify-center gap-2">
-              选择租户
+            選擇租户
             </DialogTitle>
           </DialogHeader>
           {/* 选择租户 */}

@@ -27,7 +27,7 @@ export const GET = async (request: Request) => {
     const content = await readFile(filePath, "utf-8");
     return NextResponse.json({
       code: 200,
-      message: "获取成功",
+      message: "獲取成功",
       data: JSON.parse(content),
     });
   } catch {

@@ -21,7 +21,7 @@ export default function Page({ packages }: { packages: ExtendedPackages[] }) {
   const handleSelectPlan = (plan: ExtendedPackages) => {
     const price = plan.price;
     if (price) {
-      router.push(`/confirm-order/${plan.id}`);
+      router.push(`/select-plan/${plan.id}`);
     }
   };
 

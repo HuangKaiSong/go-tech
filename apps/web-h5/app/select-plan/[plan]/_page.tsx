@@ -79,7 +79,7 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
       >
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-primary mb-2">
-            选择套餐
+            選擇套餐
           </h1>
         </div>
       </section>
@@ -147,7 +147,7 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
             <div className="flex justify-between items-center mb-4">
               <div className="flex items-center gap-3">
                 <div className="w-1 h-6 bg-primary rounded-full"></div>
-                <h3 className="text-lg font-bold text-gray-700">增值服务</h3>
+                <h3 className="text-lg font-bold text-gray-700">增值服務</h3>
               </div>
 
               <div className="flex border border-border rounded-full overflow-hidden">

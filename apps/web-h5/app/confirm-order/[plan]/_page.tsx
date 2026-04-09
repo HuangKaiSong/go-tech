@@ -133,7 +133,7 @@ const ConfirmOrder = ({ planId: planIdFromQuery, data }: { planId?: string, data
         body: JSON.stringify(orderInfo)
       }).then(res => res.json()).catch(err => { throw err })
       if (orderResponse.code === 200) {
-        toast.success('订单创建成功', { id: toastId })
+        toast.success('訂單創建成功', { id: toastId })
         const orderId = orderResponse.data;
         if (orderInfo.payType === PayTypeEnum.FPS) {
           // 上传凭证
@@ -354,7 +354,7 @@ const ConfirmOrder = ({ planId: planIdFromQuery, data }: { planId?: string, data
             <div className="bg-white rounded-lg border border-border p-6 mb-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-1 h-6 bg-primary rounded-full"></div>
-                <h3 className="text-lg font-bold text-gray-700">增值服务</h3>
+                <h3 className="text-lg font-bold text-gray-700">增值服務</h3>
               </div>
 
               <div className="space-y-3">
