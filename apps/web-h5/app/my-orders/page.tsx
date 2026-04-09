@@ -34,6 +34,7 @@ import {
   Users
 } from "lucide-react";
 import { useState } from "react";
+import { OrderStatusEnum } from "../constants/order";
 
 // 增值服務列表
 const valueAddedServices = [
@@ -132,18 +133,20 @@ const mockOrders = [
   },
 ];
 
-const getStatusColor = (status: string) => {
+
+const getStatusColor = (status: OrderStatusEnum) => {
   switch (status) {
-    case "active":
+    case OrderStatusEnum.COMPLETED:
       return "bg-green-500/10 text-green-600 border-green-200";
-    case "pending":
+    case OrderStatusEnum.PROCESSING:
       return "bg-yellow-500/10 text-yellow-600 border-yellow-200";
-    case "expired":
+    case OrderStatusEnum.WAIT_PAY:
       return "bg-gray-500/10 text-gray-600 border-gray-200";
     default:
       return "bg-gray-500/10 text-gray-600 border-gray-200";
   }
 };
+
 
 const MyOrders = () => {
   const { token } = useAuth()
@@ -350,7 +353,7 @@ const MyOrders = () => {
                             {order.platformPackageDto?.packageName}
                           </h3>
                           <Badge className={getStatusColor(order.status)}>
-                            {order.statusLabel}
+                            {order.orderStatusName}
                           </Badge>
                         </div>
                         <p className="text-sm text-muted-foreground">
