@@ -20,7 +20,10 @@ const App = () => (
         <Toaster />
         <Sonner />
         <Suspense fallback={<LoadingSpinner />}>
-          <RouterProvider router={router} />
+          <RouterProvider
+            future={{ v7_startTransition: true }}
+            router={router}
+          />
         </Suspense>
       </TooltipProvider>
     </GlobalProvider>

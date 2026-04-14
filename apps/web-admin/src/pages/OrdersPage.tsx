@@ -11,6 +11,7 @@ import { Order } from "@/mocks/orders";
 import {
   Badge,
   Button,
+  DatePicker,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -80,6 +81,7 @@ const OrdersPage = () => {
 
   const [client, setClient] = useState("");
   const [month, setMonth] = useState<number>(1);
+  const [activateDate, setActivateDate] = useState<any | null>(null);
   const [clientSearch, setClientSearch] = useState("");
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedUpgradePlan, setSelectedUpgradePlan] = useState<string | null>(
@@ -475,6 +477,7 @@ const OrdersPage = () => {
     const orderInfo: any = {
       orderType: OrderTypeEnum.PURCHASE,
       payType: selectedPaymentMethod,
+      activateDate: activateDate.format("YYYY-MM-DD"),
       orderItems: [
         {
           packageId: currentPlan.id,
@@ -497,6 +500,7 @@ const OrdersPage = () => {
           price: serviceTotalPrice,
           packageId: currentPlan?.id,
           itemName: service.name,
+          itemCode: service.id.replace("Price", ""),
         });
       });
     }
@@ -832,6 +836,12 @@ const OrdersPage = () => {
             </div>
             <div className="flex flex-row items-center gap-2">
               <label className="text-sm">生成时间：</label>
+              <DatePicker
+                value={activateDate}
+                onChange={(value) => {
+                  setActivateDate(value);
+                }}
+              />
             </div>
             <div className="flex flex-row items-center gap-2">
               <label className="text-sm">時長：</label>

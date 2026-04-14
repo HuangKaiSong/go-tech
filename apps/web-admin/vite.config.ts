@@ -52,11 +52,6 @@ export default defineConfig(({ mode, }) => {
     server: {
       host: "0.0.0.0",
       proxy: {
-        '/api/pms-resource/web-back/minio/upload': {
-          target: 'http://192.168.0.202:7171',
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api\/pms-resource\/web-back\/minio\/upload/, '/pms-resource/web-back/minio/upload'),
-        },
         [VITE_PROXY_PREFIX]: {
           target: VITE_PROXY_TARGET,
           changeOrigin: true,

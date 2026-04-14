@@ -9,16 +9,19 @@ import {
   DialogHeader,
   DialogTitle,
   Input,
+  Label,
+  Switch,
   toast,
   UploadedFile
 } from "@go-tech-frontend/ui";
 import { useSessionStorageState } from "ahooks";
+import { FileCheck } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Footer from "../../components/Footer";
 import Header from "../../components/Header";
-import { OrderItemTypeEnum, OrderTypeEnum } from '../../constants/order';
+import { OrderInfoType, OrderItemTypeEnum, OrderTypeEnum } from '../../constants/order';
 import { PayTypeEnum } from '../../constants/payment';
 const Fps = dynamic(() => import("../../components/payment/Fps"), { ssr: false })
 
@@ -60,6 +63,9 @@ const ConfirmOrder = ({ planId: planIdFromQuery, data }: { planId?: string, data
   });
   const [month, setMonth] = useState<number>(1)
 
+  const [needInvoice, setNeedInvoice] = useState<boolean>(true);
+  const [invoiceName, setInvoiceName] = useState<string>(user?.nickname || '');
+
   useEffect(() => {
     setHasMounted(true);
     return () => {
@@ -90,7 +96,7 @@ const ConfirmOrder = ({ planId: planIdFromQuery, data }: { planId?: string, data
   const handleFpsPaymentConfirm = async (voucherFile: UploadedFile) => {
     toast.dismiss()
     const toastId = toast.loading("创建订单中...");
-    const orderInfo = {
+    const orderInfo: OrderInfoType = {
       orderType: OrderTypeEnum.PURCHASE,
       payType: selectedPaymentMethod,
       orderItems: [{
@@ -100,6 +106,10 @@ const ConfirmOrder = ({ planId: planIdFromQuery, data }: { planId?: string, data
         price: selectedPlan?.price,
         count: month
       }]
+    }
+    if (needInvoice) {
+      // 发票抬头
+      orderInfo.invoiceHeader = invoiceName;
     }
 
     if (selectedServices) {
@@ -418,6 +428,32 @@ const ConfirmOrder = ({ planId: planIdFromQuery, data }: { planId?: string, data
               </div>
             </div>
           </div>
+
+           <div className="bg-white rounded-lg border border-border p-6 mb-8">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-1 h-6 bg-primary rounded-full"></div>
+              <h2 className="text-lg font-bold text-foreground">發票信息</h2>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <FileCheck className="w-5 h-5 text-primary" />
+                <span className="text-sm text-foreground">是否需要開具發票？</span>
+              </div>
+              <Switch checked={needInvoice} onCheckedChange={setNeedInvoice} />
+            </div>
+            {needInvoice && (
+              <div className="mt-4 space-y-1">
+                <Label className="text-sm text-muted-foreground">發票抬頭（公司或個人名稱）</Label>
+                <Input
+                  value={invoiceName}
+                  onChange={(e) => setInvoiceName(e.target.value)}
+                  placeholder="請輸入公司或個人名稱"
+                  className="h-9"
+                />
+              </div>
+            )}
+          </div>
+          
 
           {/* Navigation Buttons */}
           <div className="flex justify-center gap-4">

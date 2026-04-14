@@ -1,3 +1,5 @@
+import { PayTypeEnum } from "./payment";
+
 export enum OrderTypeEnum {
   /** 购买 */
   PURCHASE = 1,
@@ -28,4 +30,18 @@ export enum OrderStatusEnum {
   CANCELED = 4,
   /** 拒絕 */
   REJECT = 5,
+}
+
+export type OrderInfoType = {
+  orderType: OrderTypeEnum;
+  payType: PayTypeEnum | null;
+  invoiceHeader?: string;
+  orderItems: {
+    packageId?: string | number;
+    itemType: OrderItemTypeEnum;
+    itemName?: string;
+    price?: number;
+    count?: number;
+    itemCode?: string
+  }[]
 }
