@@ -154,6 +154,8 @@ const getStatusColor = (status: OrderStatusEnum) => {
       return "bg-yellow-500/10 text-yellow-600 border-yellow-200";
     case OrderStatusEnum.WAIT_PAY:
       return "bg-gray-500/10 text-gray-600 border-gray-200";
+    case OrderStatusEnum.REJECT:
+      return "bg-red-500/10 text-red-600 border-red-200";
     default:
       return "bg-gray-500/10 text-gray-600 border-gray-200";
   }
@@ -162,7 +164,6 @@ const getStatusColor = (status: OrderStatusEnum) => {
 const OrderDetail = ({ id: orderId, detail }: { id: string, detail: any }) => {
   const router = useRouter();
   const order = detail
-  
 
   const [showAddonsDialog, setShowAddonsDialog] = useState(false);
   const [selectedServices, setSelectedServices] = useState<
@@ -252,7 +253,7 @@ const OrderDetail = ({ id: orderId, detail }: { id: string, detail: any }) => {
               <p className="text-muted-foreground">訂單編號：{order.orderNo}</p>
             </div>
             <Badge
-              className={`text-sm px-3 py-1 ${getStatusColor(order.status)}`}
+              className={`text-sm px-3 py-1 ${getStatusColor(order.orderStatus)}`}
             >
               {order.orderStatusName}
             </Badge>

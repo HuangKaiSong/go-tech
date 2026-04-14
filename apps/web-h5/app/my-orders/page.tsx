@@ -142,6 +142,8 @@ const getStatusColor = (status: OrderStatusEnum) => {
       return "bg-yellow-500/10 text-yellow-600 border-yellow-200";
     case OrderStatusEnum.WAIT_PAY:
       return "bg-gray-500/10 text-gray-600 border-gray-200";
+    case OrderStatusEnum.REJECT:
+      return "bg-red-500/10 text-red-600 border-red-200";
     default:
       return "bg-gray-500/10 text-gray-600 border-gray-200";
   }
@@ -352,7 +354,7 @@ const MyOrders = () => {
                           <h3 className="text-xl font-bold text-foreground">
                             {order.platformPackageDto?.packageName}
                           </h3>
-                          <Badge className={getStatusColor(order.status)}>
+                          <Badge className={getStatusColor(order.orderStatus)}>
                             {order.orderStatusName}
                           </Badge>
                         </div>

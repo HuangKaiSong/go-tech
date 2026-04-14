@@ -7,7 +7,12 @@ export default async function Page({ params }: { params: { id: string } }) {
     
   try {
     const data = await httpClient.get(`/go-tech/platform/packageOrder/detail/${id}`)
-    detail = data.data    
+    detail = data.data
+    if (detail.platformPackageDto?.packageItemList) {
+    detail.platformPackageDto.packageItemList = detail.platformPackageDto.packageItemList.filter((item: any) => {
+      return item.level <= 1;
+    })
+  }
   } catch (error) {
     detail = null
   }

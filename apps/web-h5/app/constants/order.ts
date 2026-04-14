@@ -16,7 +16,7 @@ export enum OrderItemTypeEnum {
   ADDITION = 2,
 }
 
-// 订单状态（1 - 待确认，2 - 待付款，3 - 已完成，4 - 已取消）
+// 订单状态（1 - 待确认，2 - 待付款，3 - 已完成，4 - 已取消, 5 - 拒絕）
 export enum OrderStatusEnum {
   /** 待支付 */
   WAIT_PAY = 2,
@@ -26,4 +26,6 @@ export enum OrderStatusEnum {
   COMPLETED = 3,
   /** 取消 */
   CANCELED = 4,
+  /** 拒絕 */
+  REJECT = 5,
 }

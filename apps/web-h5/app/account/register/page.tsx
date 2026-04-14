@@ -5,12 +5,11 @@ import Logo from "@/assets/Gotech_Logo.webp";
 import authBgImg from "@/assets/background.webp";
 import { sendToBetterStack } from "@/lib/betterstack-logger";
 import { useCountDown } from "@go-tech-frontend/lib";
-import { Button, Checkbox, Input } from "@go-tech-frontend/ui";
+import { Button, Checkbox, Input, toast } from "@go-tech-frontend/ui";
 import { CircleAlert, X } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { toast } from "@go-tech-frontend/ui";
 import z from "zod";
 
 const verificationCodeSchema = z.object({
@@ -287,6 +286,7 @@ const Register = () => {
         company: companyName,
         password,
       } = result.data;
+      const type = new URLSearchParams(window.location.search).get("type") || undefined;
 
       const response = await fetch(
         "/go-tech/platform/platformCustomer/register",
@@ -301,6 +301,7 @@ const Register = () => {
             phone,
             companyName,
             password,
+            type,
           }),
         }
       );

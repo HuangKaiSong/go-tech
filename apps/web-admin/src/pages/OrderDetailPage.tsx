@@ -71,6 +71,15 @@ const OrderDetailPage = () => {
             已取消
           </Badge>
         );
+      case OrderStatusEnum.REJECT:
+        return (
+          <Badge
+            variant="outline"
+            className="text-destructive border-destructive"
+          >
+            已拒絕
+          </Badge>
+        );
       default:
         return (
           <Badge variant="outline" className="text-primary border-primary">

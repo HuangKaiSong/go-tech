@@ -28,7 +28,7 @@ export const OrderItemTypeLabel: Record<OrderItemTypeEnum, string> = {
   [OrderItemTypeEnum.ADDITION]: "增值服务",
 };
 
-// 订单状态（1 - 待确认，2 - 待付款，3 - 已完成，4 - 已取消）
+// 订单状态（1 - 待确认，2 - 待付款，3 - 已完成，4 - 已取消, 5 - 拒絕）
 export enum OrderStatusEnum {
   /** 待支付 */
   WAIT_PAY = 2,
@@ -38,6 +38,8 @@ export enum OrderStatusEnum {
   COMPLETED = 3,
   /** 取消 */
   CANCELED = 4,
+  /** 拒绝 */
+  REJECT = 5,
 }
 
 export const OrderStatusLabel: Record<OrderStatusEnum, string> = {
@@ -45,4 +47,5 @@ export const OrderStatusLabel: Record<OrderStatusEnum, string> = {
   [OrderStatusEnum.PROCESSING]: "待确认",
   [OrderStatusEnum.CANCELED]: "已取消",
   [OrderStatusEnum.COMPLETED]: "已完成",
+  [OrderStatusEnum.REJECT]: "已拒絕",
 };

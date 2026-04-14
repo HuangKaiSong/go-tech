@@ -166,7 +166,7 @@ const OrdersPage = () => {
     mutationFn: async (orderId: number) => {
       try {
         toast.dismiss();
-        toastId.current = toast.loading("处理中...");
+        toastId.current = toast.loading("處理中...");
         const url = `${import.meta.env.VITE_PROXY_PREFIX}/go-tech/platform/packageOrder/confirm?id=${orderId.toString()}`;
         const res = await fetch(url, {
           method: "POST",
@@ -195,6 +195,48 @@ const OrdersPage = () => {
     },
     onError: (error) => {
       toast.error("订单确认失败", {
+        id: toastId.current,
+        description: error.message,
+        onDismiss() {
+          toastId.current = null;
+        },
+      });
+      console.log(error);
+    },
+  });
+  const rejectpayment = useMutation({
+    mutationFn: async (orderId: number) => {
+      try {
+        toast.dismiss();
+        toastId.current = toast.loading("處理中...");
+        const url = `${import.meta.env.VITE_PROXY_PREFIX}/go-tech/platform/packageOrder/reject?id=${orderId.toString()}`;
+        const res = await fetch(url, {
+          method: "POST",
+        });
+        const response = await res.json();
+        if (!response || !response.code || response.code !== 200) {
+          throw new Error("Failed to fetch data");
+        }
+
+        return response;
+      } catch (error) {
+        console.log(error);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      toast.success("拒絕成功", {
+        id: toastId.current,
+        onDismiss() {
+          toastId.current = null;
+        },
+      });
+      refetch();
+      setConfirmDialogOpen(false);
+      setSelectedOrder(null);
+    },
+    onError: (error) => {
+      toast.error("拒絕失敗", {
         id: toastId.current,
         description: error.message,
         onDismiss() {
@@ -254,9 +296,10 @@ const OrdersPage = () => {
 
   const handleRejectPayment = () => {
     if (selectedOrder) {
-      refetch();
-      setConfirmDialogOpen(false);
-      setSelectedOrder(null);
+      // refetch();
+      // setConfirmDialogOpen(false);
+      // setSelectedOrder(null);
+      rejectpayment.mutateAsync(selectedOrder.id);
     }
   };
 
@@ -281,6 +324,15 @@ const OrdersPage = () => {
             className="text-destructive border-destructive"
           >
             已取消
+          </Badge>
+        );
+      case OrderStatusEnum.REJECT:
+        return (
+          <Badge
+            variant="outline"
+            className="text-destructive border-destructive"
+          >
+            已拒絕
           </Badge>
         );
       default:
@@ -777,6 +829,9 @@ const OrdersPage = () => {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div className="flex flex-row items-center gap-2">
+              <label className="text-sm">生成时间：</label>
             </div>
             <div className="flex flex-row items-center gap-2">
               <label className="text-sm">時長：</label>
