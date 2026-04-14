@@ -115,7 +115,9 @@ const ConfirmOrder = ({ planId: planIdFromQuery, data }: { planId?: string, data
             count: quantity,
             price: serviceTotalPrice,
             packageId: selectedPlan?.id,
-            itemName: service.name
+            itemName: service.name,
+            // @ts-ignore
+            itemCode: serviceId.replace('Price', '')
           })
         })
     }
