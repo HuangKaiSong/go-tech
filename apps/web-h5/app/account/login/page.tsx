@@ -11,7 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { sendToBetterStack } from "@/lib/betterstack-logger";
 import { toast } from "@go-tech-frontend/ui";
 import { Eye, EyeOff, X } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import z from "zod";
 
 const signinSchema = z.object({
@@ -20,9 +20,13 @@ const signinSchema = z.object({
 });
 
 const Login = () => {
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email");
+  const type = searchParams.get("type");
+
   const router = useRouter();
   const { setUser, setToken, refetchTenants } = useAuth();
-  const [account, setAccount] = useState("");
+  const [account, setAccount] = useState(email || "");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -41,12 +45,19 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/go-tech/platform/platformCustomer/login", {
+      let uri = type === 'user' ? '/pms-admin/web-back/admin/accept' : "/go-tech/platform/platformCustomer/login"
+
+      const body = type === 'user' ? {
+        email: result.data.username,
+        password: result.data.password,
+      } : result.data
+
+      const response = await fetch(uri, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(result.data),
+        body: JSON.stringify(body),
       });
       if (!response.ok) {
         throw response;
