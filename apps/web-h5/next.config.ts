@@ -42,6 +42,10 @@ const nextConfig: NextConfig = {
         source: '/pms-resource/:path*',
         destination: process.env.NEXT_PUBLIC_API_URL + '/pms-resource/:path*', // 替换为实际后端地址
       },
+      {
+        source: '/pms-admin/:path*',
+        destination: process.env.NEXT_PUBLIC_API_URL + '/pms-admin/:path*', // 替换为实际后端地址
+      },
     ]
 
     // if (process.env.NODE_ENV === 'development') {
