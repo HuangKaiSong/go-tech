@@ -157,6 +157,8 @@ const ConfirmOrder = ({ planId: planIdFromQuery, data }: { planId?: string, data
               payEvidence: voucherFile.url
             })
           }).catch(err => { throw err }).then(res => res.json())
+
+          router.push(`/my-orders/${orderId}`)
         }
     
         setShowPaymentDialog(false);

@@ -24,12 +24,14 @@ export enum OrderStatusEnum {
   WAIT_PAY = 2,
   /** 待确认 */
   PROCESSING = 1,
+  /** 待開通 */
+  ACTIVATION = 3,
   /** 已完成 */
-  COMPLETED = 3,
+  COMPLETED = 4,
   /** 取消 */
-  CANCELED = 4,
-  /** 拒絕 */
-  REJECT = 5,
+  CANCELED = 5,
+  /** 拒绝 */
+  REJECT = 6,
 }
 
 export type OrderInfoType = {

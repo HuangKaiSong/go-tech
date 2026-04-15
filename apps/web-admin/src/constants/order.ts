@@ -34,17 +34,20 @@ export enum OrderStatusEnum {
   WAIT_PAY = 2,
   /** 待确认 */
   PROCESSING = 1,
+  /** 待開通 */
+  ACTIVATION = 3,
   /** 已完成 */
-  COMPLETED = 3,
+  COMPLETED = 4,
   /** 取消 */
-  CANCELED = 4,
+  CANCELED = 5,
   /** 拒绝 */
-  REJECT = 5,
+  REJECT = 6,
 }
 
 export const OrderStatusLabel: Record<OrderStatusEnum, string> = {
-  [OrderStatusEnum.WAIT_PAY]: "待支付",
-  [OrderStatusEnum.PROCESSING]: "待确认",
+  [OrderStatusEnum.WAIT_PAY]: "待付款",
+  [OrderStatusEnum.PROCESSING]: "待確認",
+  [OrderStatusEnum.ACTIVATION]: "待開通",
   [OrderStatusEnum.CANCELED]: "已取消",
   [OrderStatusEnum.COMPLETED]: "已完成",
   [OrderStatusEnum.REJECT]: "已拒絕",
