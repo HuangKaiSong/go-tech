@@ -2,11 +2,40 @@ import type { NextConfig } from "next";
 import createNextIntlPlugin from 'next-intl/plugin';
 import { Rewrite } from "next/dist/lib/load-custom-routes";
 
+const isDev = process.env.NODE_ENV === 'development'
+
+const cspHeader = `
+    default-src 'self';
+    script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''};
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' blob: data: https://go-techs.com https://admin.go-techs.com;
+    connect-src 'self' https://go-techs.com https://admin.go-techs.com;
+    font-src 'self';
+    object-src 'none';
+    base-uri 'self';
+    form-action 'self';
+    frame-ancestors 'self' https://admin.go-techs.com;
+    upgrade-insecure-requests;
+`
+
 const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
   reactStrictMode: false,
   allowedDevOrigins: ['localhost:5173', '192.168.0.168:5173', '192.168.0.202:3201', 'admin.go-techs.com'],
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: cspHeader.replace(/\s{2,}/g, ' ').trim(),
+          },
+        ],
+      },
+    ]
+  },
   async rewrites() {
     const proxy: Rewrite[] = [
       {
