@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "@/app/components/Link";
-import Logo from "@/assets/Gotech_Logo.webp";
+// import Logo from "@/assets/Gotech_Logo.webp";
 import {
   Crown,
   LogOut,
@@ -81,7 +81,7 @@ const SelectTenant = ({
           {/* 选择租户 */}
           <div className="grid grid-cols-3 gap-4 items-center justify-center">
             {tenants?.map((tenant) => (
-              <div key={tenant.tenantId} onClick={() => handleClick(tenant)} className="flex flex-col items-center rounded-lg border-solid border-1 border-transparent py-2 gap-y-2 transition-all hover:border-primary active:hover:border-primary">
+              <div key={tenant.tenantId} onClick={() => handleClick(tenant)} className="flex flex-col items-center rounded-lg border-solid border border-transparent py-2 gap-y-2 transition-all hover:border-primary active:hover:border-primary">
                 <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center">
                   <span className="text-xl">{tenant.tenantName?.slice(0, 1)}</span>
                 </div>
@@ -101,7 +101,7 @@ const Header = ({ heroBg, initialBlocks }: { heroBg?: string | StaticImageData, 
   const { hasIframe } = useIframeContext();
   const { user, isLoggedIn, logout, token, tenants } = useAuth();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const defaultLogoSrc = typeof Logo === "string" ? Logo : Logo.src;
+  const defaultLogoSrc = "/images/Gotech_Logo.webp";
   const block = initialBlocks?.find((block) => block.type === "common");
   const {logo = defaultLogoSrc ,phoneValue = '+652 8888 8888', emailValue = 'info@go-techs.com'} = block?.values || {};
 
