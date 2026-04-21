@@ -1,16 +1,15 @@
 "use client";
 
 import Link from "@/app/components/Link";
-import Logo from "@/assets/Gotech_Logo.webp";
+// import Logo from "@/assets/Gotech_Logo.webp";
 import authBgImg from "@/assets/background.webp";
 import { sendToBetterStack } from "@/lib/betterstack-logger";
 import { useCountDown } from "@go-tech-frontend/lib";
-import { Button, Input } from "@go-tech-frontend/ui";
+import { Button, Input, toast } from "@go-tech-frontend/ui";
 import { CircleAlert, X } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { toast } from "@go-tech-frontend/ui";
 import z from "zod";
 
 const sendCodeSchema = z.object({
@@ -216,6 +215,8 @@ const Register = () => {
       <Image
         src={authBgImg}
         alt="Background"
+        loading="eager"
+        style={{ width: "auto" }}
         className="absolute inset-0 h-full object-cover"
       />
       <div className="absolute inset-0 bg-foreground/30 backdrop-blur-sm" />
@@ -233,10 +234,12 @@ const Register = () => {
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
           <Image
-            src={Logo}
+            src="/images/Gotech_Logo.webp"
             alt="logo"
             className="w-40 h-auto"
             loading="eager"
+            width={160}
+            height={160}
           />
         </div>
 

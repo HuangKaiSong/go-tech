@@ -5,7 +5,7 @@ import { Button, Input } from "@go-tech-frontend/ui";
 import Image from "next/image";
 import { useState } from "react";
 
-import Logo from "@/assets/Gotech_Logo.webp";
+// import Logo from "@/assets/Gotech_Logo.webp";
 import authBgImg from "@/assets/background.webp";
 import { useAuth } from "@/contexts/AuthContext";
 import { sendToBetterStack } from "@/lib/betterstack-logger";
@@ -95,6 +95,8 @@ const Login = () => {
       <Image
         src={authBgImg}
         alt="Background"
+        loading="eager"
+        style={{ width: "auto" }}
         className="absolute inset-0 w-full h-full object-cover"
       />
       <div className="absolute inset-0 bg-foreground/30 backdrop-blur-sm" />
@@ -111,7 +113,7 @@ const Login = () => {
 
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <Image src={Logo} alt="logo" className="w-40" />
+          <Image src="/images/Gotech_Logo.webp" width={160} height={160} alt="logo" className="w-40" />
         </div>
 
         <h1 className="text-2xl font-bold text-center text-foreground mb-8">

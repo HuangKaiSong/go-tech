@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "@/app/components/Link";
-import Logo from "@/assets/Gotech_Logo.webp";
+// import Logo from "@/assets/Gotech_Logo.webp";
 import authBgImg from "@/assets/background.webp";
 import { sendToBetterStack } from "@/lib/betterstack-logger";
 import { useCountDown } from "@go-tech-frontend/lib";
@@ -344,6 +344,8 @@ const Register = () => {
       <Image
         src={authBgImg}
         alt="Background"
+        loading="eager"
+        style={{ width: "auto" }}
         className="absolute inset-0 w-full h-full object-cover"
       />
       <div className="absolute inset-0 bg-foreground/30 backdrop-blur-sm" />
@@ -361,9 +363,11 @@ const Register = () => {
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
           <Image
-            src={Logo}
+            src="/images/Gotech_Logo.webp"
             alt="logo"
             className="w-40 h-auto"
+            width={160}
+            height={160}
             loading="eager"
           />
         </div>

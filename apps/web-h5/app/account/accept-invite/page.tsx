@@ -2,7 +2,7 @@
 
 import Link from "@/app/components/Link";
 import authBackground from "@/assets/auth-background.jpg";
-import LogoImg from "@/assets/Gotech_Logo.webp";
+// import LogoImg from "@/assets/Gotech_Logo.webp";
 import { Button } from "@go-tech-frontend/ui";
 import { LogIn, UserPlus, X } from "lucide-react";
 import Image from "next/image";
@@ -46,10 +46,12 @@ const AcceptInvite = () => {
   const Logo = () => (
     <div className="flex flex-col items-center mb-8">
       <Image
-        src={LogoImg}
+        src="/images/Gotech_Logo.webp"
         alt="logo"
         className="w-40 h-auto"
         loading="eager"
+        width={160}
+        height={160}
       />
     </div>
   );
