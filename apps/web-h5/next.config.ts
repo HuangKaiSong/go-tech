@@ -7,31 +7,6 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   reactStrictMode: false,
   allowedDevOrigins: ['localhost:5173', '192.168.0.168:5173', '192.168.0.202:3201', 'admin.go-techs.com'],
-  async headers() {
-    return [
-      {
-        source: "/_next/:path*",
-        headers: [
-          {
-            key: "Access-Control-Allow-Origin",
-            value: "https://admin.go-techs.com",
-          },
-          {
-            key: "Access-Control-Allow-Methods",
-            value: "GET, OPTIONS",
-          },
-          {
-            key: "Access-Control-Allow-Headers",
-            value: "Content-Type, Authorization",
-          },
-          {
-            key: "Vary",
-            value: "Origin",
-          },
-        ],
-      },
-    ];
-  },
   async rewrites() {
     const proxy: Rewrite[] = [
       {
