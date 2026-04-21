@@ -32,6 +32,10 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: cspHeader.replace(/\s{2,}/g, ' ').trim(),
           },
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          }
         ],
       },
     ]
