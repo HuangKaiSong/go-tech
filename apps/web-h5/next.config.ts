@@ -10,7 +10,7 @@ const cspHeader = `
     style-src 'self' 'unsafe-inline';
     img-src 'self' blob: data: https://go-techs.com https://admin.go-techs.com;
     connect-src 'self' https://go-techs.com https://admin.go-techs.com;
-    font-src 'self';
+    font-src 'self' https://at.alicdn.com;
     object-src 'none';
     base-uri 'self';
     form-action 'self';
