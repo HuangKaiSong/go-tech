@@ -1,5 +1,6 @@
 "use client";
 
+import valueAddedServices from '@/app/constants/addedServices';
 import servicePlanBg from "@/assets/service-plan-bg.jpg";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -24,16 +25,6 @@ import Header from "../../components/Header";
 import { OrderInfoType, OrderItemTypeEnum, OrderTypeEnum } from '../../constants/order';
 import { PayTypeEnum } from '../../constants/payment';
 const Fps = dynamic(() => import("../../components/payment/Fps"), { ssr: false })
-
-
-// Value-added services
-const valueAddedServices = [
-  { id: "rentSysPrice", name: "Sales Module（租務）", price: 20 },
-  { id: "venueSysPrice", name: "跟進 Module（維務）", price: 20 },
-  { id: "accountingSysPrice", name: "Xero Module（會計）", price: 50 },
-  { id: "custServiceSysPrice", name: "客服 Module（維務）", price: 20 },
-  { id: "addUnitPrice", name: "增加單位數量", price: 80 },
-];
 
 const ConfirmOrder = ({ planId: planIdFromQuery, data }: { planId?: string, data?: Packages }) => {
   const router = useRouter();

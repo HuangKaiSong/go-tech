@@ -2,6 +2,7 @@
 
 import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
+import valueAddedServices from '@/app/constants/addedServices';
 import servicePlanBg from "@/assets/service-plan-bg.jpg";
 import { Button } from "@go-tech-frontend/ui";
 import { useSessionStorageState } from "ahooks";
@@ -12,15 +13,6 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-
-// Value-added services
-const valueAddedServices = [
-  { id: "rentSysPrice", name: "Sales Module（租務）", price: 20 },
-  { id: "venueSysPrice", name: "跟進 Module（維務）", price: 20 },
-  { id: "accountingSysPrice", name: "Xero Module（會計）", price: 50 },
-  { id: "custServiceSysPrice", name: "客服 Module（維務）", price: 20 },
-  { id: "addUnitPrice", name: "增加單位數量", price: 80 },
-];
 
 const SelectPlan = ({ plan }: { plan: Packages }) => {
   const router = useRouter();
