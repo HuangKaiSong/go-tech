@@ -337,6 +337,18 @@ const OrdersPage = () => {
             已拒絕
           </Badge>
         );
+      case OrderStatusEnum.ACTIVATION:
+        return (
+          <Badge variant="outline" className="text-primary border-primary">
+            待開通
+          </Badge>
+        );
+      case OrderStatusEnum.WAIT_PAY:
+        return (
+          <Badge variant="outline" className="text-primary border-primary">
+            待支付
+          </Badge>
+        );
       default:
         return (
           <Badge variant="outline" className="text-primary border-primary">
