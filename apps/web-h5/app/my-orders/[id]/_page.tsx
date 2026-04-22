@@ -242,7 +242,7 @@ const OrderDetail = ({ id: orderId, detail }: { id: string, detail: any }) => {
                           className="flex justify-between items-center pl-4"
                         >
                           <span className="text-sm">
-                            {addon.name} × {addon.count}
+                            {addon.itemName} × {addon.count}
                             <span className="text-muted-foreground ml-2">
                               ({addon.price}/個)
                             </span>
