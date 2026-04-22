@@ -19,20 +19,13 @@ import {
 } from "@go-tech-frontend/ui";
 import {
   ArrowLeft,
-  Building,
-  Calendar,
   CheckCircle,
-  Clock,
   Download,
-  Droplets,
-  FileText,
-  LayoutDashboard,
   Minus,
   Package,
   Plus,
   RefreshCw,
-  Settings,
-  Users
+  Settings
 } from "lucide-react";
 import { GetStaticPaths, GetStaticProps } from "next";
 import { useRouter } from "next/navigation";
@@ -46,84 +39,6 @@ const valueAddedServices = [
   { id: "data-backup", name: "數據備份服務", price: 200 },
   { id: "custom-report", name: "自訂報表功能", price: 400 },
 ];
-
-// 模擬訂單數據
-const mockOrders: Record<
-  string,
-  {
-    id: string;
-    orderDate: string;
-    planName: string;
-    planSubtitle: string;
-    price: string;
-    currency: string;
-    status: string;
-    statusLabel: string;
-    features: {
-      icon: React.ComponentType<{ className?: string }>;
-      label: string;
-    }[];
-    addons: {
-      name: string;
-      quantity: number;
-      price: string;
-      unitPrice: string;
-    }[];
-    expiryDate: string;
-    paymentMethod: string;
-    transactionId: string;
-  }
-> = {
-  "ORD-2024-001": {
-    id: "ORD-2024-001",
-    orderDate: "2024-01-15",
-    planName: "套餐B",
-    planSubtitle: "最多可創建100個單位",
-    price: "$3,200",
-    currency: "HKD",
-    status: "active",
-    statusLabel: "使用中",
-    features: [
-      { icon: Users, label: "管理層" },
-      { icon: FileText, label: "代理列表" },
-      { icon: Users, label: "客戶列表" },
-      { icon: FileText, label: "合同列表(線上&線下合同)" },
-      { icon: Building, label: "單位列表" },
-      { icon: Droplets, label: "水電列表" },
-      { icon: Clock, label: "跟進列表" },
-      { icon: Calendar, label: "日程" },
-      { icon: LayoutDashboard, label: "dashboard" },
-    ],
-    addons: [
-      { name: "額外50個單位", quantity: 2, price: "$1,000", unitPrice: "$500" },
-    ],
-    expiryDate: "2025-01-15",
-    paymentMethod: "微信支付",
-    transactionId: "WX20240115123456789",
-  },
-  "ORD-2023-042": {
-    id: "ORD-2023-042",
-    orderDate: "2023-06-20",
-    planName: "套餐A",
-    planSubtitle: "最多可創建25個單位",
-    price: "$1,000",
-    currency: "HKD",
-    status: "expired",
-    statusLabel: "已過期",
-    features: [
-      { icon: Users, label: "管理層" },
-      { icon: FileText, label: "代理列表" },
-      { icon: Users, label: "客戶列表" },
-      { icon: FileText, label: "合同列表(線上&線下合同)" },
-      { icon: Building, label: "單位列表" },
-      { icon: Droplets, label: "水電列表" },
-    ],
-    addons: [],
-    expiryDate: "2024-06-20",
-    paymentMethod: "支付寶",
-    transactionId: "ALI20230620987654321",
-  },
-};
 
 type OrderProps = {
   id: string;
@@ -388,7 +303,7 @@ const OrderDetail = ({ id: orderId, detail }: { id: string, detail: any }) => {
             {
               order.orderStatus === OrderStatusEnum.COMPLETED && (
                 <div className="flex flex-col sm:flex-row gap-4 justify-end">
-                  <Button variant="outline" className="gap-2">
+                  <Button variant="outline" className="gap-2" onClick={() => router.push(`/invoice/${order.id}`)}>
                     <Download className="w-4 h-4" />
                     下載發票
                   </Button>
