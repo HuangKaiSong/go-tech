@@ -248,7 +248,7 @@ const OrderDetail = ({ id: orderId, detail }: { id: string, detail: any }) => {
                             </span>
                           </span>
                           <span className="font-medium">
-                            {addon.price} HKD
+                            {addon.amount} HKD
                           </span>
                         </div>
                       ))}

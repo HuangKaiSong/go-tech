@@ -3,6 +3,7 @@
 import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
 import Link from "@/app/components/Link";
+import valueAddedServices from '@/app/constants/addedServices';
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Badge,
@@ -13,126 +14,20 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
-  DialogTitle,
-  Separator,
+  DialogTitle
 } from "@go-tech-frontend/ui";
 import { useAsyncEffect } from "ahooks";
 import {
   ArrowUpCircle,
-  Building,
-  Calendar,
-  Check,
-  Clock,
-  Droplets,
   Eye,
-  FileText,
-  LayoutDashboard,
-  Minus,
   Package,
-  Plus,
   Settings,
-  Users
+  ShoppingCart
 } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { OrderStatusEnum } from "../constants/order";
-
-// 增值服務列表
-const valueAddedServices = [
-  { id: "extra-50-units", name: "額外50個單位", price: 500 },
-  { id: "extra-100-units", name: "額外100個單位", price: 900 },
-  { id: "priority-support", name: "優先客服支援", price: 300 },
-  { id: "data-backup", name: "數據備份服務", price: 200 },
-  { id: "custom-report", name: "自訂報表功能", price: 400 },
-];
-
-// 套餐升級選項
-const upgradePlans = [
-  {
-    id: "plan-b",
-    name: "套餐B",
-    subtitle: "最多可創建100個單位",
-    price: 3200,
-    features: [
-      "管理層",
-      "代理列表",
-      "客戶列表",
-      "合同列表",
-      "單位列表",
-      "水電列表",
-      "跟進列表",
-      "日程",
-      "dashboard",
-    ],
-  },
-  {
-    id: "plan-c",
-    name: "套餐C",
-    subtitle: "最多可創建500個單位",
-    price: 6800,
-    features: [
-      "管理層",
-      "代理列表",
-      "客戶列表",
-      "合同列表",
-      "單位列表",
-      "水電列表",
-      "跟進列表",
-      "日程",
-      "dashboard",
-      "高級報表",
-      "API接口",
-      "多公司管理",
-    ],
-  },
-];
-
-// 模擬訂單數據
-const mockOrders = [
-  {
-    id: "ORD-2024-001",
-    orderDate: "2024-01-15",
-    planName: "套餐B",
-    planSubtitle: "最多可創建100個單位",
-    price: "$3,200",
-    currency: "HKD",
-    status: "active",
-    statusLabel: "使用中",
-    features: [
-      { icon: Users, label: "管理層" },
-      { icon: FileText, label: "代理列表" },
-      { icon: Users, label: "客戶列表" },
-      { icon: FileText, label: "合同列表(線上&線下合同)" },
-      { icon: Building, label: "單位列表" },
-      { icon: Droplets, label: "水電列表" },
-      { icon: Clock, label: "跟進列表" },
-      { icon: Calendar, label: "日程" },
-      { icon: LayoutDashboard, label: "dashboard" },
-    ],
-    addons: [{ name: "額外50個單位", quantity: 2, price: "$500" }],
-    expiryDate: "2025-01-15",
-  },
-  {
-    id: "ORD-2023-042",
-    orderDate: "2023-06-20",
-    planName: "套餐A",
-    planSubtitle: "最多可創建25個單位",
-    price: "$1,000",
-    currency: "HKD",
-    status: "expired",
-    statusLabel: "已過期",
-    features: [
-      { icon: Users, label: "管理層" },
-      { icon: FileText, label: "代理列表" },
-      { icon: Users, label: "客戶列表" },
-      { icon: FileText, label: "合同列表(線上&線下合同)" },
-      { icon: Building, label: "單位列表" },
-      { icon: Droplets, label: "水電列表" },
-    ],
-    addons: [],
-    expiryDate: "2024-06-20",
-  },
-];
-
+import { AddService } from "./AddService";
+import { Upgrade } from "./Upgrade";
 
 const getStatusColor = (status: OrderStatusEnum) => {
   switch (status) {
@@ -156,6 +51,9 @@ const MyOrders = () => {
   const [orderList, setOrderList] = useState<any[]>([])
   const [showAddonsDialog, setShowAddonsDialog] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const selectOrder = useMemo(() => {
+    return orderList.find(order => order.id === selectedOrderId);
+  }, [orderList, selectedOrderId])
   const [selectedServices, setSelectedServices] = useState<
     Record<string, number>
   >({});
@@ -194,9 +92,15 @@ const MyOrders = () => {
   };
 
   const calculateAddonsTotal = () => {
+    if (!selectedOrderId) return 0
     return Object.entries(selectedServices).reduce((sum, [id, qty]) => {
       const service = valueAddedServices.find(s => s.id === id);
-      return sum + (service ? service.price * qty : 0);
+      let price = 0
+      if (service) {
+        price = selectOrder?.platformPackageDto?.[service.id] || 0;
+      }
+      
+      return sum + (service ? price * qty : 0);
     }, 0);
   };
 
@@ -204,12 +108,6 @@ const MyOrders = () => {
     setSelectedOrderId(orderId);
     setSelectedServices({});
     setShowAddonsDialog(true);
-  };
-
-  const handleConfirmAddons = () => {
-    setShowAddonsDialog(false);
-    setPaymentType("addons");
-    setShowPaymentDialog(true);
   };
 
   const handlePaymentSelect = (method: string) => {
@@ -239,28 +137,6 @@ const MyOrders = () => {
     setShowUpgradeDialog(true);
   };
 
-  const toggleUpgradeService = (serviceId: string) => {
-    setUpgradeSelectedServices(prev => {
-      if (prev[serviceId]) {
-        const { [serviceId]: _, ...rest } = prev;
-        return rest;
-      }
-      return { ...prev, [serviceId]: 1 };
-    });
-  };
-
-  const updateUpgradeQuantity = (serviceId: string, delta: number) => {
-    setUpgradeSelectedServices(prev => {
-      const current = prev[serviceId] || 0;
-      const newQty = Math.max(0, current + delta);
-      if (newQty === 0) {
-        const { [serviceId]: _, ...rest } = prev;
-        return rest;
-      }
-      return { ...prev, [serviceId]: newQty };
-    });
-  };
-
   const calculateUpgradeAddonsTotal = () => {
     return Object.entries(upgradeSelectedServices).reduce((sum, [id, qty]) => {
       const service = valueAddedServices.find(s => s.id === id);
@@ -268,14 +144,8 @@ const MyOrders = () => {
     }, 0);
   };
 
-  const handleConfirmUpgrade = () => {
-    setShowUpgradeDialog(false);
-    setPaymentType("upgrade");
-    setShowPaymentDialog(true);
-  };
-
   const getUpgradePrice = () => {
-    const plan = upgradePlans.find(p => p.id === selectedUpgradePlan);
+    const plan = orderList.find(p => p.id === selectedUpgradePlan);
     return plan ? plan.price : 0;
   };
 
@@ -407,7 +277,7 @@ const MyOrders = () => {
                                   <span>
                                     {addon.itemName} x{addon.count}
                                   </span>
-                                  <span>{addon.price}</span>
+                                  <span>{addon.amount}</span>
                                 </div>
                               ))}
                             </div>
@@ -453,29 +323,33 @@ const MyOrders = () => {
                         </Button>
                       </Link>
                         <>
-                          {/* <Button
-                            variant="outline"
-                            size="sm"
-                            className="gap-2"
-                            onClick={() => openAddonsDialog(order.id)}
-                          >
-                            <ShoppingCart className="w-4 h-4" />
-                            購買增值服務
-                          </Button>
-                          {order.planName !== "套餐C" && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="gap-2 border-primary text-primary hover:bg-primary hover:text-white"
-                              onClick={() => openUpgradeDialog(order.id)}
-                            >
-                              <ArrowUpCircle className="w-4 h-4" />
-                              套餐升級
-                            </Button>
-                          )} */}
-                          <Link href={`/renew-order/${order.id}`}>
-                            <Button size="sm">續費</Button>
-                          </Link>
+                          {order.orderStatus === OrderStatusEnum.COMPLETED && (
+                            <>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="gap-2"
+                                onClick={() => {
+                                  openAddonsDialog(order.id)
+                                }}
+                              >
+                                <ShoppingCart className="w-4 h-4" />
+                                購買增值服務
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="gap-2 border-primary text-primary hover:bg-primary hover:text-white"
+                                onClick={() => openUpgradeDialog(order.id)}
+                              >
+                                <ArrowUpCircle className="w-4 h-4" />
+                                套餐升級
+                              </Button>
+                              <Link href={`/renew-order/${order.id}`}>
+                                <Button size="sm">續費</Button>
+                              </Link>
+                            </>
+                          )}
                         </>
                       {order.status === "expired" && (
                         <Link href="/service-plan">
@@ -508,295 +382,14 @@ const MyOrders = () => {
       </section>
 
       {/* 購買增值服務對話框 */}
-      <Dialog open={showAddonsDialog} onOpenChange={setShowAddonsDialog}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>購買增值服務</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 mt-4">
-            {valueAddedServices.map(service => {
-              const isSelected = selectedServices[service.id] !== undefined;
-              const quantity = selectedServices[service.id] || 0;
-
-              return (
-                <div
-                  key={service.id}
-                  className={`p-4 rounded-lg border-2 transition-colors ${
-                    isSelected ? "border-primary bg-primary/5" : "border-border"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => toggleService(service.id)}
-                        className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary"
-                      />
-                      <div>
-                        <p className="font-medium">{service.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          ${service.price} HKD / 個
-                        </p>
-                      </div>
-                    </div>
-
-                    {isSelected && (
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => updateQuantity(service.id, -1)}
-                          className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-muted transition-colors"
-                        >
-                          <Minus className="w-4 h-4" />
-                        </button>
-                        <span className="w-8 text-center font-medium">
-                          {quantity}
-                        </span>
-                        <button
-                          onClick={() => updateQuantity(service.id, 1)}
-                          className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-muted transition-colors"
-                        >
-                          <Plus className="w-4 h-4" />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  {isSelected && quantity > 0 && (
-                    <div className="mt-2 pt-2 border-t border-foreground/30 text-right text-sm text-muted-foreground">
-                      小計：
-                      <span className="font-medium text-foreground">
-                        ${(service.price * quantity).toLocaleString()} HKD
-                      </span>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-
-            <Separator />
-
-            <div className="flex justify-between items-center text-lg font-bold">
-              <span>總計</span>
-              <span className="text-primary">
-                ${calculateAddonsTotal().toLocaleString()} HKD
-              </span>
-            </div>
-
-            <div className="flex gap-3 pt-2">
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={() => setShowAddonsDialog(false)}
-              >
-                取消
-              </Button>
-              <Button
-                className="flex-1"
-                disabled={calculateAddonsTotal() === 0}
-                onClick={handleConfirmAddons}
-              >
-                確認購買
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {showAddonsDialog && (
+        <AddService data={selectOrder} open={showAddonsDialog} onOpenChange={setShowAddonsDialog} />
+      )}
 
       {/* 套餐升級對話框 */}
-      <Dialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <ArrowUpCircle className="w-5 h-5 text-primary" />
-              套餐升級
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 mt-4">
-            <p className="text-sm text-muted-foreground">
-              選擇您想升級的套餐方案，享受更多功能與服務
-            </p>
-
-            {upgradePlans.map(plan => {
-              const currentOrder = mockOrders.find(
-                o => o.id === selectedOrderId
-              );
-              const isCurrentPlan = currentOrder?.planName === plan.name;
-              const isLowerPlan =
-                plan.name === "套餐B" && currentOrder?.planName === "套餐C";
-
-              if (isCurrentPlan || isLowerPlan) return null;
-
-              return (
-                <div
-                  key={plan.id}
-                  onClick={() => setSelectedUpgradePlan(plan.id)}
-                  className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                    selectedUpgradePlan === plan.id
-                      ? "border-primary bg-primary/5 shadow-md"
-                      : "border-border hover:border-primary/50"
-                  }`}
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <h4 className="font-bold text-lg">{plan.name}</h4>
-                      <p className="text-sm text-muted-foreground">
-                        {plan.subtitle}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-xl font-bold text-primary">
-                        ${plan.price.toLocaleString()}
-                      </div>
-                      <span className="text-xs text-muted-foreground">
-                        HKD/年
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    {plan.features.slice(0, 6).map((feature, idx) => (
-                      <span
-                        key={idx}
-                        className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded bg-[#FAEEEB] text-muted-foreground"
-                      >
-                        <Check className="w-3 h-3 text-[#F9881E]" />
-                        {feature}
-                      </span>
-                    ))}
-                    {plan.features.length > 6 && (
-                      <span className="text-xs text-muted-foreground">
-                        +{plan.features.length - 6} 更多功能
-                      </span>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-
-            {/* 增值服務選擇 */}
-            {selectedUpgradePlan && (
-              <>
-                <Separator />
-                <div>
-                  <h4 className="font-medium text-foreground mb-3">
-                    選購增值服務（可選）
-                  </h4>
-                  <div className="space-y-3">
-                    {valueAddedServices.map(service => {
-                      const isSelected =
-                        upgradeSelectedServices[service.id] !== undefined;
-                      const quantity = upgradeSelectedServices[service.id] || 0;
-
-                      return (
-                        <div
-                          key={service.id}
-                          className={`p-3 rounded-lg border transition-colors ${
-                            isSelected
-                              ? "border-primary bg-primary/5"
-                              : "border-border"
-                          }`}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <input
-                                type="checkbox"
-                                checked={isSelected}
-                                onChange={() =>
-                                  toggleUpgradeService(service.id)
-                                }
-                                className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
-                              />
-                              <div>
-                                <p className="text-sm font-medium">
-                                  {service.name}
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                  ${service.price} HKD / 個
-                                </p>
-                              </div>
-                            </div>
-
-                            {isSelected && (
-                              <div className="flex items-center gap-2">
-                                <button
-                                  onClick={() =>
-                                    updateUpgradeQuantity(service.id, -1)
-                                  }
-                                  className="w-6 h-6 rounded-full border flex items-center justify-center hover:bg-muted transition-colors"
-                                >
-                                  <Minus className="w-3 h-3" />
-                                </button>
-                                <span className="w-6 text-center text-sm font-medium">
-                                  {quantity}
-                                </span>
-                                <button
-                                  onClick={() =>
-                                    updateUpgradeQuantity(service.id, 1)
-                                  }
-                                  className="w-6 h-6 rounded-full border flex items-center justify-center hover:bg-muted transition-colors"
-                                >
-                                  <Plus className="w-3 h-3" />
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </>
-            )}
-
-            <Separator />
-
-            {/* 費用匯總 */}
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">套餐費用</span>
-                <span>${getUpgradePrice().toLocaleString()} HKD</span>
-              </div>
-              {calculateUpgradeAddonsTotal() > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">增值服務</span>
-                  <span>
-                    ${calculateUpgradeAddonsTotal().toLocaleString()} HKD
-                  </span>
-                </div>
-              )}
-              <Separator />
-              <div className="flex justify-between items-center text-lg font-bold">
-                <span>總計</span>
-                <span className="text-primary">
-                  $
-                  {(
-                    getUpgradePrice() + calculateUpgradeAddonsTotal()
-                  ).toLocaleString()}{" "}
-                  HKD
-                </span>
-              </div>
-            </div>
-
-            <div className="flex gap-3 pt-2">
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={() => setShowUpgradeDialog(false)}
-              >
-                取消
-              </Button>
-              <Button
-                className="flex-1"
-                disabled={!selectedUpgradePlan}
-                onClick={handleConfirmUpgrade}
-              >
-                確認升級
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {showUpgradeDialog && (
+        <Upgrade data={selectOrder} open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog} />
+      )}
 
       {/* 支付方式選擇對話框 */}
       <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>

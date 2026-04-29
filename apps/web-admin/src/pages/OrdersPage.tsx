@@ -392,10 +392,12 @@ const OrdersPage = () => {
   const calculateUpgradeAddonsTotal = () => {
     const plan = plans.find((p) => p.id === selectedUpgradePlan);
     if (!plan) return 0;
-    return Object.entries(upgradeSelectedServices).reduce((sum, [id, qty]) => {
-      const service = valueAddedServices.find((s) => s.id === id);
-      return sum + (service ? plan[service.id] * qty : 0);
-    }, 0);
+    return (
+      Object.entries(upgradeSelectedServices).reduce((sum, [id, qty]) => {
+        const service = valueAddedServices.find((s) => s.id === id);
+        return sum + (service ? plan[service.id] * qty : 0);
+      }, 0) * month
+    );
   };
 
   const handleCreateDialogChange = (open: boolean) => {
@@ -497,6 +499,7 @@ const OrdersPage = () => {
           itemName: currentPlan?.packageName,
           price: currentPlan?.price,
           count: month,
+          days: month * 30,
         },
       ],
     };
@@ -957,7 +960,7 @@ const OrdersPage = () => {
                                   {service.name}
                                 </p>
                                 <p className="text-xs text-muted-foreground">
-                                  ${currentPlan[service.id]} HKD / 個
+                                  ${currentPlan[service.id] * month} HKD / 個
                                 </p>
                               </div>
                             </div>

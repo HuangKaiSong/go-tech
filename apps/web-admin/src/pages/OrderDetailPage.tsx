@@ -290,15 +290,15 @@ const OrderDetailPage = () => {
               {otherService?.map((addon, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between py-2"
+                  className="flex items-center justify-between py-2 pl-4"
                 >
-                  <span className="text-foreground">{addon.itemName}</span>
-                  <div className="flex items-center gap-6">
-                    <span className="text-foreground">${addon.price}</span>
-                    <span className="text-muted-foreground">
-                      數量 {addon.count}
+                  <span className="text-sm">
+                    {addon.itemName} × {addon.count}
+                    <span className="text-muted-foreground ml-2">
+                      ({addon.price}/個)
                     </span>
-                  </div>
+                  </span>
+                  <span className="font-medium">{addon.amount} HKD</span>
                 </div>
               ))}
             </div>

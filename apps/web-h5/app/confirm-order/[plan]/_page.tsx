@@ -23,7 +23,7 @@ import { useEffect, useState } from "react";
 import Footer from "../../components/Footer";
 import Header from "../../components/Header";
 import { OrderInfoType, OrderItemTypeEnum, OrderTypeEnum } from '../../constants/order';
-import { PayTypeEnum } from '../../constants/payment';
+import { DAYSPERMONTH, PayTypeEnum } from '../../constants/payment';
 const Fps = dynamic(() => import("../../components/payment/Fps"), { ssr: false })
 
 const ConfirmOrder = ({ planId: planIdFromQuery, data }: { planId?: string, data?: Packages }) => {
@@ -95,7 +95,8 @@ const ConfirmOrder = ({ planId: planIdFromQuery, data }: { planId?: string, data
         itemType: OrderItemTypeEnum.PACKAGE,
         itemName: selectedPlan?.packageName,
         price: selectedPlan?.price,
-        count: month
+        count: month,
+        days: month * DAYSPERMONTH
       }]
     }
     if (needInvoice) {
@@ -183,7 +184,7 @@ const ConfirmOrder = ({ planId: planIdFromQuery, data }: { planId?: string, data
   const addonsTotal = Object.entries(selectedServicesSafe).reduce(
     (sum, [serviceId, quantity]) => sum + getServiceUnitPrice(serviceId) * quantity,
     0
-  );
+  ) * month;
   // @ts-ignore
   const originalPrice = (selectedPlan?.price * month || 0) + addonsTotal;
   const discount = 0;
@@ -213,71 +214,6 @@ const ConfirmOrder = ({ planId: planIdFromQuery, data }: { planId?: string, data
             為確保您的發票有效，請提供與貴公司營業登記相符的公司名稱，如需修改請點擊修改按鈕
           </p>
 
-          {/* Customer Info Card */}
-          {/* <div className="bg-white rounded-lg border border-border p-6 mb-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-1 h-6 bg-primary rounded-full"></div>
-              <h2 className="text-lg font-bold text-foreground">客户信息</h2>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label className="text-sm text-muted-foreground">
-                  客戶名稱：
-                </label>
-                <Input
-                  value={customerInfo.name}
-                  onChange={e =>
-                    setCustomerInfo({ ...customerInfo, name: e.target.value })
-                  }
-                  className="h-9"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-sm text-muted-foreground">
-                  電子郵箱：
-                </label>
-                <Input
-                  type="email"
-                  value={customerInfo.email}
-                  onChange={e =>
-                    setCustomerInfo({ ...customerInfo, email: e.target.value })
-                  }
-                  className="h-9"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-sm text-muted-foreground">
-                  聯繫電話：
-                </label>
-                <Input
-                  type="tel"
-                  value={customerInfo.phone}
-                  onChange={e =>
-                    setCustomerInfo({ ...customerInfo, phone: e.target.value })
-                  }
-                  className="h-9"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-sm text-muted-foreground">
-                  公司名稱：
-                </label>
-                <Input
-                  value={customerInfo.company}
-                  onChange={e =>
-                    setCustomerInfo({
-                      ...customerInfo,
-                      company: e.target.value,
-                    })
-                  }
-                  className="h-9"
-                />
-              </div>
-            </div>
-          </div> */}
-
-               {/* Customer Info Card */}
           <div className="bg-white rounded-lg border border-border p-6 mb-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-1 h-6 bg-primary rounded-full"></div>
@@ -370,6 +306,7 @@ const ConfirmOrder = ({ planId: planIdFromQuery, data }: { planId?: string, data
                     );
                     if (!service) return null;
                     const serviceTotalPrice = getServiceUnitPrice(serviceId) * quantity;
+                    const subTotalPrice = serviceTotalPrice * month;
 
                     return (
                       <div
@@ -381,7 +318,7 @@ const ConfirmOrder = ({ planId: planIdFromQuery, data }: { planId?: string, data
                         </span>
                         <div className="flex items-center gap-8">
                           <span className="text-sm font-medium">
-                            ${serviceTotalPrice}
+                            ${subTotalPrice}
                           </span>
                           <span className="text-sm text-muted-foreground">
                             數量 {quantity}

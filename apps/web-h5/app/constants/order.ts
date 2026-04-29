@@ -34,16 +34,58 @@ export enum OrderStatusEnum {
   REJECT = 6,
 }
 
+export type OrderItemsType = {
+  packageId?: string | number;
+  itemType: OrderItemTypeEnum;
+  itemName?: string;
+  price?: number;
+  count?: number;
+  itemCode?: string
+  days?: number;
+  amount?: number;
+}
+
 export type OrderInfoType = {
   orderType: OrderTypeEnum;
   payType: PayTypeEnum | null;
   invoiceHeader?: string;
-  orderItems: {
-    packageId?: string | number;
-    itemType: OrderItemTypeEnum;
-    itemName?: string;
-    price?: number;
-    count?: number;
-    itemCode?: string
+  orderItems: OrderItemsType[]
+}
+
+export type PlatformPackageDto = {
+  id: number;
+  accountingSysPrice: number;
+  addUnitPrice: number;
+  custServiceSysPrice: number;
+  rentSysPrice: number;
+  venueSysPrice: number;
+  price: number;
+  packageName: string;
+  unitCount: number;
+  packageItemList: {
+    level: number;
+    menuTitle: string;
+    menuIcon: string;
+    menuId: number;
+    packageId: number;
+    id: number;
   }[]
 }
+
+export type OrderItemInfoType = {
+  packageName: string;
+  orderStatus: OrderStatusEnum;
+  id: number;
+  orderNo: string;
+  payTime: string | null;
+  expireDate: string | null;
+  activateDate: string | null;
+  discountRate: number;
+  discountAmount: number;
+  finalAmount: number;
+  orderAmount: number;
+
+  platformPackageDto: PlatformPackageDto;
+
+  orderItems: OrderItemsType[]
+} & OrderInfoType;

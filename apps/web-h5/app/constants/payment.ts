@@ -7,6 +7,8 @@ export enum PayTypeEnum {
   Alipay = 3,
 }
 
+// 每月固定30天
+export const DAYSPERMONTH = 30;
 
 export const PayTypelabel: Record<PayTypeEnum, string> = {
   [PayTypeEnum.FPS]: "FPS",
