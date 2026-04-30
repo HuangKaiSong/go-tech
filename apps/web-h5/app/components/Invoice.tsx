@@ -1,13 +1,29 @@
-'use client'
+"use client";
 
 import { useAuth } from "@/contexts/AuthContext";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, Input, Label } from "@go-tech-frontend/ui";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  Input,
+  Label,
+} from "@go-tech-frontend/ui";
 import { ChevronDown } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 
 const fmt = (n: number) =>
-  n.toLocaleString("en-HK", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  n.toLocaleString("zh-Hant-HK", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 
 const toSafeFileName = (value: string) => value.replace(/[^\w.-]+/g, "_");
 
@@ -25,22 +41,29 @@ const Index = ({
     businessRegNo: "",
     payTime: "2025-04-22",
     orderItems: [
-      { itemName: "企業雲端方案 (Pro Plan) - 生效日期 2025-05-01", amount: 2400 },
+      {
+        itemName: "企業雲端方案 (Pro Plan) - 生效日期 2025-05-01",
+        amount: 2400,
+      },
       { itemName: "網域註冊續期 (.com.hk) - 1 年", amount: 480 },
     ],
-    invoiceHeader: '',
-    id: 0
-  }
+    invoiceHeader: "",
+    id: 0,
+  },
 }) => {
   const { token } = useAuth();
-  const orderItems = Array.isArray(invoice?.orderItems) ? invoice.orderItems : [];
+  const orderItems = Array.isArray(invoice?.orderItems)
+    ? invoice.orderItems
+    : [];
   const subtotal = invoice.orderAmount;
   const total = invoice.orderAmount;
   const due = invoice.finalAmount;
   const invoiceNo = invoice?.invoiceNo ?? "invoice";
   const fileBaseName = toSafeFileName(`Invoice-${invoiceNo}`);
 
-  const [pendingAction, setPendingAction] = useState<"print" | "pdf" | "csv" | null>(null);
+  const [pendingAction, setPendingAction] = useState<
+    "print" | "pdf" | "csv" | null
+  >(null);
 
   // 商业登记号
   const [brInput, setBrInput] = useState("");
@@ -63,19 +86,19 @@ const Index = ({
     if (!brInput.trim()) return;
 
     const requestHeaders = new Headers({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-      'User-Type': 'platform_customer'
-    })
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      "User-Type": "platform_customer",
+    });
 
-    await fetch('/go-tech/platform/packageOrder/setBusinessRegNo', {
-      method: 'POST',
+    await fetch("/go-tech/platform/packageOrder/setBusinessRegNo", {
+      method: "POST",
       headers: requestHeaders,
       body: JSON.stringify({
         id: invoice.id,
         businessRegNo: brInput.trim(),
       }),
-    }).then(res => res.json())
+    }).then(res => res.json());
     invoice.businessRegNo = brInput.trim();
     setDialogOpen(false);
     requestAnimationFrame(() => {
@@ -83,7 +106,7 @@ const Index = ({
       if (pendingAction === "pdf") handleExportPdf();
       if (pendingAction === "csv") handleExportCsv();
       setPendingAction(null);
-    })
+    });
   };
 
   const handlePrint = () => {
@@ -111,7 +134,7 @@ const Index = ({
   };
 
   const handleExportPdf = () => {
-    const url = `/api/pdf/invoice?id=${invoice.id}&code=${invoiceNo}`;
+    const url = `/api/pdf/invoice?id=${invoice.id}`;
     window.open(url, "_blank");
   };
 
@@ -123,7 +146,7 @@ const Index = ({
       ["Business Reg No.", invoice?.businessRegNo ?? ""],
       [],
       ["Description", "Amount (HKD)"],
-      ...orderItems.map((item) => [item?.itemName ?? "", fmt(item?.amount ?? 0)]),
+      ...orderItems.map(item => [item?.itemName ?? "", fmt(item?.amount ?? 0)]),
       [],
       ["Subtotal", fmt(subtotal)],
       ["Total", fmt(total)],
@@ -131,7 +154,7 @@ const Index = ({
     ];
 
     const csv = rows
-      .map((row) => row.map((cell) => escapeCsvValue(cell ?? "")).join(","))
+      .map(row => row.map(cell => escapeCsvValue(cell ?? "")).join(","))
       .join("\n");
 
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -146,7 +169,7 @@ const Index = ({
   };
 
   return (
-    <> 
+    <>
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -161,7 +184,7 @@ const Index = ({
               <Input
                 id="br-no"
                 value={brInput}
-                onChange={(e) => setBrInput(e.target.value)}
+                onChange={e => setBrInput(e.target.value)}
                 placeholder="例如：12345678-001"
                 autoFocus
               />
@@ -216,9 +239,15 @@ const Index = ({
         `}</style>
         <h1 className="sr-only">發票預覽 - Go Techs Limited</h1>
 
-        <article id="invoice" className="mx-auto max-w-3xl bg-background shadow-sm border border-border">
+        <article
+          id="invoice"
+          className="mx-auto max-w-3xl bg-background shadow-sm border border-border"
+        >
           {/* PAID banner */}
-          <div className="bg-primary text-primary-foreground text-center py-3 font-semibold tracking-wide" id="invoice-print-header">
+          <div
+            className="bg-primary text-primary-foreground text-center py-3 font-semibold tracking-wide"
+            id="invoice-print-header"
+          >
             ✓ PAID
           </div>
 
@@ -227,11 +256,20 @@ const Index = ({
             <div>
               <h2 className="text-lg font-bold mb-3">INVOICE</h2>
               <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-semibold">{fmt(invoice.orderAmount)}</span>
+                <span className="text-2xl font-semibold">
+                  {fmt(invoice.orderAmount)}
+                </span>
                 <span className="text-xl font-medium ml-1">HKD</span>
               </div>
             </div>
-            <Image src="/images/Gotech_Logo.webp" alt="Go Techs Limited logo" width={96} height={96} className="w-24 h-24 object-contain" loading="lazy" />
+            <Image
+              src="/images/Gotech_Logo.webp"
+              alt="Go Techs Limited logo"
+              width={96}
+              height={96}
+              className="w-24 h-24 object-contain"
+              loading="lazy"
+            />
           </header>
 
           <div className="border-t border-foreground" />
@@ -304,14 +342,18 @@ const Index = ({
           <section className="px-8 py-4 text-sm">
             <h3 className="font-bold mb-2">Terms</h3>
             <p className="text-foreground/80">
-              The amount due will be debited from the payment details you have provided to us on or after the due date stated above
+              The amount due will be debited from the payment details you have
+              provided to us on or after the due date stated above
             </p>
           </section>
 
           <div className="border-t border-foreground mx-8" />
 
           {/* Print & Export */}
-          <section id="invoice-print-actions" className="px-8 py-6 flex justify-end text-sm">
+          <section
+            id="invoice-print-actions"
+            className="px-8 py-6 flex justify-end text-sm"
+          >
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
@@ -322,9 +364,15 @@ const Index = ({
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onSelect={() => requestAction("print")}>Print</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => requestAction("pdf")}>Invoice {invoiceNo}.pdf</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => requestAction("csv")}>Invoice {invoiceNo}.csv</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => requestAction("print")}>
+                  Print
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => requestAction("pdf")}>
+                  Invoice {invoiceNo}.pdf
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => requestAction("csv")}>
+                  Invoice {invoiceNo}.csv
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </section>
