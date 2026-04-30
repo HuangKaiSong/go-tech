@@ -57,27 +57,27 @@ const logoDataUriPromise: Promise<string | null> = (async () => {
   return null;
 })();
 
-// ─── Warmup：模块加载时预热字体和渲染引擎 ───
-(async () => {
-  try {
-    await renderToBuffer(
-      <InvoicePDF
-        status="PAID"
-        to=""
-        invoiceNumber=""
-        issueDate=""
-        items={[]}
-        subtotal={0}
-        total={0}
-        amountDue={0}
-        useCjkFont={true}
-      />
-    );
-    console.log("[InvoicePDF] warmup done");
-  } catch (e) {
-    console.warn("[InvoicePDF] warmup failed", e);
-  }
-})();
+// // ─── Warmup：模块加载时预热字体和渲染引擎 ───
+// (async () => {
+//   try {
+//     await renderToBuffer(
+//       <InvoicePDF
+//         status="PAID"
+//         to=""
+//         invoiceNumber=""
+//         issueDate=""
+//         items={[]}
+//         subtotal={0}
+//         total={0}
+//         amountDue={0}
+//         useCjkFont={true}
+//       />
+//     );
+//     console.log("[InvoicePDF] warmup done");
+//   } catch (e) {
+//     console.warn("[InvoicePDF] warmup failed", e);
+//   }
+// })();
 
 // ─── Invoice fetch 抽离 ───
 async function fetchInvoice(
