@@ -22,24 +22,24 @@ const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
   reactStrictMode: false,
-  allowedDevOrigins: ['localhost:5173', '192.168.0.168:5173', '192.168.0.202:3201', 'admin.go-techs.com'],
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'Content-Security-Policy',
-            value: cspHeader.replace(/\s{2,}/g, ' ').trim(),
-          },
-          {
-            key: 'Access-Control-Allow-Origin',
-            value: '*',
-          }
-        ],
-      },
-    ]
-  },
+  allowedDevOrigins: ['localhost', '192.168.0.168', '192.168.0.202', 'admin.go-techs.com'],
+  // async headers() {
+  //   return [
+  //     {
+  //       source: '/(.*)',
+  //       headers: [
+  //         {
+  //           key: 'Content-Security-Policy',
+  //           value: cspHeader.replace(/\s{2,}/g, ' ').trim(),
+  //         },
+  //         {
+  //           key: 'Access-Control-Allow-Origin',
+  //           value: '*',
+  //         }
+  //       ],
+  //     },
+  //   ]
+  // },
   async rewrites() {
     const proxy: Rewrite[] = [
       {
