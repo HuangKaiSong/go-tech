@@ -3,7 +3,7 @@
 import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
 import Link from "@/app/components/Link";
-import valueAddedServices from '@/app/constants/addedServices';
+import valueAddedServices from "@/app/constants/addedServices";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Badge,
@@ -14,7 +14,7 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
-  DialogTitle
+  DialogTitle,
 } from "@go-tech-frontend/ui";
 import { useAsyncEffect } from "ahooks";
 import {
@@ -22,7 +22,7 @@ import {
   Eye,
   Package,
   Settings,
-  ShoppingCart
+  ShoppingCart,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { OrderStatusEnum } from "../constants/order";
@@ -44,16 +44,15 @@ const getStatusColor = (status: OrderStatusEnum) => {
   }
 };
 
-
 const MyOrders = () => {
-  const { token } = useAuth()
+  const { token } = useAuth();
 
-  const [orderList, setOrderList] = useState<any[]>([])
+  const [orderList, setOrderList] = useState<any[]>([]);
   const [showAddonsDialog, setShowAddonsDialog] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const selectOrder = useMemo(() => {
     return orderList.find(order => order.id === selectedOrderId);
-  }, [orderList, selectedOrderId])
+  }, [orderList, selectedOrderId]);
   const [selectedServices, setSelectedServices] = useState<
     Record<string, number>
   >({});
@@ -92,14 +91,14 @@ const MyOrders = () => {
   };
 
   const calculateAddonsTotal = () => {
-    if (!selectedOrderId) return 0
+    if (!selectedOrderId) return 0;
     return Object.entries(selectedServices).reduce((sum, [id, qty]) => {
       const service = valueAddedServices.find(s => s.id === id);
-      let price = 0
+      let price = 0;
       if (service) {
         price = selectOrder?.platformPackageDto?.[service.id] || 0;
       }
-      
+
       return sum + (service ? price * qty : 0);
     }, 0);
   };
@@ -156,25 +155,24 @@ const MyOrders = () => {
     return getUpgradePrice() + calculateUpgradeAddonsTotal();
   };
 
-  useAsyncEffect(async() => {
+  useAsyncEffect(async () => {
     try {
-      const data = await fetch('/go-tech/platform/packageOrder/myOrders', {
-        method: 'GET',
+      const data = await fetch("/go-tech/platform/packageOrder/myOrders", {
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
-          'User-Type': 'platform_customer',
-          'Authorization': `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "User-Type": "platform_customer",
+          Authorization: `Bearer ${token}`,
         },
-      }).then(res => res.json())
+      }).then(res => res.json());
       if (data.code === 200) {
-        setOrderList(data.data)
+        setOrderList(data.data);
       }
-      
     } catch (error) {
       console.log(error);
-      setOrderList([])
+      setOrderList([]);
     }
-  }, [])
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -262,24 +260,28 @@ const MyOrders = () => {
                             <span className="text-muted-foreground">
                               到期日期
                             </span>
-                            <span>{order.expireDate || '-'}</span>
+                            <span>{order.expireDate || "-"}</span>
                           </div>
-                          {order.orderItems?.filter((item: any) => item.itemType !== 1)?.length > 0 && (
+                          {order.orderItems?.filter(
+                            (item: any) => item.itemType !== 1
+                          )?.length > 0 && (
                             <div className="pt-2 border-t border-foreground/30">
                               <span className="text-muted-foreground">
                                 增值服務：
                               </span>
-                              {order.orderItems?.filter((item: any) => item.itemType !== 1)?.map((addon: any) => (
-                                <div
-                                  key={addon.id}
-                                  className="flex justify-between mt-1"
-                                >
-                                  <span>
-                                    {addon.itemName} x{addon.count}
-                                  </span>
-                                  <span>{addon.amount}</span>
-                                </div>
-                              ))}
+                              {order.orderItems
+                                ?.filter((item: any) => item.itemType !== 1)
+                                ?.map((addon: any) => (
+                                  <div
+                                    key={addon.id}
+                                    className="flex justify-between mt-1"
+                                  >
+                                    <span>
+                                      {addon.itemName} x{addon.count}
+                                    </span>
+                                    <span>{addon.amount}</span>
+                                  </div>
+                                ))}
                             </div>
                           )}
                         </div>
@@ -291,25 +293,33 @@ const MyOrders = () => {
                           包含功能
                         </h4>
                         <div className="grid grid-cols-2 gap-2">
-                          {order.platformPackageDto?.packageItemList?.map((feature: any) => {
-                            if (feature.level >= 2) return null
-                            return (
-                              <div
-                                key={feature.id}
-                                className="flex items-center gap-2 py-1.5 px-2 rounded bg-[#FAEEEB]"
-                              >
-                                {/* <feature.icon className="w-4 h-4 text-[#F9881E]" /> */}
-                                {feature.menuIcon && (
-                                  <svg className="svg-icon w-4 h-4 text-primary mr-1" aria-hidden="true">
-                                    <use href={`#icon-${feature.menuIcon}`} xlinkHref={`#icon-${feature.menuIcon}`}></use>
-                                  </svg>
-                                )}
-                                <span className="text-xs text-muted-foreground">
-                                  {feature.menuTitle}
-                                </span>
-                              </div>
-                            )
-                          })}
+                          {order.platformPackageDto?.packageItemList?.map(
+                            (feature: any) => {
+                              if (feature.level >= 2) return null;
+                              return (
+                                <div
+                                  key={feature.id}
+                                  className="flex items-center gap-2 py-1.5 px-2 rounded bg-[#FAEEEB]"
+                                >
+                                  {/* <feature.icon className="w-4 h-4 text-[#F9881E]" /> */}
+                                  {feature.menuIcon && (
+                                    <svg
+                                      className="svg-icon w-4 h-4 text-primary mr-1"
+                                      aria-hidden="true"
+                                    >
+                                      <use
+                                        href={`#icon-${feature.menuIcon}`}
+                                        xlinkHref={`#icon-${feature.menuIcon}`}
+                                      ></use>
+                                    </svg>
+                                  )}
+                                  <span className="text-xs text-muted-foreground">
+                                    {feature.menuTitle}
+                                  </span>
+                                </div>
+                              );
+                            }
+                          )}
                         </div>
                       </div>
                     </div>
@@ -322,6 +332,7 @@ const MyOrders = () => {
                           查看詳情
                         </Button>
                       </Link>
+                      {order.isEffective && (
                         <>
                           {order.orderStatus === OrderStatusEnum.COMPLETED && (
                             <>
@@ -330,7 +341,7 @@ const MyOrders = () => {
                                 size="sm"
                                 className="gap-2"
                                 onClick={() => {
-                                  openAddonsDialog(order.id)
+                                  openAddonsDialog(order.id);
                                 }}
                               >
                                 <ShoppingCart className="w-4 h-4" />
@@ -351,6 +362,7 @@ const MyOrders = () => {
                             </>
                           )}
                         </>
+                      )}
                       {order.status === "expired" && (
                         <Link href="/service-plan">
                           <Button size="sm">重新訂購</Button>
@@ -383,12 +395,20 @@ const MyOrders = () => {
 
       {/* 購買增值服務對話框 */}
       {showAddonsDialog && (
-        <AddService data={selectOrder} open={showAddonsDialog} onOpenChange={setShowAddonsDialog} />
+        <AddService
+          data={selectOrder}
+          open={showAddonsDialog}
+          onOpenChange={setShowAddonsDialog}
+        />
       )}
 
       {/* 套餐升級對話框 */}
       {showUpgradeDialog && (
-        <Upgrade data={selectOrder} open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog} />
+        <Upgrade
+          data={selectOrder}
+          open={showUpgradeDialog}
+          onOpenChange={setShowUpgradeDialog}
+        />
       )}
 
       {/* 支付方式選擇對話框 */}

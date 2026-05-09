@@ -25,7 +25,7 @@ import {
   Package,
   Plus,
   RefreshCw,
-  Settings
+  Settings,
 } from "lucide-react";
 import { GetStaticPaths, GetStaticProps } from "next";
 import { useRouter } from "next/navigation";
@@ -76,9 +76,9 @@ const getStatusColor = (status: OrderStatusEnum) => {
   }
 };
 
-const OrderDetail = ({ id: orderId, detail }: { id: string, detail: any }) => {
+const OrderDetail = ({ id: orderId, detail }: { id: string; detail: any }) => {
   const router = useRouter();
-  const order = detail
+  const order = detail;
 
   const [showAddonsDialog, setShowAddonsDialog] = useState(false);
   const [selectedServices, setSelectedServices] = useState<
@@ -201,19 +201,27 @@ const OrderDetail = ({ id: orderId, detail }: { id: string, detail: any }) => {
                   包含功能
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {order.platformPackageDto?.packageItemList?.map((feature: any) => (
-                    <div
-                      key={feature.id}
-                      className="flex items-center gap-2 py-2 px-3 rounded-lg bg-[#FAEEEB]"
-                    >
-                      {feature.menuIcon && (
-                        <svg className="svg-icon w-4 h-4 text-primary mr-1" aria-hidden="true">
-                          <use href={`#icon-${feature.menuIcon}`} xlinkHref={`#icon-${feature.menuIcon}`}></use>
-                        </svg>
-                      )}
-                      <span className="text-sm">{feature.menuTitle}</span>
-                    </div>
-                  ))}
+                  {order.platformPackageDto?.packageItemList?.map(
+                    (feature: any) => (
+                      <div
+                        key={feature.id}
+                        className="flex items-center gap-2 py-2 px-3 rounded-lg bg-[#FAEEEB]"
+                      >
+                        {feature.menuIcon && (
+                          <svg
+                            className="svg-icon w-4 h-4 text-primary mr-1"
+                            aria-hidden="true"
+                          >
+                            <use
+                              href={`#icon-${feature.menuIcon}`}
+                              xlinkHref={`#icon-${feature.menuIcon}`}
+                            ></use>
+                          </svg>
+                        )}
+                        <span className="text-sm">{feature.menuTitle}</span>
+                      </div>
+                    )
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -226,32 +234,33 @@ const OrderDetail = ({ id: orderId, detail }: { id: string, detail: any }) => {
               <CardContent className="space-y-4">
                 <div className="flex justify-between items-center">
                   <span>{order.packageName}</span>
-                  <span className="font-medium">
-                    {order.finalAmount} HKD
-                  </span>
+                  <span className="font-medium">{order.finalAmount} HKD</span>
                 </div>
 
-                {order.orderItems?.filter((item: any) => item.itemType !== 1)?.length > 0 && (
+                {order.orderItems?.filter((item: any) => item.itemType !== 1)
+                  ?.length > 0 && (
                   <>
                     <Separator />
                     <div className="space-y-2">
                       <p className="text-sm text-muted-foreground">增值服務</p>
-                      {order.orderItems?.filter((item: any) => item.itemType !== 1)?.map((addon: any) => (
-                        <div
-                          key={addon.id}
-                          className="flex justify-between items-center pl-4"
-                        >
-                          <span className="text-sm">
-                            {addon.itemName} × {addon.count}
-                            <span className="text-muted-foreground ml-2">
-                              ({addon.price}/個)
+                      {order.orderItems
+                        ?.filter((item: any) => item.itemType !== 1)
+                        ?.map((addon: any) => (
+                          <div
+                            key={addon.id}
+                            className="flex justify-between items-center pl-4"
+                          >
+                            <span className="text-sm">
+                              {addon.itemName} × {addon.count}
+                              <span className="text-muted-foreground ml-2">
+                                ({addon.price}/個)
+                              </span>
                             </span>
-                          </span>
-                          <span className="font-medium">
-                            {addon.amount} HKD
-                          </span>
-                        </div>
-                      ))}
+                            <span className="font-medium">
+                              {addon.amount} HKD
+                            </span>
+                          </div>
+                        ))}
                     </div>
                   </>
                 )}
@@ -276,12 +285,14 @@ const OrderDetail = ({ id: orderId, detail }: { id: string, detail: any }) => {
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">付款方式</span>
-                      <span>{PayTypelabel[order.payType as PayTypeEnum] || '-'}</span>
+                      <span>
+                        {PayTypelabel[order.payType as PayTypeEnum] || "-"}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">交易編號</span>
                       <span className="font-mono text-xs">
-                        {order.transactionId || '-'}
+                        {order.transactionId || "-"}
                       </span>
                     </div>
                   </div>
@@ -292,7 +303,7 @@ const OrderDetail = ({ id: orderId, detail }: { id: string, detail: any }) => {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">到期日期</span>
-                      <span>{order.expireDate || '-'}</span>
+                      <span>{order.expireDate || "-"}</span>
                     </div>
                   </div>
                 </div>
@@ -300,15 +311,19 @@ const OrderDetail = ({ id: orderId, detail }: { id: string, detail: any }) => {
             </Card>
 
             {/* 操作按鈕 */}
-            {
-              order.orderStatus === OrderStatusEnum.COMPLETED && (
-                <div className="flex flex-col sm:flex-row gap-4 justify-end">
-                  <Button variant="outline" className="gap-2" onClick={() => router.push(`/invoice/${order.id}`)}>
-                    <Download className="w-4 h-4" />
-                    下載發票
-                  </Button>
-                    <>
-                      {/* <Button
+            {order.orderStatus === OrderStatusEnum.COMPLETED && (
+              <div className="flex flex-col sm:flex-row gap-4 justify-end">
+                <Button
+                  variant="outline"
+                  className="gap-2"
+                  onClick={() => router.push(`/invoice/${order.id}`)}
+                >
+                  <Download className="w-4 h-4" />
+                  下載發票
+                </Button>
+                {order.isEffective && (
+                  <>
+                    {/* <Button
                         variant="outline"
                         className="gap-2"
                         onClick={() => setShowAddonsDialog(true)}
@@ -316,21 +331,21 @@ const OrderDetail = ({ id: orderId, detail }: { id: string, detail: any }) => {
                         <ShoppingCart className="w-4 h-4" />
                         購買增值服務
                       </Button> */}
-                      <Link href={`/renew-order/${order.id}`}>
-                        <Button className="gap-2 w-full sm:w-auto">
-                          <RefreshCw className="w-4 h-4" />
-                          續費套餐
-                        </Button>
-                      </Link>
-                    </>
-                  {order.status === "expired" && (
-                    <Link href="/service-plan">
-                      <Button className="gap-2 w-full sm:w-auto">重新訂購</Button>
+                    <Link href={`/renew-order/${order.id}`}>
+                      <Button className="gap-2 w-full sm:w-auto">
+                        <RefreshCw className="w-4 h-4" />
+                        續費套餐
+                      </Button>
                     </Link>
-                  )}
-                </div>
-              )
-            }
+                  </>
+                )}
+                {order.status === "expired" && (
+                  <Link href="/service-plan">
+                    <Button className="gap-2 w-full sm:w-auto">重新訂購</Button>
+                  </Link>
+                )}
+              </div>
+            )}
 
             {/* 購買增值服務對話框 */}
             <Dialog open={showAddonsDialog} onOpenChange={setShowAddonsDialog}>

@@ -85,6 +85,7 @@ export type OrderItemInfoType = {
   discountAmount: number;
   finalAmount: number;
   orderAmount: number;
+  isEffective: boolean;
 
   platformPackageDto: PlatformPackageDto;
 
