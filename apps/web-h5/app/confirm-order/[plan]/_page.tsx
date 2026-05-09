@@ -94,7 +94,7 @@ const ConfirmOrder = ({ planId: planIdFromQuery, data }: { planId?: string, data
         packageId: selectedPlan?.id,
         itemType: OrderItemTypeEnum.PACKAGE,
         itemName: selectedPlan?.packageName,
-        price: selectedPlan?.price,
+        price: selectedPlan!.price!,
         count: month,
         days: month * DAYSPERMONTH
       }]
