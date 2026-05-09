@@ -110,21 +110,22 @@ export const AddService: FC<AddServiceProps> = ({
   };
 
   const calculateAddonsTotal = () => {
-    const { ratio, count } = getProrationInfo();
-    return (
-      Object.entries(selectedServices).reduce((sum, [id, qty]) => {
-        const service = valueAddedServices.find(s => s.id === id);
-        let price = 0;
-        if (service) {
-          price = currentOrder?.platformPackageDto?.[service.id] || 0;
-        }
-        const subTotal = service
-          ? Math.floor(price * qty * ratio * 100) / 100
-          : 0;
-        // 計算增值服務金額
-        return sum + subTotal;
-      }, 0) * count
-    );
+    const { ratio, daysRemaining } = getProrationInfo();
+
+    return Object.entries(selectedServices).reduce((sum, [id, qty]) => {
+      const service = valueAddedServices.find(s => s.id === id);
+      let price = 0;
+      if (service) {
+        price = currentOrder?.platformPackageDto?.[service.id] || 0;
+      }
+      const subTotal = service
+        ? Math.floor(
+            (price / DAYSPERMONTH) * daysRemaining * ratio * qty * 100
+          ) / 100
+        : 0;
+      // 計算增值服務金額
+      return sum + subTotal;
+    }, 0);
   };
 
   const handleConfirmAddons = () => {
@@ -291,6 +292,7 @@ export const AddService: FC<AddServiceProps> = ({
                               (price / DAYSPERMONTH) *
                                 daysRemaining *
                                 ratio *
+                                quantity *
                                 100
                             ) / 100}{" "}
                             HKD
