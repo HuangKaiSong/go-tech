@@ -13,7 +13,7 @@ import {
   UploadedFile,
 } from "@go-tech-frontend/ui";
 import dayjs from "dayjs";
-import { ArrowUpCircle, Check, Minus, Plus } from "lucide-react";
+import { ArrowUpCircle, Check } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FC } from "react";
@@ -26,7 +26,7 @@ import {
   OrderTypeEnum,
   PlatformPackageDto,
 } from "../constants/order";
-import { PayTypeEnum } from "../constants/payment";
+import { DAYSPERMONTH, PayTypeEnum } from "../constants/payment";
 const PaymentPanel = dynamic(() => import("../components/payment/Panel"), {
   ssr: false,
 });
@@ -99,6 +99,8 @@ export const Upgrade: FC<UpgradeProps> = ({
           price = plan[service.id];
         }
 
+        console.log(price);
+
         const subTotal = service
           ? Math.floor(price * qty * ratio * 100) / 100
           : 0;
@@ -116,21 +118,20 @@ export const Upgrade: FC<UpgradeProps> = ({
     const orderPackageInfo = order.orderItems.find(
       item => item.itemType === OrderItemTypeEnum.PACKAGE
     );
-    const months = orderPackageInfo?.count || 0;
-    const dyas = orderPackageInfo?.days || 0;
+    if (!orderPackageInfo) {
+      return { months: 0, ratio: 0, newExpiryDate: "", remainingCredit: 0 };
+    }
+
+    const dyas = orderPackageInfo.days || 0;
 
     // 新到期日 = 今天 + 訂單原始時長
     const newExpiry = dayjs();
-    let newExpiryDate = newExpiry.add(months, "month").format("YYYY-MM-DD");
-    if (dyas) {
-      newExpiryDate = newExpiry.add(dyas, "day").format("YYYY-MM-DD");
-    }
+    const newExpiryDate = newExpiry.add(dyas, "days").format("YYYY-MM-DD");
 
     // 已使用天數與剩餘餘額（按舊套餐每日單價計算）
     const today = dayjs();
     const expiry = dayjs(new Date(order.expireDate!));
     const totalDays =
-      dyas ||
       expiry.diff(
         dayjs(
           new Date(order.activateDate || order.payTime! || order.createTime)
@@ -138,13 +139,15 @@ export const Upgrade: FC<UpgradeProps> = ({
         "day"
       ) + 1;
 
+    const months = totalDays / DAYSPERMONTH;
+
     // 剩余天数
     const daysRemaining = expiry.diff(today, "day") + 1;
     const ratio = daysRemaining / totalDays;
     // 已使用天数
     const usedDays = totalDays - daysRemaining;
     const remainingDays = Math.max(0, totalDays - usedDays);
-    const dailyAmount = order.orderAmount / totalDays;
+    const dailyAmount = order.finalAmount / dyas;
     const remainingCredit = Math.floor(dailyAmount * remainingDays * 100) / 100;
 
     return {
@@ -379,7 +382,7 @@ export const Upgrade: FC<UpgradeProps> = ({
                   {/* 增值服務選擇 */}
                   {selectedUpgradePlan && (
                     <>
-                      <Separator />
+                      {/* <Separator />
                       <div>
                         <h4 className="font-medium text-foreground mb-3">
                           選購增值服務（可選）
@@ -455,7 +458,7 @@ export const Upgrade: FC<UpgradeProps> = ({
                             );
                           })}
                         </div>
-                      </div>
+                      </div> */}
                     </>
                   )}
 

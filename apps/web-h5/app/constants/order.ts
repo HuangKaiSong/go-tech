@@ -38,7 +38,7 @@ export type OrderItemsType = {
   packageId?: string | number;
   itemType: OrderItemTypeEnum;
   itemName?: string;
-  price?: number;
+  price: number;
   count?: number;
   itemCode?: string
   days?: number;

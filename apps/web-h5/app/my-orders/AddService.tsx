@@ -88,14 +88,21 @@ export const AddService: FC<AddServiceProps> = ({
     if (!orderPackageInfo)
       return { daysRemaining: 0, ratio: 0, count: 0, expiryDate: "" };
 
+    const expiry = dayjs(new Date(order.expireDate!));
+
+    // const totalDay =
+    //   orderPackageInfo.days || orderPackageInfo.count! * DAYSPERMONTH || 0;
     const totalDay =
-      orderPackageInfo.days || orderPackageInfo.count! * DAYSPERMONTH || 0;
+      expiry.diff(
+        dayjs(
+          new Date(order.activateDate || order.payTime! || order.createTime)
+        ),
+        "day"
+      ) + 1;
     const count = orderPackageInfo?.count || 0;
     const today = dayjs();
-    const expiry = dayjs(new Date(order.expireDate!));
     // 剩余天数
     const daysRemaining = expiry.diff(today, "day") + 1;
-    console.log(totalDay);
 
     const ratio = daysRemaining / totalDay;
 
@@ -281,14 +288,20 @@ export const AddService: FC<AddServiceProps> = ({
                           <span className="font-medium text-foreground">
                             $
                             {Math.floor(
-                              count * price * quantity * ratio * 100
+                              (price / DAYSPERMONTH) *
+                                daysRemaining *
+                                ratio *
+                                100
                             ) / 100}{" "}
                             HKD
                           </span>
                           <span className="ml-2 text-xs">
                             （單價 $
-                            {(price * quantity * count).toLocaleString()} x{" "}
-                            {(ratio * 100).toFixed(2)}%）
+                            {(
+                              (price / DAYSPERMONTH) *
+                              daysRemaining
+                            ).toLocaleString()}{" "}
+                            x {(ratio * 100).toFixed(2)}%）
                           </span>
                         </div>
                       )}
