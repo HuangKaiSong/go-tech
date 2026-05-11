@@ -187,6 +187,7 @@ export const Upgrade: FC<UpgradeProps> = ({
   const handleFpsPaymentConfirm = async (voucherFile: UploadedFile) => {
     toast.dismiss();
     const toastId = toast.loading("創建升級訂單中...");
+    const plan = upgradePlans.find(p => p.id === selectedUpgradePlan);
     const orderPackageInfo = data.orderItems.find(
       item => item.itemType === OrderItemTypeEnum.PACKAGE
     );
@@ -201,10 +202,10 @@ export const Upgrade: FC<UpgradeProps> = ({
       originalOrder: currentOrder.orderNo,
       orderItems: [
         {
-          packageId: currentOrder.platformPackageDto?.id,
+          packageId: plan?.id,
           itemType: OrderItemTypeEnum.PACKAGE,
-          itemName: currentOrder?.platformPackageDto?.packageName,
-          price: currentOrder?.platformPackageDto?.price,
+          itemName: plan?.packageName,
+          price: plan?.price,
           count: orderPackageInfo?.count,
           days: orderPackageInfo?.days || 0,
         },
