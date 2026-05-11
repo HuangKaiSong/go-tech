@@ -1,3 +1,6 @@
+import valueAddedServices, {
+  type SpecificValueAddedServicesId,
+} from "@/constants/addedServices";
 import { PackageItem } from "@/mocks/packages";
 import { Button, Checkbox, Input, Switch, toast } from "@go-tech-frontend/ui";
 import { useMutation, useQueries } from "@tanstack/react-query";
@@ -34,6 +37,13 @@ interface PackageState {
     custServiceSysPrice?: number;
   };
 }
+
+const valueAddedServiceNames = new Map(
+  valueAddedServices.map((service) => [service.id, service.name]),
+);
+
+const getValueAddedServiceName = (id: SpecificValueAddedServicesId) =>
+  valueAddedServiceNames.get(id) ?? id;
 
 type PackageAction =
   | { type: "SET_PACKAGE_DATA"; payload: PackageItem }
@@ -591,7 +601,7 @@ const PackageEditPage = () => {
         {/* Addon Prices */}
         <div className="grid grid-cols-2 border-b border-border">
           <div className="p-4 font-medium text-center bg-muted/30 border-r border-border">
-            增加單位價格
+            {getValueAddedServiceName("addUnitPrice")}價格
           </div>
           <div className="p-4 flex justify-center">
             <Input
@@ -612,7 +622,7 @@ const PackageEditPage = () => {
         </div>
         <div className="grid grid-cols-2 border-b border-border">
           <div className="p-4 font-medium text-center bg-muted/30 border-r border-border">
-            附加租務系統價格
+            {getValueAddedServiceName("rentSysPrice")}價格
           </div>
           <div className="p-4 flex justify-center">
             <Input
@@ -633,7 +643,7 @@ const PackageEditPage = () => {
         </div>
         <div className="grid grid-cols-2 border-b border-border">
           <div className="p-4 font-medium text-center bg-muted/30 border-r border-border">
-            附加場務系統價格
+            {getValueAddedServiceName("venueSysPrice")}價格
           </div>
           <div className="p-4 flex justify-center">
             <Input
@@ -654,7 +664,7 @@ const PackageEditPage = () => {
         </div>
         <div className="grid grid-cols-2 border-b border-border">
           <div className="p-4 font-medium text-center bg-muted/30 border-r border-border">
-            附加會計系統價格
+            {getValueAddedServiceName("accountingSysPrice")}價格
           </div>
           <div className="p-4 flex justify-center">
             <Input
@@ -675,7 +685,7 @@ const PackageEditPage = () => {
         </div>
         <div className="grid grid-cols-2">
           <div className="p-4 font-medium text-center bg-muted/30 border-r border-border">
-            附加客服系統價格
+            {getValueAddedServiceName("custServiceSysPrice")}價格
           </div>
           <div className="p-4 flex justify-center">
             <Input
@@ -701,3 +711,4 @@ const PackageEditPage = () => {
 };
 
 export default PackageEditPage;
+
