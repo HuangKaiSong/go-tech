@@ -1,5 +1,4 @@
-
-import { audiences } from '@/app/components/blockDefaults';
+import { audiences } from "@/app/components/blockDefaults";
 import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
 import { ChevronDown } from "lucide-react";
@@ -28,8 +27,7 @@ const features = [
   {
     number: 3,
     title: "保障財務清晰，避免收益損失",
-    description:
-      "收支有據可查：租金、按金、管理費等明細統一記錄，對賬更快捷。",
+    description: "收支有據可查：租金、按金、管理費等明細統一記錄，對賬更快捷。",
     subDescription:
       "分類清晰：財務資料結構化呈現，帳目更透明，減少遺漏與爭議。",
   },
@@ -86,13 +84,14 @@ const comparisonData = [
 
 const TargetAudience = async () => {
   const blocks = await loadPageBlocks("target-audience", defaultTargetAudience);
-  const heroBackground = blocks?.find((block) => block.type === 'hero')?.backgroundImage || '';
+  const heroBackground =
+    blocks?.find(block => block.type === "hero")?.backgroundImage || "";
 
   const hasIframe = false;
 
   return (
     <div className="min-h-screen bg-background">
-      <Header heroBg={heroBackground} />
+      <Header heroBg={heroBackground} initialBlocks={blocks} />
       {/* Hero Section */}
       <HeroSection initialBlocks={blocks} page="target-audience" />
       {/* <section
@@ -128,10 +127,12 @@ const TargetAudience = async () => {
                     {audience.title}
                   </h3>
                 </div>
-                <div className="h-48 overflow-hidden">
+                <div className="h-48 overflow-hidden relative">
                   <Image
                     src={audience.image}
                     alt={audience.title}
+                    loading="lazy"
+                    fill
                     className="w-full h-full object-cover"
                   />
                 </div>

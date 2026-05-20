@@ -7,18 +7,19 @@ import HeroSection from "../components/HeroSection";
 const SystemFeatures = async () => {
   const blocks = await loadPageBlocks(
     "system-features",
-    defaultSystemFeaturesBlocks,
+    defaultSystemFeaturesBlocks
   );
 
-  const heroBackground = blocks?.find((block) => block.type === 'hero')?.backgroundImage || '';
+  const heroBackground =
+    blocks?.find(block => block.type === "hero")?.backgroundImage || "";
 
   return (
-     <div className="min-h-screen flex flex-col bg-background">
-      <Header heroBg={heroBackground} />
+    <div className="min-h-screen flex flex-col bg-background">
+      <Header heroBg={heroBackground} initialBlocks={blocks} />
       <HeroSection initialBlocks={blocks} page="system-features" />
       <Footer />
     </div>
-  )
+  );
 };
 
 export default SystemFeatures;

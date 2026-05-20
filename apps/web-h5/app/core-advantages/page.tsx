@@ -67,11 +67,12 @@ export default async function Page() {
     },
   ];
 
-  const heroBackground = blocks?.find((block) => block.type === 'hero')?.backgroundImage || '';
+  const heroBackground =
+    blocks?.find(block => block.type === "hero")?.backgroundImage || "";
 
   return (
     <div className="min-h-screen bg-background">
-      <Header heroBg={heroBackground} />
+      <Header heroBg={heroBackground} initialBlocks={blocks} />
 
       {/* Hero Section */}
       <HeroSection initialBlocks={blocks} page="core-advantages" />
@@ -230,7 +231,9 @@ export default async function Page() {
                 <div className="flex gap-4">
                   <span className="text-primary font-bold text-xl">03</span>
                   <div>
-                    <h4 className="font-bold text-foreground mb-2">多功能整合</h4>
+                    <h4 className="font-bold text-foreground mb-2">
+                      多功能整合
+                    </h4>
                     <p className="text-sm text-muted-foreground">
                       將招租、租約、收租、維修、財務與文件等工作集中管理，減少人手記錄與跨平台往返；同時保留完整紀錄，讓跟進更有條理、管理更專業。
                     </p>
