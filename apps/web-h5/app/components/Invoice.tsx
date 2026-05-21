@@ -175,7 +175,7 @@ const Index = ({
           <DialogHeader>
             <DialogTitle>輸入 Business Reg No.</DialogTitle>
             <DialogDescription>
-              請輸入商業登記號碼，輸入後將會顯示於發票上。
+              請輸入商業登記號碼，輸入後將會顯示於發票上。請注意，輸入後不能變更
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={confirmBr} className="space-y-4">
@@ -185,7 +185,7 @@ const Index = ({
                 id="br-no"
                 value={brInput}
                 onChange={e => setBrInput(e.target.value)}
-                placeholder="例如：12345678-001"
+                placeholder="例如：12345678-001， 請注意，輸入後不能變更"
                 autoFocus
               />
             </div>
