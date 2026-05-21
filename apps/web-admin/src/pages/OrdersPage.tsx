@@ -4,6 +4,7 @@ import {
   OrderStatusEnum,
   OrderStatusLabel,
   OrderTypeEnum,
+  OrderTypeLabel,
 } from "@/constants/order";
 import { PayTypeEnum, PayTypelabel } from "@/constants/payment";
 import { useAuth } from "@/hooks/use-auth";
@@ -748,7 +749,9 @@ const OrdersPage = () => {
                 </div>
                 <div>
                   <span className="text-muted-foreground">套餐類型：</span>
-                  <span className="font-medium">{selectedOrder.orderType}</span>
+                  <span className="font-medium">
+                    {OrderTypeLabel[selectedOrder.orderType]}
+                  </span>
                 </div>
                 <div>
                   <span className="text-muted-foreground">訂單金額：</span>
@@ -1113,3 +1116,4 @@ const OrdersPage = () => {
 };
 
 export default OrdersPage;
+
