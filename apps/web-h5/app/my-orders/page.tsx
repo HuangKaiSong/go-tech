@@ -3,7 +3,6 @@
 import Footer from "@/app/components/Footer";
 import Header from "@/app/components/Header";
 import Link from "@/app/components/Link";
-import valueAddedServices from "@/app/constants/addedServices";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Badge,
@@ -11,23 +10,29 @@ import {
   Card,
   CardContent,
   CardHeader,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
+  toast,
+  UploadedFile,
 } from "@go-tech-frontend/ui";
 import { useAsyncEffect } from "ahooks";
 import {
   ArrowUpCircle,
   Eye,
   Package,
+  RefreshCw,
   Settings,
   ShoppingCart,
 } from "lucide-react";
+import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { OrderStatusEnum } from "../constants/order";
+import { OrderItemInfoType, OrderStatusEnum } from "../constants/order";
+import { PayTypeEnum } from "../constants/payment";
 import { AddService } from "./AddService";
 import { Upgrade } from "./Upgrade";
+
+const PaymentPanel = dynamic(() => import("../components/payment/Panel"), {
+  ssr: false,
+});
 
 const getStatusColor = (status: OrderStatusEnum) => {
   switch (status) {
@@ -46,113 +51,75 @@ const getStatusColor = (status: OrderStatusEnum) => {
 
 const MyOrders = () => {
   const { token } = useAuth();
+  const router = useRouter();
 
-  const [orderList, setOrderList] = useState<any[]>([]);
+  const [orderList, setOrderList] = useState<OrderItemInfoType[]>([]);
   const [showAddonsDialog, setShowAddonsDialog] = useState(false);
-  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
   const selectOrder = useMemo(() => {
     return orderList.find(order => order.id === selectedOrderId);
   }, [orderList, selectedOrderId]);
-  const [selectedServices, setSelectedServices] = useState<
-    Record<string, number>
-  >({});
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
-  const [selectedUpgradePlan, setSelectedUpgradePlan] = useState<string | null>(
-    null
-  );
-  const [paymentType, setPaymentType] = useState<"addons" | "upgrade">(
-    "addons"
-  );
-  const [upgradeSelectedServices, setUpgradeSelectedServices] = useState<
-    Record<string, number>
-  >({});
-
-  const toggleService = (serviceId: string) => {
-    setSelectedServices(prev => {
-      if (prev[serviceId]) {
-        const { [serviceId]: _, ...rest } = prev;
-        return rest;
-      }
-      return { ...prev, [serviceId]: 1 };
-    });
-  };
-
-  const updateQuantity = (serviceId: string, delta: number) => {
-    setSelectedServices(prev => {
-      const current = prev[serviceId] || 0;
-      const newQty = Math.max(0, current + delta);
-      if (newQty === 0) {
-        const { [serviceId]: _, ...rest } = prev;
-        return rest;
-      }
-      return { ...prev, [serviceId]: newQty };
-    });
-  };
-
-  const calculateAddonsTotal = () => {
-    if (!selectedOrderId) return 0;
-    return Object.entries(selectedServices).reduce((sum, [id, qty]) => {
-      const service = valueAddedServices.find(s => s.id === id);
-      let price = 0;
-      if (service) {
-        price = selectOrder?.platformPackageDto?.[service.id] || 0;
-      }
-
-      return sum + (service ? price * qty : 0);
-    }, 0);
-  };
-
-  const openAddonsDialog = (orderId: string) => {
+  const openAddonsDialog = (orderId: number) => {
     setSelectedOrderId(orderId);
-    setSelectedServices({});
     setShowAddonsDialog(true);
   };
 
-  const handlePaymentSelect = (method: string) => {
-    if (paymentType === "addons") {
-      console.log("購買增值服務:", {
-        method,
-        orderId: selectedOrderId,
-        services: selectedServices,
-      });
-    } else {
-      console.log("套餐升級:", {
-        method,
-        orderId: selectedOrderId,
-        upgradePlan: selectedUpgradePlan,
-      });
-    }
+  const handleBackToPaymentMethods = () => {
     setShowPaymentDialog(false);
-    setSelectedServices({});
-    setSelectedOrderId(null);
-    setSelectedUpgradePlan(null);
   };
 
-  const openUpgradeDialog = (orderId: string) => {
-    setSelectedOrderId(orderId);
-    setSelectedUpgradePlan(null);
-    setUpgradeSelectedServices({});
-    setShowUpgradeDialog(true);
-  };
-
-  const calculateUpgradeAddonsTotal = () => {
-    return Object.entries(upgradeSelectedServices).reduce((sum, [id, qty]) => {
-      const service = valueAddedServices.find(s => s.id === id);
-      return sum + (service ? service.price * qty : 0);
-    }, 0);
-  };
-
-  const getUpgradePrice = () => {
-    const plan = orderList.find(p => p.id === selectedUpgradePlan);
-    return plan ? plan.price : 0;
-  };
-
-  const getPaymentAmount = () => {
-    if (paymentType === "addons") {
-      return calculateAddonsTotal();
+  const handleFpsPaymentConfirm = async (file: UploadedFile) => {
+    toast.dismiss();
+    if (!selectOrder) {
+      return;
     }
-    return getUpgradePrice() + calculateUpgradeAddonsTotal();
+    const toastId = toast.loading("正在準備數據中...");
+    const headers = new Headers({
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      "User-Type": "platform_customer",
+    });
+    const orderInfo: any = {
+      id: selectOrder.id,
+      payType: PayTypeEnum.FPS,
+      payEvidence: file.url,
+    };
+
+    try {
+      // 创建订单
+      const orderResponse = await fetch(
+        "/go-tech/platform/packageOrder/reAdd",
+        {
+          method: "POST",
+          headers: headers,
+          body: JSON.stringify(orderInfo),
+        }
+      )
+        .then(res => res.json())
+        .catch(err => {
+          throw err;
+        });
+      if (orderResponse.code === 200) {
+        toast.success("操作订单成功", { id: toastId });
+        if (orderInfo.payType === PayTypeEnum.FPS) {
+          toast.success("支付憑證已提交，我們將在確認後為您更新订单");
+          router.push(`/my-orders/${selectOrder.id}`);
+        }
+
+        setShowPaymentDialog(false);
+      } else {
+        toast.error(orderResponse.message);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const openUpgradeDialog = (orderId: number) => {
+    setSelectedOrderId(orderId);
+    setShowUpgradeDialog(true);
   };
 
   useAsyncEffect(async () => {
@@ -332,6 +299,20 @@ const MyOrders = () => {
                           查看詳情
                         </Button>
                       </Link>
+                      {order.orderStatus === OrderStatusEnum.REJECT && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-2 border-primary text-primary hover:bg-primary hover:text-white"
+                          onClick={() => {
+                            setSelectedOrderId(order.id);
+                            setShowPaymentDialog(true);
+                          }}
+                        >
+                          <RefreshCw className="w-4 h-4" />
+                          重新購買
+                        </Button>
+                      )}
                       {order.isEffective && (
                         <>
                           {order.orderStatus === OrderStatusEnum.COMPLETED && (
@@ -363,11 +344,11 @@ const MyOrders = () => {
                           )}
                         </>
                       )}
-                      {order.status === "expired" && (
+                      {/* {order.status === "expired" && (
                         <Link href="/service-plan">
                           <Button size="sm">重新訂購</Button>
                         </Link>
-                      )}
+                      )} */}
                     </div>
                   </CardContent>
                 </Card>
@@ -394,7 +375,7 @@ const MyOrders = () => {
       </section>
 
       {/* 購買增值服務對話框 */}
-      {showAddonsDialog && (
+      {showAddonsDialog && selectOrder && (
         <AddService
           data={selectOrder}
           open={showAddonsDialog}
@@ -403,7 +384,7 @@ const MyOrders = () => {
       )}
 
       {/* 套餐升級對話框 */}
-      {showUpgradeDialog && (
+      {showUpgradeDialog && selectOrder && (
         <Upgrade
           data={selectOrder}
           open={showUpgradeDialog}
@@ -412,42 +393,15 @@ const MyOrders = () => {
       )}
 
       {/* 支付方式選擇對話框 */}
-      <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>選擇支付方式</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 mt-4">
-            <p className="text-center text-muted-foreground">
-              應付金額：
-              <span className="text-xl font-bold text-primary">
-                ${getPaymentAmount().toLocaleString()} HKD
-              </span>
-            </p>
-            <div className="space-y-3">
-              <button
-                onClick={() => handlePaymentSelect("wechat")}
-                className="w-full p-4 rounded-lg border-2 hover:border-green-500 hover:bg-green-50 transition-colors flex items-center gap-4"
-              >
-                <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">微</span>
-                </div>
-                <span className="font-medium">微信支付</span>
-              </button>
-              <button
-                onClick={() => handlePaymentSelect("alipay")}
-                className="w-full p-4 rounded-lg border-2 hover:border-blue-500 hover:bg-blue-50 transition-colors flex items-center gap-4"
-              >
-                <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">支</span>
-                </div>
-                <span className="font-medium">支付寶支付</span>
-              </button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
+      {showPaymentDialog && selectOrder && (
+        <PaymentPanel
+          open={showPaymentDialog}
+          onOpenChange={setShowPaymentDialog}
+          price={selectOrder.finalAmount}
+          handleBackToPaymentMethods={handleBackToPaymentMethods}
+          handleFpsPaymentConfirm={handleFpsPaymentConfirm}
+        />
+      )}
       <Footer />
     </div>
   );

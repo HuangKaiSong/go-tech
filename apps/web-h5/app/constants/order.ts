@@ -75,6 +75,7 @@ export type PlatformPackageDto = {
 export type OrderItemInfoType = {
   packageName: string;
   orderStatus: OrderStatusEnum;
+  orderStatusName: string;
   createTime: string;
   id: number;
   orderNo: string;
