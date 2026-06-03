@@ -5,6 +5,8 @@ export default class Time extends EventEmitter {
   elapsed: number;
   current: number;
   start: number;
+  private rafId: number = 0;
+  private stopped = false;
 
   constructor() {
     super()
@@ -15,12 +17,14 @@ export default class Time extends EventEmitter {
     this.elapsed = 0
     this.delta = 16
 
-    window.requestAnimationFrame(() => {
+    this.rafId = window.requestAnimationFrame(() => {
       this.tick()
     })
   }
 
   tick() {
+    if (this.stopped) return
+
     const currentTime = Date.now()
     this.delta = currentTime - this.current
     this.current = currentTime
@@ -28,8 +32,13 @@ export default class Time extends EventEmitter {
 
     this.trigger('tick')
 
-    window.requestAnimationFrame(() => {
+    this.rafId = window.requestAnimationFrame(() => {
       this.tick()
     })
+  }
+
+  stop() {
+    this.stopped = true
+    window.cancelAnimationFrame(this.rafId)
   }
 }

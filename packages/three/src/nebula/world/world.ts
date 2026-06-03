@@ -92,4 +92,10 @@ export default class World {
       this.lensFlare.update()
     }
   }
+
+  resize() {
+    if (this.galaxy) {
+      this.galaxy.resize()
+    }
+  }
 }

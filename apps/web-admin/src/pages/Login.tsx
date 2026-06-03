@@ -91,13 +91,23 @@ const Login = () => {
   });
 
   useEffect(() => {
-    if (effectType === "experience") {
-      const _experience = new Experience(threeDom.current);
-      window._experience = _experience;
-    }
     if (effectType === "dotline") {
       new Dotline({ dom: "dotline", cw: 2000, ch: 1000, ds: 150 }).start();
+      return;
     }
+
+    if (effectType !== "experience") return;
+
+    const canvas = threeDom.current;
+    if (!canvas) return;
+
+    const _experience = new Experience(canvas);
+    window._experience = _experience;
+
+    return () => {
+      _experience.destroy();
+      window._experience = undefined;
+    };
   }, [effectType]);
 
   return (

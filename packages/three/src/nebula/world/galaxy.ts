@@ -163,6 +163,11 @@ export default class Galaxy {
     }
   }
 
+  resize() {
+    this.pixelRatio = this.experience.sizes.pixelRatio
+    this.material.uniforms.uSize.value = this.parameters.size * this.pixelRatio
+  }
+
   debuggerInit() {
     if (this.debugActive) {
       const fl = this.debug?.addFolder({
@@ -202,7 +207,7 @@ export default class Galaxy {
         max: 80,
         step: 1,
       }).on('change', () => {
-        this.material.uniforms.uSize.value = this.parameters.size
+        this.material.uniforms.uSize.value = this.parameters.size * this.pixelRatio
         this.material.needsUpdate = true
       })
 

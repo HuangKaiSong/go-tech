@@ -68,6 +68,7 @@ export default class Experience {
 
   resize(): void {
     this.camera.resize()
+    this.world.resize()
     this.renderer.resize()
   }
 
@@ -77,5 +78,14 @@ export default class Experience {
     this.renderer.update() // 切换为手动更新
     this.stats.update()
     this.iMouse.update()
+  }
+
+  destroy(): void {
+    this.sizes.off('resize')
+    this.time.stop()
+    this.renderer.instance.forceContextLoss()
+    this.renderer.instance.dispose()
+    this.debug.active && this.debug.ui?.dispose()
+    instance = null
   }
 }
