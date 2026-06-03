@@ -1,6 +1,6 @@
-import * as THREE from 'three'
+import * as THREE from 'three';
 
-import Experience from './experience.js'
+import Experience from './experience.js';
 
 export default class Renderer {
   experience: Experience;
@@ -24,7 +24,7 @@ export default class Renderer {
     this.instance = new THREE.WebGLRenderer({
       canvas: this.canvas,
       antialias: true,
-      powerPreference: 'high-performance',
+      // powerPreference: 'high-performance',
     })
     this.instance.toneMapping = THREE.ACESFilmicToneMapping
     this.instance.toneMappingExposure = 1.5
