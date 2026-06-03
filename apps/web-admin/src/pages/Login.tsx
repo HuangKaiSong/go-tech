@@ -1,6 +1,8 @@
 import TechCursor from "@/components/TechCursor";
+import VideoPlayer from "@/components/VideoPlayer";
 import { useAuth } from "@/hooks/use-auth";
 import Dotline from "@/hooks/use-dotline";
+import { weightedRandom, type WeightedOption } from "@/utils/weighted-random";
 import { Experience } from "@go-tech-frontend/three";
 import { Button, Input } from "@go-tech-frontend/ui";
 import { useMutation } from "@tanstack/react-query";
@@ -9,6 +11,23 @@ import { Eye, EyeOff } from "lucide-react";
 import { Fragment, RefObject, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+
+type AnimateType = "experience" | "video" | "dotline";
+
+const animateType: readonly WeightedOption<AnimateType>[] = [
+  {
+    option: "experience",
+    weight: 0.7,
+  },
+  {
+    option: "video",
+    weight: 0.6,
+  },
+  {
+    option: "dotline",
+    weight: 0.2,
+  },
+];
 
 const Login = () => {
   const navigate = useNavigate();
@@ -19,11 +38,9 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const threeDom = useRef<HTMLCanvasElement>(null);
-  const [effectType] = useState<"experience" | "starry" | "dotline">(() => {
-    const pick = Math.floor(Math.random() * 3);
-    if (pick === 0) return "experience";
-    return "dotline";
-  });
+  const [effectType, _setEffectType] = useState<AnimateType>(() =>
+    weightedRandom(animateType),
+  );
 
   // 获取来源页面路径
   const from = location.state?.from || "/";
@@ -94,6 +111,8 @@ const Login = () => {
             style={{ pointerEvents: "none", zIndex: -1 }}
           />
         </Fragment>
+      ) : effectType === "video" ? (
+        <VideoPlayer url="/videos/yhkt_linglong_version1.mp4" />
       ) : (
         <canvas id="dotline" className="absolute inset-0" />
       )}
@@ -146,3 +165,4 @@ const Login = () => {
 };
 
 export default Login;
+
