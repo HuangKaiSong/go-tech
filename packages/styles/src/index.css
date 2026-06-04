@@ -1,4 +1,4 @@
-@import './variables.css';
+@import "./variables.css";
 
 @import "tailwindcss";
 @plugin "tailwindcss-animate";
@@ -92,7 +92,6 @@
   }
 }
 
-
 /* 设置滚动条 */
 ::-webkit-scrollbar {
   width: 4px;
@@ -110,7 +109,8 @@
   border-radius: 5px;
 }
 
-html, :host {
+html,
+:host {
   background-color: var(--color-background);
   color: var(--color-foreground);
 }
