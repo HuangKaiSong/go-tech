@@ -10,7 +10,10 @@
 		"start:h5": "pnpm --filter web-h5 run start",
 		"dev:admin": "pnpm --filter web-admin run dev",
 		"build:admin": "pnpm --filter web-admin run build",
-		"preview:admin": "pnpm --filter web-admin run preview"
+		"preview:admin": "pnpm --filter web-admin run preview",
+		"dev:hr-m": "pnpm --filter hr-mobile-manager run dev",
+		"build:hr-m": "pnpm --filter hr-mobile-manager run build",
+		"start:hr-m": "pnpm --filter hr-mobile-manager run start"
 	},
 	"packageManager": "pnpm@10.17.0"
 }
