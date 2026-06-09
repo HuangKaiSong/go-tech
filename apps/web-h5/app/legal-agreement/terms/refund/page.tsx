@@ -3,10 +3,8 @@ import { useMemo } from "react";
 
 export default function Refund() {
   const url = useMemo(() => {
-    return "//terms/refund.docx";
+    return "https://go-techs.com/terms/refund.docx";
   }, []);
-
-  console.log(url);
 
   return (
     <div>
