@@ -30,6 +30,12 @@ interface PackageState {
   featureGroups: FeatureGroup[];
   priceSettings: {
     price: number;
+    /** 90天价格 */
+    priceA?: number;
+    /** 180天价格 */
+    priceB?: number;
+    /** 365天价格 */
+    priceC?: number;
     addUnitPrice?: number;
     rentSysPrice?: number;
     venueSysPrice?: number;
@@ -108,6 +114,9 @@ const defaultState: PackageState = {
   featureGroups: [],
   priceSettings: {
     price: 0,
+    priceA: undefined,
+    priceB: undefined,
+    priceC: undefined,
     addUnitPrice: undefined,
     rentSysPrice: undefined,
     venueSysPrice: undefined,
@@ -271,6 +280,21 @@ const PackageEditPage = () => {
         type: "UPDATE_PRICE_SETTING",
         field: "price", // 套餐价格
         value: (packageinfo as any).price,
+      });
+      dispatch({
+        type: "UPDATE_PRICE_SETTING",
+        field: "priceA",
+        value: (packageinfo as any).priceA,
+      });
+      dispatch({
+        type: "UPDATE_PRICE_SETTING",
+        field: "priceB",
+        value: (packageinfo as any).priceB,
+      });
+      dispatch({
+        type: "UPDATE_PRICE_SETTING",
+        field: "priceC",
+        value: (packageinfo as any).priceC,
       });
       dispatch({
         type: "UPDATE_PRICE_SETTING",
@@ -588,6 +612,66 @@ const PackageEditPage = () => {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 border-b border-border">
+          <div className="p-4 font-medium text-center bg-muted/30 border-r border-border">
+            <div>3个月價格（Price）</div>
+            <div className="p-4 flex justify-center">
+              <Input
+                placeholder="輸入價格"
+                className="w-32 text-center"
+                value={state.priceSettings.priceA}
+                onChange={(e) => {
+                  if (e.target.value) {
+                    dispatch({
+                      type: "UPDATE_PRICE_SETTING",
+                      field: "priceA",
+                      value: parseFloat(e.target.value),
+                    });
+                  }
+                }}
+              />
+            </div>
+          </div>
+          <div className="p-4 font-medium text-center bg-muted/30 border-r border-border">
+            <div>6个月價格（Price）</div>
+            <div className="p-4 flex justify-center">
+              <Input
+                placeholder="輸入價格"
+                className="w-32 text-center"
+                value={state.priceSettings.priceB}
+                onChange={(e) => {
+                  if (e.target.value) {
+                    dispatch({
+                      type: "UPDATE_PRICE_SETTING",
+                      field: "priceB",
+                      value: parseFloat(e.target.value),
+                    });
+                  }
+                }}
+              />
+            </div>
+          </div>
+          <div className="p-4 font-medium text-center bg-muted/30 border-r border-border">
+            <div>12个月價格（Price）</div>
+            <div className="p-4 flex justify-center">
+              <Input
+                placeholder="輸入價格"
+                className="w-32 text-center"
+                value={state.priceSettings.priceC}
+                onChange={(e) => {
+                  if (e.target.value) {
+                    dispatch({
+                      type: "UPDATE_PRICE_SETTING",
+                      field: "priceC",
+                      value: parseFloat(e.target.value),
+                    });
+                  }
+                }}
+              />
+            </div>
           </div>
         </div>
 

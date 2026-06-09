@@ -49,7 +49,7 @@ import {
   RotateCcw,
   Search,
 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 interface Reponse {
@@ -385,9 +385,42 @@ const OrdersPage = () => {
     });
   };
 
+  /**
+   * 优惠价格
+   * 1个月-2个月 -> price
+   * 3个月-5个月 -> priceA
+   * 6个月-11个月 -> priceB
+   * 12个月及以上 -> priceC
+   */
+  const discountAmount = useMemo<number>(() => {
+    const plan = plans.find((p) => p.id === selectedUpgradePlan);
+    if (!plan) {
+      return 0;
+    }
+    // 原价
+    let recursePrice = plan?.price;
+    if (month >= 12) {
+      recursePrice = plan?.priceC || recursePrice;
+    }
+    if (month >= 6 && month < 12) {
+      recursePrice = plan?.priceB || recursePrice;
+    }
+    if (month >= 3 && month < 6) {
+      recursePrice = plan?.priceA || recursePrice;
+    }
+
+    const diffPrice =
+      Math.max(0, (plan?.price || 0) - (recursePrice || 0)) * month;
+
+    return Math.max(0, diffPrice);
+  }, [month, plans, selectedUpgradePlan]);
+
   const getUpgradePrice = () => {
     const plan = plans.find((p) => p.id === selectedUpgradePlan);
-    return plan ? plan.price * month : 0;
+    if (!plan) {
+      return 0;
+    }
+    return plan.price * month;
   };
 
   const calculateUpgradeAddonsTotal = () => {
@@ -1016,13 +1049,21 @@ const OrdersPage = () => {
                   </span>
                 </div>
               )}
+              {discountAmount > 0 && (
+                <div className="flex justify-between text-sm text-green-600">
+                  <span className="text-green-600">優惠折扣</span>
+                  <span>-${discountAmount.toLocaleString()} HKD</span>
+                </div>
+              )}
               <Separator />
               <div className="flex justify-between items-center text-lg font-bold">
                 <span>總計</span>
                 <span className="text-primary">
                   $
                   {(
-                    getUpgradePrice() + calculateUpgradeAddonsTotal()
+                    getUpgradePrice() -
+                    discountAmount +
+                    calculateUpgradeAddonsTotal()
                   ).toLocaleString()}{" "}
                   HKD
                 </span>

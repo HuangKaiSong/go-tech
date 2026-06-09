@@ -3,6 +3,12 @@ type Packages = {
   packageName: string;
   unitCount: number;
   price: number;
+  /** 90天价格 */
+  priceA?: number;
+  /** 180天价格 */
+  priceB?: number;
+  /** 365天价格 */
+  priceC?: number;
   addUnitPrice: number;
   rentSysPrice: number;
   venueSysPrice: number;

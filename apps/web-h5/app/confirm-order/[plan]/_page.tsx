@@ -1,6 +1,6 @@
 "use client";
 
-import valueAddedServices from '@/app/constants/addedServices';
+import valueAddedServices from "@/app/constants/addedServices";
 import servicePlanBg from "@/assets/service-plan-bg.jpg";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -13,22 +13,34 @@ import {
   Label,
   Switch,
   toast,
-  UploadedFile
+  UploadedFile,
 } from "@go-tech-frontend/ui";
 import { useSessionStorageState } from "ahooks";
 import { FileCheck } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Footer from "../../components/Footer";
 import Header from "../../components/Header";
-import { OrderInfoType, OrderItemTypeEnum, OrderTypeEnum } from '../../constants/order';
-import { DAYSPERMONTH, PayTypeEnum } from '../../constants/payment';
-const Fps = dynamic(() => import("../../components/payment/Fps"), { ssr: false })
+import {
+  OrderInfoType,
+  OrderItemTypeEnum,
+  OrderTypeEnum,
+} from "../../constants/order";
+import { DAYSPERMONTH, PayTypeEnum } from "../../constants/payment";
+const Fps = dynamic(() => import("../../components/payment/Fps"), {
+  ssr: false,
+});
 
-const ConfirmOrder = ({ planId: planIdFromQuery, data }: { planId?: string, data?: Packages }) => {
+const ConfirmOrder = ({
+  planId: planIdFromQuery,
+  data,
+}: {
+  planId?: string;
+  data?: Packages;
+}) => {
   const router = useRouter();
-  const { planId } = { planId: planIdFromQuery};
+  const { planId } = { planId: planIdFromQuery };
   const { user, token } = useAuth();
 
   const selectedPlan = data;
@@ -36,15 +48,14 @@ const ConfirmOrder = ({ planId: planIdFromQuery, data }: { planId?: string, data
 
   const [selectedServices, setSelectedServices] = useSessionStorageState<
     Record<string, number>
-  >('user-selected-services', {
+  >("user-selected-services", {
     defaultValue: () => ({}),
     listenStorageChange: true,
   });
 
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<
-    PayTypeEnum | null
-  >(null);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] =
+    useState<PayTypeEnum | null>(null);
   // Customer info state
   const [customerInfo, setCustomerInfo] = useState({
     name: user?.nickname,
@@ -52,16 +63,16 @@ const ConfirmOrder = ({ planId: planIdFromQuery, data }: { planId?: string, data
     phone: "",
     company: "",
   });
-  const [month, setMonth] = useState<number>(1)
+  const [month, setMonth] = useState<number>(1);
 
   const [needInvoice, setNeedInvoice] = useState<boolean>(true);
-  const [invoiceName, setInvoiceName] = useState<string>(user?.nickname || '');
+  const [invoiceName, setInvoiceName] = useState<string>(user?.nickname || "");
 
   useEffect(() => {
     setHasMounted(true);
     return () => {
-      setSelectedServices({})
-    }
+      setSelectedServices({});
+    };
   }, []);
 
   const selectedServicesSafe = hasMounted ? (selectedServices ?? {}) : {};
@@ -85,74 +96,81 @@ const ConfirmOrder = ({ planId: planIdFromQuery, data }: { planId?: string, data
   };
 
   const handleFpsPaymentConfirm = async (voucherFile: UploadedFile) => {
-    toast.dismiss()
+    toast.dismiss();
     const toastId = toast.loading("创建订单中...");
     const orderInfo: OrderInfoType = {
       orderType: OrderTypeEnum.PURCHASE,
       payType: selectedPaymentMethod,
-      orderItems: [{
-        packageId: selectedPlan?.id,
-        itemType: OrderItemTypeEnum.PACKAGE,
-        itemName: selectedPlan?.packageName,
-        price: selectedPlan!.price!,
-        count: month,
-        days: month * DAYSPERMONTH
-      }]
-    }
+      orderItems: [
+        {
+          packageId: selectedPlan?.id,
+          itemType: OrderItemTypeEnum.PACKAGE,
+          itemName: selectedPlan?.packageName,
+          price: selectedPlan!.price!,
+          count: month,
+          days: month * DAYSPERMONTH,
+        },
+      ],
+    };
     if (needInvoice) {
       // 发票抬头
       orderInfo.invoiceHeader = invoiceName;
     }
 
     if (selectedServices) {
-      Object.entries(selectedServicesSafe).map(
-        ([serviceId, quantity]) => {
-          const service = valueAddedServices.find(
-            s => s.id === serviceId
-          );
-          if (!service) return null;
-          const serviceTotalPrice = getServiceUnitPrice(serviceId);
-          orderInfo.orderItems.push({
-            itemType: OrderItemTypeEnum.ADDITION,
-            count: quantity,
-            price: serviceTotalPrice,
-            packageId: selectedPlan?.id,
-            itemName: service.name,
-            // @ts-ignore
-            itemCode: serviceId.replace('Price', '')
-          })
-        })
+      Object.entries(selectedServicesSafe).map(([serviceId, quantity]) => {
+        const service = valueAddedServices.find(s => s.id === serviceId);
+        if (!service) return null;
+        const serviceTotalPrice = getServiceUnitPrice(serviceId);
+        orderInfo.orderItems.push({
+          itemType: OrderItemTypeEnum.ADDITION,
+          count: quantity,
+          price: serviceTotalPrice,
+          packageId: selectedPlan?.id,
+          itemName: service.name,
+          // @ts-ignore
+          itemCode: serviceId.replace("Price", ""),
+        });
+      });
     }
     const requestHeaders = new Headers({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-      'User-Type': 'platform_customer'
-    })
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      "User-Type": "platform_customer",
+    });
 
     try {
       // 创建订单
-      const orderResponse = await fetch('/go-tech/platform/packageOrder/add', {
-        method: 'POST',
+      const orderResponse = await fetch("/go-tech/platform/packageOrder/add", {
+        method: "POST",
         headers: requestHeaders,
-        body: JSON.stringify(orderInfo)
-      }).then(res => res.json()).catch(err => { throw err })
+        body: JSON.stringify(orderInfo),
+      })
+        .then(res => res.json())
+        .catch(err => {
+          throw err;
+        });
       if (orderResponse.code === 200) {
-        toast.success('訂單創建成功', { id: toastId })
+        toast.success("訂單創建成功", { id: toastId });
         const orderId = orderResponse.data;
         if (orderInfo.payType === PayTypeEnum.FPS) {
           // 上传凭证
-          await fetch('/go-tech/platform/packageOrder/payEvidence', {
-            method: 'POST',
+          await fetch("/go-tech/platform/packageOrder/payEvidence", {
+            method: "POST",
             headers: requestHeaders,
             body: JSON.stringify({
               id: orderId,
-              payEvidence: voucherFile.url
+              payEvidence: voucherFile.url,
+            }),
+          })
+            .catch(err => {
+              throw err;
             })
-          }).catch(err => { throw err }).then(res => res.json())
+            .then(res => res.json());
 
-          router.push(`/my-orders/${orderId}`)
+          router.push(`/my-orders/${orderId}`);
         }
-    
+
         setShowPaymentDialog(false);
         setSelectedPaymentMethod(null);
         toast.success("支付憑證已提交，我們將在確認後為您開通服務");
@@ -161,7 +179,6 @@ const ConfirmOrder = ({ planId: planIdFromQuery, data }: { planId?: string, data
       }
     } catch (error) {
       console.log(error);
-      
     }
   };
 
@@ -174,20 +191,50 @@ const ConfirmOrder = ({ planId: planIdFromQuery, data }: { planId?: string, data
 
     if (serviceId === "rentSysPrice") return selectedPlan.rentSysPrice;
     if (serviceId === "venueSysPrice") return selectedPlan.venueSysPrice;
-    if (serviceId === "accountingSysPrice") return selectedPlan.accountingSysPrice;
-    if (serviceId === "custServiceSysPrice") return selectedPlan.custServiceSysPrice;
+    if (serviceId === "accountingSysPrice")
+      return selectedPlan.accountingSysPrice;
+    if (serviceId === "custServiceSysPrice")
+      return selectedPlan.custServiceSysPrice;
     if (serviceId === "addUnitPrice") return selectedPlan.addUnitPrice;
 
     return 0;
   };
 
-  const addonsTotal = Object.entries(selectedServicesSafe).reduce(
-    (sum, [serviceId, quantity]) => sum + getServiceUnitPrice(serviceId) * quantity,
-    0
-  ) * month;
+  const addonsTotal =
+    Object.entries(selectedServicesSafe).reduce(
+      (sum, [serviceId, quantity]) =>
+        sum + getServiceUnitPrice(serviceId) * quantity,
+      0
+    ) * month;
   // @ts-ignore
   const originalPrice = (selectedPlan?.price * month || 0) + addonsTotal;
-  const discount = 0;
+
+  /**
+   * 优惠价格
+   * 1个月-2个月 -> price
+   * 3个月-5个月 -> priceA
+   * 6个月-11个月 -> priceB
+   * 12个月及以上 -> priceC
+   */
+  const discount = useMemo<number>(() => {
+    // 原价
+    let recursePrice = selectedPlan?.price;
+    if (month >= 12) {
+      recursePrice = selectedPlan?.priceC || recursePrice;
+    }
+    if (month >= 6 && month < 12) {
+      recursePrice = selectedPlan?.priceB || recursePrice;
+    }
+    if (month >= 3 && month < 6) {
+      recursePrice = selectedPlan?.priceA || recursePrice;
+    }
+
+    const diffPrice =
+      Math.max(0, (selectedPlan?.price || 0) - (recursePrice || 0)) * month;
+
+    return Math.max(0, diffPrice);
+  }, [month, addonsTotal]);
+
   const totalPrice = originalPrice - discount;
 
   return (
@@ -225,15 +272,12 @@ const ConfirmOrder = ({ planId: planIdFromQuery, data }: { planId?: string, data
                 value={month}
                 type="number"
                 min={1}
-                onChange={e =>
-                  setMonth(Number(e.target.value))
-                }
+                onChange={e => setMonth(Number(e.target.value))}
                 className="h-9"
               />
               <div className="text-lg">月</div>
             </div>
           </div>
-
 
           {/* Plan Details Card */}
           <div className="bg-white rounded-lg border border-border p-6 mb-6">
@@ -250,9 +294,7 @@ const ConfirmOrder = ({ planId: planIdFromQuery, data }: { planId?: string, data
                 <span className="text-2xl font-bold text-gray-700">
                   ${selectedPlan?.price?.toLocaleString()}
                 </span>
-                <span className="text-lg text-gray-700 ml-1">
-                  
-                </span>
+                <span className="text-lg text-gray-700 ml-1"></span>
               </div>
             </div>
 
@@ -278,8 +320,14 @@ const ConfirmOrder = ({ planId: planIdFromQuery, data }: { planId?: string, data
                       style={{ backgroundColor: "#FAEEEB" }}
                     >
                       {feature.menuIcon && (
-                        <svg className="svg-icon w-4 h-4 text-primary mr-1" aria-hidden="true">
-                          <use href={`#icon-${feature.menuIcon}`} xlinkHref={`#icon-${feature.menuIcon}`}></use>
+                        <svg
+                          className="svg-icon w-4 h-4 text-primary mr-1"
+                          aria-hidden="true"
+                        >
+                          <use
+                            href={`#icon-${feature.menuIcon}`}
+                            xlinkHref={`#icon-${feature.menuIcon}`}
+                          ></use>
                         </svg>
                       )}
                       <span>{feature.menuTitle}</span>
@@ -305,7 +353,8 @@ const ConfirmOrder = ({ planId: planIdFromQuery, data }: { planId?: string, data
                       s => s.id === serviceId
                     );
                     if (!service) return null;
-                    const serviceTotalPrice = getServiceUnitPrice(serviceId) * quantity;
+                    const serviceTotalPrice =
+                      getServiceUnitPrice(serviceId) * quantity;
                     const subTotalPrice = serviceTotalPrice * month;
 
                     return (
@@ -359,7 +408,7 @@ const ConfirmOrder = ({ planId: planIdFromQuery, data }: { planId?: string, data
             </div>
           </div>
 
-           <div className="bg-white rounded-lg border border-border p-6 mb-8">
+          <div className="bg-white rounded-lg border border-border p-6 mb-8">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-1 h-6 bg-primary rounded-full"></div>
               <h2 className="text-lg font-bold text-foreground">發票信息</h2>
@@ -367,23 +416,26 @@ const ConfirmOrder = ({ planId: planIdFromQuery, data }: { planId?: string, data
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <FileCheck className="w-5 h-5 text-primary" />
-                <span className="text-sm text-foreground">是否需要開具發票？</span>
+                <span className="text-sm text-foreground">
+                  是否需要開具發票？
+                </span>
               </div>
               <Switch checked={needInvoice} onCheckedChange={setNeedInvoice} />
             </div>
             {needInvoice && (
               <div className="mt-4 space-y-1">
-                <Label className="text-sm text-muted-foreground">發票抬頭（公司或個人名稱）</Label>
+                <Label className="text-sm text-muted-foreground">
+                  發票抬頭（公司或個人名稱）
+                </Label>
                 <Input
                   value={invoiceName}
-                  onChange={(e) => setInvoiceName(e.target.value)}
+                  onChange={e => setInvoiceName(e.target.value)}
                   placeholder="請輸入公司或個人名稱"
                   className="h-9"
                 />
               </div>
             )}
           </div>
-          
 
           {/* Navigation Buttons */}
           <div className="flex justify-center gap-4">

@@ -60,6 +60,9 @@ export type PlatformPackageDto = {
   rentSysPrice: number;
   venueSysPrice: number;
   price: number;
+  priceA?: number;
+  priceB?: number;
+  priceC?: number;
   packageName: string;
   unitCount: number;
   packageItemList: {
