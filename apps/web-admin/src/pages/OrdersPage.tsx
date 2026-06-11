@@ -711,7 +711,7 @@ const OrdersPage = () => {
                   {order.packageName}
                 </TableCell>
                 <TableCell className="text-center">
-                  {order.orderAmount}
+                  {order.finalAmount}
                 </TableCell>
                 <TableCell className="text-center">
                   {PayTypelabel[order.payType]}
