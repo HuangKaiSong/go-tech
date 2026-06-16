@@ -13,6 +13,9 @@ const SystemUsersPage = lazyPage(() => import("@/pages/SystemUsersPage"));
 const SystemUserDetailPage = lazyPage(
   () => import("@/pages/SystemUserDetailPage"),
 );
+const PromoCodeDetailPage = lazyPage(
+  () => import("@/pages/PromoCodeDetailPage"),
+);
 const PromotionsPage = lazyPage(() => import("@/pages/PromotionsPage"));
 const PromoCodesPage = lazyPage(() => import("@/pages/PromoCodesPage"));
 const CouponsPage = lazyPage(() => import("@/pages/CouponsPage"));
@@ -62,6 +65,10 @@ export const routes: RouteObject[] = [
       {
         path: "/promotions",
         element: <PromotionsPage />,
+      },
+      {
+        path: "/promo-codes/:id",
+        element: <PromoCodeDetailPage />,
       },
       {
         path: "/promo-codes",
@@ -126,3 +133,4 @@ export const routes: RouteObject[] = [
     element: <NotFound />,
   },
 ];
+
