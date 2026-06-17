@@ -59,7 +59,10 @@ export default defineConfig(({ mode, }) => {
         [VITE_PROXY_PREFIX]: {
           target: VITE_PROXY_TARGET,
           changeOrigin: true,
-          rewrite: (path) => path.replace(new RegExp(`^${VITE_PROXY_PREFIX}`), ''),
+          rewrite: (path) => {
+            console.log('full path => ' + VITE_PROXY_TARGET + path.replace(new RegExp(`^${VITE_PROXY_PREFIX}`), ''))
+            return path.replace(new RegExp(`^${VITE_PROXY_PREFIX}`), '')
+          },
         },
         '/h5-hook': {
           target: VITE_H5_SITE_URL,
