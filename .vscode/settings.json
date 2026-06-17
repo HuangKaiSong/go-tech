@@ -25,6 +25,7 @@
   "i18n-ally.keystyle": "flat",
   "i18n-ally.enabledFrameworks": ["next-intl"],
   "commentTranslate.source": "Google",
-  "js/ts.locale": "zh-CN"
+  "js/ts.locale": "zh-CN",
+  "js/ts.tsdk.path": "node_modules/.pnpm/node_modules/typescript/lib"
 }
 
