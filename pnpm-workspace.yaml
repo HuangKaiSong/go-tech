@@ -9,6 +9,13 @@ onlyBuiltDependencies:
   - sharp
   - unrs-resolver
 
+strictPeerDependencies: false
+ignoreWorkspaceRootCheck: true
+
+overrides:
+  # 确保类型一致性
+  typescript: "^6.0.3"
+
 # ── Shared version catalog ─────────────────────────────────────────────────────
 # In package.json, reference via:
 #   "dep": "catalog:"           → default catalog
