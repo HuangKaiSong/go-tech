@@ -1,22 +1,15 @@
 {
   "name": "@go-tech-frontend/lib",
   "version": "1.0.0",
-  "description": "",
+  "private": true,
+  "description": "DEPRECATED back-compat shim — use @go-tech/core-utils and @go-tech/core-hooks",
   "keywords": [],
   "license": "ISC",
   "author": "",
   "main": "./src/index.ts",
   "dependencies": {
-    "clsx": "^2.1.1",
-    "dayjs": "^1.11.19",
-    "tailwind-merge": "^3.4.0"
-  },
-  "peerDependencies": {
-    "@types/node": ">=24",
-    "@types/react": ">=19",
-    "@types/react-dom": ">=19",
-    "react": ">=19",
-    "react-dom": ">=19"
+    "@go-tech/core-hooks": "workspace:*",
+    "@go-tech/core-utils": "workspace:*"
   },
   "packageManager": "pnpm@10.17.0"
 }

@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { cn } from '@go-tech-frontend/lib';
+import { cn } from '@go-tech/core-utils';
 
 export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
 

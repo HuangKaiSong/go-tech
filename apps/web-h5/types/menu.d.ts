@@ -1,8 +1,5 @@
-type MenuType = {
-  children?: MenuType[];
-  desc: string;
-  icon: string;
-  id: number;
-  parentId: number;
-  title: string;
-};
+import type { MenuType as CoreMenuType } from '@go-tech/core-types';
+
+declare global {
+  type MenuType = CoreMenuType;
+}

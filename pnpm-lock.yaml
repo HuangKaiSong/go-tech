@@ -157,6 +157,9 @@ catalogs:
       specifier: ^3.25.76
       version: 3.25.76
   dev:
+    '@types/node':
+      specifier: ^24.10.2
+      version: 24.10.7
     '@types/react':
       specifier: ^19.2.7
       version: 19.2.8
@@ -635,9 +638,6 @@ importers:
 
   apps/web-admin:
     dependencies:
-      '@go-tech-frontend/lib':
-        specifier: workspace:*
-        version: link:../../packages/lib
       '@go-tech-frontend/styles':
         specifier: workspace:*
         version: link:../../packages/styles
@@ -647,6 +647,9 @@ importers:
       '@go-tech-frontend/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@go-tech/core-utils':
+        specifier: workspace:*
+        version: link:../../packages/core/utils
       '@hookform/resolvers':
         specifier: 'catalog:'
         version: 3.10.0(react-hook-form@7.71.1(react@19.2.3))
@@ -783,15 +786,21 @@ importers:
 
   apps/web-h5:
     dependencies:
-      '@go-tech-frontend/lib':
-        specifier: workspace:*
-        version: link:../../packages/lib
       '@go-tech-frontend/styles':
         specifier: workspace:*
         version: link:../../packages/styles
       '@go-tech-frontend/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@go-tech/core-hooks':
+        specifier: workspace:*
+        version: link:../../packages/core/hooks
+      '@go-tech/core-http':
+        specifier: workspace:*
+        version: link:../../packages/core/http
+      '@go-tech/core-types':
+        specifier: workspace:*
+        version: link:../../packages/core/types
       '@react-pdf/renderer':
         specifier: ^4.5.1
         version: 4.5.1(react@19.2.3)
@@ -913,32 +922,77 @@ importers:
 
   internal/tsconfig: {}
 
-  packages/lib:
+  packages/core/hooks:
     dependencies:
-      '@types/node':
-        specifier: '>=24'
-        version: 24.10.7
+      '@go-tech/core-utils':
+        specifier: workspace:*
+        version: link:../utils
       '@types/react':
-        specifier: '>=19'
+        specifier: '>=18'
         version: 19.2.8
-      '@types/react-dom':
-        specifier: '>=19'
-        version: 19.2.3(@types/react@19.2.8)
-      clsx:
-        specifier: ^2.1.1
-        version: 2.1.1
       dayjs:
         specifier: ^1.11.19
         version: 1.11.19
       react:
-        specifier: '>=19'
+        specifier: '>=18'
         version: 19.2.3
-      react-dom:
-        specifier: '>=19'
-        version: 19.2.3(react@19.2.3)
+    devDependencies:
+      '@go-tech/tsconfig':
+        specifier: workspace:*
+        version: link:../../../internal/tsconfig
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+
+  packages/core/http:
+    dependencies:
+      '@go-tech/core-types':
+        specifier: workspace:*
+        version: link:../types
+    devDependencies:
+      '@go-tech/tsconfig':
+        specifier: workspace:*
+        version: link:../../../internal/tsconfig
+      '@types/node':
+        specifier: catalog:dev
+        version: 24.10.7
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+
+  packages/core/types:
+    devDependencies:
+      '@go-tech/tsconfig':
+        specifier: workspace:*
+        version: link:../../../internal/tsconfig
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+
+  packages/core/utils:
+    dependencies:
+      clsx:
+        specifier: 'catalog:'
+        version: 2.1.1
       tailwind-merge:
         specifier: ^3.4.0
         version: 3.4.0
+    devDependencies:
+      '@go-tech/tsconfig':
+        specifier: workspace:*
+        version: link:../../../internal/tsconfig
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+
+  packages/lib:
+    dependencies:
+      '@go-tech/core-hooks':
+        specifier: workspace:*
+        version: link:../core/hooks
+      '@go-tech/core-utils':
+        specifier: workspace:*
+        version: link:../core/utils
 
   packages/styles:
     dependencies:
@@ -998,9 +1052,9 @@ importers:
 
   packages/ui:
     dependencies:
-      '@go-tech-frontend/lib':
+      '@go-tech/core-utils':
         specifier: workspace:*
-        version: link:../lib
+        version: link:../core/utils
       '@radix-ui/react-accordion':
         specifier: ^1.2.11
         version: 1.2.12(@types/react-dom@19.2.3(@types/react@19.2.8))(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)

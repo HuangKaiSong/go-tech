@@ -1,6 +1,6 @@
 'use client';
 
-import { useCountDown } from '@go-tech-frontend/lib';
+import { useCountDown } from '@go-tech/core-hooks';
 import { Button, Input, toast } from '@go-tech-frontend/ui';
 import { CircleAlert, X } from 'lucide-react';
 import Image from 'next/image';

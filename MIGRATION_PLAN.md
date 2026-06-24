@@ -95,7 +95,21 @@ internal/*                       工程配置（不参与运行时）
 
 **验收**：`turbo run build` 全绿且有缓存命中；`pnpm lint` 走 oxlint；CI 时间下降。
 
-### 阶段 1 — 抽取 `core` 跨端内核（中风险）
+### 阶段 1 — 抽取 `core` 跨端内核（中风险） ✅ 已完成
+
+> 落地状态（决策：命名空间收敛为 `@go-tech/*`；http 内核为阶段 3 的 Jotai 状态层预留 `onUnauthorized` 注入点）：
+>
+> - 新增 4 个跨端内核包（均位于 `packages/core/*`，`tsconfig` extends `@go-tech/tsconfig/library.json`，`lib: ["ESNext"]` 不含 DOM）：
+>   - `@go-tech/core-utils`：`cn` / `truncate` / `formatNumber` / 类型守卫。
+>   - `@go-tech/core-hooks`：`useCountDown` / `useLatest`（React peer，timer 用 node 类型，无 DOM）。
+>   - `@go-tech/core-types`：`HttpBaseResponse` / `User` / `Tenant` / `Packages` / `MenuType`。
+>   - `@go-tech/core-http`：runtime-agnostic `HttpClient` + 可注入 `HttpAdapter`（`getBaseUrl`/`getToken`/`defaultHeaders`/`onError`/`onUnauthorized`/`returnErrorBody`）。
+> - `apps/web-h5/lib/http.ts` 改为注入 Next.js `cookies()` adapter 消费内核；导出 `httpClient`/`getBaseUrl` 不变。
+> - `web-h5` 的 `types/*.d.ts` 改为从 `@go-tech/core-types` re-export（保留全局 ambient，零调用点改动）。
+> - 全仓 `@go-tech-frontend/lib` 引用（33 处）重定向到 `@go-tech/core-utils` / `@go-tech/core-hooks`；`packages/lib` 保留为已弃用的 re-export shim（沙箱无法删除，可后续手动移除）。
+> - `pnpm-workspace.yaml` 增加 `packages/core/*` glob。
+> - 验收通过：4 个 core 包 + `web-h5` + `web-admin` 的 `tsc` 全绿；向 core 包注入 `document`/`window` 会编译报错（已实测）。oxlint/oxfmt 为平台原生二进制，请在本机 `pnpm lint` / `pnpm format` 跑。
+> - 待办（阶段 1 范围外）：`web-admin` / HR 应用的内联 fetch 迁移到 `core-http` adapter（属阶段 3 service 层）；`web-admin/src/types` 收敛进 `core-types`。
 
 **目标**：把平台无关逻辑下沉到 `packages/core/*`，明确「禁止 DOM」边界。
 

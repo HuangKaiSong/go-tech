@@ -12,10 +12,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@go-tech-frontend/lib": "workspace:*",
     "@go-tech-frontend/styles": "workspace:*",
     "@go-tech-frontend/three": "workspace:*",
     "@go-tech-frontend/ui": "workspace:*",
+    "@go-tech/core-utils": "workspace:*",
     "@hookform/resolvers": "catalog:",
     "@tanstack/react-query": "catalog:",
     "ahooks": "catalog:",

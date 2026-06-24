@@ -1,14 +1,17 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
+/** Merge Tailwind class names, de-duplicating conflicting utilities. */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+/** Truncate `text` to `length` chars, appending an ellipsis when cut. */
 export const truncate = (text: string, length: number) => {
   return text.length > length ? `${text.slice(0, length)}...` : text;
 };
 
+/** Format a number using `Intl.NumberFormat` with up to 2 fraction digits. */
 export const formatNumber = (number: number, locale: string = 'en-US'): string => {
   return new Intl.NumberFormat(locale, {
     style: 'decimal',

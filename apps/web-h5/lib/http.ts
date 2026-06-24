@@ -1,5 +1,6 @@
 // oxlint-disable
 import 'server-only';
+import { HttpClient, type HttpAdapter } from '@go-tech/core-http';
 import { cookies } from 'next/headers';
 
 export function getBaseUrl(): string {
@@ -12,80 +13,20 @@ export function getBaseUrl(): string {
   return apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
 }
 
-export class Http {
-  private getBaseUri(): string {
-    return getBaseUrl();
-  }
-
-  async request<T = any>(endpoint: string, options: RequestInit = {}, params?: Record<string, string>): Promise<T> {
-    let fullEndpoint = endpoint;
-
-    if (params) {
-      const queryString = new URLSearchParams(params).toString();
-      fullEndpoint = `${endpoint}?${queryString}`;
-    }
-
-    const baseUrl = this.getBaseUri();
-    const url = `${baseUrl}${fullEndpoint}`;
-
+/**
+ * Next.js (server-only) adapter for the platform-agnostic HTTP kernel.
+ * Reads the auth token from the request cookie and tags requests as a
+ * platform customer.
+ */
+const nextAdapter: HttpAdapter = {
+  getBaseUrl,
+  async getToken() {
     const cookieStore = await cookies();
-    const authToken = cookieStore.get('GO_TECH_AUTH_TOKEN')?.value || '';
+    return cookieStore.get('GO_TECH_AUTH_TOKEN')?.value || '';
+  },
+  defaultHeaders: { 'User-Type': 'platform_customer' },
+  // Preserve legacy behavior: resolve with the response body even on non-ok.
+  returnErrorBody: true
+};
 
-    const headers = new Headers(options.headers);
-    headers.set('User-Type', 'platform_customer');
-    headers.set('Content-Type', 'application/json');
-    if (authToken) {
-      headers.append('Authorization', `Bearer ${authToken}`);
-    }
-
-    const requestOptons: RequestInit = {
-      ...options,
-      method: options.method,
-      headers,
-      body: options.body ? JSON.stringify(options.body) : null
-    };
-
-    try {
-      const response = await fetch(url, requestOptons);
-      return (await response.json()) as T;
-    } catch (error) {
-      return Promise.reject(error);
-    }
-  }
-
-  async post<T>(endpoint: string, data?: any, params?: Record<string, string>): Promise<HttpBaseResponse<T>> {
-    return this.request<HttpBaseResponse<T>>(
-      endpoint,
-      {
-        method: 'POST',
-        body: data ? JSON.stringify(data) : undefined
-      },
-      params
-    );
-  }
-
-  async get<T = any>(endpoint: string, params?: Record<string, string>): Promise<HttpBaseResponse<T>> {
-    return this.request<HttpBaseResponse<T>>(
-      endpoint,
-      {
-        method: 'GET'
-      },
-      params
-    );
-  }
-
-  async put<T>(endpoint: string, data?: any): Promise<HttpBaseResponse<T>> {
-    return this.request<HttpBaseResponse<T>>(endpoint, {
-      method: 'PUT',
-      body: data ? JSON.stringify(data) : undefined
-    });
-  }
-
-  async delete<T>(endpoint: string): Promise<HttpBaseResponse<T>> {
-    return this.request<HttpBaseResponse<T>>(endpoint, {
-      method: 'DELETE'
-    });
-  }
-}
-
-export const httpClient = new Http();
+export const httpClient = new HttpClient(nextAdapter);

@@ -1,5 +1,5 @@
-type User = {
-  nickname: string;
-  sub: string;
-  userId: number;
-};
+import type { User as CoreUser } from '@go-tech/core-types';
+
+declare global {
+  type User = CoreUser;
+}

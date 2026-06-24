@@ -11,9 +11,11 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@go-tech-frontend/lib": "workspace:*",
     "@go-tech-frontend/styles": "workspace:*",
     "@go-tech-frontend/ui": "workspace:*",
+    "@go-tech/core-hooks": "workspace:*",
+    "@go-tech/core-http": "workspace:*",
+    "@go-tech/core-types": "workspace:*",
     "@react-pdf/renderer": "^4.5.1",
     "ahooks": "catalog:",
     "bcryptjs": "^3.0.3",

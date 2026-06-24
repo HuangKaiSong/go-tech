@@ -1,5 +1,5 @@
-interface HttpBaseResponse<T = any> {
-  code?: number;
-  data?: T;
-  [key: string]: any;
+import type { HttpBaseResponse as CoreHttpBaseResponse } from '@go-tech/core-types';
+
+declare global {
+  type HttpBaseResponse<T = any> = CoreHttpBaseResponse<T>;
 }

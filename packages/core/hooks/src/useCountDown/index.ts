@@ -1,7 +1,7 @@
+import { isNumber } from '@go-tech/core-utils';
 import dayjs from 'dayjs';
 import { useEffect, useMemo, useState } from 'react';
 import useLatest from '../useLatest';
-import { isNumber } from './../utils';
 
 export type TDate = dayjs.ConfigType;
 
