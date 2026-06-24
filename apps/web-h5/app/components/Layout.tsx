@@ -3,6 +3,7 @@
 import { Toaster } from '@go-tech-frontend/ui';
 import { useEffect, useState } from 'react';
 import { IframeProvider } from '@/contexts/IframeContext';
+import { WhatsappService } from './CustomerService';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [hasIframe, setHasIframe] = useState<boolean>(false);
@@ -19,6 +20,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <div className="bg-white dark:bg-gray-950 text-black dark:text-white antialiased" data-iframe={hasIframe}>
         <Toaster theme="system" className="toaster group" position="top-right" richColors />
         {children}
+        <WhatsappService />
       </div>
     </IframeProvider>
   );
