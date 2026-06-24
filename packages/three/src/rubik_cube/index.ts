@@ -3,24 +3,24 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 let instance: RubikCube | null = null;
 
-type Move = 'R' | 'L' | 'U' | 'D' | 'F' | 'B';
+type Move = 'B' | 'D' | 'F' | 'L' | 'R' | 'U';
 type Axis = 'x' | 'y' | 'z';
 
 interface RotationState {
-  move: Move;
   axis: Axis;
-  layer: number;
-  direction: 1 | -1;
-  pivot: THREE.Group;
   cubies: THREE.Mesh[];
-  targetAngle: number;
   currentAngle: number;
+  direction: 1 | -1;
+  layer: number;
+  move: Move;
+  pivot: THREE.Group;
+  targetAngle: number;
 }
 
 interface DragState {
+  axisVector: THREE.Vector3;
   move: Move;
   rotationSign: 1 | -1;
-  axisVector: THREE.Vector3;
   samplePoint: THREE.Vector3;
   startX: number;
   startY: number;
@@ -44,7 +44,7 @@ export default class RubikCube {
   clock!: THREE.Clock;
   animationFrameId: number | null = null;
   activeRotation: RotationState | null = null;
-  moveQueue: Array<{ move: Move; direction: 1 | -1 }> = [];
+  moveQueue: Array<{ direction: 1 | -1; move: Move }> = [];
   isInitialized = false;
   raycaster = new THREE.Raycaster();
   pointerNdc = new THREE.Vector2();
@@ -58,6 +58,7 @@ export default class RubikCube {
 
   constructor(canvas?: HTMLCanvasElement) {
     if (instance) {
+      // oxlint-disable-next-line no-constructor-return
       return instance;
     }
 
@@ -74,17 +75,12 @@ export default class RubikCube {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x111318);
 
-    this.camera = new THREE.PerspectiveCamera(
-      45,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      100,
-    );
+    this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
     this.camera.position.set(5.2, 5.1, 7.2);
 
     this.renderer = new THREE.WebGLRenderer({
       canvas: this.canvas,
-      antialias: true,
+      antialias: true
     });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -184,9 +180,9 @@ export default class RubikCube {
   }
 
   private addLights() {
-    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x2a2a35, 0.55);
-    const ambient = new THREE.AmbientLight(0xffffff, 0.45);
-    const mainLight = new THREE.DirectionalLight(0xffffff, 1.15);
+    const hemiLight = new THREE.HemisphereLight(0xFFFFFF, 0x2A2A35, 0.55);
+    const ambient = new THREE.AmbientLight(0xFFFFFF, 0.45);
+    const mainLight = new THREE.DirectionalLight(0xFFFFFF, 1.15);
     mainLight.position.set(5, 9, 6);
 
     this.scene.add(hemiLight, ambient, mainLight);
@@ -209,20 +205,22 @@ export default class RubikCube {
     }
   }
 
+  // oxlint-disable-next-line class-methods-use-this
   private createCubieMaterials(x: number, y: number, z: number) {
-    const body = 0x1c1c1c;
-    const up = 0xffffff;
-    const down = 0xffe45d;
-    const right = 0xd1302d;
-    const left = 0xf1782c;
-    const front = 0x1d9f4f;
-    const back = 0x265ee8;
+    const body = 0x1C1C1C;
+    const up = 0xFFFFFF;
+    const down = 0xFFE45D;
+    const right = 0xD1302D;
+    const left = 0xF1782C;
+    const front = 0x1D9F4F;
+    const back = 0x265EE8;
 
-    const sideColor = (condition: boolean, color: number) => new THREE.MeshStandardMaterial({
-      color: condition ? color : body,
-      roughness: 0.6,
-      metalness: 0.05,
-    });
+    const sideColor = (condition: boolean, color: number) =>
+      new THREE.MeshStandardMaterial({
+        color: condition ? color : body,
+        roughness: 0.6,
+        metalness: 0.05
+      });
 
     return [
       sideColor(x === HALF, right),
@@ -230,7 +228,7 @@ export default class RubikCube {
       sideColor(y === HALF, up),
       sideColor(y === -HALF, down),
       sideColor(z === HALF, front),
-      sideColor(z === -HALF, back),
+      sideColor(z === -HALF, back)
     ];
   }
 
@@ -281,7 +279,7 @@ export default class RubikCube {
       axisVector,
       samplePoint,
       startX: event.clientX,
-      startY: event.clientY,
+      startY: event.clientY
     };
 
     this.controlsWasEnabled = this.controls.enabled;
@@ -293,21 +291,14 @@ export default class RubikCube {
       return;
     }
 
-    const delta = new THREE.Vector2(
-      event.clientX - this.dragState.startX,
-      event.clientY - this.dragState.startY,
-    );
+    const delta = new THREE.Vector2(event.clientX - this.dragState.startX, event.clientY - this.dragState.startY);
     if (delta.lengthSq() < 36) {
       this.dragState = null;
       this.controls.enabled = this.controlsWasEnabled;
       return;
     }
 
-    const angleSign = this.getAngleSignFromDrag(
-      this.dragState.axisVector,
-      this.dragState.samplePoint,
-      delta,
-    );
+    const angleSign = this.getAngleSignFromDrag(this.dragState.axisVector, this.dragState.samplePoint, delta);
     const direction = (angleSign * this.dragState.rotationSign) as 1 | -1;
 
     this.rotate(this.dragState.move, direction);
@@ -325,7 +316,7 @@ export default class RubikCube {
     const pivot = new THREE.Group();
     this.cubeGroup.add(pivot);
 
-    const targetCubies = this.cubies.filter((cubie) => {
+    const targetCubies = this.cubies.filter(cubie => {
       const value = cubie.userData.grid[config.axis] as number;
       return value === config.layer;
     });
@@ -342,7 +333,7 @@ export default class RubikCube {
       pivot,
       cubies: targetCubies,
       targetAngle: (Math.PI / 2) * direction * config.rotationSign,
-      currentAngle: 0,
+      currentAngle: 0
     };
   }
 
@@ -351,7 +342,7 @@ export default class RubikCube {
       return;
     }
 
-    const { pivot, axis, targetAngle } = this.activeRotation;
+    const { axis, pivot, targetAngle } = this.activeRotation;
     const remain = targetAngle - this.activeRotation.currentAngle;
     const maxStep = TURN_SPEED * delta;
     const step = Math.abs(remain) < maxStep ? remain : Math.sign(remain) * maxStep;
@@ -369,7 +360,7 @@ export default class RubikCube {
       return;
     }
 
-    const { pivot, cubies } = this.activeRotation;
+    const { cubies, pivot } = this.activeRotation;
     for (const cubie of cubies) {
       this.cubeGroup.attach(cubie);
       this.snapCubieTransform(cubie);
@@ -381,41 +372,37 @@ export default class RubikCube {
   }
 
   private snapCubieTransform(cubie: THREE.Mesh) {
-    cubie.position.set(
-      this.snap(cubie.position.x),
-      this.snap(cubie.position.y),
-      this.snap(cubie.position.z),
-    );
+    cubie.position.set(this.snap(cubie.position.x), this.snap(cubie.position.y), this.snap(cubie.position.z));
 
     cubie.rotation.set(
       this.snapAngle(cubie.rotation.x),
       this.snapAngle(cubie.rotation.y),
-      this.snapAngle(cubie.rotation.z),
+      this.snapAngle(cubie.rotation.z)
     );
   }
 
+  // oxlint-disable-next-line class-methods-use-this
   private updateGridPosition(cubie: THREE.Mesh) {
     cubie.userData.grid = new THREE.Vector3(
       Math.round(cubie.position.x / STEP),
       Math.round(cubie.position.y / STEP),
-      Math.round(cubie.position.z / STEP),
+      Math.round(cubie.position.z / STEP)
     );
   }
 
+  // oxlint-disable-next-line class-methods-use-this
   private snap(value: number) {
     return Math.round(value / STEP) * STEP;
   }
 
+  // oxlint-disable-next-line class-methods-use-this
   private snapAngle(angle: number) {
     const quarter = Math.PI / 2;
     return Math.round(angle / quarter) * quarter;
   }
 
   private pickCubie(clientX: number, clientY: number) {
-    this.pointerNdc.set(
-      (clientX / window.innerWidth) * 2 - 1,
-      -(clientY / window.innerHeight) * 2 + 1,
-    );
+    this.pointerNdc.set((clientX / window.innerWidth) * 2 - 1, -(clientY / window.innerHeight) * 2 + 1);
     this.raycaster.setFromCamera(this.pointerNdc, this.camera);
     const hits = this.raycaster.intersectObjects(this.cubies, false);
     const firstHit = hits[0];
@@ -430,6 +417,7 @@ export default class RubikCube {
     return { cubie, faceNormal };
   }
 
+  // oxlint-disable-next-line class-methods-use-this
   private getDominantAxis(normal: THREE.Vector3): Axis {
     const absX = Math.abs(normal.x);
     const absY = Math.abs(normal.y);
@@ -444,6 +432,7 @@ export default class RubikCube {
     return 'z';
   }
 
+  // oxlint-disable-next-line class-methods-use-this
   private axisToVector(axis: Axis) {
     if (axis === 'x') {
       return new THREE.Vector3(1, 0, 0);
@@ -454,6 +443,7 @@ export default class RubikCube {
     return new THREE.Vector3(0, 0, 1);
   }
 
+  // oxlint-disable-next-line class-methods-use-this
   private getMoveFromAxisLayer(axis: Axis, layer: number): Move {
     if (axis === 'x') {
       return layer > 0 ? 'R' : 'L';
@@ -467,7 +457,7 @@ export default class RubikCube {
   private getAngleSignFromDrag(
     axisVector: THREE.Vector3,
     samplePoint: THREE.Vector3,
-    dragPixels: THREE.Vector2,
+    dragPixels: THREE.Vector2
   ): 1 | -1 {
     const radius = samplePoint.clone();
     const projectedRadius = radius.clone().sub(axisVector.clone().multiplyScalar(radius.dot(axisVector)));
@@ -485,14 +475,12 @@ export default class RubikCube {
       return dragPixels.x + dragPixels.y >= 0 ? 1 : -1;
     }
 
-    const dragNdc = new THREE.Vector2(
-      (dragPixels.x / window.innerWidth) * 2,
-      (-dragPixels.y / window.innerHeight) * 2,
-    );
+    const dragNdc = new THREE.Vector2((dragPixels.x / window.innerWidth) * 2, (-dragPixels.y / window.innerHeight) * 2);
 
     return dragNdc.dot(motionNdc) >= 0 ? 1 : -1;
   }
 
+  // oxlint-disable-next-line class-methods-use-this
   private getMoveConfig(move: Move): { axis: Axis; layer: number; rotationSign: 1 | -1 } {
     switch (move) {
       case 'R':

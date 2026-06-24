@@ -1,5 +1,5 @@
 interface HttpBaseResponse<T = any> {
   code?: number;
   data?: T;
-  [key: string]: any
+  [key: string]: any;
 }

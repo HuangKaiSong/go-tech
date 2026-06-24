@@ -1,0 +1,16 @@
+{
+  "name": "@go-tech/types",
+  "version": "1.0.0",
+  "description": "全局类型定义 - 跨平台支持",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./src/*"
+      ]
+    }
+  },
+  "exports": {
+    ".": "./src/index",
+    "./types": "./src/index.d.ts"
+  }
+}

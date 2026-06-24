@@ -1,23 +1,23 @@
-import { httpClient } from "@/lib/http";
-import Image from "next/image";
+import Image from 'next/image';
+import { httpClient } from '@/lib/http';
 
-const fmt = (n: number) =>
-  n.toLocaleString("en-HK", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fmt = (n: number) => n.toLocaleString('en-HK', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 export default async function Page({ params }: { params: { id: string } }) {
   const { id } = await params;
   let invoice: any = null;
-    
+
   try {
-    const data = await httpClient.get(`/go-tech/platform/packageOrder/detail/${id}`)
-    invoice = data.data
+    const data = await httpClient.get(`/go-tech/platform/packageOrder/detail/${id}`);
+    invoice = data.data;
     if (invoice.platformPackageDto?.packageItemList) {
-    invoice.platformPackageDto.packageItemList = invoice.platformPackageDto.packageItemList.filter((item: any) => {
-      return item.level <= 1;
-    })
-  }
+      invoice.platformPackageDto.packageItemList = invoice.platformPackageDto.packageItemList.filter((item: any) => {
+        return item.level <= 1;
+      });
+    }
   } catch (error) {
-    invoice = null
+    console.error(error);
+    invoice = null;
   }
 
   if (!invoice) {
@@ -31,17 +31,20 @@ export default async function Page({ params }: { params: { id: string } }) {
     );
   }
 
-  const orderItems = Array.isArray(invoice?.orderItems) ? invoice.orderItems : [] as any[];
+  const orderItems = Array.isArray(invoice?.orderItems) ? invoice.orderItems : ([] as any[]);
   const subtotal = invoice.orderAmount ?? 0;
   const total = invoice.orderAmount ?? 0;
   const due = invoice.finalAmount ?? 0;
-  const invoiceNo = invoice?.invoiceNo ?? "-";
+  const invoiceNo = invoice?.invoiceNo ?? '-';
 
   return (
     <main className="min-h-screen bg-muted/30 min-w-191.5">
       <article id="invoice" className="mx-auto max-w-3xl">
         {/* PAID banner */}
-        <div className="bg-primary text-primary-foreground text-center py-3 font-semibold tracking-wide" id="invoice-print-header">
+        <div
+          className="bg-primary text-primary-foreground text-center py-3 font-semibold tracking-wide"
+          id="invoice-print-header"
+        >
           ✓ PAID
         </div>
 
@@ -54,7 +57,14 @@ export default async function Page({ params }: { params: { id: string } }) {
               <span className="text-xl font-medium ml-1">HKD</span>
             </div>
           </div>
-          <Image src="/images/Gotech_Logo.webp" alt="Go Techs Limited logo" width={96} height={96} className="w-24 h-24 object-contain" loading="lazy" />
+          <Image
+            src="/images/Gotech_Logo.webp"
+            alt="Go Techs Limited logo"
+            width={96}
+            height={96}
+            className="w-24 h-24 object-contain"
+            loading="lazy"
+          />
         </header>
 
         <div className="border-t border-foreground" />
@@ -127,12 +137,13 @@ export default async function Page({ params }: { params: { id: string } }) {
         <section className="px-8 py-4 text-sm">
           <h3 className="font-bold mb-2">Terms</h3>
           <p className="text-foreground/80">
-            The amount due will be debited from the payment details you have provided to us on or after the due date stated above
+            The amount due will be debited from the payment details you have provided to us on or after the due date
+            stated above
           </p>
         </section>
 
         <div className="border-t border-foreground mx-8" />
       </article>
     </main>
-  )
+  );
 }

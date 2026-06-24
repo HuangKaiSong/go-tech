@@ -1,40 +1,39 @@
-"use client";
+'use client';
 
-import Link from "@/app/components/Link";
-import { Button, Input } from "@go-tech-frontend/ui";
-import Image from "next/image";
-import { useState } from "react";
+import { Button, Input, toast } from '@go-tech-frontend/ui';
+import Image from 'next/image';
+import { useState } from 'react';
+import Link from '@/app/components/Link';
 
+import { Eye, EyeOff, X } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import z from 'zod';
 // import Logo from "@/assets/Gotech_Logo.webp";
-import authBgImg from "@/assets/background.webp";
-import { useAuth } from "@/contexts/AuthContext";
-import { sendToBetterStack } from "@/lib/betterstack-logger";
-import { toast } from "@go-tech-frontend/ui";
-import { Eye, EyeOff, X } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
-import z from "zod";
+import authBgImg from '@/assets/background.webp';
+import { useAuth } from '@/contexts/AuthContext';
+import { sendToBetterStack } from '@/lib/betterstack-logger';
 
 const signinSchema = z.object({
   username: z.string(),
-  password: z.string().min(6),
+  password: z.string().min(6)
 });
 
 const Login = () => {
   const searchParams = useSearchParams();
-  const email = searchParams.get("email");
-  const type = searchParams.get("type");
+  const email = searchParams.get('email');
+  const type = searchParams.get('type');
 
   const router = useRouter();
-  const { setUser, setToken, refetchTenants } = useAuth();
-  const [account, setAccount] = useState(email || "");
-  const [password, setPassword] = useState("");
+  const { refetchTenants, setToken, setUser } = useAuth();
+  const [account, setAccount] = useState(email || '');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async () => {
     const result = signinSchema.safeParse({
       username: account,
-      password: password,
+      password
     });
 
     if (!result.success) {
@@ -45,19 +44,22 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      let uri = type === 'user' ? '/pms-admin/web-back/admin/accept' : "/go-tech/platform/platformCustomer/login"
+      const uri = type === 'user' ? '/pms-admin/web-back/admin/accept' : '/go-tech/platform/platformCustomer/login';
 
-      const body = type === 'user' ? {
-        email: result.data.username,
-        password: result.data.password,
-      } : result.data
+      const body =
+        type === 'user'
+          ? {
+              email: result.data.username,
+              password: result.data.password
+            }
+          : result.data;
 
       const response = await fetch(uri, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify(body),
+        body: JSON.stringify(body)
       });
       if (!response.ok) {
         throw response;
@@ -65,23 +67,23 @@ const Login = () => {
 
       const signResponse = await response.json();
       if (signResponse.code === 200) {
-        fetch("/api/auth/signin", {
-          method: "POST",
-          body: JSON.stringify(signResponse.data),
+        fetch('/api/auth/signin', {
+          method: 'POST',
+          body: JSON.stringify(signResponse.data)
         })
           .then(res => res.json())
           .then(res => {
-            setToken(signResponse.data.token)
+            setToken(signResponse.data.token);
             setUser(res.data);
-            refetchTenants(signResponse.data.token)
-            toast.success("登入成功！");
-            router.replace("/");
+            refetchTenants(signResponse.data.token);
+            toast.success('登入成功！');
+            router.replace('/');
           });
       }
     } catch (error: Response | any) {
       if (error instanceof Response) {
         const err = await error.json();
-        sendToBetterStack('error', error.statusText, { extra: err, body: result.data })
+        sendToBetterStack('error', error.statusText, { extra: err, body: result.data });
         toast.error(err.message);
       }
     } finally {
@@ -96,7 +98,7 @@ const Login = () => {
         src={authBgImg}
         alt="Background"
         loading="eager"
-        style={{ width: "auto" }}
+        style={{ width: 'auto' }}
         className="absolute inset-0 w-full h-full object-cover"
       />
       <div className="absolute inset-0 bg-foreground/30 backdrop-blur-sm" />
@@ -104,10 +106,7 @@ const Login = () => {
       {/* Login Card */}
       <div className="relative bg-background rounded-2xl shadow-2xl w-full max-w-xl p-8 md:p-12">
         {/* Close Button */}
-        <Link
-          href="/"
-          className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"
-        >
+        <Link href="/" className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors">
           <X className="w-6 h-6" />
         </Link>
 
@@ -116,9 +115,7 @@ const Login = () => {
           <Image src="/images/Gotech_Logo.webp" width={160} height={160} alt="logo" className="w-40" />
         </div>
 
-        <h1 className="text-2xl font-bold text-center text-foreground mb-8">
-          登入您的帳戶
-        </h1>
+        <h1 className="text-2xl font-bold text-center text-foreground mb-8">登入您的帳戶</h1>
 
         <div className="space-y-6">
           <div>
@@ -133,7 +130,7 @@ const Login = () => {
 
           <div className="relative">
             <Input
-              type={showPassword ? "text" : "password"}
+              type={showPassword ? 'text' : 'password'}
               placeholder="請輸入您的密碼"
               value={password}
               onChange={e => setPassword(e.target.value)}
@@ -144,11 +141,7 @@ const Login = () => {
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
             >
-              {showPassword ? (
-                <EyeOff className="w-5 h-5" />
-              ) : (
-                <Eye className="w-5 h-5" />
-              )}
+              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
           </div>
 
@@ -157,7 +150,7 @@ const Login = () => {
             disabled={isLoading || !account || !password}
             className="w-full h-14 text-lg font-semibold bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground disabled:opacity-50 transition-colors"
           >
-            {isLoading ? "登入中..." : "登入"}
+            {isLoading ? '登入中...' : '登入'}
           </Button>
         </div>
 
@@ -170,10 +163,7 @@ const Login = () => {
               忘記密碼?
             </Link>
           </div>
-          <Link
-            href="/account/register"
-            className="text-foreground underline hover:text-primary transition-colors"
-          >
+          <Link href="/account/register" className="text-foreground underline hover:text-primary transition-colors">
             註冊新帳戶
           </Link>
         </div>

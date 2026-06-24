@@ -11,36 +11,36 @@ export default class Renderer {
   instance!: THREE.WebGLRenderer;
 
   constructor() {
-    this.experience = new Experience()
-    this.canvas = this.experience.canvas
-    this.sizes = this.experience.sizes
-    this.scene = this.experience.scene
-    this.camera = this.experience.camera
+    this.experience = new Experience();
+    this.canvas = this.experience.canvas;
+    this.sizes = this.experience.sizes;
+    this.scene = this.experience.scene;
+    this.camera = this.experience.camera;
 
-    this.setInstance()
+    this.setInstance();
   }
 
   setInstance() {
     this.instance = new THREE.WebGLRenderer({
       canvas: this.canvas,
-      antialias: true,
+      antialias: true
       // powerPreference: 'high-performance',
-    })
-    this.instance.toneMapping = THREE.ACESFilmicToneMapping
-    this.instance.toneMappingExposure = 1.5
-    this.instance.shadowMap.enabled = true
-    this.instance.shadowMap.type = THREE.PCFSoftShadowMap
-    this.instance.setClearColor('#000012')
-    this.instance.setPixelRatio(this.sizes.pixelRatio)
-    this.instance.setSize(this.sizes.width, this.sizes.height)
+    });
+    this.instance.toneMapping = THREE.ACESFilmicToneMapping;
+    this.instance.toneMappingExposure = 1.5;
+    this.instance.shadowMap.enabled = true;
+    this.instance.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.instance.setClearColor('#000012');
+    this.instance.setPixelRatio(this.sizes.pixelRatio);
+    this.instance.setSize(this.sizes.width, this.sizes.height);
   }
 
   resize() {
-    this.instance.setPixelRatio(this.sizes.pixelRatio)
-    this.instance.setSize(this.sizes.width, this.sizes.height)
+    this.instance.setPixelRatio(this.sizes.pixelRatio);
+    this.instance.setSize(this.sizes.width, this.sizes.height);
   }
 
   update() {
-    this.instance.render(this.scene, this.camera.instance)
+    this.instance.render(this.scene, this.camera.instance);
   }
 }

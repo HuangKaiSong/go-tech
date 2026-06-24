@@ -1,71 +1,63 @@
-import {
-  Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@go-tech-frontend/ui";
-import { ArrowLeft, Percent } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Button, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@go-tech-frontend/ui';
+import { ArrowLeft, Percent } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const mockUsages = [
   {
     id: 1,
-    name: "陳小明",
-    phone: "98765432",
-    email: "ming@example.com",
-    member: "黃金會員",
-    package: "黃金套餐",
-    amount: "900",
-    discount: "100",
-    usedAt: "12/08/2025 14:23",
+    name: '陳小明',
+    phone: '98765432',
+    email: 'ming@example.com',
+    member: '黃金會員',
+    package: '黃金套餐',
+    amount: '900',
+    discount: '100',
+    usedAt: '12/08/2025 14:23'
   },
   {
     id: 2,
-    name: "李大華",
-    phone: "92345678",
-    email: "hua@example.com",
-    member: "白金會員",
-    package: "白金套餐",
-    amount: "1800",
-    discount: "200",
-    usedAt: "12/08/2025 15:10",
+    name: '李大華',
+    phone: '92345678',
+    email: 'hua@example.com',
+    member: '白金會員',
+    package: '白金套餐',
+    amount: '1800',
+    discount: '200',
+    usedAt: '12/08/2025 15:10'
   },
   {
     id: 3,
-    name: "王美麗",
-    phone: "93456789",
-    email: "mei@example.com",
-    member: "鑽石會員",
-    package: "鑽石套餐",
-    amount: "2700",
-    discount: "300",
-    usedAt: "12/09/2025 09:45",
+    name: '王美麗',
+    phone: '93456789',
+    email: 'mei@example.com',
+    member: '鑽石會員',
+    package: '鑽石套餐',
+    amount: '2700',
+    discount: '300',
+    usedAt: '12/09/2025 09:45'
   },
   {
     id: 4,
-    name: "張志強",
-    phone: "94567890",
-    email: "zhi@example.com",
-    member: "黃金會員",
-    package: "黃金套餐",
-    amount: "900",
-    discount: "100",
-    usedAt: "12/09/2025 11:20",
+    name: '張志強',
+    phone: '94567890',
+    email: 'zhi@example.com',
+    member: '黃金會員',
+    package: '黃金套餐',
+    amount: '900',
+    discount: '100',
+    usedAt: '12/09/2025 11:20'
   },
   {
     id: 5,
-    name: "劉雅婷",
-    phone: "95678901",
-    email: "ya@example.com",
-    member: "白金會員",
-    package: "白金套餐",
-    amount: "1800",
-    discount: "200",
-    usedAt: "12/10/2025 16:05",
-  },
+    name: '劉雅婷',
+    phone: '95678901',
+    email: 'ya@example.com',
+    member: '白金會員',
+    package: '白金套餐',
+    amount: '1800',
+    discount: '200',
+    usedAt: '12/10/2025 16:05'
+  }
 ];
 
 const PromoCodeDetailPage = () => {
@@ -81,7 +73,7 @@ const PromoCodeDetailPage = () => {
             優惠管理/<span className="text-primary">優惠碼詳情</span>
           </h1>
         </div>
-        <Button variant="outline" onClick={() => navigate("/promo-codes")}>
+        <Button variant="outline" onClick={() => navigate('/promo-codes')}>
           <ArrowLeft className="w-4 h-4 mr-2" />
           返回
         </Button>
@@ -114,30 +106,18 @@ const PromoCodeDetailPage = () => {
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50">
-              <TableHead className="text-center font-medium">
-                用戶姓名
-              </TableHead>
+              <TableHead className="text-center font-medium">用戶姓名</TableHead>
               <TableHead className="text-center font-medium">電話</TableHead>
               <TableHead className="text-center font-medium">郵箱</TableHead>
-              <TableHead className="text-center font-medium">
-                會員等級
-              </TableHead>
-              <TableHead className="text-center font-medium">
-                購買套餐
-              </TableHead>
-              <TableHead className="text-center font-medium">
-                訂單金額
-              </TableHead>
-              <TableHead className="text-center font-medium">
-                優惠金額
-              </TableHead>
-              <TableHead className="text-center font-medium">
-                使用時間
-              </TableHead>
+              <TableHead className="text-center font-medium">會員等級</TableHead>
+              <TableHead className="text-center font-medium">購買套餐</TableHead>
+              <TableHead className="text-center font-medium">訂單金額</TableHead>
+              <TableHead className="text-center font-medium">優惠金額</TableHead>
+              <TableHead className="text-center font-medium">使用時間</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {mockUsages.map((u) => (
+            {mockUsages.map(u => (
               <TableRow key={u.id} className="hover:bg-muted/30">
                 <TableCell className="text-center">{u.name}</TableCell>
                 <TableCell className="text-center">{u.phone}</TableCell>
@@ -145,9 +125,7 @@ const PromoCodeDetailPage = () => {
                 <TableCell className="text-center">{u.member}</TableCell>
                 <TableCell className="text-center">{u.package}</TableCell>
                 <TableCell className="text-center">${u.amount}</TableCell>
-                <TableCell className="text-center text-primary">
-                  -${u.discount}
-                </TableCell>
+                <TableCell className="text-center text-primary">-${u.discount}</TableCell>
                 <TableCell className="text-center">{u.usedAt}</TableCell>
               </TableRow>
             ))}
@@ -159,4 +137,3 @@ const PromoCodeDetailPage = () => {
 };
 
 export default PromoCodeDetailPage;
-

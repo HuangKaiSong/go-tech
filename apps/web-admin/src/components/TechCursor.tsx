@@ -1,9 +1,16 @@
-import { useEffect, useRef } from "react";
+import { type RefObject, useEffect, useRef } from 'react';
+
+const setCursorSize = (ref: RefObject<HTMLDivElement | null>, size: string) => {
+  if (ref.current) {
+    ref.current.style.width = size;
+    ref.current.style.height = size;
+  }
+};
 
 const TechCursor = () => {
-  const cursor = useRef(null);
-  const cursorTrail = useRef(null);
-  const cursorDot = useRef(null);
+  const cursor = useRef<HTMLDivElement | null>(null);
+  const cursorTrail = useRef<HTMLDivElement | null>(null);
+  const cursorDot = useRef<HTMLDivElement | null>(null);
 
   // 使用 useRef 存储鼠标位置，而不是普通变量
   const mouseX = useRef(0);
@@ -14,7 +21,7 @@ const TechCursor = () => {
   const trailY = useRef(0);
 
   // 动画帧ID
-  const animationFrameId = useRef(null);
+  const animationFrameId = useRef<number | null>(null);
 
   function handleMouseMove(e) {
     mouseX.current = e.clientX;
@@ -22,65 +29,45 @@ const TechCursor = () => {
 
     // 检查是否在Three.js画布上
     const target = e.target;
-    if (target && target.classList.contains("three-canvas")) {
-      if (cursor.current) cursor.current.style.opacity = "0";
-      if (cursorTrail.current) cursorTrail.current.style.opacity = "0";
-      if (cursorDot.current) cursorDot.current.style.opacity = "0";
+    if (target && target.classList.contains('three-canvas')) {
+      if (cursor.current) cursor.current.style.opacity = '0';
+      if (cursorTrail.current) cursorTrail.current.style.opacity = '0';
+      if (cursorDot.current) cursorDot.current.style.opacity = '0';
       return;
     }
 
     // 显示光标
-    if (cursor.current) cursor.current.style.opacity = "1";
-    if (cursorTrail.current) cursorTrail.current.style.opacity = "1";
-    if (cursorDot.current) cursorDot.current.style.opacity = "1";
+    if (cursor.current) cursor.current.style.opacity = '1';
+    if (cursorTrail.current) cursorTrail.current.style.opacity = '1';
+    if (cursorDot.current) cursorDot.current.style.opacity = '1';
 
     // 检查是否悬停在可交互元素上
     const isHovering =
-      target?.closest(".nav-button") ||
-      target?.closest(".social-button") ||
-      target?.closest(".logo-text");
+      target?.closest('.nav-button') || target?.closest('.social-button') || target?.closest('.logo-text');
 
     if (isHovering) {
-      if (cursor.current) {
-        cursor.current.style.width = "80px";
-        cursor.current.style.height = "80px";
-      }
-      if (cursorTrail.current) {
-        cursorTrail.current.style.width = "50px";
-        cursorTrail.current.style.height = "50px";
-      }
-      if (cursorDot.current) {
-        cursorDot.current.style.width = "12px";
-        cursorDot.current.style.height = "12px";
-      }
+      setCursorSize(cursor, '80px');
+      setCursorSize(cursorTrail, '50px');
+      setCursorSize(cursorDot, '12px');
     } else {
-      if (cursor.current) {
-        cursor.current.style.width = "60px";
-        cursor.current.style.height = "60px";
-      }
-      if (cursorTrail.current) {
-        cursorTrail.current.style.width = "40px";
-        cursorTrail.current.style.height = "40px";
-      }
-      if (cursorDot.current) {
-        cursorDot.current.style.width = "8px";
-        cursorDot.current.style.height = "8px";
-      }
+      setCursorSize(cursor, '60px');
+      setCursorSize(cursorTrail, '40px');
+      setCursorSize(cursorDot, '8px');
     }
   }
 
   // 鼠标离开页面
   function handleMouseLeave() {
-    if (cursor.current) cursor.current.style.opacity = "0";
-    if (cursorTrail.current) cursorTrail.current.style.opacity = "0";
-    if (cursorDot.current) cursorDot.current.style.opacity = "0";
+    if (cursor.current) cursor.current.style.opacity = '0';
+    if (cursorTrail.current) cursorTrail.current.style.opacity = '0';
+    if (cursorDot.current) cursorDot.current.style.opacity = '0';
   }
 
   // 鼠标进入页面
   function handleMouseEnter() {
-    if (cursor.current) cursor.current.style.opacity = "1";
-    if (cursorTrail.current) cursorTrail.current.style.opacity = "1";
-    if (cursorDot.current) cursorDot.current.style.opacity = "1";
+    if (cursor.current) cursor.current.style.opacity = '1';
+    if (cursorTrail.current) cursorTrail.current.style.opacity = '1';
+    if (cursorDot.current) cursorDot.current.style.opacity = '1';
   }
 
   // 动画循环
@@ -112,17 +99,17 @@ const TechCursor = () => {
   }
 
   useEffect(() => {
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseleave", handleMouseLeave);
-    window.addEventListener("mouseenter", handleMouseEnter);
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseleave', handleMouseLeave);
+    window.addEventListener('mouseenter', handleMouseEnter);
 
     // 开始动画
     animate();
 
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseleave", handleMouseLeave);
-      window.removeEventListener("mouseenter", handleMouseEnter);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseleave', handleMouseLeave);
+      window.removeEventListener('mouseenter', handleMouseEnter);
 
       // 取消动画帧
       if (animationFrameId.current) {

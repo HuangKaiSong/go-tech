@@ -1,13 +1,10 @@
 {
+  "extends": "@go-tech/tsconfig/vite-react.json",
   "compilerOptions": {
     "allowImportingTsExtensions": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
-    "lib": [
-      "ES2020",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["ES2021", "DOM", "DOM.Iterable", "ES2023"],
     "module": "ESNext",
     "moduleDetection": "force",
     "moduleResolution": "bundler",
@@ -17,17 +14,20 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"],
+      "react": ["./node_modules/@types/react"],
+      "react/jsx-runtime": ["./node_modules/@types/react/jsx-runtime"],
+      "react/jsx-dev-runtime": ["./node_modules/@types/react/jsx-dev-runtime"],
+      "react-dom": ["./node_modules/@types/react-dom"],
+      "react-dom/*": ["./node_modules/@types/react-dom/*"]
     },
     "skipLibCheck": true,
     "strict": false,
     "target": "ES2020",
-    "types": [],
-    "useDefineForClassFields": true
+    "useDefineForClassFields": true,
+    "typeRoots": ["./node_modules/@types", "./src/types"],
+    // 或者使用 types 字段
+    "types": ["node"]
   },
-  "include": [
-    "src"
-  ]
+  "include": ["src"]
 }

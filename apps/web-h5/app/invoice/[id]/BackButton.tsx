@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
-import { ArrowLeft } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { ArrowLeft } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 const BackButton = () => {
   const router = useRouter();
@@ -12,7 +12,7 @@ const BackButton = () => {
       return;
     }
 
-    router.push("/my-orders");
+    router.push('/my-orders');
   };
 
   return (

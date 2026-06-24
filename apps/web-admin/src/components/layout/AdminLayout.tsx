@@ -1,35 +1,35 @@
-import { useAuth } from "@/hooks/use-auth";
-import { useLayoutEffect } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
-import { toast } from "sonner";
-import AdminHeader from "./AdminHeader";
-import AdminSidebar from "./AdminSidebar";
+import { useLayoutEffect } from 'react';
+import { Outlet, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import { useAuth } from '@/hooks/use-auth';
+import AdminHeader from './AdminHeader';
+import AdminSidebar from './AdminSidebar';
 
 const AdminLayout = () => {
   const navigate = useNavigate();
-  const { isExpired, isAuthenticated, token } = useAuth();
+  const { isAuthenticated, isExpired, token } = useAuth();
   const originFetch = window.fetch;
 
   useLayoutEffect(() => {
     if (isExpired && token) {
-      toast.error("登录凭证已过期, 请重新登录");
+      toast.error('登录凭证已过期, 请重新登录');
       requestAnimationFrame(() => {
-        navigate("/login", {
+        navigate('/login', {
           state: {
-            from: location.pathname,
-          },
+            from: location.pathname
+          }
         });
       });
       return;
     }
     if (!isAuthenticated) {
-      toast.error("请先登录");
+      toast.error('请先登录');
       requestAnimationFrame(() => {
-        navigate("/login", {
+        navigate('/login', {
           replace: true,
           state: {
-            from: location.pathname,
-          },
+            from: location.pathname
+          }
         });
       });
       return;
@@ -56,8 +56,8 @@ const AdminLayout = () => {
       // 添加认证token到请求头
       if (token) {
         if (config.headers instanceof Headers) {
-          config.headers.append("Authorization", `Bearer ${token}`);
-          config.headers.append("Language", "zh-TW");
+          config.headers.append('Authorization', `Bearer ${token}`);
+          config.headers.append('Language', 'zh-TW');
         }
       }
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from 'react';
 
 interface VideoPlayerProps {
   url: string;
@@ -12,8 +12,8 @@ export default function VideoPlayer({ url }: VideoPlayerProps) {
     if (!video) return;
 
     const play = () => {
-      if (document.visibilityState !== "visible") return;
-      void video.play().catch(() => {
+      if (document.visibilityState !== 'visible') return;
+      video.play().catch(() => {
         // Browser autoplay policy can reject play(); muted video normally passes.
       });
     };
@@ -32,15 +32,15 @@ export default function VideoPlayer({ url }: VideoPlayerProps) {
       play();
     };
 
-    video.addEventListener("ended", handleEnded);
-    document.addEventListener("visibilitychange", handleVisibilityChange);
+    video.addEventListener('ended', handleEnded);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     play();
 
     return () => {
-      video.removeEventListener("ended", handleEnded);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      video.removeEventListener('ended', handleEnded);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       video.pause();
-      video.removeAttribute("src");
+      video.removeAttribute('src');
       video.load();
     };
   }, [url]);

@@ -12,41 +12,32 @@ import {
   TabsList,
   TabsTrigger,
   Textarea,
-  UploadedFile,
-} from "@go-tech-frontend/ui";
-import { useAsyncEffect } from "ahooks";
-import { CSSProperties, useEffect, useRef, useState } from "react";
-import { AdminHeroBlock } from "./type";
-import {
-  extractUrl,
-  fetchAndConvertToFile,
-  normalizeAlign,
-  rgbToHex,
-} from "./utils";
+  type UploadedFile
+} from '@go-tech-frontend/ui';
+import { useAsyncEffect } from 'ahooks';
+import { type CSSProperties, useEffect, useRef, useState } from 'react';
+import { type AdminHeroBlock } from './type';
+import { extractUrl, fetchAndConvertToFile, normalizeAlign, rgbToHex } from './utils';
 
 function readSnapshotStyle(element: Element | null, cssProp: string) {
-  if (!element) return "";
-  const raw = element.getAttribute("data-computed-style");
-  if (!raw) return "";
+  if (!element) return '';
+  const raw = element.getAttribute('data-computed-style');
+  if (!raw) return '';
   try {
     const parsed = JSON.parse(raw) as Record<string, string>;
-    return parsed[cssProp] || "";
+    return parsed[cssProp] || '';
   } catch {
-    return "";
+    return '';
   }
 }
 
-function getStyleValue(
-  element: Element | null,
-  cssProp: string,
-  fallbackCamelProp?: keyof CSSStyleDeclaration,
-) {
-  if (!element) return "";
+function getStyleValue(element: Element | null, cssProp: string, fallbackCamelProp?: keyof CSSStyleDeclaration) {
+  if (!element) return '';
   const snapshotValue = readSnapshotStyle(element, cssProp);
   if (snapshotValue) return snapshotValue;
 
   const view = element.ownerDocument?.defaultView;
-  if (!view) return "";
+  if (!view) return '';
 
   const computed = view.getComputedStyle(element);
   if (computed.getPropertyValue(cssProp)) {
@@ -57,103 +48,71 @@ function getStyleValue(
     return computed[fallbackCamelProp] as string;
   }
 
-  return "";
+  return '';
 }
 
 function Editor({
   element,
-  sync,
   onPatchBlock,
+  sync
 }: {
   element: Element;
+  onPatchBlock: (blockId: string, blockSeq: number | undefined, patch: Partial<AdminHeroBlock>) => void;
   sync: (payload: Record<string, unknown>) => void;
-  onPatchBlock: (
-    blockId: string,
-    blockSeq: number | undefined,
-    patch: Partial<AdminHeroBlock>,
-  ) => void;
 }) {
   const originBg = element.querySelector('[data-block-role="background"]');
-  const orignBgImg = extractUrl(
-    getStyleValue(originBg, "background-image", "backgroundImage"),
-  );
+  const orignBgImg = extractUrl(getStyleValue(originBg, 'background-image', 'backgroundImage'));
   const file = useRef<File | null>(null);
 
   const originTitle = element.querySelector('[data-block-role="title"]');
-  const originTitleSecondary = element.querySelector(
-    '[data-block-role="titleSecondary"]',
-  );
+  const originTitleSecondary = element.querySelector('[data-block-role="titleSecondary"]');
   const originSubtitle = element.querySelector('[data-block-role="subtitle"]');
   const originButton = element.querySelector('[data-block-role="buttonText"]');
 
   const titleInfo = {
-    content: originTitle?.textContent || "",
+    content: originTitle?.textContent || '',
     style: {
-      fontSize: getStyleValue(originTitle, "font-size", "fontSize").replace(
-        "px",
-        "",
-      ),
-      color: rgbToHex(getStyleValue(originTitle, "color")),
-      align: normalizeAlign(
-        getStyleValue(originTitle, "text-align", "textAlign"),
-      ),
-      padding: getStyleValue(originTitle, "padding"),
-      margin: getStyleValue(originTitle, "margin"),
-      lineHeight: getStyleValue(originTitle, "line-height"),
-    },
+      fontSize: getStyleValue(originTitle, 'font-size', 'fontSize').replace('px', ''),
+      color: rgbToHex(getStyleValue(originTitle, 'color')),
+      align: normalizeAlign(getStyleValue(originTitle, 'text-align', 'textAlign')),
+      padding: getStyleValue(originTitle, 'padding'),
+      margin: getStyleValue(originTitle, 'margin'),
+      lineHeight: getStyleValue(originTitle, 'line-height')
+    }
   };
   const titleSecondaryInfo = {
-    content: originTitleSecondary?.textContent || "",
+    content: originTitleSecondary?.textContent || '',
     style: {
-      fontSize: getStyleValue(
-        originTitleSecondary,
-        "font-size",
-        "fontSize",
-      ).replace("px", ""),
-      color: rgbToHex(getStyleValue(originTitleSecondary, "color")),
-      align: normalizeAlign(
-        getStyleValue(originTitleSecondary, "text-align", "textAlign"),
-      ),
-      padding: getStyleValue(originTitleSecondary, "padding"),
-      margin: getStyleValue(originTitleSecondary, "margin"),
-      lineHeight: getStyleValue(originTitleSecondary, "line-height"),
-    },
+      fontSize: getStyleValue(originTitleSecondary, 'font-size', 'fontSize').replace('px', ''),
+      color: rgbToHex(getStyleValue(originTitleSecondary, 'color')),
+      align: normalizeAlign(getStyleValue(originTitleSecondary, 'text-align', 'textAlign')),
+      padding: getStyleValue(originTitleSecondary, 'padding'),
+      margin: getStyleValue(originTitleSecondary, 'margin'),
+      lineHeight: getStyleValue(originTitleSecondary, 'line-height')
+    }
   };
   const subTitleInfo = {
-    content: originSubtitle?.textContent || "",
+    content: originSubtitle?.textContent || '',
     style: {
-      fontSize: getStyleValue(originSubtitle, "font-size", "fontSize").replace(
-        "px",
-        "",
-      ),
-      color: rgbToHex(getStyleValue(originSubtitle, "color")),
-      align: normalizeAlign(
-        getStyleValue(originSubtitle, "text-align", "textAlign"),
-      ),
-      padding: getStyleValue(originSubtitle, "padding"),
-      margin: getStyleValue(originSubtitle, "margin"),
-      lineHeight: getStyleValue(originSubtitle, "line-height"),
-    },
+      fontSize: getStyleValue(originSubtitle, 'font-size', 'fontSize').replace('px', ''),
+      color: rgbToHex(getStyleValue(originSubtitle, 'color')),
+      align: normalizeAlign(getStyleValue(originSubtitle, 'text-align', 'textAlign')),
+      padding: getStyleValue(originSubtitle, 'padding'),
+      margin: getStyleValue(originSubtitle, 'margin'),
+      lineHeight: getStyleValue(originSubtitle, 'line-height')
+    }
   };
   const buttonInfo = {
-    content: originButton?.textContent || "",
-    link: (originButton as HTMLButtonElement)?.dataset?.blockLink || "",
+    content: originButton?.textContent || '',
+    link: (originButton as HTMLButtonElement)?.dataset?.blockLink || '',
     style: {
-      fontSize: getStyleValue(originButton, "font-size", "fontSize").replace(
-        "px",
-        "",
-      ),
-      color: rgbToHex(getStyleValue(originButton, "color")),
-      backgroundColor: rgbToHex(
-        getStyleValue(originButton, "background-color", "backgroundColor"),
-      ),
-      width: getStyleValue(originButton, "width").replace("px", ""),
-      height: getStyleValue(originButton, "height").replace("px", ""),
-      borderRadius: getStyleValue(originButton, "border-radius").replace(
-        "px",
-        "",
-      ),
-    },
+      fontSize: getStyleValue(originButton, 'font-size', 'fontSize').replace('px', ''),
+      color: rgbToHex(getStyleValue(originButton, 'color')),
+      backgroundColor: rgbToHex(getStyleValue(originButton, 'background-color', 'backgroundColor')),
+      width: getStyleValue(originButton, 'width').replace('px', ''),
+      height: getStyleValue(originButton, 'height').replace('px', ''),
+      borderRadius: getStyleValue(originButton, 'border-radius').replace('px', '')
+    }
   };
 
   const [title, setTitle] = useState(titleInfo);
@@ -171,10 +130,10 @@ function Editor({
           id: new Date().getTime().toString(),
           file: file.current,
           previewUrl: URL.createObjectURL(file.current),
-          status: "success",
+          status: 'success',
           progress: 100,
-          url: orignBgImg,
-        },
+          url: orignBgImg
+        }
       ]);
     }
   }, [orignBgImg]);
@@ -186,24 +145,22 @@ function Editor({
     };
   }, []);
 
-  /**
-   * 同步背景图片
-   */
+  /** 同步背景图片 */
   const handleApplyBackground = () => {
-    const url = fileList.find((file) => file.status === "success")?.url;
+    const url = fileList.find(_file => _file.status === 'success')?.url;
     const blockId = (originBg as HTMLElement)?.dataset?.blockId;
     const blockSeq = (originBg as HTMLElement)?.dataset?.blockSeq
       ? Number((originBg as HTMLElement)?.dataset?.blockSeq)
       : undefined;
 
     sync({
-      type: "SET_BACKGROUND_IMAGE",
-      url: url,
+      type: 'SET_BACKGROUND_IMAGE',
+      url,
       block: {
         id: (originBg as HTMLElement).dataset.blockId,
         role: (originBg as HTMLElement).dataset.blockRole,
-        seq: (originBg as HTMLElement).dataset.blockSeq,
-      },
+        seq: (originBg as HTMLElement).dataset.blockSeq
+      }
     });
 
     if (blockId && url) {
@@ -211,57 +168,51 @@ function Editor({
     }
   };
 
-  /**
-   * 同步文字
-   */
+  /** 同步文字 */
   const handleApplyText = (
     content: {
       content: string;
       style: {
-        fontSize: string;
+        align: 'center' | 'left' | 'right';
         color: string;
-        align: "left" | "center" | "right";
-        padding: string;
-        margin: string;
+        fontSize: string;
         lineHeight: string;
+        margin: string;
+        padding: string;
       };
     },
     el: Element | null,
-    patch: Partial<AdminHeroBlock>,
+    patch: Partial<AdminHeroBlock>
   ) => {
     if (!el) return;
     const blockId = (el as HTMLElement).dataset.blockId;
-    const blockSeq = (el as HTMLElement).dataset.blockSeq
-      ? Number((el as HTMLElement).dataset.blockSeq)
-      : undefined;
+    const blockSeq = (el as HTMLElement).dataset.blockSeq ? Number((el as HTMLElement).dataset.blockSeq) : undefined;
     const style: CSSProperties = {
-      fontSize: content.style.fontSize
-        ? Number(content.style.fontSize)
-        : "1rem",
+      fontSize: content.style.fontSize ? Number(content.style.fontSize) : '1rem',
       color: content.style.color || undefined,
-      padding: content.style.padding ? content.style.padding : "",
-      margin: content.style.margin ? content.style.margin : "",
-      textAlign: content.style.align || "left",
-      lineHeight: content.style.lineHeight ? content.style.lineHeight : "",
+      padding: content.style.padding ? content.style.padding : '',
+      margin: content.style.margin ? content.style.margin : '',
+      textAlign: content.style.align || 'left',
+      lineHeight: content.style.lineHeight ? content.style.lineHeight : ''
     };
     sync({
-      type: "UPDATE_ELEMENT_TEXT",
+      type: 'UPDATE_ELEMENT_TEXT',
       text: content.content,
       block: {
         id: (el as HTMLElement).dataset.blockId,
         role: (el as HTMLElement).dataset.blockRole,
-        seq: (el as HTMLElement).dataset.blockSeq,
-      },
+        seq: (el as HTMLElement).dataset.blockSeq
+      }
     });
 
     sync({
-      type: "UPDATE_ELEMENT_STYLE",
+      type: 'UPDATE_ELEMENT_STYLE',
       style,
       block: {
         id: (el as HTMLElement).dataset.blockId,
         role: (el as HTMLElement).dataset.blockRole,
-        seq: (el as HTMLElement).dataset.blockSeq,
-      },
+        seq: (el as HTMLElement).dataset.blockSeq
+      }
     });
 
     if (blockId) {
@@ -274,15 +225,13 @@ function Editor({
     handleApplyText(title, originTitle, {
       title: title.content,
       titleStyle: {
-        fontSize: title.style.fontSize
-          ? Number(title.style.fontSize)
-          : undefined,
+        fontSize: title.style.fontSize ? Number(title.style.fontSize) : undefined,
         color: title.style.color || undefined,
         padding: title.style.padding || undefined,
         margin: title.style.margin || undefined,
         textAlign: title.style.align || undefined,
-        lineHeight: title.style.lineHeight || undefined,
-      },
+        lineHeight: title.style.lineHeight || undefined
+      }
     });
   };
 
@@ -291,15 +240,13 @@ function Editor({
     handleApplyText(titleSecondary, originTitleSecondary, {
       titleSecondary: titleSecondary.content,
       titleSecondaryStyle: {
-        fontSize: titleSecondary.style.fontSize
-          ? Number(titleSecondary.style.fontSize)
-          : undefined,
+        fontSize: titleSecondary.style.fontSize ? Number(titleSecondary.style.fontSize) : undefined,
         color: titleSecondary.style.color || undefined,
         padding: titleSecondary.style.padding || undefined,
         margin: titleSecondary.style.margin || undefined,
         textAlign: titleSecondary.style.align || undefined,
-        lineHeight: titleSecondary.style.lineHeight || undefined,
-      },
+        lineHeight: titleSecondary.style.lineHeight || undefined
+      }
     });
   };
 
@@ -308,15 +255,13 @@ function Editor({
     handleApplyText(subtitle, originSubtitle, {
       subtitle: subtitle.content,
       subtitleStyle: {
-        fontSize: subtitle.style.fontSize
-          ? Number(subtitle.style.fontSize)
-          : undefined,
+        fontSize: subtitle.style.fontSize ? Number(subtitle.style.fontSize) : undefined,
         color: subtitle.style.color || undefined,
         padding: subtitle.style.padding || undefined,
         margin: subtitle.style.margin || undefined,
         textAlign: subtitle.style.align || undefined,
-        lineHeight: subtitle.style.lineHeight || undefined,
-      },
+        lineHeight: subtitle.style.lineHeight || undefined
+      }
     });
   };
 
@@ -329,35 +274,31 @@ function Editor({
         ? Number((originButton as HTMLElement).dataset.blockSeq)
         : undefined;
       const style: CSSProperties = {
-        fontSize: button.style.fontSize
-          ? Number(button.style.fontSize)
-          : "1rem",
+        fontSize: button.style.fontSize ? Number(button.style.fontSize) : '1rem',
         color: button.style.color || undefined,
         backgroundColor: button.style.backgroundColor || undefined,
         width: button.style.width ? Number(button.style.width) : undefined,
         height: button.style.height ? Number(button.style.height) : undefined,
-        borderRadius: button.style.borderRadius
-          ? Number(button.style.borderRadius)
-          : undefined,
+        borderRadius: button.style.borderRadius ? Number(button.style.borderRadius) : undefined
       };
       sync({
-        type: "UPDATE_ELEMENT_TEXT",
+        type: 'UPDATE_ELEMENT_TEXT',
         text: button.content,
         block: {
           id: blockId,
           role: blockRole,
-          seq: blockSeq,
-        },
+          seq: blockSeq
+        }
       });
 
       sync({
-        type: "UPDATE_ELEMENT_STYLE",
+        type: 'UPDATE_ELEMENT_STYLE',
         style,
         block: {
           id: blockId,
           role: blockRole,
-          seq: blockSeq,
-        },
+          seq: blockSeq
+        }
       });
     } catch (error) {
       console.log(error);
@@ -377,7 +318,7 @@ function Editor({
               maxCount={1}
               list={fileList}
               uploadUrl="/api/pms-resource/web-back/minio/upload"
-              onChange={(files) => {
+              onChange={files => {
                 setFileList(files);
               }}
             />
@@ -397,10 +338,10 @@ function Editor({
               rows={3}
               placeholder="输入文字"
               value={title.content}
-              onChange={(e) => {
-                setTitle((prev) => ({
+              onChange={e => {
+                setTitle(prev => ({
                   ...prev,
-                  content: e.target.value,
+                  content: e.target.value
                 }));
               }}
             />
@@ -413,13 +354,13 @@ function Editor({
                 type="number"
                 min="10"
                 value={Number(title.style.fontSize)}
-                onChange={(e) => {
-                  setTitle((prev) => ({
+                onChange={e => {
+                  setTitle(prev => ({
                     ...prev,
                     style: {
                       ...prev.style,
-                      fontSize: e.target.value,
-                    },
+                      fontSize: e.target.value
+                    }
                   }));
                 }}
               />
@@ -430,13 +371,13 @@ function Editor({
                 id="textColor"
                 type="color"
                 value={title.style.color}
-                onChange={(e) => {
-                  setTitle((prev) => ({
+                onChange={e => {
+                  setTitle(prev => ({
                     ...prev,
                     style: {
                       ...prev.style,
-                      color: e.target.value,
-                    },
+                      color: e.target.value
+                    }
                   }));
                 }}
               />
@@ -447,14 +388,14 @@ function Editor({
               <Label htmlFor="textAlign">对齐</Label>
               <select
                 id="textAlign"
-                value={title.style.align}
-                onChange={(e) => {
-                  setTitle((prev) => ({
+                value={title.style.align!}
+                onChange={e => {
+                  setTitle(prev => ({
                     ...prev,
                     style: {
                       ...prev.style,
-                      align: e.target.value as "left" | "center" | "right",
-                    },
+                      align: e.target.value as 'center' | 'left' | 'right'
+                    }
                   }));
                 }}
                 className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
@@ -469,13 +410,13 @@ function Editor({
               <Input
                 id="paddingSize"
                 value={title.style.padding}
-                onChange={(e) => {
-                  setTitle((prev) => ({
+                onChange={e => {
+                  setTitle(prev => ({
                     ...prev,
                     style: {
                       ...prev.style,
-                      padding: e.target.value,
-                    },
+                      padding: e.target.value
+                    }
                   }));
                 }}
               />
@@ -486,13 +427,13 @@ function Editor({
                 id="marginSize"
                 min="0"
                 value={title.style.margin}
-                onChange={(e) => {
-                  setTitle((prev) => ({
+                onChange={e => {
+                  setTitle(prev => ({
                     ...prev,
                     style: {
                       ...prev.style,
-                      margin: e.target.value,
-                    },
+                      margin: e.target.value
+                    }
                   }));
                 }}
               />
@@ -503,13 +444,13 @@ function Editor({
                 id="marginSize"
                 min="0"
                 value={title.style.lineHeight}
-                onChange={(e) => {
-                  setTitle((prev) => ({
+                onChange={e => {
+                  setTitle(prev => ({
                     ...prev,
                     style: {
                       ...prev.style,
-                      lineHeight: e.target.value,
-                    },
+                      lineHeight: e.target.value
+                    }
                   }));
                 }}
               />
@@ -535,10 +476,10 @@ function Editor({
               rows={3}
               placeholder="输入文字"
               value={titleSecondary.content}
-              onChange={(e) => {
-                setTitleSecondary((prev) => ({
+              onChange={e => {
+                setTitleSecondary(prev => ({
                   ...prev,
-                  content: e.target.value,
+                  content: e.target.value
                 }));
               }}
             />
@@ -551,13 +492,13 @@ function Editor({
                 type="number"
                 min="10"
                 value={Number(titleSecondary.style.fontSize)}
-                onChange={(e) => {
-                  setTitleSecondary((prev) => ({
+                onChange={e => {
+                  setTitleSecondary(prev => ({
                     ...prev,
                     style: {
                       ...prev.style,
-                      fontSize: e.target.value,
-                    },
+                      fontSize: e.target.value
+                    }
                   }));
                 }}
               />
@@ -568,13 +509,13 @@ function Editor({
                 id="textColor"
                 type="color"
                 value={titleSecondary.style.color}
-                onChange={(e) => {
-                  setTitleSecondary((prev) => ({
+                onChange={e => {
+                  setTitleSecondary(prev => ({
                     ...prev,
                     style: {
                       ...prev.style,
-                      color: e.target.value,
-                    },
+                      color: e.target.value
+                    }
                   }));
                 }}
               />
@@ -585,14 +526,14 @@ function Editor({
               <Label htmlFor="textAlign">对齐</Label>
               <select
                 id="textAlign"
-                value={titleSecondary.style.align}
-                onChange={(e) => {
-                  setTitleSecondary((prev) => ({
+                value={titleSecondary.style.align!}
+                onChange={e => {
+                  setTitleSecondary(prev => ({
                     ...prev,
                     style: {
                       ...prev.style,
-                      align: e.target.value as "left" | "center" | "right",
-                    },
+                      align: e.target.value as 'center' | 'left' | 'right'
+                    }
                   }));
                 }}
                 className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
@@ -607,13 +548,13 @@ function Editor({
               <Input
                 id="paddingSize"
                 value={titleSecondary.style.padding}
-                onChange={(e) => {
-                  setTitleSecondary((prev) => ({
+                onChange={e => {
+                  setTitleSecondary(prev => ({
                     ...prev,
                     style: {
                       ...prev.style,
-                      padding: e.target.value,
-                    },
+                      padding: e.target.value
+                    }
                   }));
                 }}
               />
@@ -624,13 +565,13 @@ function Editor({
                 id="marginSize"
                 min="0"
                 value={titleSecondary.style.margin}
-                onChange={(e) => {
-                  setTitleSecondary((prev) => ({
+                onChange={e => {
+                  setTitleSecondary(prev => ({
                     ...prev,
                     style: {
                       ...prev.style,
-                      margin: e.target.value,
-                    },
+                      margin: e.target.value
+                    }
                   }));
                 }}
               />
@@ -641,13 +582,13 @@ function Editor({
                 id="marginSize"
                 min="0"
                 value={titleSecondary.style.lineHeight}
-                onChange={(e) => {
-                  setTitleSecondary((prev) => ({
+                onChange={e => {
+                  setTitleSecondary(prev => ({
                     ...prev,
                     style: {
                       ...prev.style,
-                      lineHeight: e.target.value,
-                    },
+                      lineHeight: e.target.value
+                    }
                   }));
                 }}
               />
@@ -672,10 +613,10 @@ function Editor({
               rows={3}
               placeholder="输入文字"
               value={subtitle.content}
-              onChange={(e) => {
-                setSubtitle((prev) => ({
+              onChange={e => {
+                setSubtitle(prev => ({
                   ...prev,
-                  content: e.target.value,
+                  content: e.target.value
                 }));
               }}
             />
@@ -688,13 +629,13 @@ function Editor({
                 type="number"
                 min="10"
                 value={Number(subtitle.style.fontSize)}
-                onChange={(e) => {
-                  setSubtitle((prev) => ({
+                onChange={e => {
+                  setSubtitle(prev => ({
                     ...prev,
                     style: {
                       ...prev.style,
-                      fontSize: e.target.value,
-                    },
+                      fontSize: e.target.value
+                    }
                   }));
                 }}
               />
@@ -705,13 +646,13 @@ function Editor({
                 id="textColor"
                 type="color"
                 value={subtitle.style.color}
-                onChange={(e) => {
-                  setSubtitle((prev) => ({
+                onChange={e => {
+                  setSubtitle(prev => ({
                     ...prev,
                     style: {
                       ...prev.style,
-                      color: e.target.value,
-                    },
+                      color: e.target.value
+                    }
                   }));
                 }}
               />
@@ -722,14 +663,14 @@ function Editor({
               <Label htmlFor="textAlign">对齐</Label>
               <select
                 id="textAlign"
-                value={subtitle.style.align}
-                onChange={(e) => {
-                  setSubtitle((prev) => ({
+                value={subtitle.style.align!}
+                onChange={e => {
+                  setSubtitle(prev => ({
                     ...prev,
                     style: {
                       ...prev.style,
-                      align: e.target.value as "left" | "center" | "right",
-                    },
+                      align: e.target.value as 'center' | 'left' | 'right'
+                    }
                   }));
                 }}
                 className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
@@ -744,13 +685,13 @@ function Editor({
               <Input
                 id="paddingSize"
                 value={subtitle.style.padding}
-                onChange={(e) => {
-                  setSubtitle((prev) => ({
+                onChange={e => {
+                  setSubtitle(prev => ({
                     ...prev,
                     style: {
                       ...prev.style,
-                      padding: e.target.value,
-                    },
+                      padding: e.target.value
+                    }
                   }));
                 }}
               />
@@ -761,13 +702,13 @@ function Editor({
                 id="marginSize"
                 min="0"
                 value={subtitle.style.margin}
-                onChange={(e) => {
-                  setSubtitle((prev) => ({
+                onChange={e => {
+                  setSubtitle(prev => ({
                     ...prev,
                     style: {
                       ...prev.style,
-                      margin: e.target.value,
-                    },
+                      margin: e.target.value
+                    }
                   }));
                 }}
               />
@@ -778,13 +719,13 @@ function Editor({
                 id="marginSize"
                 min="0"
                 value={subtitle.style.lineHeight}
-                onChange={(e) => {
-                  setSubtitle((prev) => ({
+                onChange={e => {
+                  setSubtitle(prev => ({
                     ...prev,
                     style: {
                       ...prev.style,
-                      lineHeight: e.target.value,
-                    },
+                      lineHeight: e.target.value
+                    }
                   }));
                 }}
               />
@@ -809,10 +750,10 @@ function Editor({
               id="buttonLabel"
               placeholder="输入按钮文字"
               value={button.content}
-              onChange={(e) => {
-                setButton((prev) => ({
+              onChange={e => {
+                setButton(prev => ({
                   ...prev,
-                  content: e.target.value,
+                  content: e.target.value
                 }));
               }}
             />
@@ -822,10 +763,10 @@ function Editor({
             <Input
               id="buttonLink"
               value={button.link}
-              onChange={(e) => {
-                setButton((prev) => ({
+              onChange={e => {
+                setButton(prev => ({
                   ...prev,
-                  link: e.target.value,
+                  link: e.target.value
                 }));
               }}
             />
@@ -838,13 +779,13 @@ function Editor({
                 type="number"
                 min="10"
                 value={Number(button.style.fontSize)}
-                onChange={(e) => {
-                  setButton((prev) => ({
+                onChange={e => {
+                  setButton(prev => ({
                     ...prev,
                     style: {
                       ...prev.style,
-                      fontSize: e.target.value,
-                    },
+                      fontSize: e.target.value
+                    }
                   }));
                 }}
               />
@@ -855,13 +796,13 @@ function Editor({
                 id="buttonTextColor"
                 type="color"
                 value={button.style.color}
-                onChange={(e) =>
-                  setButton((prev) => ({
+                onChange={e =>
+                  setButton(prev => ({
                     ...prev,
                     style: {
                       ...prev.style,
-                      color: e.target.value,
-                    },
+                      color: e.target.value
+                    }
                   }))
                 }
               />
@@ -872,13 +813,13 @@ function Editor({
                 id="buttonBgColor"
                 type="color"
                 value={button.style.backgroundColor}
-                onChange={(e) =>
-                  setButton((prev) => ({
+                onChange={e =>
+                  setButton(prev => ({
                     ...prev,
                     style: {
                       ...prev.style,
-                      backgroundColor: e.target.value,
-                    },
+                      backgroundColor: e.target.value
+                    }
                   }))
                 }
               />
@@ -888,13 +829,13 @@ function Editor({
               <Input
                 id="buttonRadius"
                 value={button.style.borderRadius}
-                onChange={(e) =>
-                  setButton((prev) => ({
+                onChange={e =>
+                  setButton(prev => ({
                     ...prev,
                     style: {
                       ...prev.style,
-                      borderRadius: e.target.value,
-                    },
+                      borderRadius: e.target.value
+                    }
                   }))
                 }
               />
@@ -906,13 +847,13 @@ function Editor({
                 type="number"
                 min="60"
                 value={button.style.width}
-                onChange={(e) =>
-                  setButton((prev) => ({
+                onChange={e =>
+                  setButton(prev => ({
                     ...prev,
                     style: {
                       ...prev.style,
-                      width: e.target.value,
-                    },
+                      width: e.target.value
+                    }
                   }))
                 }
               />
@@ -924,13 +865,13 @@ function Editor({
                 type="number"
                 min="28"
                 value={button.style.height}
-                onChange={(e) =>
-                  setButton((prev) => ({
+                onChange={e =>
+                  setButton(prev => ({
                     ...prev,
                     style: {
                       ...prev.style,
-                      height: e.target.value,
-                    },
+                      height: e.target.value
+                    }
                   }))
                 }
               />
@@ -949,55 +890,40 @@ function Editor({
 
 export default function Hero({
   element,
-  sync,
   onPatchBlock,
-  onAddHeroAfter,
-  onRemoveHero,
-  onMoveHero,
+  sync
 }: {
   element: HTMLElement;
-  sync: (payload: Record<string, unknown>) => void;
-  onPatchBlock: (
-    blockId: string,
-    blockSeq: number | undefined,
-    patch: Partial<AdminHeroBlock>,
-  ) => void;
   onAddHeroAfter: (blockSeq: number) => void;
+  onMoveHero: (blockSeq: number, direction: 'down' | 'up') => void;
+  onPatchBlock: (blockId: string, blockSeq: number | undefined, patch: Partial<AdminHeroBlock>) => void;
   onRemoveHero: (blockSeq: number) => void;
-  onMoveHero: (blockSeq: number, direction: "up" | "down") => void;
+  sync: (payload: Record<string, unknown>) => void;
 }) {
-  const [activeTab, setActiveTab] = useState("0");
+  const [activeTab, setActiveTab] = useState('0');
 
   if (!element) return null;
-  const slides = Array.from(element.querySelectorAll(".slick-slide")).filter(
-    (slide) => !(slide as HTMLElement).classList.contains("slick-cloned"),
+  const slides = Array.from(element.querySelectorAll('.slick-slide')).filter(
+    slide => !(slide as HTMLElement).classList.contains('slick-cloned')
   );
-  const slideMetas = slides.map((slide, index) => {
-    const node = slide.querySelector(
-      "[data-block-id][data-block-seq]",
-    ) as HTMLElement | null;
-    return {
-      tab: `${index}`,
-      blockId: node?.dataset.blockId || "",
-      blockSeq:
-        node?.dataset.blockSeq !== undefined
-          ? Number(node.dataset.blockSeq)
-          : undefined,
-    };
-  });
-  const activeMeta =
-    slideMetas.find((meta) => meta.tab === activeTab) || slideMetas[0];
-  const activeIndex = activeMeta
-    ? slideMetas.findIndex((meta) => meta.tab === activeMeta.tab)
-    : -1;
-  const canMoveUp = activeIndex > 0;
-  const canMoveDown = activeIndex > -1 && activeIndex < slideMetas.length - 1;
+  // const slideMetas = slides.map((slide, index) => {
+  //   const node = slide.querySelector('[data-block-id][data-block-seq]') as HTMLElement | null;
+  //   return {
+  //     tab: `${index}`,
+  //     blockId: node?.dataset.blockId || '',
+  //     blockSeq: node?.dataset.blockSeq !== undefined ? Number(node.dataset.blockSeq) : undefined
+  //   };
+  // });
+  // const activeMeta = slideMetas.find(meta => meta.tab === activeTab) || slideMetas[0];
+  // const activeIndex = activeMeta ? slideMetas.findIndex(meta => meta.tab === activeMeta.tab) : -1;
+  // const _canMoveUp = activeIndex > 0;
+  // const _canMoveDown = activeIndex > -1 && activeIndex < slideMetas.length - 1;
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab}>
       <div className="flex items-center justify-between mb-4">
         <TabsList className="flex items-center gap-4">
-          {slides.map((slide, index) => (
+          {slides.map((_slide, index) => (
             <TabsTrigger key={index} value={`${index}`}>
               {index + 1}
             </TabsTrigger>

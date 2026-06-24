@@ -1,10 +1,5 @@
-"use client";
+'use client';
 
-import Footer from "@/app/components/Footer";
-import Header from "@/app/components/Header";
-import Link from "@/app/components/Link";
-import { OrderStatusEnum } from "@/app/constants/order";
-import { PayTypeEnum, PayTypelabel } from "@/app/constants/payment";
 import {
   Badge,
   Button,
@@ -15,29 +10,25 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  Separator,
-} from "@go-tech-frontend/ui";
-import {
-  ArrowLeft,
-  CheckCircle,
-  Download,
-  Minus,
-  Package,
-  Plus,
-  RefreshCw,
-  Settings,
-} from "lucide-react";
-import { GetStaticPaths, GetStaticProps } from "next";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+  Separator
+} from '@go-tech-frontend/ui';
+import { ArrowLeft, CheckCircle, Download, Minus, Package, Plus, RefreshCw, Settings } from 'lucide-react';
+import type { GetStaticPaths, GetStaticProps } from 'next';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import Footer from '@/app/components/Footer';
+import Header from '@/app/components/Header';
+import Link from '@/app/components/Link';
+import { OrderStatusEnum } from '@/app/constants/order';
+import { PayTypeEnum, PayTypelabel } from '@/app/constants/payment';
 
 // 增值服務列表
 const valueAddedServices = [
-  { id: "extra-50-units", name: "額外50個單位", price: 500 },
-  { id: "extra-100-units", name: "額外100個單位", price: 900 },
-  { id: "priority-support", name: "優先客服支援", price: 300 },
-  { id: "data-backup", name: "數據備份服務", price: 200 },
-  { id: "custom-report", name: "自訂報表功能", price: 400 },
+  { id: 'extra-50-units', name: '額外50個單位', price: 500 },
+  { id: 'extra-100-units', name: '額外100個單位', price: 900 },
+  { id: 'priority-support', name: '優先客服支援', price: 300 },
+  { id: 'data-backup', name: '數據備份服務', price: 200 },
+  { id: 'custom-report', name: '自訂報表功能', price: 400 }
 ];
 
 type OrderProps = {
@@ -53,37 +44,35 @@ export const getStaticPaths = (async () => {
     paths: [
       {
         params: {
-          id: "ORD-2024-001",
-        },
-      }, // See the "paths" section below
+          id: 'ORD-2024-001'
+        }
+      } // See the "paths" section below
     ],
-    fallback: true,
+    fallback: true
   };
 }) satisfies GetStaticPaths;
 
 const getStatusColor = (status: OrderStatusEnum) => {
   switch (status) {
     case OrderStatusEnum.COMPLETED:
-      return "bg-green-500/10 text-green-600 border-green-200";
+      return 'bg-green-500/10 text-green-600 border-green-200';
     case OrderStatusEnum.PROCESSING:
-      return "bg-yellow-500/10 text-yellow-600 border-yellow-200";
+      return 'bg-yellow-500/10 text-yellow-600 border-yellow-200';
     case OrderStatusEnum.WAIT_PAY:
-      return "bg-gray-500/10 text-gray-600 border-gray-200";
+      return 'bg-gray-500/10 text-gray-600 border-gray-200';
     case OrderStatusEnum.REJECT:
-      return "bg-red-500/10 text-red-600 border-red-200";
+      return 'bg-red-500/10 text-red-600 border-red-200';
     default:
-      return "bg-gray-500/10 text-gray-600 border-gray-200";
+      return 'bg-gray-500/10 text-gray-600 border-gray-200';
   }
 };
 
-const OrderDetail = ({ id: orderId, detail }: { id: string; detail: any }) => {
+const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
   const router = useRouter();
   const order = detail;
 
   const [showAddonsDialog, setShowAddonsDialog] = useState(false);
-  const [selectedServices, setSelectedServices] = useState<
-    Record<string, number>
-  >({});
+  const [selectedServices, setSelectedServices] = useState<Record<string, number>>({});
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
 
   const toggleService = (serviceId: string) => {
@@ -121,7 +110,7 @@ const OrderDetail = ({ id: orderId, detail }: { id: string; detail: any }) => {
   };
 
   const handlePaymentSelect = (method: string) => {
-    console.log("購買增值服務:", { method, services: selectedServices });
+    console.log('購買增值服務:', { method, services: selectedServices });
     setShowPaymentDialog(false);
     setSelectedServices({});
     // 這裡可以添加實際的支付邏輯
@@ -154,7 +143,7 @@ const OrderDetail = ({ id: orderId, detail }: { id: string; detail: any }) => {
       <section className="relative py-6 bg-[#FFF8F5]">
         <div className="container mx-auto px-4">
           <button
-            onClick={() => router.push("/my-orders")}
+            onClick={() => router.push('/my-orders')}
             className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -162,16 +151,10 @@ const OrderDetail = ({ id: orderId, detail }: { id: string; detail: any }) => {
           </button>
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-primary mb-2">
-                訂單詳情
-              </h1>
+              <h1 className="text-3xl md:text-4xl font-bold text-primary mb-2">訂單詳情</h1>
               <p className="text-muted-foreground">訂單編號：{order.orderNo}</p>
             </div>
-            <Badge
-              className={`text-sm px-3 py-1 ${getStatusColor(order.orderStatus)}`}
-            >
-              {order.orderStatusName}
-            </Badge>
+            <Badge className={`text-sm px-3 py-1 ${getStatusColor(order.orderStatus)}`}>{order.orderStatusName}</Badge>
           </div>
         </div>
       </section>
@@ -201,27 +184,16 @@ const OrderDetail = ({ id: orderId, detail }: { id: string; detail: any }) => {
                   包含功能
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {order.platformPackageDto?.packageItemList?.map(
-                    (feature: any) => (
-                      <div
-                        key={feature.id}
-                        className="flex items-center gap-2 py-2 px-3 rounded-lg bg-[#FAEEEB]"
-                      >
-                        {feature.menuIcon && (
-                          <svg
-                            className="svg-icon w-4 h-4 text-primary mr-1"
-                            aria-hidden="true"
-                          >
-                            <use
-                              href={`#icon-${feature.menuIcon}`}
-                              xlinkHref={`#icon-${feature.menuIcon}`}
-                            ></use>
-                          </svg>
-                        )}
-                        <span className="text-sm">{feature.menuTitle}</span>
-                      </div>
-                    )
-                  )}
+                  {order.platformPackageDto?.packageItemList?.map((feature: any) => (
+                    <div key={feature.id} className="flex items-center gap-2 py-2 px-3 rounded-lg bg-[#FAEEEB]">
+                      {feature.menuIcon && (
+                        <svg className="svg-icon w-4 h-4 text-primary mr-1" aria-hidden="true">
+                          <use href={`#icon-${feature.menuIcon}`} xlinkHref={`#icon-${feature.menuIcon}`} />
+                        </svg>
+                      )}
+                      <span className="text-sm">{feature.menuTitle}</span>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
@@ -237,8 +209,7 @@ const OrderDetail = ({ id: orderId, detail }: { id: string; detail: any }) => {
                   <span className="font-medium">{order.finalAmount} HKD</span>
                 </div>
 
-                {order.orderItems?.filter((item: any) => item.itemType !== 1)
-                  ?.length > 0 && (
+                {order.orderItems?.filter((item: any) => item.itemType !== 1)?.length > 0 && (
                   <>
                     <Separator />
                     <div className="space-y-2">
@@ -246,19 +217,12 @@ const OrderDetail = ({ id: orderId, detail }: { id: string; detail: any }) => {
                       {order.orderItems
                         ?.filter((item: any) => item.itemType !== 1)
                         ?.map((addon: any) => (
-                          <div
-                            key={addon.id}
-                            className="flex justify-between items-center pl-4"
-                          >
+                          <div key={addon.id} className="flex justify-between items-center pl-4">
                             <span className="text-sm">
                               {addon.itemName} × {addon.count}
-                              <span className="text-muted-foreground ml-2">
-                                ({addon.price}/個)
-                              </span>
+                              <span className="text-muted-foreground ml-2">({addon.price}/個)</span>
                             </span>
-                            <span className="font-medium">
-                              {addon.amount} HKD
-                            </span>
+                            <span className="font-medium">{addon.amount} HKD</span>
                           </div>
                         ))}
                     </div>
@@ -268,9 +232,7 @@ const OrderDetail = ({ id: orderId, detail }: { id: string; detail: any }) => {
                 <Separator />
                 <div className="flex justify-between items-center text-lg font-bold">
                   <span>總計</span>
-                  <span className="text-primary">
-                    ${order.finalAmount?.toLocaleString()} HKD
-                  </span>
+                  <span className="text-primary">${order.finalAmount?.toLocaleString()} HKD</span>
                 </div>
               </CardContent>
             </Card>
@@ -285,15 +247,11 @@ const OrderDetail = ({ id: orderId, detail }: { id: string; detail: any }) => {
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">付款方式</span>
-                      <span>
-                        {PayTypelabel[order.payType as PayTypeEnum] || "-"}
-                      </span>
+                      <span>{PayTypelabel[order.payType as PayTypeEnum] || '-'}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">交易編號</span>
-                      <span className="font-mono text-xs">
-                        {order.transactionId || "-"}
-                      </span>
+                      <span className="font-mono text-xs">{order.transactionId || '-'}</span>
                     </div>
                   </div>
                   <div className="space-y-3">
@@ -303,7 +261,7 @@ const OrderDetail = ({ id: orderId, detail }: { id: string; detail: any }) => {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">到期日期</span>
-                      <span>{order.expireDate || "-"}</span>
+                      <span>{order.expireDate || '-'}</span>
                     </div>
                   </div>
                 </div>
@@ -313,11 +271,7 @@ const OrderDetail = ({ id: orderId, detail }: { id: string; detail: any }) => {
             {/* 操作按鈕 */}
             {order.orderStatus === OrderStatusEnum.COMPLETED && (
               <div className="flex flex-col sm:flex-row gap-4 justify-end">
-                <Button
-                  variant="outline"
-                  className="gap-2"
-                  onClick={() => router.push(`/invoice/${order.id}`)}
-                >
+                <Button variant="outline" className="gap-2" onClick={() => router.push(`/invoice/${order.id}`)}>
                   <Download className="w-4 h-4" />
                   下載發票
                 </Button>
@@ -339,7 +293,7 @@ const OrderDetail = ({ id: orderId, detail }: { id: string; detail: any }) => {
                     </Link>
                   </>
                 )}
-                {order.status === "expired" && (
+                {order.status === 'expired' && (
                   <Link href="/service-plan">
                     <Button className="gap-2 w-full sm:w-auto">重新訂購</Button>
                   </Link>
@@ -355,17 +309,14 @@ const OrderDetail = ({ id: orderId, detail }: { id: string; detail: any }) => {
                 </DialogHeader>
                 <div className="space-y-4 mt-4">
                   {valueAddedServices.map(service => {
-                    const isSelected =
-                      selectedServices[service.id] !== undefined;
+                    const isSelected = selectedServices[service.id] !== undefined;
                     const quantity = selectedServices[service.id] || 0;
 
                     return (
                       <div
                         key={service.id}
                         className={`p-4 rounded-lg border-2 transition-colors ${
-                          isSelected
-                            ? "border-primary bg-primary/5"
-                            : "border-border"
+                          isSelected ? 'border-primary bg-primary/5' : 'border-border'
                         }`}
                       >
                         <div className="flex items-center justify-between">
@@ -378,9 +329,7 @@ const OrderDetail = ({ id: orderId, detail }: { id: string; detail: any }) => {
                             />
                             <div>
                               <p className="font-medium">{service.name}</p>
-                              <p className="text-sm text-muted-foreground">
-                                ${service.price} HKD / 個
-                              </p>
+                              <p className="text-sm text-muted-foreground">${service.price} HKD / 個</p>
                             </div>
                           </div>
 
@@ -392,9 +341,7 @@ const OrderDetail = ({ id: orderId, detail }: { id: string; detail: any }) => {
                               >
                                 <Minus className="w-4 h-4" />
                               </button>
-                              <span className="w-8 text-center font-medium">
-                                {quantity}
-                              </span>
+                              <span className="w-8 text-center font-medium">{quantity}</span>
                               <button
                                 onClick={() => updateQuantity(service.id, 1)}
                                 className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-muted transition-colors"
@@ -421,24 +368,14 @@ const OrderDetail = ({ id: orderId, detail }: { id: string; detail: any }) => {
 
                   <div className="flex justify-between items-center text-lg font-bold">
                     <span>總計</span>
-                    <span className="text-primary">
-                      ${calculateAddonsTotal().toLocaleString()} HKD
-                    </span>
+                    <span className="text-primary">${calculateAddonsTotal().toLocaleString()} HKD</span>
                   </div>
 
                   <div className="flex gap-3 pt-2">
-                    <Button
-                      variant="outline"
-                      className="flex-1"
-                      onClick={() => setShowAddonsDialog(false)}
-                    >
+                    <Button variant="outline" className="flex-1" onClick={() => setShowAddonsDialog(false)}>
                       取消
                     </Button>
-                    <Button
-                      className="flex-1"
-                      disabled={calculateAddonsTotal() === 0}
-                      onClick={handleConfirmAddons}
-                    >
+                    <Button className="flex-1" disabled={calculateAddonsTotal() === 0} onClick={handleConfirmAddons}>
                       確認購買
                     </Button>
                   </div>
@@ -447,10 +384,7 @@ const OrderDetail = ({ id: orderId, detail }: { id: string; detail: any }) => {
             </Dialog>
 
             {/* 支付方式選擇對話框 */}
-            <Dialog
-              open={showPaymentDialog}
-              onOpenChange={setShowPaymentDialog}
-            >
+            <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
               <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                   <DialogTitle>選擇支付方式</DialogTitle>
@@ -464,7 +398,7 @@ const OrderDetail = ({ id: orderId, detail }: { id: string; detail: any }) => {
                   </p>
                   <div className="space-y-3">
                     <button
-                      onClick={() => handlePaymentSelect("wechat")}
+                      onClick={() => handlePaymentSelect('wechat')}
                       className="w-full p-4 rounded-lg border-2 hover:border-green-500 hover:bg-green-50 transition-colors flex items-center gap-4"
                     >
                       <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
@@ -473,7 +407,7 @@ const OrderDetail = ({ id: orderId, detail }: { id: string; detail: any }) => {
                       <span className="font-medium">微信支付</span>
                     </button>
                     <button
-                      onClick={() => handlePaymentSelect("alipay")}
+                      onClick={() => handlePaymentSelect('alipay')}
                       className="w-full p-4 rounded-lg border-2 hover:border-blue-500 hover:bg-blue-50 transition-colors flex items-center gap-4"
                     >
                       <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center">

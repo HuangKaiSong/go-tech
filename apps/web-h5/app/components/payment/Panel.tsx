@@ -1,35 +1,33 @@
 'use client';
 
-import { PayTypeEnum } from '@/app/constants/payment';
-import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, UploadedFile } from '@go-tech-frontend/ui';
+import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, type UploadedFile } from '@go-tech-frontend/ui';
 import dynamic from 'next/dynamic';
-import { FC, useState } from 'react';
-const Fps = dynamic(() => import("./Fps"), { ssr: false })
+import { type FC, useState } from 'react';
+import { PayTypeEnum } from '@/app/constants/payment';
+const Fps = dynamic(() => import('./Fps'), { ssr: false });
 
 type PanelProps = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  price: number;
   handleBackToPaymentMethods: () => void;
   handleFpsPaymentConfirm: (voucherFile: UploadedFile) => void;
-}
+  onOpenChange: (open: boolean) => void;
+  open: boolean;
+  price: number;
+};
 
 export const Panel: FC<PanelProps> = ({
-  open,
-  onOpenChange,
-  price,
   handleBackToPaymentMethods,
   handleFpsPaymentConfirm,
+  onOpenChange,
+  open,
+  price
 }) => {
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<
-    PayTypeEnum | null
-  >(null);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PayTypeEnum | null>(null);
 
   const handlePaymentSelect = (method: PayTypeEnum) => {
     if (method === PayTypeEnum.FPS) {
       setSelectedPaymentMethod(PayTypeEnum.FPS);
     } else {
-      console.log("Payment method selected:", method);
+      console.log('Payment method selected:', method);
       onOpenChange(false);
       // Handle payment logic here
     }
@@ -38,8 +36,8 @@ export const Panel: FC<PanelProps> = ({
   return (
     <Dialog
       open={open}
-      onOpenChange={open => {
-        onOpenChange(open)
+      onOpenChange={flag => {
+        onOpenChange(flag);
         if (!open) {
           setSelectedPaymentMethod(null);
         }
@@ -48,9 +46,7 @@ export const Panel: FC<PanelProps> = ({
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="text-center text-xl">
-            {selectedPaymentMethod === PayTypeEnum.FPS
-              ? "FPS 轉數快支付"
-              : "選擇支付方式"}
+            {selectedPaymentMethod === PayTypeEnum.FPS ? 'FPS 轉數快支付' : '選擇支付方式'}
           </DialogTitle>
         </DialogHeader>
 
@@ -98,7 +94,7 @@ export const Panel: FC<PanelProps> = ({
         )}
       </DialogContent>
     </Dialog>
-  )
-}
+  );
+};
 
 export default Panel;

@@ -1,0 +1,12 @@
+{
+  "$schema": "../../node_modules/oxlint/configuration_schema.json",
+  "extends": ["../../internal/config/oxlint/next.json"],
+  "settings": {
+    "next": {
+      "rootDir": "apps/web-h5/"
+    },
+    "react": {
+      "version": "19.2.0"
+    }
+  }
+}

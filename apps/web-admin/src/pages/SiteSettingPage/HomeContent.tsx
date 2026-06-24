@@ -1,14 +1,13 @@
-import { useEffect, useRef, useState } from "react";
-import PanlEditor from "./PanlEditor";
+import { useEffect, useRef, useState } from 'react';
+import PanlEditor from './PanlEditor';
 
 const VIEWPORT_WIDTH = 1280;
 const VIEWPORT_HEIGHT = 1080;
 const IFRAME_WIDTH = 1920;
 const IFRAME_HEIGHT = 1080;
-const BASE_SCALE = VIEWPORT_WIDTH / IFRAME_WIDTH;
 
 const HomeContent = () => {
-  const iframeRef = useRef<HTMLIFrameElement | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null!);
   const screenRef = useRef<HTMLDivElement | null>(null);
   const [fitScale, setFitScale] = useState(1);
 
@@ -17,11 +16,8 @@ const HomeContent = () => {
     if (!el) return;
 
     const updateScale = () => {
-      const { width, height } = el.getBoundingClientRect();
-      const nextFitScale = Math.min(
-        width / VIEWPORT_WIDTH,
-        height / VIEWPORT_HEIGHT,
-      );
+      const { height, width } = el.getBoundingClientRect();
+      const nextFitScale = Math.min(width / VIEWPORT_WIDTH, height / VIEWPORT_HEIGHT);
       setFitScale(Number.isFinite(nextFitScale) ? nextFitScale : 1);
     };
 
@@ -41,7 +37,7 @@ const HomeContent = () => {
           style={{
             width: `${IFRAME_WIDTH}px`,
             height: `${IFRAME_HEIGHT}px`,
-            transform: `scale(${fitScale})`,
+            transform: `scale(${fitScale})`
           }}
         >
           <iframe

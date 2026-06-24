@@ -1,25 +1,25 @@
-import { Settings, Shield, Users, FileImage, ChevronRight } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ChevronRight, FileImage, Settings, Shield, Users } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const menuItems = [
   {
-    title: "角色管理",
-    description: "管理系統角色與權限設定",
+    title: '角色管理',
+    description: '管理系統角色與權限設定',
     icon: Shield,
-    path: "/settings/roles",
+    path: '/settings/roles'
   },
   {
-    title: "用戶管理",
-    description: "管理系統後台用戶帳號",
+    title: '用戶管理',
+    description: '管理系統後台用戶帳號',
     icon: Users,
-    path: "/settings/users",
+    path: '/settings/users'
   },
   {
-    title: "圖文管理",
-    description: "管理網站圖片與文字內容",
+    title: '圖文管理',
+    description: '管理網站圖片與文字內容',
     icon: FileImage,
-    path: "/settings/content",
-  },
+    path: '/settings/content'
+  }
 ];
 
 const SettingsPage = () => {
@@ -31,7 +31,7 @@ const SettingsPage = () => {
       </div>
 
       <div className="grid gap-4">
-        {menuItems.map((item) => (
+        {menuItems.map(item => (
           <Link
             key={item.path}
             to={item.path}

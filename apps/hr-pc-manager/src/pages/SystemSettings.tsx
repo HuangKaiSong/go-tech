@@ -1,27 +1,31 @@
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useSettings } from "@/contexts/SettingsContext";
-import { Bell, Database, Settings, Shield } from "lucide-react";
-import { useState } from "react";
+import { Bell, Database, Settings, Shield } from 'lucide-react';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useSettings } from '@/contexts/SettingsContext';
+
+const requestNotificationPermission = async () => {
+  if (!('Notification' in window)) {
+    console.log('此浏览器不支持通知');
+    return;
+  }
+
+  if (Notification.permission === 'granted') {
+    return;
+  }
+
+  if (Notification.permission !== 'denied') {
+    await Notification.requestPermission();
+  }
+};
 
 export default function SystemSettings() {
-  const {
-    settings,
-    updateGeneralSettings,
-    updateSecuritySettings,
-    updateNotificationSettings,
-  } = useSettings();
+  const { settings, updateGeneralSettings, updateNotificationSettings, updateSecuritySettings } = useSettings();
   const [saved, setSaved] = useState(false);
 
   const handleSaveGeneral = () => {
@@ -29,28 +33,10 @@ export default function SystemSettings() {
     setTimeout(() => setSaved(false), 2000);
   };
 
-  const requestNotificationPermission = async () => {
-    if (!("Notification" in window)) {
-      console.log("此浏览器不支持通知");
-      return;
-    }
-
-    if (Notification.permission === "granted") {
-      return;
-    }
-
-    if (Notification.permission !== "denied") {
-      await Notification.requestPermission();
-    }
-  };
-
-  const handleNotificationChange = (
-    key: keyof typeof settings.notification,
-    checked: boolean,
-  ) => {
+  const handleNotificationChange = (key: keyof typeof settings.notification, checked: boolean) => {
     const newSettings = {
       ...settings.notification,
-      [key]: checked,
+      [key]: checked
     };
 
     if (checked || Object.values(newSettings).some(Boolean)) {
@@ -92,10 +78,10 @@ export default function SystemSettings() {
                   <Label>公司名稱</Label>
                   <Input
                     value={settings.general.companyName}
-                    onChange={(e) =>
+                    onChange={e =>
                       updateGeneralSettings({
                         ...settings.general,
-                        companyName: e.target.value,
+                        companyName: e.target.value
                       })
                     }
                   />
@@ -104,10 +90,10 @@ export default function SystemSettings() {
                   <Label>統一編號</Label>
                   <Input
                     value={settings.general.taxId}
-                    onChange={(e) =>
+                    onChange={e =>
                       updateGeneralSettings({
                         ...settings.general,
-                        taxId: e.target.value,
+                        taxId: e.target.value
                       })
                     }
                   />
@@ -116,10 +102,10 @@ export default function SystemSettings() {
                   <Label>公司地址</Label>
                   <Input
                     value={settings.general.address}
-                    onChange={(e) =>
+                    onChange={e =>
                       updateGeneralSettings({
                         ...settings.general,
-                        address: e.target.value,
+                        address: e.target.value
                       })
                     }
                   />
@@ -128,10 +114,10 @@ export default function SystemSettings() {
                   <Label>聯絡電話</Label>
                   <Input
                     value={settings.general.phone}
-                    onChange={(e) =>
+                    onChange={e =>
                       updateGeneralSettings({
                         ...settings.general,
-                        phone: e.target.value,
+                        phone: e.target.value
                       })
                     }
                   />
@@ -139,9 +125,7 @@ export default function SystemSettings() {
               </div>
               <div className="flex justify-end gap-2">
                 <Button variant="outline">取消</Button>
-                <Button onClick={handleSaveGeneral}>
-                  {saved ? "已儲存" : "儲存變更"}
-                </Button>
+                <Button onClick={handleSaveGeneral}>{saved ? '已儲存' : '儲存變更'}</Button>
               </div>
             </CardContent>
           </Card>
@@ -160,16 +144,14 @@ export default function SystemSettings() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium">雙重驗證</p>
-                  <p className="text-xs text-muted-foreground">
-                    啟用雙重身份驗證以增強安全性
-                  </p>
+                  <p className="text-xs text-muted-foreground">啟用雙重身份驗證以增強安全性</p>
                 </div>
                 <Switch
                   checked={settings.security.twoFactorAuth}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={checked =>
                     updateSecuritySettings({
                       ...settings.security,
-                      twoFactorAuth: checked,
+                      twoFactorAuth: checked
                     })
                   }
                 />
@@ -178,16 +160,14 @@ export default function SystemSettings() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium">密碼強度要求</p>
-                  <p className="text-xs text-muted-foreground">
-                    要求使用者設定強密碼
-                  </p>
+                  <p className="text-xs text-muted-foreground">要求使用者設定強密碼</p>
                 </div>
                 <Switch
                   checked={settings.security.passwordStrength}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={checked =>
                     updateSecuritySettings({
                       ...settings.security,
-                      passwordStrength: checked,
+                      passwordStrength: checked
                     })
                   }
                 />
@@ -196,16 +176,14 @@ export default function SystemSettings() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium">自動登出</p>
-                  <p className="text-xs text-muted-foreground">
-                    閒置 30 分鐘後自動登出
-                  </p>
+                  <p className="text-xs text-muted-foreground">閒置 30 分鐘後自動登出</p>
                 </div>
                 <Switch
                   checked={settings.security.autoLogout}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={checked =>
                     updateSecuritySettings({
                       ...settings.security,
-                      autoLogout: checked,
+                      autoLogout: checked
                     })
                   }
                 />
@@ -227,45 +205,33 @@ export default function SystemSettings() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium">請假審批通知</p>
-                  <p className="text-xs text-muted-foreground">
-                    收到新的請假申請時通知
-                  </p>
+                  <p className="text-xs text-muted-foreground">收到新的請假申請時通知</p>
                 </div>
                 <Switch
                   checked={settings.notification.leaveApproval}
-                  onCheckedChange={(checked) =>
-                    handleNotificationChange("leaveApproval", checked)
-                  }
+                  onCheckedChange={checked => handleNotificationChange('leaveApproval', checked)}
                 />
               </div>
               <Separator />
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium">入職提醒</p>
-                  <p className="text-xs text-muted-foreground">
-                    新員工入職前一天提醒
-                  </p>
+                  <p className="text-xs text-muted-foreground">新員工入職前一天提醒</p>
                 </div>
                 <Switch
                   checked={settings.notification.onboardingReminder}
-                  onCheckedChange={(checked) =>
-                    handleNotificationChange("onboardingReminder", checked)
-                  }
+                  onCheckedChange={checked => handleNotificationChange('onboardingReminder', checked)}
                 />
               </div>
               <Separator />
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium">薪資發放通知</p>
-                  <p className="text-xs text-muted-foreground">
-                    薪資發放完成時通知
-                  </p>
+                  <p className="text-xs text-muted-foreground">薪資發放完成時通知</p>
                 </div>
                 <Switch
                   checked={settings.notification.salaryNotification}
-                  onCheckedChange={(checked) =>
-                    handleNotificationChange("salaryNotification", checked)
-                  }
+                  onCheckedChange={checked => handleNotificationChange('salaryNotification', checked)}
                 />
               </div>
             </CardContent>
@@ -275,4 +241,3 @@ export default function SystemSettings() {
     </div>
   );
 }
-

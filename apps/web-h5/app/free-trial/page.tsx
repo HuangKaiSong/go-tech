@@ -1,37 +1,32 @@
-"use client";
+'use client';
 
-import Footer from "@/app/components/Footer";
-import Header from "@/app/components/Header";
-import { Button, Input } from "@go-tech-frontend/ui";
-import { CheckCircle } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { Button, Input } from '@go-tech-frontend/ui';
+import { CheckCircle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import Footer from '@/app/components/Footer';
+import Header from '@/app/components/Header';
 
 const FreeTrial = () => {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    company: "",
+    name: '',
+    email: '',
+    phone: '',
+    company: ''
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle trial registration
-    router.push("/");
+    router.push('/');
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const trialBenefits = [
-    "14天完整功能體驗",
-    "無需信用卡",
-    "專人客服支援",
-    "數據安全保障",
-  ];
+  const trialBenefits = ['14天完整功能體驗', '無需信用卡', '專人客服支援', '數據安全保障'];
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -41,20 +36,14 @@ const FreeTrial = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-10">
-              <h1 className="text-3xl md:text-4xl font-bold text-primary mb-4">
-                立即開始14天免費試用
-              </h1>
-              <p className="text-muted-foreground text-lg">
-                體驗完整功能，無需任何付款
-              </p>
+              <h1 className="text-3xl md:text-4xl font-bold text-primary mb-4">立即開始14天免費試用</h1>
+              <p className="text-muted-foreground text-lg">體驗完整功能，無需任何付款</p>
             </div>
 
             <div className="grid md:grid-cols-2 gap-8">
               {/* Benefits */}
               <div className="bg-primary/5 rounded-lg p-8">
-                <h2 className="text-xl font-bold text-gray-700 mb-6">
-                  試用包含
-                </h2>
+                <h2 className="text-xl font-bold text-gray-700 mb-6">試用包含</h2>
                 <ul className="space-y-4">
                   {trialBenefits.map((benefit, index) => (
                     <li key={index} className="flex items-center gap-3">
@@ -67,9 +56,7 @@ const FreeTrial = () => {
 
               {/* Form */}
               <div className="bg-white rounded-lg shadow-lg p-8">
-                <h2 className="text-xl font-bold text-gray-700 mb-6">
-                  填寫資料
-                </h2>
+                <h2 className="text-xl font-bold text-gray-700 mb-6">填寫資料</h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -116,9 +103,7 @@ const FreeTrial = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      公司名稱
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">公司名稱</label>
                     <Input
                       name="company"
                       value={formData.company}

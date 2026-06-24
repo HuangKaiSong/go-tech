@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { IframeProvider } from "@/contexts/IframeContext";
-import { useEffect, useState } from "react";
-import { Toaster } from "@go-tech-frontend/ui";
+import { Toaster } from '@go-tech-frontend/ui';
+import { useEffect, useState } from 'react';
+import { IframeProvider } from '@/contexts/IframeContext';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [hasIframe, setHasIframe] = useState<boolean>(false);
@@ -16,16 +16,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <IframeProvider hasIframe={hasIframe}>
-      <div
-        className="bg-white dark:bg-gray-950 text-black dark:text-white antialiased"
-        data-iframe={hasIframe}
-      >
-        <Toaster
-          theme="system"
-          className="toaster group"
-          position="top-right"
-          richColors
-        />
+      <div className="bg-white dark:bg-gray-950 text-black dark:text-white antialiased" data-iframe={hasIframe}>
+        <Toaster theme="system" className="toaster group" position="top-right" richColors />
         {children}
       </div>
     </IframeProvider>

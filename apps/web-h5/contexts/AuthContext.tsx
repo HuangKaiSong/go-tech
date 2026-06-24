@@ -1,58 +1,58 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
-import { createContext, useContext, useState } from "react";
+import { useRouter } from 'next/navigation';
+import { createContext, useContext, useState } from 'react';
 
 type AuthContextType = {
-  user: User | null;
-  setUser: (user: User | null) => void;
   isLoggedIn: boolean;
   logout: () => void;
-  token: string | undefined;
+  refetchTenants: (token: string) => void;
   setToken: (token: string | undefined) => void;
-  tenants: Tenant[],
-  refetchTenants: (token: string) => void
+  setUser: (user: User | null) => void;
+  tenants: Tenant[];
+  token: string | undefined;
+  user: User | null;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({
-  children,
-  initialUser,
+  _tenants,
   _token,
-  _tenants
+  children,
+  initialUser
 }: {
+  _tenants: Tenant[];
+  _token: string | undefined;
   children: React.ReactNode;
   initialUser: User | null;
-  _token: string | undefined;
-  _tenants: Tenant[]
 }) => {
-  const router = useRouter()
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(initialUser);
   const [token, setToken] = useState<string | undefined>(_token);
-  const [tenants, setTenants] = useState<Tenant[]>(_tenants)
+  const [tenants, setTenants] = useState<Tenant[]>(_tenants);
 
   const logout = async () => {
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
+      await fetch('/api/auth/logout', { method: 'POST' });
       setUser(null);
-      router.replace('/')
+      router.replace('/');
     } catch (error) {
-      console.error("Error during logout:", error);
+      console.error('Error during logout:', error);
     }
   };
 
   const refetchTenants = async (voucher: string) => {
     try {
-      const response = await fetch("/go-tech/platform/packageOrder/myTenants", {
+      const response = await fetch('/go-tech/platform/packageOrder/myTenants', {
         headers: {
-          Authorization: `Bearer ${voucher}`,
-        },
+          Authorization: `Bearer ${voucher}`
+        }
       });
       const data = await response.json();
-      setTenants(data?.data || [])
+      setTenants(data?.data || []);
     } catch (error) {
-      console.error("Error fetching tenants:", error);
+      console.error('Error fetching tenants:', error);
     }
   };
 
@@ -61,7 +61,7 @@ export const AuthProvider = ({
       value={{
         user,
         setUser,
-        isLoggedIn: !!user,
+        isLoggedIn: Boolean(user),
         logout,
         token,
         setToken,
@@ -76,6 +76,6 @@ export const AuthProvider = ({
 
 export const useAuth = () => {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
+  if (!ctx) throw new Error('useAuth must be used inside AuthProvider');
   return ctx;
 };

@@ -1,75 +1,219 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import MobileLayout from "@/components/MobileLayout";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import {
-  Search, ArrowLeft, Phone, MessageCircle, ChevronRight,
-  ChevronDown, Building2, Users, User, Briefcase, MapPin, PhoneCall, PhoneOff
-} from "lucide-react";
+  ArrowLeft,
+  Briefcase,
+  Building2,
+  ChevronDown,
+  ChevronRight,
+  MapPin,
+  MessageCircle,
+  Phone,
+  PhoneCall,
+  PhoneOff,
+  Search,
+  User,
+  Users
+} from 'lucide-react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import MobileLayout from '@/components/MobileLayout';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 
 // ── Organization Data ──
 type Employee = {
-  id: string;
-  name: string;
   avatar: string;
   dept: string;
-  title: string;
-  phone: string;
   email: string;
-  location: string;
+  id: string;
   isManager?: boolean;
+  location: string;
+  name: string;
   online?: boolean;
+  phone: string;
+  title: string;
 };
 
 type Department = {
+  children?: Department[];
   id: string;
-  name: string;
   manager: string;
   memberCount: number;
-  children?: Department[];
+  name: string;
 };
 
 const employees: Employee[] = [
-  { id: "1", name: "張經理", avatar: "張", dept: "人力資源部", title: "HR 經理", phone: "9567-8901", email: "zhang@company.com", location: "台北總部 8F", isManager: true, online: true },
-  { id: "2", name: "李美玲", avatar: "李", dept: "人力資源部", title: "HR 專員", phone: "9234-5678", email: "li@company.com", location: "台北總部 8F", online: false },
-  { id: "3", name: "陳大華", avatar: "陳", dept: "技術開發部", title: "技術主管", phone: "9345-6789", email: "chen@company.com", location: "台北總部 10F", isManager: true, online: true },
-  { id: "4", name: "王小明", avatar: "王", dept: "技術開發部", title: "前端工程師", phone: "9123-4567", email: "wang@company.com", location: "台北總部 10F", online: true },
-  { id: "5", name: "劉工", avatar: "劉", dept: "技術開發部", title: "後端工程師", phone: "9678-9012", email: "liu@company.com", location: "台北總部 10F", online: false },
-  { id: "6", name: "趙博", avatar: "趙", dept: "技術開發部", title: "測試工程師", phone: "9789-0123", email: "zhao@company.com", location: "台北總部 10F", online: true },
-  { id: "7", name: "林志明", avatar: "林", dept: "市場營銷部", title: "市場經理", phone: "9456-7890", email: "lin@company.com", location: "台北總部 6F", isManager: true, online: false },
-  { id: "8", name: "黃麗", avatar: "黃", dept: "財務部", title: "財務專員", phone: "9890-1234", email: "huang@company.com", location: "台北總部 7F", online: true },
-  { id: "9", name: "周明", avatar: "周", dept: "財務部", title: "財務經理", phone: "9901-2345", email: "zhou@company.com", location: "台北總部 7F", isManager: true, online: false },
-  { id: "10", name: "吳芳", avatar: "吳", dept: "市場營銷部", title: "品牌專員", phone: "9012-3456", email: "wu@company.com", location: "台北總部 6F", online: true },
-  { id: "11", name: "鄭總", avatar: "鄭", dept: "管理層", title: "總經理", phone: "9111-0000", email: "zheng@company.com", location: "台北總部 12F", isManager: true, online: true },
-  { id: "12", name: "孫副總", avatar: "孫", dept: "管理層", title: "副總經理", phone: "9111-0001", email: "sun@company.com", location: "台北總部 12F", isManager: true, online: false },
+  {
+    id: '1',
+    name: '張經理',
+    avatar: '張',
+    dept: '人力資源部',
+    title: 'HR 經理',
+    phone: '9567-8901',
+    email: 'zhang@company.com',
+    location: '台北總部 8F',
+    isManager: true,
+    online: true
+  },
+  {
+    id: '2',
+    name: '李美玲',
+    avatar: '李',
+    dept: '人力資源部',
+    title: 'HR 專員',
+    phone: '9234-5678',
+    email: 'li@company.com',
+    location: '台北總部 8F',
+    online: false
+  },
+  {
+    id: '3',
+    name: '陳大華',
+    avatar: '陳',
+    dept: '技術開發部',
+    title: '技術主管',
+    phone: '9345-6789',
+    email: 'chen@company.com',
+    location: '台北總部 10F',
+    isManager: true,
+    online: true
+  },
+  {
+    id: '4',
+    name: '王小明',
+    avatar: '王',
+    dept: '技術開發部',
+    title: '前端工程師',
+    phone: '9123-4567',
+    email: 'wang@company.com',
+    location: '台北總部 10F',
+    online: true
+  },
+  {
+    id: '5',
+    name: '劉工',
+    avatar: '劉',
+    dept: '技術開發部',
+    title: '後端工程師',
+    phone: '9678-9012',
+    email: 'liu@company.com',
+    location: '台北總部 10F',
+    online: false
+  },
+  {
+    id: '6',
+    name: '趙博',
+    avatar: '趙',
+    dept: '技術開發部',
+    title: '測試工程師',
+    phone: '9789-0123',
+    email: 'zhao@company.com',
+    location: '台北總部 10F',
+    online: true
+  },
+  {
+    id: '7',
+    name: '林志明',
+    avatar: '林',
+    dept: '市場營銷部',
+    title: '市場經理',
+    phone: '9456-7890',
+    email: 'lin@company.com',
+    location: '台北總部 6F',
+    isManager: true,
+    online: false
+  },
+  {
+    id: '8',
+    name: '黃麗',
+    avatar: '黃',
+    dept: '財務部',
+    title: '財務專員',
+    phone: '9890-1234',
+    email: 'huang@company.com',
+    location: '台北總部 7F',
+    online: true
+  },
+  {
+    id: '9',
+    name: '周明',
+    avatar: '周',
+    dept: '財務部',
+    title: '財務經理',
+    phone: '9901-2345',
+    email: 'zhou@company.com',
+    location: '台北總部 7F',
+    isManager: true,
+    online: false
+  },
+  {
+    id: '10',
+    name: '吳芳',
+    avatar: '吳',
+    dept: '市場營銷部',
+    title: '品牌專員',
+    phone: '9012-3456',
+    email: 'wu@company.com',
+    location: '台北總部 6F',
+    online: true
+  },
+  {
+    id: '11',
+    name: '鄭總',
+    avatar: '鄭',
+    dept: '管理層',
+    title: '總經理',
+    phone: '9111-0000',
+    email: 'zheng@company.com',
+    location: '台北總部 12F',
+    isManager: true,
+    online: true
+  },
+  {
+    id: '12',
+    name: '孫副總',
+    avatar: '孫',
+    dept: '管理層',
+    title: '副總經理',
+    phone: '9111-0001',
+    email: 'sun@company.com',
+    location: '台北總部 12F',
+    isManager: true,
+    online: false
+  }
 ];
 
 const orgStructure: Department[] = [
   {
-    id: "company", name: "XX科技有限公司", manager: "鄭總", memberCount: employees.length,
+    id: 'company',
+    name: 'XX科技有限公司',
+    manager: '鄭總',
+    memberCount: employees.length,
     children: [
-      { id: "mgmt", name: "管理層", manager: "鄭總", memberCount: 2 },
-      { id: "hr", name: "人力資源部", manager: "張經理", memberCount: 2 },
-      { id: "tech", name: "技術開發部", manager: "陳大華", memberCount: 4 },
-      { id: "mkt", name: "市場營銷部", manager: "林志明", memberCount: 2 },
-      { id: "fin", name: "財務部", manager: "周明", memberCount: 2 },
-    ],
-  },
+      { id: 'mgmt', name: '管理層', manager: '鄭總', memberCount: 2 },
+      { id: 'hr', name: '人力資源部', manager: '張經理', memberCount: 2 },
+      { id: 'tech', name: '技術開發部', manager: '陳大華', memberCount: 4 },
+      { id: 'mkt', name: '市場營銷部', manager: '林志明', memberCount: 2 },
+      { id: 'fin', name: '財務部', manager: '周明', memberCount: 2 }
+    ]
+  }
 ];
 
-const departments = ["全部", "管理層", "人力資源部", "技術開發部", "市場營銷部", "財務部"];
+const departments = ['全部', '管理層', '人力資源部', '技術開發部', '市場營銷部', '財務部'];
 
 // ── Employee Card ──
 const EmployeeCard = ({ emp, onClick }: { emp: Employee; onClick: () => void }) => (
-  <button onClick={onClick} className="w-full flex items-center gap-3 p-3 rounded-xl bg-card border border-border active:bg-muted transition-colors text-left">
+  <button
+    onClick={onClick}
+    className="w-full flex items-center gap-3 p-3 rounded-xl bg-card border border-border active:bg-muted transition-colors text-left"
+  >
     <div className="relative">
       <Avatar className="w-12 h-12">
-        <AvatarFallback className={`text-sm font-semibold ${emp.isManager ? "bg-primary/15 text-primary" : "bg-muted text-foreground"}`}>
+        <AvatarFallback
+          className={`text-sm font-semibold ${emp.isManager ? 'bg-primary/15 text-primary' : 'bg-muted text-foreground'}`}
+        >
           {emp.avatar}
         </AvatarFallback>
       </Avatar>
@@ -82,18 +226,32 @@ const EmployeeCard = ({ emp, onClick }: { emp: Employee; onClick: () => void }) 
           <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary font-medium">主管</span>
         )}
       </div>
-      <p className="text-xs text-muted-foreground mt-0.5">{emp.title} · {emp.dept}</p>
+      <p className="text-xs text-muted-foreground mt-0.5">
+        {emp.title} · {emp.dept}
+      </p>
     </div>
     <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
   </button>
 );
 
 // ── Employee Detail ──
-const EmployeeDetail = ({ emp, onBack, onChat, onCall }: { emp: Employee; onBack: () => void; onChat: () => void; onCall: () => void }) => (
+const EmployeeDetail = ({
+  emp,
+  onBack,
+  onCall,
+  onChat
+}: {
+  emp: Employee;
+  onBack: () => void;
+  onCall: () => void;
+  onChat: () => void;
+}) => (
   <div className="min-h-screen bg-background">
     <header className="sticky top-0 z-40 bg-card/90 backdrop-blur-md border-b border-border">
       <div className="flex items-center h-14 px-4 gap-3">
-        <button onClick={onBack} className="p-1"><ArrowLeft className="w-5 h-5 text-foreground" /></button>
+        <button onClick={onBack} className="p-1">
+          <ArrowLeft className="w-5 h-5 text-foreground" />
+        </button>
         <h1 className="text-base font-semibold text-foreground">個人資料</h1>
       </div>
     </header>
@@ -104,12 +262,16 @@ const EmployeeDetail = ({ emp, onBack, onChat, onCall }: { emp: Employee; onBack
           <Avatar className="w-20 h-20">
             <AvatarFallback className="text-2xl font-bold bg-primary/15 text-primary">{emp.avatar}</AvatarFallback>
           </Avatar>
-          {emp.online && <div className="absolute bottom-1 right-1 w-4 h-4 rounded-full bg-success border-2 border-background" />}
+          {emp.online && (
+            <div className="absolute bottom-1 right-1 w-4 h-4 rounded-full bg-success border-2 border-background" />
+          )}
         </div>
         <h2 className="text-xl font-bold text-foreground">{emp.name}</h2>
         <p className="text-sm text-muted-foreground mt-0.5">{emp.title}</p>
         {emp.isManager && (
-          <span className="mt-1.5 text-[11px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">部門主管</span>
+          <span className="mt-1.5 text-[11px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+            部門主管
+          </span>
         )}
       </div>
 
@@ -173,17 +335,19 @@ const EmployeeDetail = ({ emp, onBack, onChat, onCall }: { emp: Employee; onBack
         <div className="bg-card rounded-xl border border-border p-4">
           <h3 className="text-sm font-semibold text-foreground mb-3">同部門同事</h3>
           <div className="space-y-2">
-            {employees.filter(e => e.dept === emp.dept && e.id !== emp.id).map(colleague => (
-              <div key={colleague.id} className="flex items-center gap-2.5 py-1">
-                <Avatar className="w-8 h-8">
-                  <AvatarFallback className="text-xs bg-muted">{colleague.avatar}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-foreground">{colleague.name}</p>
-                  <p className="text-[11px] text-muted-foreground">{colleague.title}</p>
+            {employees
+              .filter(e => e.dept === emp.dept && e.id !== emp.id)
+              .map(colleague => (
+                <div key={colleague.id} className="flex items-center gap-2.5 py-1">
+                  <Avatar className="w-8 h-8">
+                    <AvatarFallback className="text-xs bg-muted">{colleague.avatar}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-foreground">{colleague.name}</p>
+                    <p className="text-[11px] text-muted-foreground">{colleague.title}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
         </div>
       </div>
@@ -192,32 +356,49 @@ const EmployeeDetail = ({ emp, onBack, onChat, onCall }: { emp: Employee; onBack
 );
 
 // ── Org Chart ──
-const OrgNode = ({ dept, level = 0, onSelectEmp }: { dept: Department; level?: number; onSelectEmp: (emp: Employee) => void }) => {
+const OrgNode = ({
+  dept,
+  level = 0,
+  onSelectEmp
+}: {
+  dept: Department;
+  level?: number;
+  onSelectEmp: (emp: Employee) => void;
+}) => {
   const [expanded, setExpanded] = useState(level === 0);
   const deptMembers = employees.filter(e => e.dept === dept.name);
-  const hasChildren = !!dept.children;
+  const hasChildren = Boolean(dept.children);
   const isLeaf = !hasChildren;
 
   return (
-    <div className={`${level > 0 ? "ml-6 border-l-2 border-border pl-4" : ""}`}>
+    <div className={`${level > 0 ? 'ml-6 border-l-2 border-border pl-4' : ''}`}>
       <button
         onClick={() => setExpanded(!expanded)}
         className="w-full flex items-center gap-3 p-3 rounded-xl bg-card border border-border mb-2 active:bg-muted transition-colors text-left"
       >
-        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${level === 0 ? "bg-primary" : "bg-accent"}`}>
-          {level === 0 ? <Building2 className="w-5 h-5 text-primary-foreground" /> : <Users className="w-5 h-5 text-accent-foreground" />}
+        <div
+          className={`w-10 h-10 rounded-lg flex items-center justify-center ${level === 0 ? 'bg-primary' : 'bg-accent'}`}
+        >
+          {level === 0 ? (
+            <Building2 className="w-5 h-5 text-primary-foreground" />
+          ) : (
+            <Users className="w-5 h-5 text-accent-foreground" />
+          )}
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-foreground">{dept.name}</p>
-          <p className="text-xs text-muted-foreground">負責人：{dept.manager} · {dept.memberCount}人</p>
+          <p className="text-xs text-muted-foreground">
+            負責人：{dept.manager} · {dept.memberCount}人
+          </p>
         </div>
-        <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${expanded ? "rotate-180" : ""}`} />
+        <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${expanded ? 'rotate-180' : ''}`} />
       </button>
       {expanded && (
         <>
-          {hasChildren && dept.children!.map(child => (
-            <OrgNode key={child.id} dept={child} level={level + 1} onSelectEmp={onSelectEmp} />
-          ))}
+          {hasChildren &&
+            dept.children!.map(child => (
+              <OrgNode key={child.id} dept={child} level={level + 1} onSelectEmp={onSelectEmp} />
+            ))}
           {isLeaf && deptMembers.length > 0 && (
             <div className="ml-4 space-y-1.5 mb-2">
               {deptMembers.map(emp => (
@@ -233,14 +414,14 @@ const OrgNode = ({ dept, level = 0, onSelectEmp }: { dept: Department; level?: n
 
 // ── Main Contacts Page ──
 const Contacts = () => {
-  const [view, setView] = useState<"main" | "detail">("main");
-  const [tab, setTab] = useState<"people" | "org">("people");
-  const [search, setSearch] = useState("");
-  const [deptFilter, setDeptFilter] = useState("全部");
+  const [view, setView] = useState<'detail' | 'main'>('main');
+  const [tab, setTab] = useState<'org' | 'people'>('people');
+  const [search, setSearch] = useState('');
+  const [deptFilter, setDeptFilter] = useState('全部');
   const [selectedEmp, setSelectedEmp] = useState<Employee | null>(null);
 
   const filtered = employees
-    .filter(e => deptFilter === "全部" || e.dept === deptFilter)
+    .filter(e => deptFilter === '全部' || e.dept === deptFilter)
     .filter(e => e.name.includes(search) || e.dept.includes(search) || e.title.includes(search));
 
   // Group by department
@@ -249,22 +430,22 @@ const Contacts = () => {
     return acc;
   }, {});
 
-  const handleOrgDeptClick = (deptName: string) => {
-    setTab("people");
-    setDeptFilter(deptName);
-  };
+  // const handleOrgDeptClick = (deptName: string) => {
+  //   setTab('people');
+  //   setDeptFilter(deptName);
+  // };
 
   const [showCallDialog, setShowCallDialog] = useState(false);
   const navigate = useNavigate();
 
-  if (view === "detail" && selectedEmp) {
+  if (view === 'detail' && selectedEmp) {
     return (
       <>
         <EmployeeDetail
           emp={selectedEmp}
-          onBack={() => setView("main")}
+          onBack={() => setView('main')}
           onChat={() => {
-            navigate("/notifications?tab=chat&contact=" + encodeURIComponent(selectedEmp.name));
+            navigate(`/notifications?tab=chat&contact=${encodeURIComponent(selectedEmp.name)}`);
           }}
           onCall={() => setShowCallDialog(true)}
         />
@@ -273,7 +454,9 @@ const Contacts = () => {
           <DialogContent className="max-w-[300px] rounded-2xl text-center">
             <DialogHeader className="items-center">
               <Avatar className="w-16 h-16 mb-2">
-                <AvatarFallback className="text-xl font-bold bg-primary/15 text-primary">{selectedEmp.avatar}</AvatarFallback>
+                <AvatarFallback className="text-xl font-bold bg-primary/15 text-primary">
+                  {selectedEmp.avatar}
+                </AvatarFallback>
               </Avatar>
               <DialogTitle>{selectedEmp.name}</DialogTitle>
               <DialogDescription>{selectedEmp.phone}</DialogDescription>
@@ -315,18 +498,18 @@ const Contacts = () => {
         {/* Tab switch */}
         <div className="flex gap-2 mb-4">
           <button
-            onClick={() => setTab("people")}
+            onClick={() => setTab('people')}
             className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-              tab === "people" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+              tab === 'people' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
             }`}
           >
             <User className="w-4 h-4" />
             人員列表
           </button>
           <button
-            onClick={() => setTab("org")}
+            onClick={() => setTab('org')}
             className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-              tab === "org" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+              tab === 'org' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
             }`}
           >
             <Building2 className="w-4 h-4" />
@@ -334,7 +517,7 @@ const Contacts = () => {
           </button>
         </div>
 
-        {tab === "people" ? (
+        {tab === 'people' ? (
           <>
             {/* Department filter */}
             <ScrollArea className="mb-4">
@@ -344,7 +527,7 @@ const Contacts = () => {
                     key={d}
                     onClick={() => setDeptFilter(d)}
                     className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
-                      deptFilter === d ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                      deptFilter === d ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
                     }`}
                   >
                     {d}
@@ -374,16 +557,17 @@ const Contacts = () => {
                       <EmployeeCard
                         key={emp.id}
                         emp={emp}
-                        onClick={() => { setSelectedEmp(emp); setView("detail"); }}
+                        onClick={() => {
+                          setSelectedEmp(emp);
+                          setView('detail');
+                        }}
                       />
                     ))}
                   </div>
                 </div>
               ))}
               {filtered.length === 0 && (
-                <div className="text-center py-12 text-muted-foreground text-sm">
-                  未找到匹配的人員
-                </div>
+                <div className="text-center py-12 text-muted-foreground text-sm">未找到匹配的人員</div>
               )}
             </div>
           </>
@@ -395,7 +579,14 @@ const Contacts = () => {
               <span className="text-xs text-muted-foreground">點擊部門展開查看人員列表</span>
             </div>
             {orgStructure.map(dept => (
-              <OrgNode key={dept.id} dept={dept} onSelectEmp={(emp) => { setSelectedEmp(emp); setView("detail"); }} />
+              <OrgNode
+                key={dept.id}
+                dept={dept}
+                onSelectEmp={emp => {
+                  setSelectedEmp(emp);
+                  setView('detail');
+                }}
+              />
             ))}
           </div>
         )}

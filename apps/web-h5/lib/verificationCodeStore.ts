@@ -1,7 +1,6 @@
-
 type CodeRecord = {
-  code: string
-  expiresAt: number
-}
+  code: string;
+  expiresAt: number;
+};
 
-export const verificationCodeStore = new Map<string, CodeRecord>()
+export const verificationCodeStore = new Map<string, CodeRecord>();

@@ -1,6 +1,5 @@
-"use client";
+'use client';
 
-import { useAuth } from "@/contexts/AuthContext";
 import {
   Dialog,
   DialogContent,
@@ -13,19 +12,20 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   Input,
-  Label,
-} from "@go-tech-frontend/ui";
-import { ChevronDown } from "lucide-react";
-import Image from "next/image";
-import { useState } from "react";
+  Label
+} from '@go-tech-frontend/ui';
+import { ChevronDown } from 'lucide-react';
+import Image from 'next/image';
+import { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const fmt = (n: number) =>
-  n.toLocaleString("zh-Hant-HK", {
+  n.toLocaleString('zh-Hant-HK', {
     minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    maximumFractionDigits: 2
   });
 
-const toSafeFileName = (value: string) => value.replace(/[^\w.-]+/g, "_");
+const toSafeFileName = (value: string) => value.replace(/[^\w.-]+/g, '_');
 
 const escapeCsvValue = (value: string | number) => {
   const normalized = String(value).replace(/"/g, '""');
@@ -34,49 +34,102 @@ const escapeCsvValue = (value: string | number) => {
 
 const Index = ({
   invoice = {
-    invoiceNo: "INV-2025-0418",
+    invoiceNo: 'INV-2025-0418',
     finalAmount: 2880,
     orderAmount: 2880,
-    client: "ABC 科技有限公司",
-    businessRegNo: "",
-    payTime: "2025-04-22",
+    client: 'ABC 科技有限公司',
+    businessRegNo: '',
+    payTime: '2025-04-22',
     orderItems: [
       {
-        itemName: "企業雲端方案 (Pro Plan) - 生效日期 2025-05-01",
-        amount: 2400,
+        itemName: '企業雲端方案 (Pro Plan) - 生效日期 2025-05-01',
+        amount: 2400
       },
-      { itemName: "網域註冊續期 (.com.hk) - 1 年", amount: 480 },
+      { itemName: '網域註冊續期 (.com.hk) - 1 年', amount: 480 }
     ],
-    invoiceHeader: "",
-    id: 0,
-  },
+    invoiceHeader: '',
+    id: 0
+  }
 }) => {
   const { token } = useAuth();
-  const orderItems = Array.isArray(invoice?.orderItems)
-    ? invoice.orderItems
-    : [];
+  const orderItems = Array.isArray(invoice?.orderItems) ? invoice.orderItems : [];
   const subtotal = invoice.orderAmount;
   const total = invoice.orderAmount;
   const due = invoice.finalAmount;
-  const invoiceNo = invoice?.invoiceNo ?? "invoice";
+  const invoiceNo = invoice?.invoiceNo ?? 'invoice';
   const fileBaseName = toSafeFileName(`Invoice-${invoiceNo}`);
 
-  const [pendingAction, setPendingAction] = useState<
-    "print" | "pdf" | "csv" | null
-  >(null);
+  const [pendingAction, setPendingAction] = useState<'print' | 'pdf' | 'csv' | null>(null);
 
   // 商业登记号
-  const [brInput, setBrInput] = useState("");
+  const [brInput, setBrInput] = useState('');
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
 
-  const requestAction = (action: "print" | "pdf" | "csv") => {
+  const handlePrint = () => {
+    const invoiceElement = document.getElementById('invoice');
+    if (!invoiceElement) return;
+
+    const originalTitle = document.title;
+    const host = invoiceElement.cloneNode(true) as HTMLElement;
+    host.id = 'invoice-print-host';
+    host.style.display = 'none';
+    document.body.appendChild(host);
+    document.body.classList.add('invoice-printing');
+    document.title = invoiceNo;
+
+    const cleanup = () => {
+      document.title = originalTitle;
+      document.body.classList.remove('invoice-printing');
+      host.remove();
+      window.removeEventListener('afterprint', cleanup);
+    };
+
+    window.addEventListener('afterprint', cleanup);
+    window.print();
+    window.setTimeout(cleanup, 1500);
+  };
+
+  const handleExportPdf = () => {
+    const url = `/api/pdf/invoice?id=${invoice.id}`;
+    window.open(url, '_blank');
+  };
+
+  const handleExportCsv = () => {
+    const rows = [
+      ['To', invoice?.invoiceHeader ?? ''],
+      ['Invoice Number', invoiceNo],
+      ['Issue Date', invoice?.payTime ?? ''],
+      ['Business Reg No.', invoice?.businessRegNo ?? ''],
+      [],
+      ['Description', 'Amount (HKD)'],
+      ...orderItems.map(item => [item?.itemName ?? '', fmt(item?.amount ?? 0)]),
+      [],
+      ['Subtotal', fmt(subtotal)],
+      ['Total', fmt(total)],
+      ['Amount Due', fmt(due)]
+    ];
+
+    const csv = rows.map(row => row.map(cell => escapeCsvValue(cell ?? '')).join(',')).join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${fileBaseName}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const requestAction = (action: 'csv' | 'pdf' | 'print') => {
     if (invoice.businessRegNo) {
-      if (action === "print") handlePrint();
-      if (action === "pdf") handleExportPdf();
-      if (action === "csv") handleExportCsv();
+      if (action === 'print') handlePrint();
+      if (action === 'pdf') handleExportPdf();
+      if (action === 'csv') handleExportCsv();
     } else {
       setPendingAction(action);
-      setBrInput("");
+      setBrInput('');
       setDialogOpen(true);
     }
   };
@@ -86,86 +139,27 @@ const Index = ({
     if (!brInput.trim()) return;
 
     const requestHeaders = new Headers({
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
-      "User-Type": "platform_customer",
+      'User-Type': 'platform_customer'
     });
 
-    await fetch("/go-tech/platform/packageOrder/setBusinessRegNo", {
-      method: "POST",
+    await fetch('/go-tech/platform/packageOrder/setBusinessRegNo', {
+      method: 'POST',
       headers: requestHeaders,
       body: JSON.stringify({
         id: invoice.id,
-        businessRegNo: brInput.trim(),
-      }),
+        businessRegNo: brInput.trim()
+      })
     }).then(res => res.json());
     invoice.businessRegNo = brInput.trim();
     setDialogOpen(false);
     requestAnimationFrame(() => {
-      if (pendingAction === "print") handlePrint();
-      if (pendingAction === "pdf") handleExportPdf();
-      if (pendingAction === "csv") handleExportCsv();
+      if (pendingAction === 'print') handlePrint();
+      if (pendingAction === 'pdf') handleExportPdf();
+      if (pendingAction === 'csv') handleExportCsv();
       setPendingAction(null);
     });
-  };
-
-  const handlePrint = () => {
-    const invoiceElement = document.getElementById("invoice");
-    if (!invoiceElement) return;
-
-    const originalTitle = document.title;
-    const host = invoiceElement.cloneNode(true) as HTMLElement;
-    host.id = "invoice-print-host";
-    host.style.display = "none";
-    document.body.appendChild(host);
-    document.body.classList.add("invoice-printing");
-    document.title = invoiceNo;
-
-    const cleanup = () => {
-      document.title = originalTitle;
-      document.body.classList.remove("invoice-printing");
-      host.remove();
-      window.removeEventListener("afterprint", cleanup);
-    };
-
-    window.addEventListener("afterprint", cleanup);
-    window.print();
-    window.setTimeout(cleanup, 1500);
-  };
-
-  const handleExportPdf = () => {
-    const url = `/api/pdf/invoice?id=${invoice.id}`;
-    window.open(url, "_blank");
-  };
-
-  const handleExportCsv = () => {
-    const rows = [
-      ["To", invoice?.invoiceHeader ?? ""],
-      ["Invoice Number", invoiceNo],
-      ["Issue Date", invoice?.payTime ?? ""],
-      ["Business Reg No.", invoice?.businessRegNo ?? ""],
-      [],
-      ["Description", "Amount (HKD)"],
-      ...orderItems.map(item => [item?.itemName ?? "", fmt(item?.amount ?? 0)]),
-      [],
-      ["Subtotal", fmt(subtotal)],
-      ["Total", fmt(total)],
-      ["Amount Due", fmt(due)],
-    ];
-
-    const csv = rows
-      .map(row => row.map(cell => escapeCsvValue(cell ?? "")).join(","))
-      .join("\n");
-
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${fileBaseName}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
   };
 
   return (
@@ -174,9 +168,7 @@ const Index = ({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>輸入 Business Reg No.</DialogTitle>
-            <DialogDescription>
-              請輸入商業登記號碼，輸入後將會顯示於發票上。請注意，輸入後不能變更
-            </DialogDescription>
+            <DialogDescription>請輸入商業登記號碼，輸入後將會顯示於發票上。請注意，輸入後不能變更</DialogDescription>
           </DialogHeader>
           <form onSubmit={confirmBr} className="space-y-4">
             <div className="space-y-2">
@@ -239,10 +231,7 @@ const Index = ({
         `}</style>
         <h1 className="sr-only">發票預覽 - Go Techs Limited</h1>
 
-        <article
-          id="invoice"
-          className="mx-auto max-w-3xl bg-background shadow-sm border border-border"
-        >
+        <article id="invoice" className="mx-auto max-w-3xl bg-background shadow-sm border border-border">
           {/* PAID banner */}
           <div
             className="bg-primary text-primary-foreground text-center py-3 font-semibold tracking-wide"
@@ -256,9 +245,7 @@ const Index = ({
             <div>
               <h2 className="text-lg font-bold mb-3">INVOICE</h2>
               <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-semibold">
-                  {fmt(invoice.orderAmount)}
-                </span>
+                <span className="text-2xl font-semibold">{fmt(invoice.orderAmount)}</span>
                 <span className="text-xl font-medium ml-1">HKD</span>
               </div>
             </div>
@@ -342,18 +329,15 @@ const Index = ({
           <section className="px-8 py-4 text-sm">
             <h3 className="font-bold mb-2">Terms</h3>
             <p className="text-foreground/80">
-              The amount due will be debited from the payment details you have
-              provided to us on or after the due date stated above
+              The amount due will be debited from the payment details you have provided to us on or after the due date
+              stated above
             </p>
           </section>
 
           <div className="border-t border-foreground mx-8" />
 
           {/* Print & Export */}
-          <section
-            id="invoice-print-actions"
-            className="px-8 py-6 flex justify-end text-sm"
-          >
+          <section id="invoice-print-actions" className="px-8 py-6 flex justify-end text-sm">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
@@ -364,15 +348,9 @@ const Index = ({
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onSelect={() => requestAction("print")}>
-                  Print
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => requestAction("pdf")}>
-                  Invoice {invoiceNo}.pdf
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => requestAction("csv")}>
-                  Invoice {invoiceNo}.csv
-                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => requestAction('print')}>Print</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => requestAction('pdf')}>Invoice {invoiceNo}.pdf</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => requestAction('csv')}>Invoice {invoiceNo}.csv</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </section>

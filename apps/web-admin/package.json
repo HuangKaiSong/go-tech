@@ -1,12 +1,14 @@
 {
   "name": "web-admin",
-  "private": true,
   "version": "0.0.0",
+  "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
+    "lint": "oxlint",
+    "format": "oxfmt .",
+    "type-check": "tsc -b",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -15,9 +17,9 @@
     "@go-tech-frontend/three": "workspace:*",
     "@go-tech-frontend/ui": "workspace:*",
     "@hookform/resolvers": "catalog:",
-    "antd": "^6.3.5",
     "@tanstack/react-query": "catalog:",
     "ahooks": "catalog:",
+    "antd": "^6.3.5",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
     "cmdk": "catalog:",
@@ -40,7 +42,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@eslint/js": "catalog:",
+    "@go-tech/tsconfig": "workspace:*",
     "@tailwindcss/postcss": "catalog:",
     "@tailwindcss/typography": "catalog:",
     "@types/node": "^24.10.1",
@@ -49,14 +51,9 @@
     "@vitejs/plugin-react": "^5.1.1",
     "autoprefixer": "catalog:",
     "babel-plugin-react-compiler": "catalog:",
-    "eslint": "catalog:",
-    "eslint-plugin-react-hooks": "^7.0.1",
-    "eslint-plugin-react-refresh": "catalog:",
-    "globals": "^16.5.0",
     "postcss": "catalog:",
     "tailwindcss": "^4",
     "typescript": "catalog:",
-    "typescript-eslint": "catalog:",
     "vite": "^7.2.4",
     "vite-plugin-glsl": "^1.5.5",
     "vite-plugin-pwa": "^1.2.0",

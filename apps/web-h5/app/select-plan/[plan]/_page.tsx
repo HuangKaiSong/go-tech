@@ -1,37 +1,38 @@
-"use client";
+'use client';
 
-import Footer from "@/app/components/Footer";
-import Header from "@/app/components/Header";
+import { Button } from '@go-tech-frontend/ui';
+import { useSessionStorageState } from 'ahooks';
+import { Check, Minus, Plus } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import Footer from '@/app/components/Footer';
+import Header from '@/app/components/Header';
 import valueAddedServices from '@/app/constants/addedServices';
-import servicePlanBg from "@/assets/service-plan-bg.jpg";
-import { Button } from "@go-tech-frontend/ui";
-import { useSessionStorageState } from "ahooks";
-import {
-  Check,
-  Minus,
-  Plus
-} from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import servicePlanBg from '@/assets/service-plan-bg.jpg';
+
+const getIconHref = (value: string) => {
+  const normalized = value
+    .trim()
+    .replace(/^#/, '')
+    .replace(/^icon-/, '');
+  return `#icon-${normalized}`;
+};
 
 const SelectPlan = ({ plan }: { plan: Packages }) => {
   const router = useRouter();
   const [needAddons, setNeedAddons] = useState(true);
   const [hasMounted, setHasMounted] = useState(false);
-  const [selectedServices, setSelectedServices] = useSessionStorageState<
-    Record<string, number>
-  >('user-selected-services', {
-    defaultValue: {},
-    listenStorageChange: true,
-  });
+  const [selectedServices, setSelectedServices] = useSessionStorageState<Record<string, number>>(
+    'user-selected-services',
+    {
+      defaultValue: {},
+      listenStorageChange: true
+    }
+  );
   useEffect(() => {
     setHasMounted(true);
   }, []);
   const selectedServicesSafe = hasMounted ? (selectedServices ?? {}) : {};
-  const getIconHref = (value: string) => {
-    const normalized = value.trim().replace(/^#/, '').replace(/^icon-/, '');
-    return `#icon-${normalized}`;
-  };
 
   const toggleService = (serviceId: string) => {
     setSelectedServices(prev => {
@@ -53,7 +54,7 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
   };
 
   const handleGoBack = () => {
-    router.push("/service-plan");
+    router.push('/service-plan');
   };
 
   const handleNext = () => {
@@ -65,14 +66,9 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
       <Header />
 
       {/* Hero Section */}
-      <section
-        className="relative pt-32 pb-16 bg-cover bg-center"
-        style={{ backgroundImage: `url(${servicePlanBg})` }}
-      >
+      <section className="relative pt-32 pb-16 bg-cover bg-center" style={{ backgroundImage: `url(${servicePlanBg})` }}>
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-primary mb-2">
-            選擇套餐
-          </h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-primary mb-2">選擇套餐</h1>
         </div>
       </section>
 
@@ -83,47 +79,35 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
           <div className="bg-white rounded-lg border border-border p-6 mb-6">
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center gap-3">
-                <div className="w-1 h-8 bg-primary rounded-full mt-1"></div>
+                <div className="w-1 h-8 bg-primary rounded-full mt-1" />
                 <div>
-                  <h2 className="text-xl font-bold text-gray-700">
-                    {plan.packageName}
-                  </h2>
+                  <h2 className="text-xl font-bold text-gray-700">{plan.packageName}</h2>
                 </div>
               </div>
               <div className="text-right">
-                <span className="text-2xl font-bold text-primary">
-                  ${plan.price.toLocaleString()}
-                </span>
-                <span className="text-lg text-primary ml-1">
-                  HKD
-                </span>
+                <span className="text-2xl font-bold text-primary">${plan.price.toLocaleString()}</span>
+                <span className="text-lg text-primary ml-1">HKD</span>
               </div>
             </div>
 
             <div className="mb-4">
               <div className="flex gap-4 mb-4">
-                <span className="text-sm font-medium text-muted-foreground min-w-15">
-                  套餐内容
-                </span>
-                <span className="text-sm text-gray-700">
-                  最多可創建{plan.unitCount}個單位
-                </span>
+                <span className="text-sm font-medium text-muted-foreground min-w-15">套餐内容</span>
+                <span className="text-sm text-gray-700">最多可創建{plan.unitCount}個單位</span>
               </div>
 
               <div className="flex gap-4">
-                <span className="text-sm font-medium text-muted-foreground min-w-15">
-                  包含功能
-                </span>
+                <span className="text-sm font-medium text-muted-foreground min-w-15">包含功能</span>
                 <div className="flex flex-wrap gap-2">
                   {plan.packageItemList.map((feature, index) => (
                     <div
                       key={index}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm text-muted-foreground"
-                      style={{ backgroundColor: "#FAEEEB" }}
+                      style={{ backgroundColor: '#FAEEEB' }}
                     >
                       {feature.menuIcon && (
                         <svg className="svg-icon w-4 h-4 text-primary mr-1" aria-hidden="true">
-                          <use href={getIconHref(feature.menuIcon)} xlinkHref={getIconHref(feature.menuIcon)}></use>
+                          <use href={getIconHref(feature.menuIcon)} xlinkHref={getIconHref(feature.menuIcon)} />
                         </svg>
                       )}
                       <span>{feature.menuTitle}</span>
@@ -138,7 +122,7 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
           <div className="bg-white rounded-lg border border-border p-6 mb-8">
             <div className="flex justify-between items-center mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-1 h-6 bg-primary rounded-full"></div>
+                <div className="w-1 h-6 bg-primary rounded-full" />
                 <h3 className="text-lg font-bold text-gray-700">增值服務</h3>
               </div>
 
@@ -146,9 +130,7 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
                 <button
                   onClick={() => setNeedAddons(true)}
                   className={`px-6 py-2 text-sm font-medium transition-colors ${
-                    needAddons
-                      ? "bg-primary text-white"
-                      : "bg-white text-muted-foreground hover:bg-muted"
+                    needAddons ? 'bg-primary text-white' : 'bg-white text-muted-foreground hover:bg-muted'
                   }`}
                 >
                   需要
@@ -156,9 +138,7 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
                 <button
                   onClick={() => setNeedAddons(false)}
                   className={`px-6 py-2 text-sm font-medium transition-colors ${
-                    !needAddons
-                      ? "bg-primary text-white"
-                      : "bg-white text-muted-foreground hover:bg-muted"
+                    !needAddons ? 'bg-primary text-white' : 'bg-white text-muted-foreground hover:bg-muted'
                   }`}
                 >
                   不需要
@@ -170,14 +150,12 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
             {needAddons && (
               <div className="mt-6">
                 <p className="text-sm text-primary mb-4">
-                  請選擇增值服務{" "}
-                  <span className="text-primary">（可多選）</span>
+                  請選擇增值服務 <span className="text-primary">（可多選）</span>
                 </p>
 
                 <div className="space-y-3" suppressHydrationWarning>
                   {valueAddedServices.map(service => {
-                    const isSelected =
-                      selectedServicesSafe[service.id] !== undefined;
+                    const isSelected = selectedServicesSafe[service.id] !== undefined;
                     const quantity = selectedServicesSafe[service.id] || 0;
 
                     return (
@@ -185,38 +163,34 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
                         key={service.id}
                         suppressHydrationWarning
                         className={`flex items-center justify-between p-4 rounded-lg border transition-colors ${
-                          isSelected
-                            ? "border-primary bg-primary/5"
-                            : "border-border"
+                          isSelected ? 'border-primary bg-primary/5' : 'border-border'
                         }`}
                       >
                         <div className="flex items-center gap-3">
                           <button
                             onClick={() => toggleService(service.id)}
                             className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-                              isSelected
-                                ? "bg-primary border-primary"
-                                : "border-muted-foreground"
+                              isSelected ? 'bg-primary border-primary' : 'border-muted-foreground'
                             }`}
                           >
-                            {isSelected && (
-                              <Check className="w-3 h-3 text-white" />
-                            )}
+                            {isSelected && <Check className="w-3 h-3 text-white" />}
                           </button>
-                          <span className="text-sm text-gray-700">
-                            {service.name}
-                          </span>
+                          <span className="text-sm text-gray-700">{service.name}</span>
                         </div>
 
                         <div className="flex items-center gap-4">
                           <span className="text-sm font-medium text-primary">
-                            +{
-                              service.id === "rentSysPrice" ? plan.rentSysPrice :
-                              service.id === "venueSysPrice" ? plan.venueSysPrice :
-                              service.id === "accountingSysPrice" ? plan.accountingSysPrice :
-                              service.id === "custServiceSysPrice" ? plan.custServiceSysPrice :
-                              service.id === "addUnitPrice" ? plan.addUnitPrice : 0
-                            } HKD Each
+                            +
+                            {(
+                              {
+                                rentSysPrice: plan.rentSysPrice,
+                                venueSysPrice: plan.venueSysPrice,
+                                accountingSysPrice: plan.accountingSysPrice,
+                                custServiceSysPrice: plan.custServiceSysPrice,
+                                addUnitPrice: plan.addUnitPrice
+                              } as Record<string, number>
+                            )[service.id] ?? 0}{' '}
+                            HKD Each
                           </span>
 
                           {isSelected && (
@@ -227,9 +201,7 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
                               >
                                 <Minus className="w-4 h-4" />
                               </button>
-                              <span className="w-8 text-center text-sm font-medium">
-                                {quantity}
-                              </span>
+                              <span className="w-8 text-center text-sm font-medium">{quantity}</span>
                               <button
                                 onClick={() => updateQuantity(service.id, 1)}
                                 className="w-8 h-8 rounded border border-border flex items-center justify-center hover:bg-muted hover:text-foreground transition-colors"

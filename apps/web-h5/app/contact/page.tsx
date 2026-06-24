@@ -1,23 +1,16 @@
-"use client"
+'use client';
 
-import Footer from "@/app/components/Footer";
-import Header from "@/app/components/Header";
-import {
-  Button,
-  Dialog,
-  DialogContent,
-  Input,
-  Textarea,
-  toast,
-} from "@go-tech-frontend/ui";
-import { useState } from "react";
+import { Button, Dialog, DialogContent, Input, Textarea, toast } from '@go-tech-frontend/ui';
+import { useState } from 'react';
+import Footer from '@/app/components/Footer';
+import Header from '@/app/components/Header';
 
 const Page = () => {
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    message: "",
+    name: '',
+    email: '',
+    phone: '',
+    message: ''
   });
   const [showSuccess, setShowSuccess] = useState(false);
   const [pending, setPending] = useState(false);
@@ -27,13 +20,13 @@ const Page = () => {
 
     try {
       setPending(true);
-      
-      const response = await fetch("/go-tech/platform/leaveMessage/add", {
-        method: "POST",
+
+      const response = await fetch('/go-tech/platform/leaveMessage/add', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(formData)
       });
 
       if (!response.ok) {
@@ -45,7 +38,7 @@ const Page = () => {
         // Show success dialog
         setShowSuccess(true);
         // Reset form
-        setFormData({ name: "", email: "", phone: "", message: "" }); 
+        setFormData({ name: '', email: '', phone: '', message: '' });
       } else {
         toast.error(result.message);
       }
@@ -56,7 +49,7 @@ const Page = () => {
           const result = await error.json();
           toast.error(result.message);
         } else {
-          toast.error("An error occurred while submitting the form.");
+          toast.error('An error occurred while submitting the form.');
         }
       }
     } finally {
@@ -64,9 +57,7 @@ const Page = () => {
     }
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -78,9 +69,7 @@ const Page = () => {
       <main className="flex-1 pt-32 pb-16 bg-linear-to-b from-primary/10 to-background">
         <div className="container mx-auto px-4">
           <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8 md:p-12">
-            <h1 className="text-3xl md:text-4xl font-bold text-primary text-center mb-10">
-              聯繫我們
-            </h1>
+            <h1 className="text-3xl md:text-4xl font-bold text-primary text-center mb-10">聯繫我們</h1>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
@@ -142,11 +131,7 @@ const Page = () => {
               </div>
 
               <div className="pt-4">
-                <Button
-                  type="submit"
-                  className="w-full max-w-xs mx-auto block h-12 text-lg"
-                  loading={pending}
-                >
+                <Button type="submit" className="w-full max-w-xs mx-auto block h-12 text-lg" loading={pending}>
                   發送
                 </Button>
               </div>
@@ -161,9 +146,7 @@ const Page = () => {
       <Dialog open={showSuccess} onOpenChange={setShowSuccess}>
         <DialogContent className="sm:max-w-md text-center p-8">
           <h2 className="text-2xl font-bold text-gray-700 mb-4">發送成功</h2>
-          <p className="text-muted-foreground">
-            我們看到後會第一時間跟您聯繫，請耐心等待並保持電話暢通。
-          </p>
+          <p className="text-muted-foreground">我們看到後會第一時間跟您聯繫，請耐心等待並保持電話暢通。</p>
         </DialogContent>
       </Dialog>
     </div>

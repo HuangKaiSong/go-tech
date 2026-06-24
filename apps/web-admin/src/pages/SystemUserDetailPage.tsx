@@ -1,38 +1,109 @@
-import { ArrowLeft, UserCog } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
-import {
-  Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@go-tech-frontend/ui";
+import { Button, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@go-tech-frontend/ui';
+import { ArrowLeft, UserCog } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const mockSystemUsers = [
-  { id: "TC000001", name: "張先生", phone: "9825 3973", email: "XXXXX@126.com", packageType: "黃金套餐", addon: "租務系統｜會計系統", amount: "$1080", paymentMethod: "轉賬", paymentTime: "12/08/2025 10:00:23", status: "已支付" },
-  { id: "TC000002", name: "李先生", phone: "9825 3973", email: "XXXXX@126.com", packageType: "黃金套餐", addon: "租務系統｜會計系統", amount: "$1080", paymentMethod: "轉賬", paymentTime: "12/08/2025 10:00:23", status: "已支付" },
-  { id: "TC000003", name: "王先生", phone: "9825 3973", email: "XXXXX@126.com", packageType: "白金套餐", addon: "租務系統｜會計系統", amount: "$1080", paymentMethod: "轉賬", paymentTime: "12/08/2025 10:00:23", status: "已支付" },
-  { id: "TC000004", name: "劉先生", phone: "9825 3973", email: "XXXXX@126.com", packageType: "鑽石套餐", addon: "租務系統｜會計系統", amount: "$12080", paymentMethod: "", paymentTime: "", status: "未支付" },
-  { id: "TC000005", name: "張先生", phone: "9825 3973", email: "XXXXX@126.com", packageType: "黃金套餐", addon: "租務系統｜會計系統", amount: "$1080", paymentMethod: "轉賬", paymentTime: "12/08/2025 10:00:23", status: "已支付" },
+  {
+    id: 'TC000001',
+    name: '張先生',
+    phone: '9825 3973',
+    email: 'XXXXX@126.com',
+    packageType: '黃金套餐',
+    addon: '租務系統｜會計系統',
+    amount: '$1080',
+    paymentMethod: '轉賬',
+    paymentTime: '12/08/2025 10:00:23',
+    status: '已支付'
+  },
+  {
+    id: 'TC000002',
+    name: '李先生',
+    phone: '9825 3973',
+    email: 'XXXXX@126.com',
+    packageType: '黃金套餐',
+    addon: '租務系統｜會計系統',
+    amount: '$1080',
+    paymentMethod: '轉賬',
+    paymentTime: '12/08/2025 10:00:23',
+    status: '已支付'
+  },
+  {
+    id: 'TC000003',
+    name: '王先生',
+    phone: '9825 3973',
+    email: 'XXXXX@126.com',
+    packageType: '白金套餐',
+    addon: '租務系統｜會計系統',
+    amount: '$1080',
+    paymentMethod: '轉賬',
+    paymentTime: '12/08/2025 10:00:23',
+    status: '已支付'
+  },
+  {
+    id: 'TC000004',
+    name: '劉先生',
+    phone: '9825 3973',
+    email: 'XXXXX@126.com',
+    packageType: '鑽石套餐',
+    addon: '租務系統｜會計系統',
+    amount: '$12080',
+    paymentMethod: '',
+    paymentTime: '',
+    status: '未支付'
+  },
+  {
+    id: 'TC000005',
+    name: '張先生',
+    phone: '9825 3973',
+    email: 'XXXXX@126.com',
+    packageType: '黃金套餐',
+    addon: '租務系統｜會計系統',
+    amount: '$1080',
+    paymentMethod: '轉賬',
+    paymentTime: '12/08/2025 10:00:23',
+    status: '已支付'
+  }
 ];
 
 // Mock order history for users
 const mockOrderHistory = [
-  { id: "ORD001", packageType: "黃金套餐", addon: "租務系統｜會計系統", amount: "$1080", paymentMethod: "轉賬", paymentTime: "12/08/2025 10:00:23", status: "已支付" },
-  { id: "ORD002", packageType: "白金套餐", addon: "會計系統", amount: "$2080", paymentMethod: "信用卡", paymentTime: "10/07/2025 14:30:00", status: "已支付" },
-  { id: "ORD003", packageType: "黃金套餐", addon: "租務系統", amount: "$880", paymentMethod: "轉賬", paymentTime: "05/06/2025 09:15:45", status: "已支付" },
+  {
+    id: 'ORD001',
+    packageType: '黃金套餐',
+    addon: '租務系統｜會計系統',
+    amount: '$1080',
+    paymentMethod: '轉賬',
+    paymentTime: '12/08/2025 10:00:23',
+    status: '已支付'
+  },
+  {
+    id: 'ORD002',
+    packageType: '白金套餐',
+    addon: '會計系統',
+    amount: '$2080',
+    paymentMethod: '信用卡',
+    paymentTime: '10/07/2025 14:30:00',
+    status: '已支付'
+  },
+  {
+    id: 'ORD003',
+    packageType: '黃金套餐',
+    addon: '租務系統',
+    amount: '$880',
+    paymentMethod: '轉賬',
+    paymentTime: '05/06/2025 09:15:45',
+    status: '已支付'
+  }
 ];
 
 const SystemUserDetailPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const user = mockSystemUsers.find((u) => u.id === id) || mockSystemUsers[0];
+  const user = mockSystemUsers.find(u => u.id === id) || mockSystemUsers[0];
 
   const handleBack = () => {
-    navigate("/system-users");
+    navigate('/system-users');
   };
 
   return (
@@ -78,7 +149,7 @@ const SystemUserDetailPage = () => {
           </div>
           <div>
             <p className="text-sm text-muted-foreground">訂單狀態</p>
-            <span className={user.status === "已支付" ? "text-foreground font-medium" : "text-primary font-medium"}>
+            <span className={user.status === '已支付' ? 'text-foreground font-medium' : 'text-primary font-medium'}>
               {user.status}
             </span>
           </div>
@@ -104,7 +175,7 @@ const SystemUserDetailPage = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {mockOrderHistory.map((order) => (
+            {mockOrderHistory.map(order => (
               <TableRow key={order.id} className="hover:bg-muted/30">
                 <TableCell className="text-center">{order.id}</TableCell>
                 <TableCell className="text-center">{order.packageType}</TableCell>
@@ -113,13 +184,11 @@ const SystemUserDetailPage = () => {
                 <TableCell className="text-center">{order.paymentMethod}</TableCell>
                 <TableCell className="text-center">{order.paymentTime}</TableCell>
                 <TableCell className="text-center">
-                  <span className={order.status === "已支付" ? "text-foreground" : "text-primary"}>
-                    {order.status}
-                  </span>
+                  <span className={order.status === '已支付' ? 'text-foreground' : 'text-primary'}>{order.status}</span>
                 </TableCell>
                 <TableCell className="text-center">
-                  <Button 
-                    variant="link" 
+                  <Button
+                    variant="link"
                     className="text-primary p-0 h-auto"
                     onClick={() => navigate(`/orders/${order.id}`)}
                   >

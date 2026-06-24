@@ -1,4 +1,6 @@
-import MobileLayout from "@/components/MobileLayout";
+import { ArrowLeft, Check, CheckCircle2, ChevronDown, Clock, History } from 'lucide-react';
+import { useState } from 'react';
+import MobileLayout from '@/components/MobileLayout';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -7,108 +9,99 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
-  ArrowLeft,
-  Check,
-  CheckCircle2,
-  ChevronDown,
-  Clock,
-  History,
-} from "lucide-react";
-import { useState } from "react";
+  AlertDialogTitle
+} from '@/components/ui/alert-dialog';
 
 type SalaryMonth = {
-  period: string;
-  netPay: string;
-  grossPay: string;
-  totalDeduction: string;
   confirmed: boolean;
-  items: { label: string; amount: string }[];
-  deductions: { label: string; amount: string }[];
+  deductions: { amount: string; label: string }[];
+  grossPay: string;
+  items: { amount: string; label: string }[];
+  netPay: string;
+  period: string;
+  totalDeduction: string;
 };
 
 const salaryHistory: SalaryMonth[] = [
   {
-    period: "2026年03月",
-    netPay: "13,282",
-    grossPay: "15,700",
-    totalDeduction: "-2,418",
+    period: '2026年03月',
+    netPay: '13,282',
+    grossPay: '15,700',
+    totalDeduction: '-2,418',
     confirmed: false,
     items: [
-      { label: "基本工資", amount: "11,000" },
-      { label: "崗位津貼", amount: "1,200" },
-      { label: "績效獎金", amount: "2,100" },
-      { label: "加班費", amount: "1,400" },
+      { label: '基本工資', amount: '11,000' },
+      { label: '崗位津貼', amount: '1,200' },
+      { label: '績效獎金', amount: '2,100' },
+      { label: '加班費', amount: '1,400' }
     ],
     deductions: [
-      { label: "強積金（僱員）", amount: "-785" },
-      { label: "薪俸稅", amount: "-1,133" },
-      { label: "其他扣除", amount: "-500" },
-    ],
+      { label: '強積金（僱員）', amount: '-785' },
+      { label: '薪俸稅', amount: '-1,133' },
+      { label: '其他扣除', amount: '-500' }
+    ]
   },
   {
-    period: "2026年02月",
-    netPay: "12,850",
-    grossPay: "15,200",
-    totalDeduction: "-2,350",
+    period: '2026年02月',
+    netPay: '12,850',
+    grossPay: '15,200',
+    totalDeduction: '-2,350',
     confirmed: true,
     items: [
-      { label: "基本工資", amount: "11,000" },
-      { label: "崗位津貼", amount: "1,200" },
-      { label: "績效獎金", amount: "1,800" },
-      { label: "加班費", amount: "1,200" },
+      { label: '基本工資', amount: '11,000' },
+      { label: '崗位津貼', amount: '1,200' },
+      { label: '績效獎金', amount: '1,800' },
+      { label: '加班費', amount: '1,200' }
     ],
     deductions: [
-      { label: "強積金（僱員）", amount: "-760" },
-      { label: "薪俸稅", amount: "-1,090" },
-      { label: "其他扣除", amount: "-500" },
-    ],
+      { label: '強積金（僱員）', amount: '-760' },
+      { label: '薪俸稅', amount: '-1,090' },
+      { label: '其他扣除', amount: '-500' }
+    ]
   },
   {
-    period: "2026年01月",
-    netPay: "13,100",
-    grossPay: "15,500",
-    totalDeduction: "-2,400",
+    period: '2026年01月',
+    netPay: '13,100',
+    grossPay: '15,500',
+    totalDeduction: '-2,400',
     confirmed: true,
     items: [
-      { label: "基本工資", amount: "11,000" },
-      { label: "崗位津貼", amount: "1,200" },
-      { label: "績效獎金", amount: "2,000" },
-      { label: "加班費", amount: "1,300" },
+      { label: '基本工資', amount: '11,000' },
+      { label: '崗位津貼', amount: '1,200' },
+      { label: '績效獎金', amount: '2,000' },
+      { label: '加班費', amount: '1,300' }
     ],
     deductions: [
-      { label: "強積金（僱員）", amount: "-775" },
-      { label: "薪俸稅", amount: "-1,125" },
-      { label: "其他扣除", amount: "-500" },
-    ],
+      { label: '強積金（僱員）', amount: '-775' },
+      { label: '薪俸稅', amount: '-1,125' },
+      { label: '其他扣除', amount: '-500' }
+    ]
   },
   {
-    period: "2025年12月",
-    netPay: "14,600",
-    grossPay: "17,200",
-    totalDeduction: "-2,600",
+    period: '2025年12月',
+    netPay: '14,600',
+    grossPay: '17,200',
+    totalDeduction: '-2,600',
     confirmed: true,
     items: [
-      { label: "基本工資", amount: "11,000" },
-      { label: "崗位津貼", amount: "1,200" },
-      { label: "績效獎金", amount: "2,500" },
-      { label: "加班費", amount: "1,000" },
-      { label: "年終花紅", amount: "1,500" },
+      { label: '基本工資', amount: '11,000' },
+      { label: '崗位津貼', amount: '1,200' },
+      { label: '績效獎金', amount: '2,500' },
+      { label: '加班費', amount: '1,000' },
+      { label: '年終花紅', amount: '1,500' }
     ],
     deductions: [
-      { label: "強積金（僱員）", amount: "-860" },
-      { label: "薪俸稅", amount: "-1,240" },
-      { label: "其他扣除", amount: "-500" },
-    ],
-  },
+      { label: '強積金（僱員）', amount: '-860' },
+      { label: '薪俸稅', amount: '-1,240' },
+      { label: '其他扣除', amount: '-500' }
+    ]
+  }
 ];
 
-type ViewMode = "current" | "history";
+type ViewMode = 'current' | 'history';
 
 const Salary = () => {
-  const [viewMode, setViewMode] = useState<ViewMode>("current");
+  const [viewMode, setViewMode] = useState<ViewMode>('current');
   const [selectedMonth, setSelectedMonth] = useState(salaryHistory[0]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [confirmed, setConfirmed] = useState(selectedMonth.confirmed);
@@ -121,16 +114,16 @@ const Salary = () => {
   const handleSelectHistory = (month: SalaryMonth) => {
     setSelectedMonth(month);
     setConfirmed(month.confirmed);
-    setViewMode("current");
+    setViewMode('current');
   };
 
   // History list view
-  if (viewMode === "history") {
+  if (viewMode === 'history') {
     return (
       <MobileLayout title="歷史薪酬">
         <div className="px-5 pt-4">
           <button
-            onClick={() => setViewMode("current")}
+            onClick={() => setViewMode('current')}
             className="flex items-center gap-1.5 text-sm text-muted-foreground mb-4 active:opacity-70"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -138,7 +131,7 @@ const Salary = () => {
           </button>
 
           <div className="space-y-3">
-            {salaryHistory.map((month) => (
+            {salaryHistory.map(month => (
               <button
                 key={month.period}
                 onClick={() => handleSelectHistory(month)}
@@ -146,9 +139,7 @@ const Salary = () => {
               >
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium text-foreground">
-                      {month.period}
-                    </p>
+                    <p className="text-sm font-medium text-foreground">{month.period}</p>
                     {month.confirmed ? (
                       <span className="text-[10px] font-medium px-2 py-0.5 rounded-full text-success bg-success/10">
                         已確認
@@ -159,13 +150,9 @@ const Salary = () => {
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    實發 HK$ {month.netPay}
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">實發 HK$ {month.netPay}</p>
                 </div>
-                <p className="text-base font-bold text-foreground">
-                  HK$ {month.netPay}
-                </p>
+                <p className="text-base font-bold text-foreground">HK$ {month.netPay}</p>
               </button>
             ))}
           </div>
@@ -181,11 +168,10 @@ const Salary = () => {
         {/* Period selector */}
         <div className="flex items-center justify-between mb-4">
           <button className="flex items-center gap-1.5 text-sm font-medium text-foreground">
-            {selectedMonth.period}{" "}
-            <ChevronDown className="w-4 h-4 text-muted-foreground" />
+            {selectedMonth.period} <ChevronDown className="w-4 h-4 text-muted-foreground" />
           </button>
           <button
-            onClick={() => setViewMode("history")}
+            onClick={() => setViewMode('history')}
             className="flex items-center gap-1.5 text-xs text-primary font-medium active:opacity-70"
           >
             <History className="w-3.5 h-3.5" />
@@ -207,40 +193,27 @@ const Salary = () => {
               </span>
             )}
           </div>
-          <p className="text-3xl font-bold text-primary-foreground mt-1">
-            HK$ {selectedMonth.netPay}
-          </p>
+          <p className="text-3xl font-bold text-primary-foreground mt-1">HK$ {selectedMonth.netPay}</p>
           <div className="flex gap-6 mt-4">
             <div>
               <p className="text-xs text-primary-foreground/60">應發</p>
-              <p className="text-sm font-semibold text-primary-foreground">
-                HK$ {selectedMonth.grossPay}
-              </p>
+              <p className="text-sm font-semibold text-primary-foreground">HK$ {selectedMonth.grossPay}</p>
             </div>
             <div>
               <p className="text-xs text-primary-foreground/60">扣除</p>
-              <p className="text-sm font-semibold text-primary-foreground">
-                HK$ {selectedMonth.totalDeduction}
-              </p>
+              <p className="text-sm font-semibold text-primary-foreground">HK$ {selectedMonth.totalDeduction}</p>
             </div>
           </div>
         </div>
 
         {/* Income */}
         <div className="mb-4">
-          <h3 className="text-sm font-semibold text-foreground mb-3">
-            收入明細
-          </h3>
+          <h3 className="text-sm font-semibold text-foreground mb-3">收入明細</h3>
           <div className="bg-card rounded-xl border border-border divide-y divide-border">
-            {selectedMonth.items.map((item) => (
-              <div
-                key={item.label}
-                className="flex items-center justify-between px-4 py-3"
-              >
+            {selectedMonth.items.map(item => (
+              <div key={item.label} className="flex items-center justify-between px-4 py-3">
                 <span className="text-sm text-foreground">{item.label}</span>
-                <span className="text-sm font-medium text-foreground">
-                  HK$ {item.amount}
-                </span>
+                <span className="text-sm font-medium text-foreground">HK$ {item.amount}</span>
               </div>
             ))}
           </div>
@@ -248,19 +221,12 @@ const Salary = () => {
 
         {/* Deductions */}
         <div className="mb-4">
-          <h3 className="text-sm font-semibold text-foreground mb-3">
-            扣除項目
-          </h3>
+          <h3 className="text-sm font-semibold text-foreground mb-3">扣除項目</h3>
           <div className="bg-card rounded-xl border border-border divide-y divide-border">
-            {selectedMonth.deductions.map((item) => (
-              <div
-                key={item.label}
-                className="flex items-center justify-between px-4 py-3"
-              >
+            {selectedMonth.deductions.map(item => (
+              <div key={item.label} className="flex items-center justify-between px-4 py-3">
                 <span className="text-sm text-foreground">{item.label}</span>
-                <span className="text-sm font-medium text-destructive">
-                  HK$ {item.amount}
-                </span>
+                <span className="text-sm font-medium text-destructive">HK$ {item.amount}</span>
               </div>
             ))}
           </div>
@@ -289,30 +255,21 @@ const Salary = () => {
           <AlertDialogHeader>
             <AlertDialogTitle className="text-base">確認薪酬</AlertDialogTitle>
             <AlertDialogDescription className="text-xs">
-              請確認 {selectedMonth.period}{" "}
-              的薪酬資料無誤。確認後將無法撤回，如有疑問請聯繫人事部門。
+              請確認 {selectedMonth.period} 的薪酬資料無誤。確認後將無法撤回，如有疑問請聯繫人事部門。
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="bg-muted/50 rounded-lg p-3 text-sm space-y-1.5">
             <div className="flex justify-between">
               <span className="text-muted-foreground">應發工資</span>
-              <span className="font-medium text-foreground">
-                HK$ {selectedMonth.grossPay}
-              </span>
+              <span className="font-medium text-foreground">HK$ {selectedMonth.grossPay}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">扣除合計</span>
-              <span className="font-medium text-destructive">
-                HK$ {selectedMonth.totalDeduction}
-              </span>
+              <span className="font-medium text-destructive">HK$ {selectedMonth.totalDeduction}</span>
             </div>
             <div className="flex justify-between border-t border-border pt-1.5">
-              <span className="text-muted-foreground font-medium">
-                實發工資
-              </span>
-              <span className="font-bold text-foreground">
-                HK$ {selectedMonth.netPay}
-              </span>
+              <span className="text-muted-foreground font-medium">實發工資</span>
+              <span className="font-bold text-foreground">HK$ {selectedMonth.netPay}</span>
             </div>
           </div>
           <AlertDialogFooter>
@@ -328,4 +285,3 @@ const Salary = () => {
 };
 
 export default Salary;
-

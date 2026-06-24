@@ -1,10 +1,10 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner, TooltipProvider } from "@go-tech-frontend/ui";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Suspense } from "react";
-import { RouterProvider } from "react-router-dom";
-import { router } from "./router";
-import { GlobalProvider } from "./store/global";
+import { Toaster as Sonner, TooltipProvider } from '@go-tech-frontend/ui';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Suspense } from 'react';
+import { RouterProvider } from 'react-router-dom';
+import { Toaster } from '@/components/ui/toaster';
+import { router } from './router';
+import { GlobalProvider } from './store/global';
 
 const queryClient = new QueryClient();
 const LoadingSpinner = () => (
@@ -20,10 +20,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <Suspense fallback={<LoadingSpinner />}>
-          <RouterProvider
-            future={{ v7_startTransition: true }}
-            router={router}
-          />
+          <RouterProvider future={{ v7_startTransition: true }} router={router} />
         </Suspense>
       </TooltipProvider>
     </GlobalProvider>

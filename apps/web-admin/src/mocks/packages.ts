@@ -1,13 +1,13 @@
 export interface PackageItem {
+  accountingSysPrice?: number;
+  addUnitPrice?: number;
+  custServiceSysPrice?: number;
   id?: number;
+  packageItemList: any[];
   packageName: string;
-  unitCount: number;
   price: number;
-  addUnitPrice: number;
-  rentSysPrice: number;
-  venueSysPrice: number;
-  accountingSysPrice: number;
-  custServiceSysPrice: number;
+  rentSysPrice?: number;
   status: number;
-  packageItemList: any[]
+  unitCount: number;
+  venueSysPrice?: number;
 }

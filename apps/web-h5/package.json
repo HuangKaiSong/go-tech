@@ -6,7 +6,9 @@
     "dev": "NODE_OPTIONS='--max-old-space-size=4096 --trace-deprecation' next dev",
     "build": "NODE_OPTIONS='--max-old-space-size=4096' next build",
     "start": "NODE_OPTIONS='--max-old-space-size=4096' next start -p 3200",
-    "lint": "eslint"
+    "lint": "oxlint",
+    "format": "oxfmt .",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@go-tech-frontend/lib": "workspace:*",
@@ -36,6 +38,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@go-tech/tsconfig": "workspace:*",
     "@tailwindcss/postcss": "catalog:",
     "@types/node": "^20",
     "@types/react": "catalog:react19",
@@ -43,11 +46,7 @@
     "@types/react-slick": "^0.23.13",
     "@types/svgo": "^3.0.0",
     "babel-plugin-react-compiler": "catalog:",
-    "eslint": "catalog:",
-    "eslint-config-next": "16.1.1",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-prettier": "^5.5.5",
-    "prettier": "^3.8.0",
+    "eslint-plugin-sort": "catalog:dev",
     "tailwindcss": "^4",
     "typescript": "catalog:"
   }

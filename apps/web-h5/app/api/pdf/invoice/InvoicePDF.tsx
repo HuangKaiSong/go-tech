@@ -1,52 +1,39 @@
-import {
-  Document,
-  Font,
-  Image,
-  Page,
-  Path,
-  StyleSheet,
-  Svg,
-  Text,
-  View,
-} from "@react-pdf/renderer";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { Document, Font, Image, Page, Path, StyleSheet, Svg, Text, View } from '@react-pdf/renderer';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface InvoiceItem {
-  itemName: string;
   amount: number;
+  itemName: string;
 }
 
 export interface InvoiceData {
-  status?: "PAID" | "UNPAID" | "PENDING";
-  to: string;
+  amountDue: number;
   businessRegNo?: string;
+  currency?: string;
+  from?: string;
   invoiceNumber: string;
   issueDate: string;
-  from?: string;
   items: InvoiceItem[];
-  subtotal: number;
-  total: number;
-  amountDue: number;
-  currency?: string;
   logoUrl?: string;
+  status?: 'PAID' | 'PENDING' | 'UNPAID';
+  subtotal: number;
   terms?: string;
+  to: string;
+  total: number;
   useCjkFont?: boolean;
 }
 
 // ─── Font ───────────────────────────────────────────────────────────────────
-
+// oxlint-disable
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const invoiceFontPath = path.resolve(
-  __dirname,
-  "../../../../public/fonts/Noto_Sans_TC/static/NotoSansTC-Regular.ttf"
-);
+const invoiceFontPath = path.resolve(__dirname, '../../../../public/fonts/Noto_Sans_TC/static/NotoSansTC-Regular.ttf');
 
 const invoiceFontBoldPath = path.resolve(
   __dirname,
-  "../../../../public/fonts/Noto_Sans_TC/static/NotoSansTC-Medium.ttf"
+  '../../../../public/fonts/Noto_Sans_TC/static/NotoSansTC-Medium.ttf'
 );
 
 let cjkFontRegistered = false;
@@ -57,17 +44,17 @@ function ensureCjkFontRegistered() {
   }
 
   Font.register({
-    family: "NotoSansTC",
+    family: 'NotoSansTC',
     fonts: [
       {
         src: invoiceFontPath,
-        fontWeight: "normal",
+        fontWeight: 'normal'
       },
       {
         src: invoiceFontBoldPath,
-        fontWeight: 700,
-      },
-    ],
+        fontWeight: 700
+      }
+    ]
   });
 
   cjkFontRegistered = true;
@@ -76,237 +63,232 @@ function ensureCjkFontRegistered() {
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 const colors = {
-  primary: "#f97015",
-  foreground: "#000000",
-  muted: "#94a3b8",
-  border: "#e2e8f0",
-  paidBg: "#f97015",
-  paidText: "#ffffff",
+  primary: '#f97015',
+  foreground: '#000000',
+  muted: '#94a3b8',
+  border: '#e2e8f0',
+  paidBg: '#f97015',
+  paidText: '#ffffff'
 };
 
 const styles = StyleSheet.create({
   page: {
-    fontFamily: "NotoSansTC",
+    fontFamily: 'NotoSansTC',
     fontSize: 12,
     color: colors.foreground,
-    backgroundColor: "#ffffff",
-    minWidth: 574.5,
+    backgroundColor: '#ffffff',
+    minWidth: 574.5
   },
 
   // ── Paid Banner ──
   banner: {
     backgroundColor: colors.paidBg,
     color: colors.paidText,
-    textAlign: "center",
+    textAlign: 'center',
     paddingVertical: 9,
     fontWeight: 700,
-    letterSpacing: 0.4,
+    letterSpacing: 0.4
   },
   bannerContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 3,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 3
   },
   bannerCheck: {
     width: 12,
-    height: 12,
+    height: 12
   },
 
   // ── Header ──
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
     paddingHorizontal: 24,
     paddingTop: 18,
-    paddingBottom: 12,
+    paddingBottom: 12
   },
   headerLeft: {
-    flexDirection: "column",
+    flexDirection: 'column'
   },
   invoiceTitle: {
     fontSize: 13.5,
     marginBottom: 9,
-    fontWeight: 700,
+    fontWeight: 700
   },
   amountRow: {
-    flexDirection: "row",
-    alignItems: "baseline",
-    gap: 3,
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 3
   },
   amountValue: {
-    fontSize: 18,
+    fontSize: 18
   },
   amountCurrency: {
     fontSize: 15,
-    marginLeft: 4,
+    marginLeft: 4
   },
   logo: {
     width: 72,
     height: 72,
-    objectFit: "contain",
+    objectFit: 'contain'
   },
 
   // ── Dividers ──
   dividerFull: {
     borderTopWidth: 1,
     borderTopColor: colors.foreground,
-    borderTopStyle: "solid",
-    marginHorizontal: 0,
+    borderTopStyle: 'solid',
+    marginHorizontal: 0
   },
   dividerInset: {
     borderTopWidth: 1,
     borderTopColor: colors.foreground,
-    borderTopStyle: "solid",
-    marginHorizontal: 24,
+    borderTopStyle: 'solid',
+    marginHorizontal: 24
   },
   dividerLight: {
     borderTopWidth: 1,
     borderTopColor: colors.border,
-    borderTopStyle: "solid",
+    borderTopStyle: 'solid'
   },
 
   // ── Meta Section ──
   metaSection: {
-    flexDirection: "row",
+    flexDirection: 'row',
     paddingHorizontal: 24,
     paddingVertical: 10.5,
     gap: 18,
-    fontSize: 10.5,
+    fontSize: 10.5
   },
   metaCol: {
     flex: 1,
-    flexDirection: "column",
-    gap: 3.75,
+    flexDirection: 'column',
+    gap: 3.75
   },
   metaRow: {
-    flexDirection: "row",
-    gap: 9,
+    flexDirection: 'row',
+    gap: 9
   },
   metaLabel: {
     width: 97.5,
     fontWeight: 700,
-    flexShrink: 0,
+    flexShrink: 0
   },
   metaValue: {
     flex: 1,
-    color: colors.foreground,
+    color: colors.foreground
   },
 
   // ── Items Section ──
   itemsSection: {
     paddingHorizontal: 24,
     paddingVertical: 10.5,
-    fontSize: 10.5,
+    fontSize: 10.5
   },
   itemsHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     paddingBottom: 6,
     marginBottom: 9,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
-    borderBottomStyle: "solid",
-    fontWeight: 700,
+    borderBottomStyle: 'solid',
+    fontWeight: 700
   },
   itemRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingVertical: 6,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 6
   },
   itemDesc: {
-    flex: 1,
+    flex: 1
   },
   itemAmount: {
-    textAlign: "right",
+    textAlign: 'right'
   },
 
   // ── Totals Section ──
   totalsSection: {
     paddingHorizontal: 24,
     paddingBottom: 14,
-    alignItems: "flex-end",
-    fontSize: 10.5,
+    alignItems: 'flex-end',
+    fontSize: 10.5
   },
   totalsBox: {
-    width: 336,
+    width: 336
   },
   totalRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     paddingVertical: 6,
     borderTopWidth: 1,
     borderTopColor: colors.border,
-    borderTopStyle: "solid",
+    borderTopStyle: 'solid'
   },
   totalRowBold: {
     fontWeight: 700,
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     paddingVertical: 9,
     borderTopWidth: 1,
     borderTopColor: colors.border,
-    borderTopStyle: "solid",
+    borderTopStyle: 'solid'
   },
   totalLabelBold: {},
   totalValueBold: {
-    fontSize: 12,
+    fontSize: 12
   },
 
   // ── Terms Section ──
   termsSection: {
     paddingHorizontal: 24,
-    paddingVertical: 12,
+    paddingVertical: 12
   },
   termsTitle: {
     fontSize: 10.5,
     fontWeight: 700,
-    marginBottom: 6,
+    marginBottom: 6
   },
   termsText: {
     fontSize: 10.5,
-    color: colors.muted,
-  },
+    color: colors.muted
+  }
 });
+
+const fmt = (n: number) =>
+  n.toLocaleString('zh-Hant-HK', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function InvoicePDF({
-  status = "PAID",
-  to,
+  amountDue,
   businessRegNo,
+  currency = 'HKD',
+  from = 'GO TECHS LIMITED',
   invoiceNumber,
   issueDate,
-  from = "GO TECHS LIMITED",
   items,
-  subtotal,
-  total,
-  amountDue,
-  currency = "HKD",
   logoUrl,
-  terms = "The amount due will be debited from the payment details you have provided to us on or after the due date stated above",
-  useCjkFont = false,
+  status = 'PAID',
+  subtotal,
+  terms = 'The amount due will be debited from the payment details you have provided to us on or after the due date stated above',
+  to,
+  total,
+  useCjkFont = false
 }: InvoiceData) {
   if (useCjkFont) {
     ensureCjkFontRegistered();
   }
 
-  const fontFamily = useCjkFont ? "NotoSansTC" : "Helvetica";
-
-  const fmt = (n: number) =>
-    n.toLocaleString("zh-Hant-HK", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
+  const fontFamily = useCjkFont ? 'NotoSansTC' : 'Helvetica';
 
   return (
-    <Document
-      creator="GO TECHS"
-      author="GO TECHS"
-      language="zh-Hant-HK"
-      subject={`Invoice-${invoiceNumber}`}
-    >
+    <Document creator="GO TECHS" author="GO TECHS" language="zh-Hant-HK" subject={`Invoice-${invoiceNumber}`}>
       <Page
         size="A4"
         style={{
@@ -315,19 +297,14 @@ export function InvoicePDF({
           paddingTop: 28, // 10mm ≈ 28pt
           paddingBottom: 28,
           paddingLeft: 28,
-          paddingRight: 28,
+          paddingRight: 28
         }}
       >
         {/* ── Paid Banner ── */}
         <View style={styles.banner}>
           <View style={styles.bannerContent}>
             <Svg viewBox="0 0 12 12" style={styles.bannerCheck}>
-              <Path
-                d="M2 6.5L4.7 9L10 3"
-                stroke={colors.paidText}
-                strokeWidth={1.8}
-                fill="none"
-              />
+              <Path d="M2 6.5L4.7 9L10 3" stroke={colors.paidText} strokeWidth={1.8} fill="none" />
             </Svg>
             <Text>{status}</Text>
           </View>

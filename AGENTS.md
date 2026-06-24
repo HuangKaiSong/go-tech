@@ -10,6 +10,7 @@
 - **hr_mobile_manager**: Vite 5 HR management mobile app
 
 **Shared packages**:
+
 - `@go-tech-frontend/ui`: Radix UI + CVA component library
 - `@go-tech-frontend/lib`: TypeScript utilities & hooks
 - `@go-tech-frontend/styles`: Tailwind CSS + global styles
@@ -77,12 +78,14 @@ apps/
 ## Tech Stack & Conventions
 
 ### Styling
+
 - **Tailwind CSS**: Primary styling framework (v3 in HR apps, v4 in web apps)
 - **CVA**: Class Variance Authority for composable component variants
 - **Radix UI**: Unstyled component primitives (Button, Dialog, Form, DatePicker, etc.)
 - **Lucide React**: Icon library
 
 ### UI Components
+
 Components in `packages/ui/src/` use this pattern:
 
 ```typescript
@@ -136,17 +139,20 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 ```
 
 ### API & Authentication
+
 - **HTTP Client**: Centralized in `apps/web-h5/lib/http.ts` (fetch-based)
 - **Auth Token**: `GO_TECH_AUTH_TOKEN` cookie, Bearer token header
 - **React Query**: Used in web-admin for data fetching (`@tanstack/react-query`)
 - **Context API**: Used in web-h5 (AuthContext, custom `useAuth()` hook)
 
 ### Forms
+
 - **React Hook Form**: For complex forms (web-admin, HR apps)
 - **Zod**: Schema validation
 - **Controlled Inputs**: Fallback pattern with `useState` for simple forms
 
 ### State Management
+
 - **React Context**: Auth, user data (web-h5)
 - **React Query**: Server state (web-admin)
 - **useState/useReducer**: Local component state
@@ -156,6 +162,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 ## Code Style & Conventions
 
 ### Commit Messages
+
 Format: `<type>(<scope>): <description>`
 
 ```
@@ -168,18 +175,21 @@ chore(styles): update tailwind
 Types: `feat`, `fix`, `refactor`, `chore`
 
 ### TypeScript
+
 - **Strict mode**: Enabled in web-h5 (`strictNullChecks: true`)
 - **Mixed mode**: Relaxed in web-admin (`strictNullChecks: false`)
 - **Path aliases**: `@/*` (web-h5) or `./src/*` (web-admin)
 - **No unused vars or any warnings** are disabled in ESLint configs
 
 ### File Naming
+
 - Components: `kebab-case` (e.g., `alert-dialog.tsx`, `date-picker.tsx`)
 - Utilities: `kebab-case` (e.g., `format-number.ts`)
 - TypeScript config: `tsconfig.json`
 - Vite config: `vite.config.ts`
 
 ### Prettier Settings
+
 - Print width: 80
 - Tab width: 2
 - Trailing commas: ES5 (when multiline)
@@ -194,49 +204,53 @@ Types: `feat`, `fix`, `refactor`, `chore`
 
 ```typescript
 // Class merging (Tailwind + utility classes)
-import { cn } from "@go-tech-frontend/lib";
-cn("px-2 py-1", condition && "bg-red-500");
+import { cn } from '@go-tech-frontend/lib';
+cn('px-2 py-1', condition && 'bg-red-500');
 
 // Text truncation
-import { truncate } from "@go-tech-frontend/lib";
-truncate("long text", 10); // Returns "long text..."
+import { truncate } from '@go-tech-frontend/lib';
+truncate('long text', 10); // Returns "long text..."
 
 // Number formatting
-import { formatNumber } from "@go-tech-frontend/lib";
+import { formatNumber } from '@go-tech-frontend/lib';
 formatNumber(1000); // Returns "1,000"
 
 // Type guards
-import { isObject, isString, isUndef } from "@go-tech-frontend/lib";
+import { isObject, isString, isUndef } from '@go-tech-frontend/lib';
 
 // Hooks
-import { useCountDown, useLatest } from "@go-tech-frontend/lib";
+import { useCountDown, useLatest } from '@go-tech-frontend/lib';
 ```
 
 ### HTTP Client (web-h5)
 
 ```typescript
-import { HttpClient } from "@/lib/http";
+import { HttpClient } from '@/lib/http';
 
 const http = new HttpClient();
 
 // Methods: get(), post(), put(), delete(), request()
-const data = await http.get("/api/orders");
-const response = await http.post("/api/submit", { /* data */ });
+const data = await http.get('/api/orders');
+const response = await http.post('/api/submit', {
+  /* data */
+});
 ```
 
 ### React Query Usage (web-admin)
 
 ```typescript
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation } from '@tanstack/react-query';
 
 const { data, isLoading, error } = useQuery({
-  queryKey: ["orders"],
-  queryFn: () => fetch("/api/orders").then(r => r.json()),
+  queryKey: ['orders'],
+  queryFn: () => fetch('/api/orders').then(r => r.json())
 });
 
 const mutation = useMutation({
-  mutationFn: (data) => fetch("/api/orders", { method: "POST", body: JSON.stringify(data) }),
-  onSuccess: () => { /* invalidate queries */ },
+  mutationFn: data => fetch('/api/orders', { method: 'POST', body: JSON.stringify(data) }),
+  onSuccess: () => {
+    /* invalidate queries */
+  }
 });
 ```
 
@@ -251,6 +265,7 @@ const mutation = useMutation({
 3. Export with `forwardRef` for ref forwarding
 
 Example:
+
 ```typescript
 import { Button } from "@go-tech-frontend/ui";
 import { cn } from "@go-tech-frontend/lib";
@@ -271,13 +286,14 @@ export function MyComponent() {
 3. Handle errors with try-catch or error callbacks
 
 Example:
+
 ```typescript
 type OrderResponse = {
   id: string;
-  status: "pending" | "completed";
+  status: 'pending' | 'completed';
 };
 
-const order = await http.get<OrderResponse>("/api/orders/123");
+const order = await http.get<OrderResponse>('/api/orders/123');
 ```
 
 ### Form Submission

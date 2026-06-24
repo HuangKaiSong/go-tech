@@ -1,16 +1,15 @@
-import { httpClient } from "@/lib/http";
-import PageClient from "./_page";
+import { httpClient } from '@/lib/http';
+import PageClient from './_page';
 
 export default async function Page({ params }: { params: { id: string } }) {
   const { id } = await params;
   let detail = null;
 
   try {
-    const data = await httpClient.get(
-      `/go-tech/platform/packageOrder/detail/${id}`
-    );
+    const data = await httpClient.get(`/go-tech/platform/packageOrder/detail/${id}`);
     detail = data.data;
   } catch (error) {
+    console.error(error);
     detail = null;
   }
 

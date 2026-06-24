@@ -1,16 +1,16 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { type ReactNode, createContext, useContext, useState } from 'react';
 
 export interface GeneralSettings {
-  companyName: string;
-  taxId: string;
   address: string;
+  companyName: string;
   phone: string;
+  taxId: string;
 }
 
 export interface SecuritySettings {
-  twoFactorAuth: boolean;
-  passwordStrength: boolean;
   autoLogout: boolean;
+  passwordStrength: boolean;
+  twoFactorAuth: boolean;
 }
 
 export interface NotificationSettings {
@@ -21,54 +21,52 @@ export interface NotificationSettings {
 
 export interface SettingsState {
   general: GeneralSettings;
-  security: SecuritySettings;
   notification: NotificationSettings;
+  security: SecuritySettings;
 }
 
 interface SettingsContextType {
+  resetSettings: () => void;
   settings: SettingsState;
   updateGeneralSettings: (settings: GeneralSettings) => void;
-  updateSecuritySettings: (settings: SecuritySettings) => void;
   updateNotificationSettings: (settings: NotificationSettings) => void;
-  resetSettings: () => void;
+  updateSecuritySettings: (settings: SecuritySettings) => void;
 }
 
 const defaultSettings: SettingsState = {
   general: {
-    companyName: "示範科技股份有限公司",
-    taxId: "12345678",
-    address: "台北市信義區信義路五段7號",
-    phone: "02-2345-6789",
+    companyName: '示範科技股份有限公司',
+    taxId: '12345678',
+    address: '台北市信義區信義路五段7號',
+    phone: '02-2345-6789'
   },
   security: {
     twoFactorAuth: false,
     passwordStrength: true,
-    autoLogout: true,
+    autoLogout: true
   },
   notification: {
     leaveApproval: true,
     onboardingReminder: true,
-    salaryNotification: true,
-  },
+    salaryNotification: true
+  }
 };
 
-const SettingsContext = createContext<SettingsContextType | undefined>(
-  undefined
-);
+const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<SettingsState>(defaultSettings);
 
   const updateGeneralSettings = (general: GeneralSettings) => {
-    setSettings((prev) => ({ ...prev, general }));
+    setSettings(prev => ({ ...prev, general }));
   };
 
   const updateSecuritySettings = (security: SecuritySettings) => {
-    setSettings((prev) => ({ ...prev, security }));
+    setSettings(prev => ({ ...prev, security }));
   };
 
   const updateNotificationSettings = (notification: NotificationSettings) => {
-    setSettings((prev) => ({ ...prev, notification }));
+    setSettings(prev => ({ ...prev, notification }));
   };
 
   const resetSettings = () => {
@@ -82,7 +80,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         updateGeneralSettings,
         updateSecuritySettings,
         updateNotificationSettings,
-        resetSettings,
+        resetSettings
       }}
     >
       {children}
@@ -93,7 +91,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 export function useSettings() {
   const context = useContext(SettingsContext);
   if (context === undefined) {
-    throw new Error("useSettings must be used within a SettingsProvider");
+    throw new Error('useSettings must be used within a SettingsProvider');
   }
   return context;
 }

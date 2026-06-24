@@ -1,72 +1,111 @@
-import { useParams, useNavigate } from "react-router-dom";
-import {
-  Target, ArrowLeft, Edit2, Calendar, Users, BarChart3, CheckCircle, Clock, Trash2, Play, Copy,
-} from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from "@/components/ui/table";
-import { toast } from "@/hooks/use-toast";
+import { ArrowLeft, CheckCircle, Copy, Edit2, Play, Target, Users } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { toast } from '@/hooks/use-toast';
 
 interface Criterion {
-  id: string;
   category: string;
-  name: string;
-  weight: number;
   description: string;
+  id: string;
+  name: string;
   scoringMethod: string;
+  weight: number;
 }
 
 const mockPlan = {
-  id: "PLN001",
-  name: "2026 Q1 績效考核",
-  period: "2026-01-01 至 2026-03-31",
-  cycle: "季度",
-  scope: "全公司",
-  status: "進行中",
-  createdAt: "2025-12-15",
-  updatedAt: "2026-01-02",
-  createdBy: "王美玲",
-  description: "2026年第一季度全公司績效考核方案，涵蓋工作業績、工作能力和工作態度三大維度，採用自評、同事互評和主管評價相結合的方式進行綜合評估。",
+  id: 'PLN001',
+  name: '2026 Q1 績效考核',
+  period: '2026-01-01 至 2026-03-31',
+  cycle: '季度',
+  scope: '全公司',
+  status: '進行中',
+  createdAt: '2025-12-15',
+  updatedAt: '2026-01-02',
+  createdBy: '王美玲',
+  description:
+    '2026年第一季度全公司績效考核方案，涵蓋工作業績、工作能力和工作態度三大維度，採用自評、同事互評和主管評價相結合的方式進行綜合評估。',
   weightConfig: { self: 20, peer: 30, manager: 50 },
   gradeRules: [
-    { grade: "A+", min: 95, max: 100, description: "卓越表現" },
-    { grade: "A", min: 90, max: 94, description: "優秀" },
-    { grade: "B+", min: 85, max: 89, description: "良好" },
-    { grade: "B", min: 80, max: 84, description: "合格" },
-    { grade: "C", min: 70, max: 79, description: "需改進" },
-    { grade: "D", min: 0, max: 69, description: "不合格" },
+    { grade: 'A+', min: 95, max: 100, description: '卓越表現' },
+    { grade: 'A', min: 90, max: 94, description: '優秀' },
+    { grade: 'B+', min: 85, max: 89, description: '良好' },
+    { grade: 'B', min: 80, max: 84, description: '合格' },
+    { grade: 'C', min: 70, max: 79, description: '需改進' },
+    { grade: 'D', min: 0, max: 69, description: '不合格' }
   ],
-  selfDeadline: "2026-03-25",
-  peerDeadline: "2026-03-28",
-  managerDeadline: "2026-03-31",
+  selfDeadline: '2026-03-25',
+  peerDeadline: '2026-03-28',
+  managerDeadline: '2026-03-31',
   employeeCount: 45,
-  completedCount: 28,
+  completedCount: 28
 };
 
 const mockCriteria: Criterion[] = [
-  { id: "C1", category: "工作業績", name: "專案交付達成率", weight: 25, description: "按時按質完成所負責專案的比率", scoringMethod: "目標達成率計算" },
-  { id: "C2", category: "工作業績", name: "代碼品質與技術債務", weight: 20, description: "代碼審查通過率、bug 修復速度及技術債務清理", scoringMethod: "量化指標評分" },
-  { id: "C3", category: "工作能力", name: "團隊協作與溝通", weight: 20, description: "跨部門協作效率、知識分享及溝通能力", scoringMethod: "360度回饋評分" },
-  { id: "C4", category: "工作能力", name: "問題解決與創新", weight: 15, description: "面對技術難題的解決能力及創新貢獻", scoringMethod: "案例評估" },
-  { id: "C5", category: "工作態度", name: "工作積極性與責任感", weight: 10, description: "工作主動性、責任心及對團隊目標的貢獻", scoringMethod: "行為觀察評分" },
-  { id: "C6", category: "工作態度", name: "學習成長與自我提升", weight: 10, description: "專業技能提升、學習計畫執行及職業發展", scoringMethod: "成果記錄評估" },
+  {
+    id: 'C1',
+    category: '工作業績',
+    name: '專案交付達成率',
+    weight: 25,
+    description: '按時按質完成所負責專案的比率',
+    scoringMethod: '目標達成率計算'
+  },
+  {
+    id: 'C2',
+    category: '工作業績',
+    name: '代碼品質與技術債務',
+    weight: 20,
+    description: '代碼審查通過率、bug 修復速度及技術債務清理',
+    scoringMethod: '量化指標評分'
+  },
+  {
+    id: 'C3',
+    category: '工作能力',
+    name: '團隊協作與溝通',
+    weight: 20,
+    description: '跨部門協作效率、知識分享及溝通能力',
+    scoringMethod: '360度回饋評分'
+  },
+  {
+    id: 'C4',
+    category: '工作能力',
+    name: '問題解決與創新',
+    weight: 15,
+    description: '面對技術難題的解決能力及創新貢獻',
+    scoringMethod: '案例評估'
+  },
+  {
+    id: 'C5',
+    category: '工作態度',
+    name: '工作積極性與責任感',
+    weight: 10,
+    description: '工作主動性、責任心及對團隊目標的貢獻',
+    scoringMethod: '行為觀察評分'
+  },
+  {
+    id: 'C6',
+    category: '工作態度',
+    name: '學習成長與自我提升',
+    weight: 10,
+    description: '專業技能提升、學習計畫執行及職業發展',
+    scoringMethod: '成果記錄評估'
+  }
 ];
 
 const statusColors: Record<string, string> = {
-  "進行中": "bg-primary/10 text-primary border-primary/20",
-  "已完成": "bg-success/10 text-success border-success/20",
-  "草稿": "bg-muted text-muted-foreground",
+  進行中: 'bg-primary/10 text-primary border-primary/20',
+  已完成: 'bg-success/10 text-success border-success/20',
+  草稿: 'bg-muted text-muted-foreground'
 };
 
 export default function PerformancePlanDetail() {
   const { planId } = useParams();
   const navigate = useNavigate();
 
-  const categories = [...new Set(mockCriteria.map(c => c.category))];
+  // const categories = [...new Set(mockCriteria.map(c => c.category))];
   const totalWeight = mockCriteria.reduce((s, c) => s + c.weight, 0);
   const progressPct = Math.round((mockPlan.completedCount / mockPlan.employeeCount) * 100);
 
@@ -74,7 +113,12 @@ export default function PerformancePlanDetail() {
     <div>
       {/* Header */}
       <div className="page-header">
-        <Button variant="ghost" size="sm" className="mb-2 -ml-2 text-muted-foreground" onClick={() => navigate("/performance/plans")}>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="mb-2 -ml-2 text-muted-foreground"
+          onClick={() => navigate('/performance/plans')}
+        >
           <ArrowLeft className="h-4 w-4 mr-1" /> 返回列表
         </Button>
         <div className="flex items-center justify-between">
@@ -86,16 +130,19 @@ export default function PerformancePlanDetail() {
             <p className="page-description">查看考核方案的詳細設定與執行進度</p>
           </div>
           <div className="flex gap-2">
-            {mockPlan.status === "草稿" && (
-              <Button variant="outline" size="sm" onClick={() => toast({ title: "方案已啟動" })}>
-                <Play className="h-4 w-4 mr-1" />啟動方案
+            {mockPlan.status === '草稿' && (
+              <Button variant="outline" size="sm" onClick={() => toast({ title: '方案已啟動' })}>
+                <Play className="h-4 w-4 mr-1" />
+                啟動方案
               </Button>
             )}
-            <Button variant="outline" size="sm" onClick={() => toast({ title: "方案已複製為草稿" })}>
-              <Copy className="h-4 w-4 mr-1" />複製方案
+            <Button variant="outline" size="sm" onClick={() => toast({ title: '方案已複製為草稿' })}>
+              <Copy className="h-4 w-4 mr-1" />
+              複製方案
             </Button>
             <Button size="sm" onClick={() => navigate(`/performance/plans/${planId}/edit`)}>
-              <Edit2 className="h-4 w-4 mr-1" />編輯方案
+              <Edit2 className="h-4 w-4 mr-1" />
+              編輯方案
             </Button>
           </div>
         </div>
@@ -115,7 +162,9 @@ export default function PerformancePlanDetail() {
               <InfoField label="考核範圍" value={mockPlan.scope} />
               <InfoField label="建立者" value={mockPlan.createdBy} />
               <InfoField label="狀態">
-                <Badge variant="secondary" className={statusColors[mockPlan.status] || ""}>{mockPlan.status}</Badge>
+                <Badge variant="secondary" className={statusColors[mockPlan.status] || ''}>
+                  {mockPlan.status}
+                </Badge>
               </InfoField>
               <InfoField label="建立時間" value={mockPlan.createdAt} />
               <InfoField label="更新時間" value={mockPlan.updatedAt} />
@@ -136,7 +185,9 @@ export default function PerformancePlanDetail() {
             <CardContent>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm text-muted-foreground">已完成 / 總人數</span>
-                <span className="text-sm font-semibold">{mockPlan.completedCount} / {mockPlan.employeeCount}</span>
+                <span className="text-sm font-semibold">
+                  {mockPlan.completedCount} / {mockPlan.employeeCount}
+                </span>
               </div>
               <div className="w-full h-3 bg-muted rounded-full overflow-hidden">
                 <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${progressPct}%` }} />
@@ -190,8 +241,14 @@ export default function PerformancePlanDetail() {
             <TableBody>
               {mockPlan.gradeRules.map(rule => (
                 <TableRow key={rule.grade}>
-                  <TableCell><Badge variant="outline" className="font-semibold">{rule.grade}</Badge></TableCell>
-                  <TableCell>{rule.min} – {rule.max} 分</TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className="font-semibold">
+                      {rule.grade}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {rule.min} – {rule.max} 分
+                  </TableCell>
                   <TableCell>{rule.description}</TableCell>
                 </TableRow>
               ))}
@@ -205,7 +262,9 @@ export default function PerformancePlanDetail() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-base">考核指標（共 {mockCriteria.length} 項，總權重 {totalWeight}%）</CardTitle>
+              <CardTitle className="text-base">
+                考核指標（共 {mockCriteria.length} 項，總權重 {totalWeight}%）
+              </CardTitle>
               <CardDescription>各分類考核指標的權重與評分方式</CardDescription>
             </div>
           </div>
@@ -224,7 +283,11 @@ export default function PerformancePlanDetail() {
             <TableBody>
               {mockCriteria.map(c => (
                 <TableRow key={c.id}>
-                  <TableCell><Badge variant="outline" className="text-xs">{c.category}</Badge></TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className="text-xs">
+                      {c.category}
+                    </Badge>
+                  </TableCell>
                   <TableCell className="font-medium">{c.name}</TableCell>
                   <TableCell className="text-center font-semibold">{c.weight}%</TableCell>
                   <TableCell className="text-sm text-muted-foreground max-w-[280px]">{c.description}</TableCell>
@@ -241,7 +304,7 @@ export default function PerformancePlanDetail() {
 
 // ─── Sub-components ──────────────────────────────────────────
 
-function InfoField({ label, value, children }: { label: string; value?: string; children?: React.ReactNode }) {
+function InfoField({ children, label, value }: { children?: React.ReactNode; label: string; value?: string }) {
   return (
     <div>
       <p className="text-sm text-muted-foreground mb-0.5">{label}</p>
@@ -250,7 +313,7 @@ function InfoField({ label, value, children }: { label: string; value?: string; 
   );
 }
 
-function TimelineItem({ icon: Icon, label, date }: { icon: React.ElementType; label: string; date: string }) {
+function TimelineItem({ date, icon: Icon, label }: { date: string; icon: React.ElementType; label: string }) {
   return (
     <div className="flex items-center gap-3">
       <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center shrink-0">
@@ -264,7 +327,7 @@ function TimelineItem({ icon: Icon, label, date }: { icon: React.ElementType; la
   );
 }
 
-function WeightCard({ label, percent, color }: { label: string; percent: number; color: string }) {
+function WeightCard({ color, label, percent }: { color: string; label: string; percent: number }) {
   return (
     <div className="rounded-lg border p-4 text-center">
       <p className="text-sm text-muted-foreground mb-2">{label}</p>

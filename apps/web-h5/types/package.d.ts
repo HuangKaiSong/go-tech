@@ -1,7 +1,10 @@
 type Packages = {
+  accountingSysPrice: number;
+  addUnitPrice: number;
+  custServiceSysPrice: number;
   id: number;
+  packageItemList: { level: number; menuIcon: string; menuId: number; menuTitle: string }[];
   packageName: string;
-  unitCount: number;
   price: number;
   /** 90天价格 */
   priceA?: number;
@@ -9,24 +12,23 @@ type Packages = {
   priceB?: number;
   /** 365天价格 */
   priceC?: number;
-  addUnitPrice: number;
   rentSysPrice: number;
+  unitCount: number;
   venueSysPrice: number;
-  accountingSysPrice: number;
-  custServiceSysPrice: number;
-  packageItemList: { menuId: number; menuIcon: string; menuTitle: string, level: number }[];
 };
 
 type Tenant = {
   /**
    * 租户ID
+   *
    * @type {string}
    */
   tenantId: string;
   /**
    * 租户名称
+   *
    * @type {string}
    */
   tenantName: string;
-  [key: string]: any
-}
+  [key: string]: any;
+};

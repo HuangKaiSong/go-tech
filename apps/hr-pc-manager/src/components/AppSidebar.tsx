@@ -1,117 +1,113 @@
 import {
-  LayoutDashboard,
-  Users,
-  
+  BarChart3,
+  Bell,
+  Building2,
+  ChevronDown,
   Clock,
   DollarSign,
-  Target,
   GraduationCap,
-  Building2,
-  BarChart3,
+  LayoutDashboard,
   Settings,
-  ChevronDown,
-  Bell,
-} from "lucide-react";
-import { NavLink } from "@/components/NavLink";
+  Target,
+  Users
+} from 'lucide-react';
+import { NavLink } from '@/components/NavLink';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
-  SidebarMenuSubItem,
   SidebarMenuSubButton,
-  SidebarHeader,
-} from "@/components/ui/sidebar";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+  SidebarMenuSubItem
+} from '@/components/ui/sidebar';
 
 const menuGroups = [
   {
-    label: "總覽",
-    items: [
-      { title: "儀表板", url: "/", icon: LayoutDashboard },
-    ],
+    label: '總覽',
+    items: [{ title: '儀表板', url: '/', icon: LayoutDashboard }]
   },
   {
-    label: "人事管理",
+    label: '人事管理',
     items: [
       {
-        title: "員工管理",
+        title: '員工管理',
         icon: Users,
         children: [
-          { title: "員工資料", url: "/employees" },
-          { title: "入職管理", url: "/employees/onboarding" },
-          { title: "離職管理", url: "/employees/offboarding" },
-        ],
+          { title: '員工資料', url: '/employees' },
+          { title: '入職管理', url: '/employees/onboarding' },
+          { title: '離職管理', url: '/employees/offboarding' }
+        ]
       },
       {
-        title: "組織架構",
+        title: '組織架構',
         icon: Building2,
         children: [
-          { title: "部門管理", url: "/organization/departments" },
-          { title: "職位管理", url: "/organization/roles" },
-          { title: "職位架構", url: "/organization/chart" },
-        ],
-      },
-    ],
+          { title: '部門管理', url: '/organization/departments' },
+          { title: '職位管理', url: '/organization/roles' },
+          { title: '職位架構', url: '/organization/chart' }
+        ]
+      }
+    ]
   },
   {
-    label: "日常管理",
+    label: '日常管理',
     items: [
       {
-        title: "行政管理",
+        title: '行政管理',
         icon: Clock,
         children: [
-          { title: "打卡管理", url: "/attendance/clock-in" },
-          { title: "打卡記錄", url: "/attendance/records" },
-          { title: "審批管理", url: "/attendance/approval" },
-        ],
+          { title: '打卡管理', url: '/attendance/clock-in' },
+          { title: '打卡記錄', url: '/attendance/records' },
+          { title: '審批管理', url: '/attendance/approval' }
+        ]
       },
       {
-        title: "薪資管理",
+        title: '薪資管理',
         icon: DollarSign,
         children: [
-          
-          { title: "薪資計算", url: "/payroll/calculate" },
-          { title: "獎金/罰款", url: "/payroll/bonus-penalty" },
-          { title: "發薪管理", url: "/payroll/distribute" },
-        ],
-      },
-    ],
+          { title: '薪資計算', url: '/payroll/calculate' },
+          { title: '獎金/罰款', url: '/payroll/bonus-penalty' },
+          { title: '發薪管理', url: '/payroll/distribute' }
+        ]
+      }
+    ]
   },
   {
-    label: "發展與績效",
+    label: '發展與績效',
     items: [
       {
-        title: "績效管理",
+        title: '績效管理',
         icon: Target,
         children: [
-          { title: "考核方案", url: "/performance/plans" },
-          { title: "績效評估", url: "/performance/evaluation" },
-        ],
+          { title: '考核方案', url: '/performance/plans' },
+          { title: '績效評估', url: '/performance/evaluation' }
+        ]
       },
       {
-        title: "培訓管理",
+        title: '培訓管理',
         icon: GraduationCap,
         children: [
-          { title: "培訓計劃", url: "/training/plans" },
-          { title: "培訓記錄", url: "/training/records" },
-        ],
-      },
-    ],
+          { title: '培訓計劃', url: '/training/plans' },
+          { title: '培訓記錄', url: '/training/records' }
+        ]
+      }
+    ]
   },
   {
-    label: "分析與設定",
+    label: '分析與設定',
     items: [
-      { title: "消息通知", url: "/notifications", icon: Bell },
-      { title: "報表分析", url: "/reports", icon: BarChart3 },
-      { title: "系統管理", url: "/settings", icon: Settings },
-    ],
-  },
+      { title: '消息通知', url: '/notifications', icon: Bell },
+      { title: '報表分析', url: '/reports', icon: BarChart3 },
+      { title: '系統管理', url: '/settings', icon: Settings }
+    ]
+  }
 ];
 
 export function AppSidebar() {
@@ -129,15 +125,15 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
       <SidebarContent className="px-2 py-2">
-        {menuGroups.map((group) => (
+        {menuGroups.map(group => (
           <SidebarGroup key={group.label}>
             <SidebarGroupLabel className="text-sidebar-muted text-xs uppercase tracking-wider px-2">
               {group.label}
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {group.items.map((item) =>
-                  "children" in item && item.children ? (
+                {group.items.map(item =>
+                  'children' in item && item.children ? (
                     <Collapsible key={item.title} defaultOpen className="group/collapsible">
                       <SidebarMenuItem>
                         <CollapsibleTrigger asChild>
@@ -149,7 +145,7 @@ export function AppSidebar() {
                         </CollapsibleTrigger>
                         <CollapsibleContent>
                           <SidebarMenuSub>
-                            {item.children.map((child) => (
+                            {item.children.map(child => (
                               <SidebarMenuSubItem key={child.url}>
                                 <SidebarMenuSubButton asChild>
                                   <NavLink
@@ -171,7 +167,7 @@ export function AppSidebar() {
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild>
                         <NavLink
-                          to={"url" in item ? item.url : "#"}
+                          to={'url' in item ? item.url : '#'}
                           end
                           className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                           activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"

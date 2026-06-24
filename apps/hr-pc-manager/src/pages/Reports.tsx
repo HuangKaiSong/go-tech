@@ -1,40 +1,54 @@
-import { BarChart3 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend } from "recharts";
+import { BarChart3 } from 'lucide-react';
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
+} from 'recharts';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const turnoverData = [
-  { month: "1月", rate: 2.1 },
-  { month: "2月", rate: 1.8 },
-  { month: "3月", rate: 2.5 },
-  { month: "4月", rate: 1.9 },
-  { month: "5月", rate: 2.2 },
-  { month: "6月", rate: 2.0 },
+  { month: '1月', rate: 2.1 },
+  { month: '2月', rate: 1.8 },
+  { month: '3月', rate: 2.5 },
+  { month: '4月', rate: 1.9 },
+  { month: '5月', rate: 2.2 },
+  { month: '6月', rate: 2.0 }
 ];
 
 const ageDistribution = [
-  { name: "20-25歲", value: 180, color: "hsl(215, 70%, 55%)" },
-  { name: "26-30歲", value: 380, color: "hsl(200, 75%, 45%)" },
-  { name: "31-35歲", value: 320, color: "hsl(142, 60%, 40%)" },
-  { name: "36-40歲", value: 240, color: "hsl(38, 92%, 50%)" },
-  { name: "40歲以上", value: 164, color: "hsl(280, 60%, 55%)" },
+  { name: '20-25歲', value: 180, color: 'hsl(215, 70%, 55%)' },
+  { name: '26-30歲', value: 380, color: 'hsl(200, 75%, 45%)' },
+  { name: '31-35歲', value: 320, color: 'hsl(142, 60%, 40%)' },
+  { name: '36-40歲', value: 240, color: 'hsl(38, 92%, 50%)' },
+  { name: '40歲以上', value: 164, color: 'hsl(280, 60%, 55%)' }
 ];
 
 const salaryByDept = [
-  { dept: "技術部", avg: 62000 },
-  { dept: "銷售部", avg: 48000 },
-  { dept: "市場部", avg: 45000 },
-  { dept: "運營部", avg: 52000 },
-  { dept: "財務部", avg: 50000 },
-  { dept: "人事部", avg: 42000 },
+  { dept: '技術部', avg: 62000 },
+  { dept: '銷售部', avg: 48000 },
+  { dept: '市場部', avg: 45000 },
+  { dept: '運營部', avg: 52000 },
+  { dept: '財務部', avg: 50000 },
+  { dept: '人事部', avg: 42000 }
 ];
 
 const attendanceTrend = [
-  { month: "1月", rate: 95.2 },
-  { month: "2月", rate: 94.8 },
-  { month: "3月", rate: 96.1 },
-  { month: "4月", rate: 95.7 },
-  { month: "5月", rate: 96.3 },
-  { month: "6月", rate: 96.5 },
+  { month: '1月', rate: 95.2 },
+  { month: '2月', rate: 94.8 },
+  { month: '3月', rate: 96.1 },
+  { month: '4月', rate: 95.7 },
+  { month: '5月', rate: 96.3 },
+  { month: '6月', rate: 96.5 }
 ];
 
 export default function Reports() {
@@ -73,7 +87,15 @@ export default function Reports() {
           <CardContent>
             <ResponsiveContainer width="100%" height={280}>
               <PieChart>
-                <Pie data={ageDistribution} cx="50%" cy="50%" innerRadius={55} outerRadius={95} paddingAngle={3} dataKey="value">
+                <Pie
+                  data={ageDistribution}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={55}
+                  outerRadius={95}
+                  paddingAngle={3}
+                  dataKey="value"
+                >
                   {ageDistribution.map((entry, index) => (
                     <Cell key={index} fill={entry.color} />
                   ))}

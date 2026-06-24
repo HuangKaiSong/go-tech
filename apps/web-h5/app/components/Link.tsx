@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import { useIframeContext } from "@/contexts/IframeContext";
-import BaseLink, { LinkProps } from "next/link";
-import { ReactNode } from "react";
+import BaseLink, { type LinkProps } from 'next/link';
+import { type ReactNode } from 'react';
+import { useIframeContext } from '@/contexts/IframeContext';
 
 type RestrictedLinkProps = LinkProps & {
   children: ReactNode;
@@ -10,19 +10,12 @@ type RestrictedLinkProps = LinkProps & {
   onClick?: () => void;
 };
 
-export const Link: React.FC<RestrictedLinkProps> = ({
-  children,
-  href,
-  onClick,
-  className = "",
-  ...rest
-}) => {
+export const Link: React.FC<RestrictedLinkProps> = ({ children, className = '', href, onClick, ...rest }) => {
   const { hasIframe } = useIframeContext();
 
   const handleClick = (e: React.MouseEvent) => {
     if (hasIframe) {
       e.preventDefault();
-      console.warn("在 iframe 中链接点击被阻止");
       return false;
     }
 
@@ -33,10 +26,7 @@ export const Link: React.FC<RestrictedLinkProps> = ({
 
   if (hasIframe) {
     return (
-      <span
-        className={`${className} cursor-not-allowed opacity-60`}
-        title="在 iframe 中不可用"
-      >
+      <span className={`${className} cursor-not-allowed opacity-60`} title="在 iframe 中不可用">
         {children}
       </span>
     );

@@ -1,35 +1,45 @@
-import { FileImage, Plus, Image, FileText } from "lucide-react";
-import { Link } from "react-router-dom";
-import { Button, Card, CardContent, CardHeader, CardTitle, Tabs, TabsContent, TabsList, TabsTrigger } from "@go-tech-frontend/ui";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger
+} from '@go-tech-frontend/ui';
+import { FileImage, FileText, Image, Plus } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const mockImageContent = [
   {
-    id: "1",
-    title: "首頁橫幅",
-    description: "網站首頁輪播橫幅圖片",
-    lastUpdated: "2024-01-08",
+    id: '1',
+    title: '首頁橫幅',
+    description: '網站首頁輪播橫幅圖片',
+    lastUpdated: '2024-01-08'
   },
   {
-    id: "4",
-    title: "產品圖片",
-    description: "產品展示圖片庫",
-    lastUpdated: "2024-01-10",
-  },
+    id: '4',
+    title: '產品圖片',
+    description: '產品展示圖片庫',
+    lastUpdated: '2024-01-10'
+  }
 ];
 
 const mockTextContent = [
   {
-    id: "2",
-    title: "關於我們",
-    description: "公司介紹與服務說明文字",
-    lastUpdated: "2024-01-05",
+    id: '2',
+    title: '關於我們',
+    description: '公司介紹與服務說明文字',
+    lastUpdated: '2024-01-05'
   },
   {
-    id: "3",
-    title: "服務條款",
-    description: "用戶服務條款與隱私政策",
-    lastUpdated: "2024-01-02",
-  },
+    id: '3',
+    title: '服務條款',
+    description: '用戶服務條款與隱私政策',
+    lastUpdated: '2024-01-02'
+  }
 ];
 
 const ContentPage = () => {
@@ -64,7 +74,7 @@ const ContentPage = () => {
             </Link>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
-            {mockImageContent.map((item) => (
+            {mockImageContent.map(item => (
               <Link key={item.id} to={`/settings/content/${item.id}/edit`}>
                 <Card className="hover:bg-muted/50 transition-colors cursor-pointer h-full">
                   <CardHeader className="flex flex-row items-center gap-4 pb-2">
@@ -76,12 +86,8 @@ const ContentPage = () => {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-muted-foreground mb-2">
-                      {item.description}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      最後更新：{item.lastUpdated}
-                    </p>
+                    <p className="text-sm text-muted-foreground mb-2">{item.description}</p>
+                    <p className="text-xs text-muted-foreground">最後更新：{item.lastUpdated}</p>
                   </CardContent>
                 </Card>
               </Link>
@@ -99,7 +105,7 @@ const ContentPage = () => {
             </Link>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
-            {mockTextContent.map((item) => (
+            {mockTextContent.map(item => (
               <Link key={item.id} to={`/settings/content/${item.id}/edit`}>
                 <Card className="hover:bg-muted/50 transition-colors cursor-pointer h-full">
                   <CardHeader className="flex flex-row items-center gap-4 pb-2">
@@ -111,12 +117,8 @@ const ContentPage = () => {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-muted-foreground mb-2">
-                      {item.description}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      最後更新：{item.lastUpdated}
-                    </p>
+                    <p className="text-sm text-muted-foreground mb-2">{item.description}</p>
+                    <p className="text-xs text-muted-foreground">最後更新：{item.lastUpdated}</p>
                   </CardContent>
                 </Card>
               </Link>

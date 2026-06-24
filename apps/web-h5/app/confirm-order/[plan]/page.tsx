@@ -1,25 +1,21 @@
-import { getBaseUrl } from "@/lib/http";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import PageClient from "./_page";
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { getBaseUrl } from '@/lib/http';
+import PageClient from './_page';
 
-export default async function ConfirmOrderPage({
-  params,
-}: {
-  params: { plan: string } | Promise<{ plan: string }>;
-}) {
+export default async function ConfirmOrderPage({ params }: { params: { plan: string } | Promise<{ plan: string }> }) {
   const cookieStore = await cookies();
-  const token = cookieStore.get("GO_TECH_AUTH_TOKEN")?.value;
+  const token = cookieStore.get('GO_TECH_AUTH_TOKEN')?.value;
   if (!token) {
-    return redirect("/account/login");
+    return redirect('/account/login');
   }
 
   const { plan } = await params;
   const baseUrl = getBaseUrl();
 
-  const packagesResponse = (await fetch(
-    `${baseUrl}/go-tech/platform/platformPackage/detail/${plan}`
-  ).then(res => res.json())) as HttpBaseResponse<Packages>;
+  const packagesResponse = (await fetch(`${baseUrl}/go-tech/platform/platformPackage/detail/${plan}`).then(res =>
+    res.json()
+  )) as HttpBaseResponse<Packages>;
   const packagesData = packagesResponse.data as Packages;
   if (packagesData.packageItemList) {
     packagesData.packageItemList = packagesData.packageItemList.filter(item => {

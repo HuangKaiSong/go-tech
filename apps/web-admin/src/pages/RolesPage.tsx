@@ -1,37 +1,28 @@
-import { Shield, Plus } from "lucide-react";
-import {
-  Button,
-  Badge,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@go-tech-frontend/ui";
+import { Badge, Button, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@go-tech-frontend/ui';
+import { Plus, Shield } from 'lucide-react';
 
 const mockRoles = [
   {
-    id: "1",
-    name: "超級管理員",
-    description: "擁有所有系統權限",
+    id: '1',
+    name: '超級管理員',
+    description: '擁有所有系統權限',
     userCount: 2,
-    permissions: ["全部權限"],
+    permissions: ['全部權限']
   },
   {
-    id: "2",
-    name: "營運管理員",
-    description: "管理訂單與客戶相關功能",
+    id: '2',
+    name: '營運管理員',
+    description: '管理訂單與客戶相關功能',
     userCount: 5,
-    permissions: ["訂單管理", "客戶管理", "優惠管理"],
+    permissions: ['訂單管理', '客戶管理', '優惠管理']
   },
   {
-    id: "3",
-    name: "客服人員",
-    description: "查看訂單與客戶資訊",
+    id: '3',
+    name: '客服人員',
+    description: '查看訂單與客戶資訊',
     userCount: 8,
-    permissions: ["訂單查看", "客戶查看"],
-  },
+    permissions: ['訂單查看', '客戶查看']
+  }
 ];
 
 const RolesPage = () => {
@@ -60,15 +51,13 @@ const RolesPage = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {mockRoles.map((role) => (
+            {mockRoles.map(role => (
               <TableRow key={role.id}>
                 <TableCell className="font-medium">{role.name}</TableCell>
-                <TableCell className="text-muted-foreground">
-                  {role.description}
-                </TableCell>
+                <TableCell className="text-muted-foreground">{role.description}</TableCell>
                 <TableCell>
                   <div className="flex flex-wrap gap-1">
-                    {role.permissions.map((permission) => (
+                    {role.permissions.map(permission => (
                       <Badge key={permission} variant="secondary">
                         {permission}
                       </Badge>

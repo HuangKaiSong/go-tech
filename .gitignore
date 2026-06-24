@@ -1,8 +1,6 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # dependencies
+node_modules/
 /node_modules
-node_modules
 /.pnp
 .pnp.*
 .yarn/*
@@ -10,34 +8,88 @@ node_modules
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+turbo
+.turbo
+*.log
+.next
+dist
+dist-ssr
+*.local
+.cache
+server/dist
+public/dist
 
-# testing
-/coverage
 
-# next.js
-/.next/
-/out/
+# Editor directories and files
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.temp
+yarn.lock
+package-lock.json
 
-# production
-/build
+#test
+coverage
+playwright-report
+test-results
 
-# misc
+
+# macOS
+.DS_Store
+*.
+# macOS
 .DS_Store
 *.pem
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# generated native folders
+ios/
+android/
+
+# Metro
+.metro-health-check*
 
 # debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
-/logs/
 
-# env files (can opt-in for committing if needed)
-.env*
 
-# vercel
+#tanstack
+.tanstack
+
+# next.js
+/.next/
+/out/
 .vercel
-
+.source/
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+
+# Build Outputs
+.next/
+out/
+build
+dist
+.open-next
+.wrangler

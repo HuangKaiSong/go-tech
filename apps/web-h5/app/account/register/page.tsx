@@ -1,62 +1,55 @@
-"use client";
+'use client';
 
-import Link from "@/app/components/Link";
+import { useCountDown } from '@go-tech-frontend/lib';
+import { Button, Checkbox, Input, toast } from '@go-tech-frontend/ui';
+import { CircleAlert, X } from 'lucide-react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import z from 'zod';
+import Link from '@/app/components/Link';
 // import Logo from "@/assets/Gotech_Logo.webp";
-import authBgImg from "@/assets/background.webp";
-import { sendToBetterStack } from "@/lib/betterstack-logger";
-import { useCountDown } from "@go-tech-frontend/lib";
-import { Button, Checkbox, Input, toast } from "@go-tech-frontend/ui";
-import { CircleAlert, X } from "lucide-react";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import z from "zod";
+import authBgImg from '@/assets/background.webp';
+import { sendToBetterStack } from '@/lib/betterstack-logger';
 
 const verificationCodeSchema = z.object({
-  email: z
-    .string()
-    .min(1, "请输入邮箱")
-    .email({ message: "请输入正确的邮箱" })
-    .trim(),
+  email: z.string().min(1, '请输入邮箱').email({ message: '请输入正确的邮箱' }).trim()
 });
 
 const signupSchema = verificationCodeSchema.extend({
-  name: z
-    .string({ required_error: "请输入用户名" })
-    .min(2, "请输入用户名")
-    .max(50)
-    .trim(),
-  phone: z
-    .string({ required_error: "請輸入電話" })
-    .min(1, "請輸入電話")
-    .min(7, "電話至少需要7個字符")
-    .trim(),
-  company: z.string({ required_error: "请输入公司名称" }).min(2).max(50).trim(),
-  verificationCode: z
-    .string({ message: "请输入验证码" })
-    .min(1, "请输入验证码")
-    .length(6)
-    .trim(),
+  name: z.string({ required_error: '请输入用户名' }).min(2, '请输入用户名').max(50).trim(),
+  phone: z.string({ required_error: '請輸入電話' }).min(1, '請輸入電話').min(7, '電話至少需要7個字符').trim(),
+  company: z.string({ required_error: '请输入公司名称' }).min(2).max(50).trim(),
+  verificationCode: z.string({ message: '请输入验证码' }).min(1, '请输入验证码').length(6).trim()
 });
 
 const signupSchema2 = signupSchema
   .extend({
     password: z
       .string()
-      .min(6, "密码至少需要6位字符")
-      .regex(
-        /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).+$/,
-        "密码需至少包含一个字母、一个数字和一个特殊字符"
-      )
+      .min(6, '密码至少需要6位字符')
+      .regex(/^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).+$/, '密码需至少包含一个字母、一个数字和一个特殊字符')
       .trim(),
-    confirmPassword: z.string().trim(),
+    confirmPassword: z.string().trim()
   })
   .refine(data => data.password === data.confirmPassword, {
-    message: "密码不一致",
-    path: ["confirmPassword"],
+    message: '密码不一致',
+    path: ['confirmPassword']
   });
 
-const EXISTING_EMAIL_MESSAGE = "該郵箱已被註冊，請直接登入或使用忘記密碼。";
+const EXISTING_EMAIL_MESSAGE = '該郵箱已被註冊，請直接登入或使用忘記密碼。';
+
+const parseEmailExists = (result: any) => {
+  if (typeof result?.data === 'boolean') return !result.data;
+  const message = `${result?.message || result?.msg || ''}`.toLowerCase();
+  if (message.includes('exist') || message.includes('已存在') || message.includes('已注冊')) {
+    return true;
+  }
+  if (message.includes('not exist') || message.includes('available')) {
+    return false;
+  }
+  return null;
+};
 
 const Register = () => {
   const router = useRouter();
@@ -66,8 +59,8 @@ const Register = () => {
   const [countdown] = useCountDown({
     targetDate,
     onEnd() {
-      setTargetDate(undefined)
-    },
+      setTargetDate(undefined);
+    }
   });
 
   const [pending, setPending] = useState(false);
@@ -75,50 +68,32 @@ const Register = () => {
   const [signupPending, setSignupPending] = useState(false);
   const [emailChecking, setEmailChecking] = useState(false);
   const [emailExists, setEmailExists] = useState(false);
-  const [checkedEmail, setCheckedEmail] = useState("");
+  const [checkedEmail, setCheckedEmail] = useState('');
 
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    company: "",
-    verificationCode: "",
-    password: "",
-    confirmPassword: "",
+    name: '',
+    email: '',
+    phone: '',
+    company: '',
+    verificationCode: '',
+    password: '',
+    confirmPassword: ''
   });
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [step, setStep] = useState(0);
 
-  const handleChange =
-    (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value;
-      setFormData(prev => ({ ...prev, [field]: value }));
+  const handleChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setFormData(prev => ({ ...prev, [field]: value }));
 
-      if (field === "email") {
-        setEmailExists(false);
-        setCheckedEmail("");
-      }
-    };
-
-  const isCodeButtonDisabled =
-    pending || countdown > 0 || !formData.email || emailChecking || emailExists;
-  const isEmailAvailable =
-    !!formData.email &&
-    checkedEmail === formData.email &&
-    !emailChecking &&
-    !emailExists;
-
-  const parseEmailExists = (result: any) => {
-    if (typeof result?.data === "boolean") return !result.data;
-    const message = `${result?.message || result?.msg || ""}`.toLowerCase();
-    if (message.includes("exist") || message.includes("已存在") || message.includes("已注冊")) {
-      return true;
+    if (field === 'email') {
+      setEmailExists(false);
+      setCheckedEmail('');
     }
-    if (message.includes("not exist") || message.includes("available")) {
-      return false;
-    }
-    return null;
   };
+
+  const isCodeButtonDisabled = pending || countdown > 0 || !formData.email || emailChecking || emailExists;
+  const isEmailAvailable = Boolean(formData.email) && checkedEmail === formData.email && !emailChecking && !emailExists;
 
   const checkEmailExists = async (email: string) => {
     if (!email) return false;
@@ -131,11 +106,11 @@ const Register = () => {
     try {
       const response = await fetch(
         `/go-tech/platform/platformCustomer/emailExistVerify?email=${encodeURIComponent(email)}`,
-        { method: "POST" }
+        { method: 'POST' }
       );
       const result = await response.json();
       const exists = parseEmailExists(result);
-      
+
       setCheckedEmail(email);
 
       if (exists === null) {
@@ -149,11 +124,10 @@ const Register = () => {
       }
       return exists;
     } catch (err) {
-      console.log(err);
       if (err instanceof Response) {
-        sendToBetterStack("error", err.statusText, {
+        sendToBetterStack('error', err.statusText, {
           uri: `/go-tech/platform/platformCustomer/checkEmail?email=${email}`,
-          extra: await err.json(),
+          extra: await err.json()
         });
       }
       return false;
@@ -175,7 +149,7 @@ const Register = () => {
     const result = verificationCodeSchema.safeParse(formData);
 
     if (!result.success) {
-      const message = result.error.errors.at(0)?.message || "";
+      const message = result.error.errors.at(0)?.message || '';
       toast.error(message);
       return;
     }
@@ -187,24 +161,25 @@ const Register = () => {
 
     try {
       setPending(true);
-      const response = await fetch(
-        `/go-tech/platform/platformCustomer/sendCode?email=${formData.email}`,
-        { method: "POST" }
-      );
-      const result = await response.json();
+      const response = await fetch(`/go-tech/platform/platformCustomer/sendCode?email=${formData.email}`, {
+        method: 'POST'
+      });
+      const fetchResult = await response.json();
 
-      if (result && result.code && result.code === 200) {
-        toast.success("驗證碼已發送至您的郵箱");
+      if (fetchResult && fetchResult.code && fetchResult.code === 200) {
+        toast.success('驗證碼已發送至您的郵箱');
         setTargetDate(Date.now() + 60 * 1000);
         return;
       }
-      toast.error(result.message);
+      toast.error(fetchResult.message);
     } catch (err) {
-      console.log(err);
       if (err instanceof Response) {
-        sendToBetterStack('error', err.statusText, { uri: `/go-tech/platform/platformCustomer/sendCode?email=${formData.email}`, extra: await err.json() })
+        sendToBetterStack('error', err.statusText, {
+          uri: `/go-tech/platform/platformCustomer/sendCode?email=${formData.email}`,
+          extra: await err.json()
+        });
       }
-      toast.error("驗證碼發送失敗，請稍後再試");
+      toast.error('驗證碼發送失敗，請稍後再試');
     } finally {
       setPending(false);
     }
@@ -216,7 +191,7 @@ const Register = () => {
     const result = signupSchema.safeParse(formData);
 
     if (!result.success) {
-      const message = result.error.errors.at(0)?.message || "";
+      const message = result.error.errors.at(0)?.message || '';
       toast.error(message);
       return;
     }
@@ -230,24 +205,21 @@ const Register = () => {
     try {
       setValidatedPending(true);
 
-      const { name, email, phone, company, verificationCode } = result.data;
+      const { company, email, name, phone, verificationCode } = result.data;
 
-      const response = await fetch(
-        "/go-tech/platform/platformCustomer/verify",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name,
-            email,
-            phone,
-            company,
-            verificationCode,
-          }),
-        }
-      );
+      const response = await fetch('/go-tech/platform/platformCustomer/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          phone,
+          company,
+          verificationCode
+        })
+      });
 
       const validatedResult = await response.json();
 
@@ -258,9 +230,12 @@ const Register = () => {
       setStep(1);
       setTargetDate(undefined);
     } catch (err) {
-      console.log(err);
       if (err instanceof Response) {
-        sendToBetterStack('error', err.statusText, { uri: `/go-tech/platform/platformCustomer/verify`, extra: await err.json(), body: result.data })
+        sendToBetterStack('error', err.statusText, {
+          uri: `/go-tech/platform/platformCustomer/verify`,
+          extra: await err.json(),
+          body: result.data
+        });
       }
     } finally {
       setValidatedPending(false);
@@ -273,38 +248,29 @@ const Register = () => {
     const result = signupSchema2.safeParse(formData);
 
     if (!result.success) {
-      const message = result.error.errors.at(0)?.message || "";
+      const message = result.error.errors.at(0)?.message || '';
       toast.error(message);
       return;
     }
     try {
       setSignupPending(true);
-      const {
-        name: custName,
-        email,
-        phone,
-        company: companyName,
-        password,
-      } = result.data;
-      const type = new URLSearchParams(window.location.search).get("type") || undefined;
+      const { company: companyName, email, name: custName, password, phone } = result.data;
+      const type = new URLSearchParams(window.location.search).get('type') || undefined;
 
-      const response = await fetch(
-        "/go-tech/platform/platformCustomer/register",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            custName,
-            email,
-            phone,
-            companyName,
-            password,
-            type,
-          }),
-        }
-      );
+      const response = await fetch('/go-tech/platform/platformCustomer/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          custName,
+          email,
+          phone,
+          companyName,
+          password,
+          type
+        })
+      });
 
       const signupResult = await response.json();
       if (signupResult.code !== 200) {
@@ -319,24 +285,31 @@ const Register = () => {
           }, 1000);
         }),
         {
-          loading: "注册成功, 正在為您跳转登录页面...",
-          success: "跳轉成功, 請登入",
+          loading: '注册成功, 正在為您跳转登录页面...',
+          success: '跳轉成功, 請登入',
           duration: 1000,
           onAutoClose() {
             toast.dismiss();
-            router.push("/account/login");
-          },
+            router.push('/account/login');
+          }
         }
       );
     } catch (err) {
-      console.log(err);
       if (err instanceof Response) {
-        sendToBetterStack('error', err.statusText, { uri: `/go-tech/platform/platformCustomer/register`, extra: await err.json(), body: result.data })
+        sendToBetterStack('error', err.statusText, {
+          uri: `/go-tech/platform/platformCustomer/register`,
+          extra: await err.json(),
+          body: result.data
+        });
       }
     } finally {
       setSignupPending(false);
     }
   };
+
+  let sendCodeLabel = '發送驗證碼';
+  if (pending) sendCodeLabel = '發送中...';
+  else if (countdown > 0) sendCodeLabel = `${Math.ceil(countdown / 1000)}s 後重發`;
 
   return (
     <div className="min-h-screen relative flex items-center justify-center p-4">
@@ -345,7 +318,7 @@ const Register = () => {
         src={authBgImg}
         alt="Background"
         loading="eager"
-        style={{ width: "auto" }}
+        style={{ width: 'auto' }}
         className="absolute inset-0 w-full h-full object-cover"
       />
       <div className="absolute inset-0 bg-foreground/30 backdrop-blur-sm" />
@@ -353,10 +326,7 @@ const Register = () => {
       <div className="relative bg-background rounded-2xl shadow-2xl w-full max-w-xl p-8 md:p-12 my-8">
         {/* Close Button */}
 
-        <Link
-          href="/"
-          className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"
-        >
+        <Link href="/" className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors">
           <X className="w-6 h-6" />
         </Link>
 
@@ -372,14 +342,9 @@ const Register = () => {
           />
         </div>
 
-        <h1 className="text-2xl font-bold text-center text-foreground mb-6">
-          注册新帳戶
-        </h1>
+        <h1 className="text-2xl font-bold text-center text-foreground mb-6">注册新帳戶</h1>
 
-        <form
-          onSubmit={step === 1 ? handleSubmit : handlePrevSubmit}
-          className="space-y-4"
-        >
+        <form onSubmit={step === 1 ? handleSubmit : handlePrevSubmit} className="space-y-4">
           {step === 1 ? (
             <>
               <div>
@@ -389,7 +354,7 @@ const Register = () => {
                     type="text"
                     placeholder="請輸入密碼"
                     value={formData.password}
-                    onChange={handleChange("password")}
+                    onChange={handleChange('password')}
                     className="h-12 text-base border-border flex-1"
                   />
                 </div>
@@ -404,7 +369,7 @@ const Register = () => {
                   type="text"
                   placeholder="請再次輸入密碼"
                   value={formData.confirmPassword}
-                  onChange={handleChange("confirmPassword")}
+                  onChange={handleChange('confirmPassword')}
                   className="h-12 text-base border-border flex-1"
                 />
               </div>
@@ -413,7 +378,7 @@ const Register = () => {
                 disabled={signupPending}
                 className="w-full h-14 text-lg font-semibold bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
               >
-                {signupPending ? "處理中..." : "註冊"}
+                {signupPending ? '處理中...' : '註冊'}
               </Button>
             </>
           ) : (
@@ -424,7 +389,7 @@ const Register = () => {
                   type="text"
                   placeholder="請輸入您的姓名"
                   value={formData.name}
-                  onChange={handleChange("name")}
+                  onChange={handleChange('name')}
                   className="h-12 text-base border-border flex-1"
                 />
               </div>
@@ -436,7 +401,7 @@ const Register = () => {
                     type="email"
                     placeholder="請輸入您的電子郵箱"
                     value={formData.email}
-                    onChange={handleChange("email")}
+                    onChange={handleChange('email')}
                     onBlur={handleEmailBlur}
                     className="h-12 text-base border-border pr-11"
                   />
@@ -453,13 +418,7 @@ const Register = () => {
                           strokeDasharray="57"
                           strokeDashoffset="57"
                         >
-                          <animate
-                            attributeName="stroke-dashoffset"
-                            from="57"
-                            to="0"
-                            dur="0.22s"
-                            fill="freeze"
-                          />
+                          <animate attributeName="stroke-dashoffset" from="57" to="0" dur="0.22s" fill="freeze" />
                         </circle>
                         <path
                           d="M8 12.5L10.8 15.3L16.5 9.8"
@@ -485,11 +444,10 @@ const Register = () => {
                   </span>
                 </div>
               </div>
-              {emailChecking ? (
-                <p className="text-xs text-gray-400 ml-5 -mt-2">正在驗證郵箱...</p>
-              ) : emailExists ? (
+              {emailChecking && <p className="text-xs text-gray-400 ml-5 -mt-2">正在驗證郵箱...</p>}
+              {!emailChecking && emailExists && (
                 <p className="text-xs text-destructive ml-5 -mt-2">{EXISTING_EMAIL_MESSAGE}</p>
-              ) : null}
+              )}
 
               <div className="flex items-center gap-2">
                 <span className="text-destructive">*</span>
@@ -497,7 +455,7 @@ const Register = () => {
                   type="tel"
                   placeholder="請輸入您的聯繫電話"
                   value={formData.phone}
-                  onChange={handleChange("phone")}
+                  onChange={handleChange('phone')}
                   className="h-12 text-base border-border flex-1"
                 />
               </div>
@@ -508,20 +466,18 @@ const Register = () => {
                   type="text"
                   placeholder="請輸入您的公司名稱"
                   value={formData.company}
-                  onChange={handleChange("company")}
+                  onChange={handleChange('company')}
                   className="h-12 text-base border-border flex-1"
                 />
               </div>
 
               <div className="flex items-center gap-3">
-                <span className="text-sm text-muted-foreground whitespace-nowrap">
-                  驗證碼
-                </span>
+                <span className="text-sm text-muted-foreground whitespace-nowrap">驗證碼</span>
                 <Input
                   type="text"
                   placeholder="請輸入郵箱收到的驗證碼"
                   value={formData.verificationCode}
-                  onChange={handleChange("verificationCode")}
+                  onChange={handleChange('verificationCode')}
                   className="h-12 text-base border-border flex-1"
                 />
                 <Button
@@ -530,11 +486,7 @@ const Register = () => {
                   disabled={isCodeButtonDisabled}
                   className="h-12 px-6 bg-primary text-primary-foreground hover:bg-primary/90 whitespace-nowrap"
                 >
-                  {pending
-                    ? "發送中..."
-                    : countdown > 0
-                      ? `${Math.ceil(countdown / 1000)}s 後重發`
-                      : "發送驗證碼"}
+                  {sendCodeLabel}
                 </Button>
               </div>
 
@@ -542,22 +494,17 @@ const Register = () => {
                 <Checkbox
                   id="terms"
                   checked={acceptTerms}
-                  onCheckedChange={checked =>
-                    setAcceptTerms(checked as boolean)
-                  }
+                  onCheckedChange={checked => setAcceptTerms(checked as boolean)}
                 />
-                <label
-                  htmlFor="terms"
-                  className="text-sm text-muted-foreground"
-                >
+                <label htmlFor="terms" className="text-sm text-muted-foreground">
                   我已閱讀並同意
-                  <a href="/legal-agreement/terms/terms-of-use" className="text-primary hover:underline">
+                  <Link href="/legal-agreement/terms/terms-of-use" className="text-primary hover:underline">
                     《服務條款》
-                  </a>
+                  </Link>
                   及
-                  <a href="/legal-agreement/terms/privacy" className="text-primary hover:underline">
+                  <Link href="/legal-agreement/terms/privacy" className="text-primary hover:underline">
                     《私隱政策》
-                  </a>
+                  </Link>
                 </label>
               </div>
 
@@ -566,14 +513,14 @@ const Register = () => {
                 disabled={validatedPending}
                 className="w-full h-14 text-lg font-semibold bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
               >
-                {validatedPending ? "處理中..." : "下一步"}
+                {validatedPending ? '處理中...' : '下一步'}
               </Button>
             </>
           )}
         </form>
 
         <div className="text-center mt-4 text-sm">
-          <span className="text-muted-foreground">已有帳戶？</span>{" "}
+          <span className="text-muted-foreground">已有帳戶？</span>{' '}
           <Link href="/account/login" className="text-primary hover:underline">
             立即登入
           </Link>

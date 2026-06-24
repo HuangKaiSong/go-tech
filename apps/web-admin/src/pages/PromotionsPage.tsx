@@ -1,111 +1,111 @@
-import { useState } from "react";
-import { Gift, Plus } from "lucide-react";
 import {
   Button,
-  Input,
   Checkbox,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   Switch,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@go-tech-frontend/ui";
+  TableRow
+} from '@go-tech-frontend/ui';
+import { Gift, Plus } from 'lucide-react';
+import { useState } from 'react';
 
 interface PromotionForm {
-  name: string;
-  type: string;
-  goldChecked: boolean;
-  goldDiscount: string;
-  platinumChecked: boolean;
-  platinumDiscount: string;
+  active: boolean;
+  dateRange: string;
   diamondChecked: boolean;
   diamondDiscount: string;
+  goldChecked: boolean;
+  goldDiscount: string;
+  name: string;
+  platinumChecked: boolean;
+  platinumDiscount: string;
   target: string;
-  dateRange: string;
-  active: boolean;
+  type: string;
 }
 
 const defaultForm: PromotionForm = {
-  name: "",
-  type: "套餐優惠/滿減優惠/增值服務優惠",
+  name: '',
+  type: '套餐優惠/滿減優惠/增值服務優惠',
   goldChecked: false,
-  goldDiscount: "",
+  goldDiscount: '',
   platinumChecked: false,
-  platinumDiscount: "",
+  platinumDiscount: '',
   diamondChecked: false,
-  diamondDiscount: "",
-  target: "",
-  dateRange: "",
-  active: true,
+  diamondDiscount: '',
+  target: '',
+  dateRange: '',
+  active: true
 };
 
 const mockPromotions = [
-  { 
-    id: "NOV_1", 
-    createdAt: "12/08/2025", 
-    name: "春季優惠", 
-    type: "套餐優惠", 
-    info: ["黃金套餐 20%OFF", "白金套餐 30%OFF"],
-    target: "註冊會員",
-    startDate: "12/08/2025",
-    endDate: "12/08/2025",
+  {
+    id: 'NOV_1',
+    createdAt: '12/08/2025',
+    name: '春季優惠',
+    type: '套餐優惠',
+    info: ['黃金套餐 20%OFF', '白金套餐 30%OFF'],
+    target: '註冊會員',
+    startDate: '12/08/2025',
+    endDate: '12/08/2025',
     active: true
   },
-  { 
-    id: "NOV_2", 
-    createdAt: "12/08/2025", 
-    name: "夏季優惠", 
-    type: "套餐優惠", 
-    info: ["滿1000減100"],
-    target: "所有會員",
-    startDate: "12/09/2025",
-    endDate: "12/08/2025",
+  {
+    id: 'NOV_2',
+    createdAt: '12/08/2025',
+    name: '夏季優惠',
+    type: '套餐優惠',
+    info: ['滿1000減100'],
+    target: '所有會員',
+    startDate: '12/09/2025',
+    endDate: '12/08/2025',
     active: true
   },
-  { 
-    id: "NOV_3", 
-    createdAt: "12/08/2025", 
-    name: "春季優惠", 
-    type: "套餐優惠", 
-    info: ["黃金套餐 20%OFF", "白金套餐 30%OFF"],
-    target: "註冊會員",
-    startDate: "12/08/2025",
-    endDate: "12/08/2025",
+  {
+    id: 'NOV_3',
+    createdAt: '12/08/2025',
+    name: '春季優惠',
+    type: '套餐優惠',
+    info: ['黃金套餐 20%OFF', '白金套餐 30%OFF'],
+    target: '註冊會員',
+    startDate: '12/08/2025',
+    endDate: '12/08/2025',
     active: true
   },
-  { 
-    id: "NOV_4", 
-    createdAt: "12/08/2025", 
-    name: "夏季優惠", 
-    type: "套餐優惠", 
-    info: ["滿1000減100"],
-    target: "所有會員",
-    startDate: "12/09/2025",
-    endDate: "12/08/2025",
+  {
+    id: 'NOV_4',
+    createdAt: '12/08/2025',
+    name: '夏季優惠',
+    type: '套餐優惠',
+    info: ['滿1000減100'],
+    target: '所有會員',
+    startDate: '12/09/2025',
+    endDate: '12/08/2025',
     active: false
   },
-  { 
-    id: "NOV_1", 
-    createdAt: "12/08/2025", 
-    name: "春季優惠", 
-    type: "套餐優惠", 
-    info: ["黃金套餐 20%OFF", "白金套餐 30%OFF"],
-    target: "註冊會員",
-    startDate: "12/08/2025",
-    endDate: "12/08/2025",
+  {
+    id: 'NOV_1',
+    createdAt: '12/08/2025',
+    name: '春季優惠',
+    type: '套餐優惠',
+    info: ['黃金套餐 20%OFF', '白金套餐 30%OFF'],
+    target: '註冊會員',
+    startDate: '12/08/2025',
+    endDate: '12/08/2025',
     active: true
-  },
+  }
 ];
 
 const PromotionsPage = () => {
@@ -119,19 +119,19 @@ const PromotionsPage = () => {
     setDialogOpen(true);
   };
 
-  const handleOpenEdit = (promo: typeof mockPromotions[0]) => {
+  const handleOpenEdit = (promo: (typeof mockPromotions)[0]) => {
     setForm({
       name: promo.name,
       type: promo.type,
-      goldChecked: promo.info.some(i => i.includes("黃金")),
-      goldDiscount: promo.info.find(i => i.includes("黃金"))?.match(/\d+/)?.[0] || "",
-      platinumChecked: promo.info.some(i => i.includes("白金")),
-      platinumDiscount: promo.info.find(i => i.includes("白金"))?.match(/\d+/)?.[0] || "",
-      diamondChecked: promo.info.some(i => i.includes("鑽石")),
-      diamondDiscount: promo.info.find(i => i.includes("鑽石"))?.match(/\d+/)?.[0] || "",
+      goldChecked: promo.info.some(i => i.includes('黃金')),
+      goldDiscount: promo.info.find(i => i.includes('黃金'))?.match(/\d+/)?.[0] || '',
+      platinumChecked: promo.info.some(i => i.includes('白金')),
+      platinumDiscount: promo.info.find(i => i.includes('白金'))?.match(/\d+/)?.[0] || '',
+      diamondChecked: promo.info.some(i => i.includes('鑽石')),
+      diamondDiscount: promo.info.find(i => i.includes('鑽石'))?.match(/\d+/)?.[0] || '',
       target: promo.target,
-      dateRange: "",
-      active: promo.active,
+      dateRange: '',
+      active: promo.active
     });
     setIsEditing(true);
     setDialogOpen(true);
@@ -194,10 +194,10 @@ const PromotionsPage = () => {
                 <TableCell className="text-center">
                   <div className="flex items-center justify-center gap-2">
                     <Button variant="link" className="text-primary p-0 h-auto text-sm">
-                      {promo.active ? "開始活動" : "暫停活動"}
+                      {promo.active ? '開始活動' : '暫停活動'}
                     </Button>
-                    <Button 
-                      variant="link" 
+                    <Button
+                      variant="link"
                       className="text-primary p-0 h-auto text-sm"
                       onClick={() => handleOpenEdit(promo)}
                     >
@@ -215,28 +215,26 @@ const PromotionsPage = () => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-125">
           <DialogHeader>
-            <DialogTitle className="text-lg font-medium">
-              {isEditing ? "編輯活動" : "新增活动"}
-            </DialogTitle>
+            <DialogTitle className="text-lg font-medium">{isEditing ? '編輯活動' : '新增活动'}</DialogTitle>
           </DialogHeader>
-          
+
           <div className="space-y-4 py-4">
             {/* 活動名稱 */}
             <div className="flex items-center gap-4">
               <label className="w-20 text-sm text-muted-foreground text-right shrink-0">活動名稱</label>
-              <Input 
-                placeholder="秋季優惠" 
+              <Input
+                placeholder="秋季優惠"
                 value={form.name}
-                onChange={(e) => setForm({...form, name: e.target.value})}
+                onChange={e => setForm({ ...form, name: e.target.value })}
               />
             </div>
 
             {/* 優惠類型 */}
             <div className="flex items-center gap-4">
               <label className="w-20 text-sm text-muted-foreground text-right shrink-0">優惠類型</label>
-              <Input 
+              <Input
                 value={form.type}
-                onChange={(e) => setForm({...form, type: e.target.value})}
+                onChange={e => setForm({ ...form, type: e.target.value })}
                 className="text-muted-foreground"
               />
             </div>
@@ -246,41 +244,41 @@ const PromotionsPage = () => {
               <label className="w-20 text-sm text-muted-foreground text-right shrink-0 mt-2">優惠信息</label>
               <div className="space-y-3 flex-1">
                 <div className="flex items-center gap-2">
-                  <Checkbox 
+                  <Checkbox
                     checked={form.goldChecked}
-                    onCheckedChange={(checked) => setForm({...form, goldChecked: !!checked})}
+                    onCheckedChange={checked => setForm({ ...form, goldChecked: Boolean(checked) })}
                   />
                   <span className="text-sm w-16">黃金套餐</span>
-                  <Input 
-                    className="w-16 text-center" 
+                  <Input
+                    className="w-16 text-center"
                     value={form.goldDiscount}
-                    onChange={(e) => setForm({...form, goldDiscount: e.target.value})}
+                    onChange={e => setForm({ ...form, goldDiscount: e.target.value })}
                   />
                   <span className="text-sm text-muted-foreground">%OFF</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Checkbox 
+                  <Checkbox
                     checked={form.platinumChecked}
-                    onCheckedChange={(checked) => setForm({...form, platinumChecked: !!checked})}
+                    onCheckedChange={checked => setForm({ ...form, platinumChecked: Boolean(checked) })}
                   />
                   <span className="text-sm w-16">白金套餐</span>
-                  <Input 
-                    className="w-16 text-center" 
+                  <Input
+                    className="w-16 text-center"
                     value={form.platinumDiscount}
-                    onChange={(e) => setForm({...form, platinumDiscount: e.target.value})}
+                    onChange={e => setForm({ ...form, platinumDiscount: e.target.value })}
                   />
                   <span className="text-sm text-muted-foreground">%OFF</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Checkbox 
+                  <Checkbox
                     checked={form.diamondChecked}
-                    onCheckedChange={(checked) => setForm({...form, diamondChecked: !!checked})}
+                    onCheckedChange={checked => setForm({ ...form, diamondChecked: Boolean(checked) })}
                   />
                   <span className="text-sm w-16">鑽石套餐</span>
-                  <Input 
-                    className="w-16 text-center" 
+                  <Input
+                    className="w-16 text-center"
                     value={form.diamondDiscount}
-                    onChange={(e) => setForm({...form, diamondDiscount: e.target.value})}
+                    onChange={e => setForm({ ...form, diamondDiscount: e.target.value })}
                   />
                   <span className="text-sm text-muted-foreground">%OFF</span>
                 </div>
@@ -290,7 +288,7 @@ const PromotionsPage = () => {
             {/* 優惠對象 */}
             <div className="flex items-center gap-4">
               <label className="w-20 text-sm text-muted-foreground text-right shrink-0">優惠對象</label>
-              <Select value={form.target} onValueChange={(value) => setForm({...form, target: value})}>
+              <Select value={form.target} onValueChange={value => setForm({ ...form, target: value })}>
                 <SelectTrigger>
                   <SelectValue placeholder="下拉選擇會員類型" />
                 </SelectTrigger>
@@ -307,7 +305,7 @@ const PromotionsPage = () => {
             {/* 活動日期 */}
             <div className="flex items-center gap-4">
               <label className="w-20 text-sm text-muted-foreground text-right shrink-0">活動日期</label>
-              <Select value={form.dateRange} onValueChange={(value) => setForm({...form, dateRange: value})}>
+              <Select value={form.dateRange} onValueChange={value => setForm({ ...form, dateRange: value })}>
                 <SelectTrigger>
                   <SelectValue placeholder="請選擇" />
                 </SelectTrigger>
@@ -323,26 +321,20 @@ const PromotionsPage = () => {
             {/* 活動狀態 */}
             <div className="flex items-center gap-4">
               <label className="w-20 text-sm text-muted-foreground text-right shrink-0">活動狀態</label>
-              <Switch 
-                checked={form.active}
-                onCheckedChange={(checked) => setForm({...form, active: checked})}
-              />
+              <Switch checked={form.active} onCheckedChange={checked => setForm({ ...form, active: checked })} />
             </div>
           </div>
 
           {/* Buttons */}
           <div className="flex gap-4">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="flex-1 border-primary text-primary hover:bg-primary/10"
               onClick={handleSave}
             >
               保存
             </Button>
-            <Button 
-              className="flex-1 bg-primary hover:bg-primary/90"
-              onClick={handleConfirm}
-            >
+            <Button className="flex-1 bg-primary hover:bg-primary/90" onClick={handleConfirm}>
               確認
             </Button>
           </div>

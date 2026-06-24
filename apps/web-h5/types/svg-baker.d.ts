@@ -1,15 +1,15 @@
 declare module 'svg-baker' {
   interface AddSymbolOptions {
-    path: string
-    content: string
-    id?: string
+    content: string;
+    id?: string;
+    path: string;
   }
 
   interface SpriteSymbol {
-    render(): string
+    render(): string;
   }
 
   export default class SVGCompiler {
-    addSymbol(options: AddSymbolOptions): Promise<SpriteSymbol>
+    addSymbol(options: AddSymbolOptions): Promise<SpriteSymbol>;
   }
 }

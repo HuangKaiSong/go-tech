@@ -1,51 +1,36 @@
-"use client";
+'use client';
 
-import Footer from "@/app/components/Footer";
-import Header from "@/app/components/Header";
-import Link from "@/app/components/Link";
-import { useAuth } from "@/contexts/AuthContext";
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  toast,
-  UploadedFile,
-} from "@go-tech-frontend/ui";
-import { useAsyncEffect } from "ahooks";
-import {
-  ArrowUpCircle,
-  Eye,
-  Package,
-  RefreshCw,
-  Settings,
-  ShoppingCart,
-} from "lucide-react";
-import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
-import { OrderItemInfoType, OrderStatusEnum } from "../constants/order";
-import { PayTypeEnum } from "../constants/payment";
-import { AddService } from "./AddService";
-import { Upgrade } from "./Upgrade";
+import { Badge, Button, Card, CardContent, CardHeader, type UploadedFile, toast } from '@go-tech-frontend/ui';
+import { useAsyncEffect } from 'ahooks';
+import { ArrowUpCircle, Eye, Package, RefreshCw, Settings, ShoppingCart } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation';
+import { useMemo, useState } from 'react';
+import Footer from '@/app/components/Footer';
+import Header from '@/app/components/Header';
+import Link from '@/app/components/Link';
+import { useAuth } from '@/contexts/AuthContext';
+import { type OrderItemInfoType, OrderStatusEnum } from '../constants/order';
+import { PayTypeEnum } from '../constants/payment';
+import { AddService } from './AddService';
+import { Upgrade } from './Upgrade';
 
-const PaymentPanel = dynamic(() => import("../components/payment/Panel"), {
-  ssr: false,
+const PaymentPanel = dynamic(() => import('../components/payment/Panel'), {
+  ssr: false
 });
 
 const getStatusColor = (status: OrderStatusEnum) => {
   switch (status) {
     case OrderStatusEnum.COMPLETED:
-      return "bg-green-500/10 text-green-600 border-green-200";
+      return 'bg-green-500/10 text-green-600 border-green-200';
     case OrderStatusEnum.PROCESSING:
-      return "bg-yellow-500/10 text-yellow-600 border-yellow-200";
+      return 'bg-yellow-500/10 text-yellow-600 border-yellow-200';
     case OrderStatusEnum.WAIT_PAY:
-      return "bg-gray-500/10 text-gray-600 border-gray-200";
+      return 'bg-gray-500/10 text-gray-600 border-gray-200';
     case OrderStatusEnum.REJECT:
-      return "bg-red-500/10 text-red-600 border-red-200";
+      return 'bg-red-500/10 text-red-600 border-red-200';
     default:
-      return "bg-gray-500/10 text-gray-600 border-gray-200";
+      return 'bg-gray-500/10 text-gray-600 border-gray-200';
   }
 };
 
@@ -75,36 +60,33 @@ const MyOrders = () => {
     if (!selectOrder) {
       return;
     }
-    const toastId = toast.loading("正在準備數據中...");
+    const toastId = toast.loading('正在準備數據中...');
     const headers = new Headers({
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
-      "User-Type": "platform_customer",
+      'User-Type': 'platform_customer'
     });
     const orderInfo: any = {
       id: selectOrder.id,
       payType: PayTypeEnum.FPS,
-      payEvidence: file.url,
+      payEvidence: file.url
     };
 
     try {
       // 创建订单
-      const orderResponse = await fetch(
-        "/go-tech/platform/packageOrder/reAdd",
-        {
-          method: "POST",
-          headers: headers,
-          body: JSON.stringify(orderInfo),
-        }
-      )
+      const orderResponse = await fetch('/go-tech/platform/packageOrder/reAdd', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(orderInfo)
+      })
         .then(res => res.json())
         .catch(err => {
           throw err;
         });
       if (orderResponse.code === 200) {
-        toast.success("操作订单成功", { id: toastId });
+        toast.success('操作订单成功', { id: toastId });
         if (orderInfo.payType === PayTypeEnum.FPS) {
-          toast.success("支付憑證已提交，我們將在確認後為您更新订单");
+          toast.success('支付憑證已提交，我們將在確認後為您更新订单');
           router.push(`/my-orders/${selectOrder.id}`);
         }
 
@@ -124,13 +106,13 @@ const MyOrders = () => {
 
   useAsyncEffect(async () => {
     try {
-      const data = await fetch("/go-tech/platform/packageOrder/myOrders", {
-        method: "GET",
+      const data = await fetch('/go-tech/platform/packageOrder/myOrders', {
+        method: 'GET',
         headers: {
-          "Content-Type": "application/json",
-          "User-Type": "platform_customer",
-          Authorization: `Bearer ${token}`,
-        },
+          'Content-Type': 'application/json',
+          'User-Type': 'platform_customer',
+          Authorization: `Bearer ${token}`
+        }
       }).then(res => res.json());
       if (data.code === 200) {
         setOrderList(data.data);
@@ -150,9 +132,7 @@ const MyOrders = () => {
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center gap-3 mb-2">
             <Package className="w-10 h-10 text-primary" />
-            <h1 className="text-4xl md:text-5xl font-bold text-primary">
-              我的訂單
-            </h1>
+            <h1 className="text-4xl md:text-5xl font-bold text-primary">我的訂單</h1>
           </div>
           <p className="text-lg text-primary/80">My Orders</p>
         </div>
@@ -167,9 +147,7 @@ const MyOrders = () => {
                 <CardContent>
                   <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
                   <h3 className="text-xl font-semibold mb-2">暫無訂單</h3>
-                  <p className="text-muted-foreground mb-6">
-                    您還沒有任何訂單記錄
-                  </p>
+                  <p className="text-muted-foreground mb-6">您還沒有任何訂單記錄</p>
                   <Link href="/service-plan">
                     <Button>查看服務計劃</Button>
                   </Link>
@@ -177,21 +155,14 @@ const MyOrders = () => {
               </Card>
             ) : (
               orderList?.map(order => (
-                <Card
-                  key={order.orderNo}
-                  className="border border-border hover:shadow-lg transition-shadow"
-                >
+                <Card key={order.orderNo} className="border border-border hover:shadow-lg transition-shadow">
                   <CardHeader className="pb-4">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                       <div>
                         <div className="flex items-center gap-3 mb-2">
                           <Settings className="w-6 h-6 text-primary" />
-                          <h3 className="text-xl font-bold text-foreground">
-                            {order.platformPackageDto?.packageName}
-                          </h3>
-                          <Badge className={getStatusColor(order.orderStatus)}>
-                            {order.orderStatusName}
-                          </Badge>
+                          <h3 className="text-xl font-bold text-foreground">{order.platformPackageDto?.packageName}</h3>
+                          <Badge className={getStatusColor(order.orderStatus)}>{order.orderStatusName}</Badge>
                         </div>
                         <p className="text-sm text-muted-foreground">
                           最多可創建{order.platformPackageDto?.unitCount}個單位
@@ -199,12 +170,9 @@ const MyOrders = () => {
                       </div>
                       <div className="text-right">
                         <div className="text-2xl font-bold text-primary">
-                          {order.finalAmount}{" "}
-                          <span className="text-base">HKD</span>
+                          {order.finalAmount} <span className="text-base">HKD</span>
                         </div>
-                        <p className="text-xs text-muted-foreground">
-                          訂單編號：{order.orderNo}
-                        </p>
+                        <p className="text-xs text-muted-foreground">訂單編號：{order.orderNo}</p>
                       </div>
                     </div>
                   </CardHeader>
@@ -213,36 +181,23 @@ const MyOrders = () => {
                     <div className="grid md:grid-cols-2 gap-6">
                       {/* 訂單資訊 */}
                       <div className="space-y-3">
-                        <h4 className="font-medium text-foreground border-b border-foreground/30 pb-2">
-                          訂單資訊
-                        </h4>
+                        <h4 className="font-medium text-foreground border-b border-foreground/30 pb-2">訂單資訊</h4>
                         <div className="space-y-2 text-sm">
                           <div className="flex justify-between">
-                            <span className="text-muted-foreground">
-                              下單日期
-                            </span>
+                            <span className="text-muted-foreground">下單日期</span>
                             <span>{order.createTime}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-muted-foreground">
-                              到期日期
-                            </span>
-                            <span>{order.expireDate || "-"}</span>
+                            <span className="text-muted-foreground">到期日期</span>
+                            <span>{order.expireDate || '-'}</span>
                           </div>
-                          {order.orderItems?.filter(
-                            (item: any) => item.itemType !== 1
-                          )?.length > 0 && (
+                          {order.orderItems?.filter((item: any) => item.itemType !== 1)?.length > 0 && (
                             <div className="pt-2 border-t border-foreground/30">
-                              <span className="text-muted-foreground">
-                                增值服務：
-                              </span>
+                              <span className="text-muted-foreground">增值服務：</span>
                               {order.orderItems
                                 ?.filter((item: any) => item.itemType !== 1)
                                 ?.map((addon: any) => (
-                                  <div
-                                    key={addon.id}
-                                    className="flex justify-between mt-1"
-                                  >
+                                  <div key={addon.id} className="flex justify-between mt-1">
                                     <span>
                                       {addon.itemName} x{addon.count}
                                     </span>
@@ -260,33 +215,23 @@ const MyOrders = () => {
                           包含功能
                         </h4>
                         <div className="grid grid-cols-2 gap-2">
-                          {order.platformPackageDto?.packageItemList?.map(
-                            (feature: any) => {
-                              if (feature.level >= 2) return null;
-                              return (
-                                <div
-                                  key={feature.id}
-                                  className="flex items-center gap-2 py-1.5 px-2 rounded bg-[#FAEEEB]"
-                                >
-                                  {/* <feature.icon className="w-4 h-4 text-[#F9881E]" /> */}
-                                  {feature.menuIcon && (
-                                    <svg
-                                      className="svg-icon w-4 h-4 text-primary mr-1"
-                                      aria-hidden="true"
-                                    >
-                                      <use
-                                        href={`#icon-${feature.menuIcon}`}
-                                        xlinkHref={`#icon-${feature.menuIcon}`}
-                                      ></use>
-                                    </svg>
-                                  )}
-                                  <span className="text-xs text-muted-foreground">
-                                    {feature.menuTitle}
-                                  </span>
-                                </div>
-                              );
-                            }
-                          )}
+                          {order.platformPackageDto?.packageItemList?.map((feature: any) => {
+                            if (feature.level >= 2) return null;
+                            return (
+                              <div
+                                key={feature.id}
+                                className="flex items-center gap-2 py-1.5 px-2 rounded bg-[#FAEEEB]"
+                              >
+                                {/* <feature.icon className="w-4 h-4 text-[#F9881E]" /> */}
+                                {feature.menuIcon && (
+                                  <svg className="svg-icon w-4 h-4 text-primary mr-1" aria-hidden="true">
+                                    <use href={`#icon-${feature.menuIcon}`} xlinkHref={`#icon-${feature.menuIcon}`} />
+                                  </svg>
+                                )}
+                                <span className="text-xs text-muted-foreground">{feature.menuTitle}</span>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     </div>
@@ -314,6 +259,7 @@ const MyOrders = () => {
                         </Button>
                       )}
                       {order.isEffective && (
+                        // oxlint-disable
                         <>
                           {order.orderStatus === OrderStatusEnum.COMPLETED && (
                             <>
@@ -359,9 +305,7 @@ const MyOrders = () => {
             <div className="flex items-center justify-between p-6 bg-muted/30 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 mt-8 border border-gray-300">
               <div>
                 <h3 className="font-medium text-lg">需要更多功能？</h3>
-                <p className="text-sm text-muted-foreground">
-                  探索其他套餐方案，找到最適合您的選擇
-                </p>
+                <p className="text-sm text-muted-foreground">探索其他套餐方案，找到最適合您的選擇</p>
               </div>
               <Link href="/service-plan">
                 <Button className="gap-2">
@@ -376,20 +320,12 @@ const MyOrders = () => {
 
       {/* 購買增值服務對話框 */}
       {showAddonsDialog && selectOrder && (
-        <AddService
-          data={selectOrder}
-          open={showAddonsDialog}
-          onOpenChange={setShowAddonsDialog}
-        />
+        <AddService data={selectOrder} open={showAddonsDialog} onOpenChange={setShowAddonsDialog} />
       )}
 
       {/* 套餐升級對話框 */}
       {showUpgradeDialog && selectOrder && (
-        <Upgrade
-          data={selectOrder}
-          open={showUpgradeDialog}
-          onOpenChange={setShowUpgradeDialog}
-        />
+        <Upgrade data={selectOrder} open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog} />
       )}
 
       {/* 支付方式選擇對話框 */}

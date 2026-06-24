@@ -1,8 +1,8 @@
 type MenuType = {
-  id: number;
-  title: string;
-  parentId: number;
+  children?: MenuType[];
   desc: string;
   icon: string;
-  children?: MenuType[];
+  id: number;
+  parentId: number;
+  title: string;
 };

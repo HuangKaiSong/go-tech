@@ -1,16 +1,5 @@
-"use client";
+'use client';
 
-import Footer from "@/app/components/Footer";
-import Header from "@/app/components/Header";
-import Link from "@/app/components/Link";
-import Fps from "@/app/components/payment/Fps";
-import {
-  OrderItemInfoType,
-  OrderItemTypeEnum,
-  OrderTypeEnum,
-} from "@/app/constants/order";
-import { DAYSPERMONTH, PayTypeEnum } from "@/app/constants/payment";
-import { useAuth } from "@/contexts/AuthContext";
 import {
   Badge,
   Button,
@@ -26,45 +15,37 @@ import {
   RadioGroup,
   RadioGroupItem,
   Separator,
-  toast,
-  UploadedFile,
-} from "@go-tech-frontend/ui";
-import dayjs from "dayjs";
-import {
-  ArrowLeft,
-  CheckCircle,
-  Clock,
-  CreditCard,
-  Package,
-  RefreshCw,
-  Settings,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+  type UploadedFile,
+  toast
+} from '@go-tech-frontend/ui';
+import dayjs from 'dayjs';
+import { ArrowLeft, CheckCircle, Clock, CreditCard, Package, RefreshCw, Settings } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useMemo, useState } from 'react';
+import Footer from '@/app/components/Footer';
+import Header from '@/app/components/Header';
+import Link from '@/app/components/Link';
+import Fps from '@/app/components/payment/Fps';
+import { type OrderItemInfoType, OrderItemTypeEnum, OrderTypeEnum } from '@/app/constants/order';
+import { DAYSPERMONTH, PayTypeEnum } from '@/app/constants/payment';
+import { useAuth } from '@/contexts/AuthContext';
 
 const renewalOptions = [
-  { id: "1month", label: "續費1个月", months: 1, discount: 0 },
-  { id: "2month", label: "續費2个月", months: 2, discount: 0 },
-  { id: "3month", label: "續費3个月", months: 3, discount: 0 },
-  { id: "custom", label: "自定义月数", months: 6, discount: 0 },
+  { id: '1month', label: '續費1个月', months: 1, discount: 0 },
+  { id: '2month', label: '續費2个月', months: 2, discount: 0 },
+  { id: '3month', label: '續費3个月', months: 3, discount: 0 },
+  { id: 'custom', label: '自定义月数', months: 6, discount: 0 }
 ];
 
-const RenewOrder = ({
-  id,
-  detail,
-}: {
-  id: string;
-  detail: OrderItemInfoType;
-}) => {
+const RenewOrder = ({ detail, id: _id }: { detail: OrderItemInfoType; id: string }) => {
   const router = useRouter();
   const order = detail;
   const { token } = useAuth();
 
-  const [selectedPeriod, setSelectedPeriod] = useState("1month");
+  const [selectedPeriod, setSelectedPeriod] = useState('1month');
   const [customMonths, setCustomMonths] = useState(6);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] =
-    useState<PayTypeEnum | null>(null);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PayTypeEnum | null>(null);
 
   if (!order) {
     return (
@@ -85,24 +66,16 @@ const RenewOrder = ({
     );
   }
 
-  const addService = order.orderItems.filter(
-    item => item.itemType === OrderItemTypeEnum.ADDITION
-  );
+  const addService = order.orderItems.filter(item => item.itemType === OrderItemTypeEnum.ADDITION);
 
   const selectedOption = renewalOptions.find(opt => opt.id === selectedPeriod)!;
-  const selectedMonths =
-    selectedOption.id === "custom" ? customMonths : selectedOption.months;
+  const selectedMonths = selectedOption.id === 'custom' ? customMonths : selectedOption.months;
   const yearlyPrice = order.platformPackageDto?.price || 0;
   const months = selectedMonths;
   const originalPrice = yearlyPrice * months;
 
-  /**
-   * 优惠价格
-   * 1个月-2个月 -> price
-   * 3个月-5个月 -> priceA
-   * 6个月-11个月 -> priceB
-   * 12个月及以上 -> priceC
-   */
+  /** 优惠价格 1个月-2个月 -> price 3个月-5个月 -> priceA 6个月-11个月 -> priceB 12个月及以上 -> priceC */
+  // oxlint-disable react-hooks/rules-of-hooks
   const discountAmount = useMemo<number>(() => {
     // 原价
     let recursePrice = order.platformPackageDto?.price;
@@ -116,25 +89,19 @@ const RenewOrder = ({
       recursePrice = order.platformPackageDto?.priceA || recursePrice;
     }
 
-    const diffPrice =
-      Math.max(
-        0,
-        (order.platformPackageDto?.price || 0) - (recursePrice || 0)
-      ) * months;
+    const diffPrice = Math.max(0, (order.platformPackageDto?.price || 0) - (recursePrice || 0)) * months;
 
     return Math.max(0, diffPrice);
+    // oxlint-disable react-hooks/exhaustive-deps
   }, [months]);
 
-  const addServicePrice = addService.reduce(
-    (acc, item) => acc + item.price! * item.count! * months,
-    0
-  );
+  const addServicePrice = addService.reduce((acc, item) => acc + item.price! * item.count! * months, 0);
 
   const finalPrice = addServicePrice + originalPrice - discountAmount;
 
   // 計算新到期日
-  const currentExpiry = dayjs(new Date(order.expireDate || ""));
-  const newExpiry = currentExpiry.add(months * DAYSPERMONTH, "day");
+  const currentExpiry = dayjs(new Date(order.expireDate || ''));
+  const newExpiry = currentExpiry.add(months * DAYSPERMONTH, 'day');
 
   const handleConfirmPayment = () => {
     setShowPaymentDialog(true);
@@ -144,16 +111,16 @@ const RenewOrder = ({
     setSelectedPaymentMethod(null);
   };
 
-  const handlePaymentSelect = (method: PayTypeEnum) => {
-    console.log("Selected payment method:", method);
-    setShowPaymentDialog(false);
-    // 這裡可以跳轉到支付頁面或顯示成功訊息
-    router.push("/my-orders");
-  };
+  // const handlePaymentSelect = (method: PayTypeEnum) => {
+  //   console.log("Selected payment method:", method);
+  //   setShowPaymentDialog(false);
+  //   // 這裡可以跳轉到支付頁面或顯示成功訊息
+  //   router.push("/my-orders");
+  // };
 
   const handleFpsPaymentConfirm = async (voucherFile: UploadedFile) => {
     toast.dismiss();
-    const toastId = toast.loading("創建續費訂單中...");
+    const toastId = toast.loading('創建續費訂單中...');
     const orderInfo: any = {
       orderType: OrderTypeEnum.RENEWAL,
       payType: selectedPaymentMethod,
@@ -165,9 +132,9 @@ const RenewOrder = ({
           itemName: detail?.platformPackageDto?.packageName,
           price: detail?.platformPackageDto?.price,
           count: months,
-          days: months * DAYSPERMONTH,
-        },
-      ],
+          days: months * DAYSPERMONTH
+        }
+      ]
     };
     if (addService.length) {
       addService.map(item => {
@@ -177,40 +144,41 @@ const RenewOrder = ({
           itemCode: item.itemCode,
           itemName: item.itemName!,
           price: item.price!,
-          count: item.count,
+          count: item.count
         });
+        return null;
       });
     }
 
     const requestHeaders = new Headers({
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
-      "User-Type": "platform_customer",
+      'User-Type': 'platform_customer'
     });
 
     try {
       // 创建订单
-      const orderResponse = await fetch("/go-tech/platform/packageOrder/add", {
-        method: "POST",
+      const orderResponse = await fetch('/go-tech/platform/packageOrder/add', {
+        method: 'POST',
         headers: requestHeaders,
-        body: JSON.stringify(orderInfo),
+        body: JSON.stringify(orderInfo)
       })
         .then(res => res.json())
         .catch(err => {
           throw err;
         });
       if (orderResponse.code === 200) {
-        toast.success("續費訂單創建成功", { id: toastId });
+        toast.success('續費訂單創建成功', { id: toastId });
         const orderId = orderResponse.data;
         if (orderInfo.payType === PayTypeEnum.FPS) {
           // 上传凭证
-          await fetch("/go-tech/platform/packageOrder/payEvidence", {
-            method: "POST",
+          await fetch('/go-tech/platform/packageOrder/payEvidence', {
+            method: 'POST',
             headers: requestHeaders,
             body: JSON.stringify({
               id: orderId,
-              payEvidence: voucherFile.url,
-            }),
+              payEvidence: voucherFile.url
+            })
           })
             .catch(err => {
               throw err;
@@ -220,8 +188,8 @@ const RenewOrder = ({
 
         setShowPaymentDialog(false);
         setSelectedPaymentMethod(null);
-        router.push("/my-orders");
-        toast.success("支付憑證已提交，我們將在確認後為您續費");
+        router.push('/my-orders');
+        toast.success('支付憑證已提交，我們將在確認後為您續費');
       } else {
         toast.error(orderResponse.message);
       }
@@ -247,9 +215,7 @@ const RenewOrder = ({
           <div className="flex items-center gap-3">
             <RefreshCw className="w-10 h-10 text-primary" />
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-primary">
-                續費套餐
-              </h1>
+              <h1 className="text-3xl md:text-4xl font-bold text-primary">續費套餐</h1>
               <p className="text-muted-foreground">訂單編號：{order.id}</p>
             </div>
           </div>
@@ -275,9 +241,7 @@ const RenewOrder = ({
                       </p>
                     </div>
                   </div>
-                  <Badge className="bg-green-500/10 text-green-600 border-green-200">
-                    使用中
-                  </Badge>
+                  <Badge className="bg-green-500/10 text-green-600 border-green-200">使用中</Badge>
                 </div>
               </CardHeader>
               <CardContent>
@@ -286,30 +250,19 @@ const RenewOrder = ({
                   <span>當前到期日：{order.expireDate}</span>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                  {order.platformPackageDto?.packageItemList?.map(
-                    (feature: any) => {
-                      if (feature.level >= 2) return null;
-                      return (
-                        <div
-                          key={feature.id}
-                          className="flex items-center gap-2 py-1.5 px-2 rounded bg-[#FAEEEB]"
-                        >
-                          {feature.menuIcon && (
-                            <svg
-                              className="svg-icon w-4 h-4 text-primary mr-1"
-                              aria-hidden="true"
-                            >
-                              <use
-                                href={`#icon-${feature.menuIcon}`}
-                                xlinkHref={`#icon-${feature.menuIcon}`}
-                              ></use>
-                            </svg>
-                          )}
-                          <span className="text-xs">{feature.menuTitle}</span>
-                        </div>
-                      );
-                    }
-                  )}
+                  {order.platformPackageDto?.packageItemList?.map((feature: any) => {
+                    if (feature.level >= 2) return null;
+                    return (
+                      <div key={feature.id} className="flex items-center gap-2 py-1.5 px-2 rounded bg-[#FAEEEB]">
+                        {feature.menuIcon && (
+                          <svg className="svg-icon w-4 h-4 text-primary mr-1" aria-hidden="true">
+                            <use href={`#icon-${feature.menuIcon}`} xlinkHref={`#icon-${feature.menuIcon}`} />
+                          </svg>
+                        )}
+                        <span className="text-xs">{feature.menuTitle}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
@@ -328,16 +281,10 @@ const RenewOrder = ({
                           key={service.itemCode}
                           className="flex items-center justify-between py-3 border-b border-border last:border-0"
                         >
-                          <span className="text-sm text-gray-700">
-                            {service.itemName}
-                          </span>
+                          <span className="text-sm text-gray-700">{service.itemName}</span>
                           <div className="flex items-center gap-8">
-                            <span className="text-sm font-medium">
-                              ${service.amount}
-                            </span>
-                            <span className="text-sm text-muted-foreground">
-                              數量 {service.count}
-                            </span>
+                            <span className="text-sm font-medium">${service.amount}</span>
+                            <span className="text-sm text-muted-foreground">數量 {service.count}</span>
                           </div>
                         </div>
                       );
@@ -353,14 +300,9 @@ const RenewOrder = ({
                 <h2 className="text-lg font-bold">選擇續費時長</h2>
               </CardHeader>
               <CardContent>
-                <RadioGroup
-                  value={selectedPeriod}
-                  onValueChange={setSelectedPeriod}
-                  className="space-y-3"
-                >
+                <RadioGroup value={selectedPeriod} onValueChange={setSelectedPeriod} className="space-y-3">
                   {renewalOptions.map(option => {
-                    const optionMonths =
-                      option.id === "custom" ? customMonths : option.months;
+                    const optionMonths = option.id === 'custom' ? customMonths : option.months;
                     const price = yearlyPrice * optionMonths;
                     const discount = price * option.discount;
                     const final = price - discount;
@@ -370,8 +312,8 @@ const RenewOrder = ({
                         key={option.id}
                         className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-colors ${
                           selectedPeriod === option.id
-                            ? "border-primary bg-primary/5"
-                            : "border-border hover:border-primary/50"
+                            ? 'border-primary bg-primary/5'
+                            : 'border-border hover:border-primary/50'
                         }`}
                         onClick={() => setSelectedPeriod(option.id)}
                       >
@@ -379,31 +321,25 @@ const RenewOrder = ({
                           <RadioGroupItem value={option.id} id={option.id} />
                           <Label htmlFor={option.id} className="cursor-pointer">
                             <span className="font-medium">{option.label}</span>
-                            {option.id === "custom" && (
+                            {option.id === 'custom' && (
                               <span className="ml-2 inline-flex items-center gap-2">
                                 <Input
                                   type="number"
                                   min={1}
                                   className="w-20 h-8 text-center"
                                   value={customMonths}
-                                  onClick={() => setSelectedPeriod("custom")}
+                                  onClick={() => setSelectedPeriod('custom')}
                                   onChange={e => {
-                                    const value = Math.max(
-                                      1,
-                                      parseInt(e.target.value || "1", 10)
-                                    );
+                                    const value = Math.max(1, Number.parseInt(e.target.value || '1', 10));
                                     setCustomMonths(value);
-                                    setSelectedPeriod("custom");
+                                    setSelectedPeriod('custom');
                                   }}
                                 />
                                 <span className="text-sm">个月</span>
                               </span>
                             )}
                             {option.discount > 0 && (
-                              <Badge
-                                variant="secondary"
-                                className="ml-2 bg-red-100 text-red-600"
-                              >
+                              <Badge variant="secondary" className="ml-2 bg-red-100 text-red-600">
                                 省 {option.discount * 100}%
                               </Badge>
                             )}
@@ -415,9 +351,7 @@ const RenewOrder = ({
                               ${price.toLocaleString()}
                             </span>
                           )}
-                          <span className="font-bold text-primary">
-                            ${final.toLocaleString()}
-                          </span>
+                          <span className="font-bold text-primary">${final.toLocaleString()}</span>
                         </div>
                       </div>
                     );
@@ -440,10 +374,7 @@ const RenewOrder = ({
                 </div>
                 {addService.length > 0 &&
                   addService.map((addon: any) => (
-                    <div
-                      key={addon.id}
-                      className="flex justify-between items-center pl-4"
-                    >
+                    <div key={addon.id} className="flex justify-between items-center pl-4">
                       <span className="text-sm">
                         {addon.itemName} × {addon.count}
                       </span>
@@ -462,16 +393,14 @@ const RenewOrder = ({
 
                 <div className="flex justify-between items-center text-lg font-bold">
                   <span>應付金額</span>
-                  <span className="text-primary">
-                    ${finalPrice.toLocaleString()}
-                  </span>
+                  <span className="text-primary">${finalPrice.toLocaleString()}</span>
                 </div>
 
                 <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
                   <CheckCircle className="w-4 h-4 text-green-500" />
                   <span>
                     預計續費後新到期日：
-                    {newExpiry?.toISOString()?.split("T")?.[0]}
+                    {newExpiry?.toISOString()?.split('T')?.[0]}
                   </span>
                 </div>
               </CardContent>
@@ -493,9 +422,7 @@ const RenewOrder = ({
             <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border border-gray-300">
               <div>
                 <h3 className="font-medium">需要更多功能？</h3>
-                <p className="text-sm text-muted-foreground">
-                  探索其他套餐方案，找到最適合您的選擇
-                </p>
+                <p className="text-sm text-muted-foreground">探索其他套餐方案，找到最適合您的選擇</p>
               </div>
               <Link href="/service-plan">
                 <Button variant="outline" className="gap-2">
@@ -521,9 +448,7 @@ const RenewOrder = ({
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-center text-xl">
-              {selectedPaymentMethod === PayTypeEnum.FPS
-                ? "FPS 轉數快支付"
-                : "選擇支付方式"}
+              {selectedPaymentMethod === PayTypeEnum.FPS ? 'FPS 轉數快支付' : '選擇支付方式'}
             </DialogTitle>
           </DialogHeader>
 

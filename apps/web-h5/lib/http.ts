@@ -1,5 +1,6 @@
-import { cookies } from "next/headers";
+// oxlint-disable
 import 'server-only';
+import { cookies } from 'next/headers';
 
 export function getBaseUrl(): string {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -12,7 +13,7 @@ export function getBaseUrl(): string {
 }
 
 export class Http {
-  private getBaseUrl(): string {
+  private getBaseUri(): string {
     return getBaseUrl();
   }
 
@@ -24,58 +25,65 @@ export class Http {
       fullEndpoint = `${endpoint}?${queryString}`;
     }
 
-    const baseUrl = this.getBaseUrl();
+    const baseUrl = this.getBaseUri();
     const url = `${baseUrl}${fullEndpoint}`;
 
     const cookieStore = await cookies();
     const authToken = cookieStore.get('GO_TECH_AUTH_TOKEN')?.value || '';
 
     const headers = new Headers(options.headers);
-    headers.set('User-Type', 'platform_customer')
+    headers.set('User-Type', 'platform_customer');
     headers.set('Content-Type', 'application/json');
     if (authToken) {
       headers.append('Authorization', `Bearer ${authToken}`);
     }
 
-
     const requestOptons: RequestInit = {
       ...options,
       method: options.method,
       headers,
-      body: options.body ? JSON.stringify(options.body) : null,
+      body: options.body ? JSON.stringify(options.body) : null
     };
 
     try {
       const response = await fetch(url, requestOptons);
-      return await response.json() as T;
+      return (await response.json()) as T;
     } catch (error) {
       return Promise.reject(error);
     }
   }
 
   async post<T>(endpoint: string, data?: any, params?: Record<string, string>): Promise<HttpBaseResponse<T>> {
-    return this.request<HttpBaseResponse<T>>(endpoint, {
-      method: 'POST',
-      body: data ? JSON.stringify(data) : undefined,
-    }, params);
+    return this.request<HttpBaseResponse<T>>(
+      endpoint,
+      {
+        method: 'POST',
+        body: data ? JSON.stringify(data) : undefined
+      },
+      params
+    );
   }
 
   async get<T = any>(endpoint: string, params?: Record<string, string>): Promise<HttpBaseResponse<T>> {
-    return this.request<HttpBaseResponse<T>>(endpoint, {
-      method: 'GET',
-    }, params);
+    return this.request<HttpBaseResponse<T>>(
+      endpoint,
+      {
+        method: 'GET'
+      },
+      params
+    );
   }
 
   async put<T>(endpoint: string, data?: any): Promise<HttpBaseResponse<T>> {
     return this.request<HttpBaseResponse<T>>(endpoint, {
       method: 'PUT',
-      body: data ? JSON.stringify(data) : undefined,
+      body: data ? JSON.stringify(data) : undefined
     });
   }
 
   async delete<T>(endpoint: string): Promise<HttpBaseResponse<T>> {
     return this.request<HttpBaseResponse<T>>(endpoint, {
-      method: 'DELETE',
+      method: 'DELETE'
     });
   }
 }

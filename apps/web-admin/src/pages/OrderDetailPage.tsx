@@ -1,20 +1,50 @@
-import { OrderStatusEnum } from "@/constants/order";
-import { PayTypelabel } from "@/constants/payment";
-import { OrderDetail as Detail } from "@/mocks/orders";
-import {
-  Badge,
-  Button,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@go-tech-frontend/ui";
-import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, FileText, Image } from "lucide-react";
-import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Badge, Button, Dialog, DialogContent, DialogHeader, DialogTitle } from '@go-tech-frontend/ui';
+import { useQuery } from '@tanstack/react-query';
+import { ArrowLeft, FileText, Image } from 'lucide-react';
+import { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { OrderStatusEnum } from '@/constants/order';
+import { PayTypelabel } from '@/constants/payment';
+import { type OrderDetail as Detail } from '@/mocks/orders';
 
 type Reponse = {} & Detail;
+
+const getStatusBadge = (status: OrderStatusEnum) => {
+  switch (status) {
+    case OrderStatusEnum.COMPLETED:
+      return (
+        <Badge variant="outline" className="text-success border-success">
+          已支付
+        </Badge>
+      );
+    case OrderStatusEnum.PROCESSING:
+      return (
+        <Badge variant="outline" className="text-warning border-warning">
+          待確認
+        </Badge>
+      );
+    case OrderStatusEnum.CANCELED:
+      return (
+        <Badge variant="outline" className="text-destructive border-destructive">
+          已取消
+        </Badge>
+      );
+    case OrderStatusEnum.REJECT:
+      return (
+        <Badge variant="outline" className="text-destructive border-destructive">
+          已拒絕
+        </Badge>
+      );
+    default:
+      return (
+        <Badge variant="outline" className="text-primary border-primary">
+          未支付
+        </Badge>
+      );
+  }
+};
+
+const toMoney = (value?: number) => value?.toLocaleString() ?? '';
 
 const OrderDetailPage = () => {
   const navigate = useNavigate();
@@ -22,7 +52,7 @@ const OrderDetailPage = () => {
   const [proofPreviewOpen, setProofPreviewOpen] = useState(false);
 
   const { data: orderDetail } = useQuery<Reponse>({
-    queryKey: ["platform/packageOrder/detail/", id],
+    queryKey: ['platform/packageOrder/detail/', id],
     queryFn: async () => {
       try {
         const url = `${import.meta.env.VITE_PROXY_PREFIX}/go-tech/platform/packageOrder/detail/${id}`;
@@ -30,7 +60,7 @@ const OrderDetailPage = () => {
         const res = await fetch(url);
         const response = await res.json();
         if (!response || !response.code || response.code !== 200) {
-          throw new Error("Failed to fetch data");
+          throw new Error('Failed to fetch data');
         }
 
         return response.data;
@@ -41,61 +71,16 @@ const OrderDetailPage = () => {
     },
     initialData: () => {
       return {} as Detail;
-    },
+    }
   });
 
   const handleBack = () => {
     navigate(-1);
   };
 
-  const getStatusBadge = (status: OrderStatusEnum) => {
-    switch (status) {
-      case OrderStatusEnum.COMPLETED:
-        return (
-          <Badge variant="outline" className="text-success border-success">
-            已支付
-          </Badge>
-        );
-      case OrderStatusEnum.PROCESSING:
-        return (
-          <Badge variant="outline" className="text-warning border-warning">
-            待確認
-          </Badge>
-        );
-      case OrderStatusEnum.CANCELED:
-        return (
-          <Badge
-            variant="outline"
-            className="text-destructive border-destructive"
-          >
-            已取消
-          </Badge>
-        );
-      case OrderStatusEnum.REJECT:
-        return (
-          <Badge
-            variant="outline"
-            className="text-destructive border-destructive"
-          >
-            已拒絕
-          </Badge>
-        );
-      default:
-        return (
-          <Badge variant="outline" className="text-primary border-primary">
-            未支付
-          </Badge>
-        );
-    }
-  };
-
   const hasPaymentInfo = orderDetail.payTime || orderDetail.payEvidence;
-  const orderPackage = orderDetail.orderItems?.find(
-    (item) => item.itemType === 1,
-  );
-  const otherService = orderDetail.orderItems?.filter(
-    (item) => item.itemType !== 1,
-  );
+  const orderPackage = orderDetail.orderItems?.find(item => item.itemType === 1);
+  const otherService = orderDetail.orderItems?.filter(item => item.itemType !== 1);
 
   return (
     <div className="space-y-6">
@@ -128,13 +113,11 @@ const OrderDetailPage = () => {
             </div>
             <div className="flex items-center gap-2">
               <span className="text-muted-foreground">支付方式：</span>
-              <span className="font-medium">
-                {PayTypelabel[orderDetail.payType] || "-"}
-              </span>
+              <span className="font-medium">{PayTypelabel[orderDetail.payType] || '-'}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-muted-foreground">支付時間：</span>
-              <span className="font-medium">{orderDetail.payTime || "-"}</span>
+              <span className="font-medium">{orderDetail.payTime || '-'}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-muted-foreground">訂單狀態：</span>
@@ -164,10 +147,7 @@ const OrderDetailPage = () => {
             </div>
             <div className="flex items-center gap-2">
               <span className="text-muted-foreground">公司名稱：</span>
-              <span className="font-medium">
-                {" "}
-                -{/* {orderDetail?.companyName || "-"} */}
-              </span>
+              <span className="font-medium"> -{/* {orderDetail?.companyName || "-"} */}</span>
             </div>
           </div>
         </div>
@@ -218,11 +198,7 @@ const OrderDetailPage = () => {
 
             {/* Payment Proof Button */}
             {orderDetail.payEvidence && (
-              <Button
-                variant="outline"
-                className="gap-2"
-                onClick={() => setProofPreviewOpen(true)}
-              >
+              <Button variant="outline" className="gap-2" onClick={() => setProofPreviewOpen(true)}>
                 <Image className="w-4 h-4" />
                 查看支付憑證
               </Button>
@@ -235,15 +211,10 @@ const OrderDetailPage = () => {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="w-1 h-5 bg-primary rounded-full" />
-              <h3 className="text-base font-medium">
-                {orderPackage?.itemName}
-              </h3>
+              <h3 className="text-base font-medium">{orderPackage?.itemName}</h3>
             </div>
             <span className="text-xl font-bold text-foreground">
-              ${orderPackage?.price?.toLocaleString()}{" "}
-              <span className="text-sm font-normal text-muted-foreground">
-                HKD
-              </span>
+              ${toMoney(orderPackage?.price)} <span className="text-sm font-normal text-muted-foreground">HKD</span>
             </span>
           </div>
 
@@ -256,23 +227,19 @@ const OrderDetailPage = () => {
             </div>
 
             <div>
-              <span className="text-sm text-muted-foreground mb-2 block">
-                包含功能
-              </span>
+              <span className="text-sm text-muted-foreground mb-2 block">包含功能</span>
               <div className="flex flex-wrap gap-2">
-                {orderDetail.platformPackageDto?.packageItemList?.map(
-                  (feature, index) => {
-                    return feature.level <= 1 ? (
-                      <Badge
-                        key={index}
-                        variant="outline"
-                        className="bg-background border-border text-foreground font-normal px-3 py-1.5 rounded-md"
-                      >
-                        {feature.menuTitle}
-                      </Badge>
-                    ) : null;
-                  },
-                )}
+                {orderDetail.platformPackageDto?.packageItemList?.map((feature, index) => {
+                  return feature.level <= 1 ? (
+                    <Badge
+                      key={index}
+                      variant="outline"
+                      className="bg-background border-border text-foreground font-normal px-3 py-1.5 rounded-md"
+                    >
+                      {feature.menuTitle}
+                    </Badge>
+                  ) : null;
+                })}
               </div>
             </div>
           </div>
@@ -288,15 +255,10 @@ const OrderDetailPage = () => {
 
             <div className="space-y-3">
               {otherService?.map((addon, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between py-2 pl-4"
-                >
+                <div key={index} className="flex items-center justify-between py-2 pl-4">
                   <span className="text-sm">
                     {addon.itemName} × {addon.count}
-                    <span className="text-muted-foreground ml-2">
-                      ({addon.price}/個)
-                    </span>
+                    <span className="text-muted-foreground ml-2">({addon.price}/個)</span>
                   </span>
                   <span className="font-medium">{addon.amount} HKD</span>
                 </div>
@@ -313,21 +275,15 @@ const OrderDetailPage = () => {
           <div className="flex items-center gap-8 flex-wrap">
             <div>
               <span className="text-muted-foreground">原價：</span>
-              <span className="font-bold text-foreground">
-                ${orderDetail.orderAmount?.toLocaleString()}HKD
-              </span>
+              <span className="font-bold text-foreground">${toMoney(orderDetail.orderAmount)}HKD</span>
             </div>
             <div>
               <span className="text-muted-foreground">優惠：</span>
-              <span className="font-bold text-foreground">
-                ${orderDetail.discountAmount?.toLocaleString()}HKD
-              </span>
+              <span className="font-bold text-foreground">${toMoney(orderDetail.discountAmount)}HKD</span>
             </div>
             <div>
               <span className="text-muted-foreground">總計：</span>
-              <span className="font-bold text-primary text-xl">
-                ${orderDetail.finalAmount?.toLocaleString()} HKD
-              </span>
+              <span className="font-bold text-primary text-xl">${toMoney(orderDetail.finalAmount)} HKD</span>
             </div>
           </div>
         </div>
@@ -345,11 +301,7 @@ const OrderDetailPage = () => {
 
           {orderDetail.payEvidence && (
             <div className="relative">
-              <img
-                src={orderDetail.payEvidence}
-                alt="支付憑證"
-                className="w-full h-auto rounded-lg"
-              />
+              <img src={orderDetail.payEvidence} alt="支付憑證" className="w-full h-auto rounded-lg" />
             </div>
           )}
         </DialogContent>

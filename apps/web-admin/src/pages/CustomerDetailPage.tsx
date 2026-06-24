@@ -1,77 +1,69 @@
-import { Users, ArrowLeft, ExternalLink } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
-import {
-  Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@go-tech-frontend/ui";
+import { Button, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@go-tech-frontend/ui';
+import { ArrowLeft, ExternalLink, Users } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
 
 // Mock customer data
 const mockCustomerDetail = {
-  id: "TC000001",
-  name: "张大龍",
-  phone: "98253973",
-  idNumber: "**********",
-  type: "個人/公司",
+  id: 'TC000001',
+  name: '张大龍',
+  phone: '98253973',
+  idNumber: '**********',
+  type: '個人/公司'
 };
 
 // Mock orders data
 const mockCustomerOrders = [
   {
-    id: "TC000001",
-    packageType: "黃金套餐",
-    addons: "租務系統；會計系統",
-    amount: "$1080",
-    paymentMethod: "轉賬",
-    paymentTime: "12/08/2025 10:00",
-    status: "已支付",
+    id: 'TC000001',
+    packageType: '黃金套餐',
+    addons: '租務系統；會計系統',
+    amount: '$1080',
+    paymentMethod: '轉賬',
+    paymentTime: '12/08/2025 10:00',
+    status: '已支付'
   },
   {
-    id: "TC000002",
-    packageType: "白金套餐",
-    addons: "場務系統；增加單位*10",
-    amount: "$3280",
-    paymentMethod: "網銀",
-    paymentTime: "12/08/2025 10:00",
-    status: "已支付",
+    id: 'TC000002',
+    packageType: '白金套餐',
+    addons: '場務系統；增加單位*10',
+    amount: '$3280',
+    paymentMethod: '網銀',
+    paymentTime: '12/08/2025 10:00',
+    status: '已支付'
   },
   {
-    id: "TC000003",
-    packageType: "鑽石套餐",
-    addons: "租務系統；會計系統",
-    amount: "$12080",
-    paymentMethod: "",
-    paymentTime: "",
-    status: "未支付",
+    id: 'TC000003',
+    packageType: '鑽石套餐',
+    addons: '租務系統；會計系統',
+    amount: '$12080',
+    paymentMethod: '',
+    paymentTime: '',
+    status: '未支付'
   },
   {
-    id: "TC000004",
-    packageType: "白金套餐",
-    addons: "場務系統；增加單位*10",
-    amount: "$3280",
-    paymentMethod: "網銀",
-    paymentTime: "12/08/2025 10:00",
-    status: "已支付",
-  },
+    id: 'TC000004',
+    packageType: '白金套餐',
+    addons: '場務系統；增加單位*10',
+    amount: '$3280',
+    paymentMethod: '網銀',
+    paymentTime: '12/08/2025 10:00',
+    status: '已支付'
+  }
 ];
+
+const getStatusClass = (status: string) => {
+  if (status === '已支付') {
+    return 'text-success';
+  }
+  return 'text-primary';
+};
 
 const CustomerDetailPage = () => {
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { id: _id } = useParams();
 
   const handleBack = () => {
-    navigate("/customers");
-  };
-
-  const getStatusClass = (status: string) => {
-    if (status === "已支付") {
-      return "text-success";
-    }
-    return "text-primary";
+    navigate('/customers');
   };
 
   return (
@@ -88,11 +80,7 @@ const CustomerDetailPage = () => {
       <div className="bg-card rounded-lg border border-border overflow-hidden">
         {/* Card Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-          <Button 
-            variant="link" 
-            className="text-muted-foreground gap-2 p-0 h-auto"
-            onClick={handleBack}
-          >
+          <Button variant="link" className="text-muted-foreground gap-2 p-0 h-auto" onClick={handleBack}>
             <ArrowLeft className="w-4 h-4" />
             返回
           </Button>
@@ -152,12 +140,10 @@ const CustomerDetailPage = () => {
                 <TableCell className="text-center">{order.amount}</TableCell>
                 <TableCell className="text-center">{order.paymentMethod}</TableCell>
                 <TableCell className="text-center">{order.paymentTime}</TableCell>
-                <TableCell className={`text-center ${getStatusClass(order.status)}`}>
-                  {order.status}
-                </TableCell>
+                <TableCell className={`text-center ${getStatusClass(order.status)}`}>{order.status}</TableCell>
                 <TableCell className="text-center">
-                  <Button 
-                    variant="link" 
+                  <Button
+                    variant="link"
                     className="text-primary p-0 h-auto"
                     onClick={() => navigate(`/orders/${order.id}`)}
                   >

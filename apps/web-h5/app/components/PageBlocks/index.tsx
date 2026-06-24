@@ -1,7 +1,8 @@
-"use client";
+'use client';
 
-import Link from "@/app/components/Link";
-import { Button } from "@go-tech-frontend/ui";
+// oxlint-disable
+
+import { Button } from '@go-tech-frontend/ui';
 import {
   Building2,
   Calculator,
@@ -14,10 +15,11 @@ import {
   Store,
   UserCog,
   Users,
-  Wallet,
-} from "lucide-react";
-import { CSSProperties, ReactNode } from "react";
-import Hero, { HeroBlock } from "./Hero";
+  Wallet
+} from 'lucide-react';
+import type { CSSProperties, ReactNode } from 'react';
+import Link from '@/app/components/Link';
+import Hero, { type HeroBlock } from './Hero';
 
 type BlockBase = {
   id: string;
@@ -25,49 +27,49 @@ type BlockBase = {
 };
 
 type SectionBlock = BlockBase & {
-  type: "section";
-  title: string;
-  titleStyle?: CSSProperties;
-  lineStyle?: CSSProperties;
   intro: string;
   introStyle?: CSSProperties;
-}
+  lineStyle?: CSSProperties;
+  title: string;
+  titleStyle?: CSSProperties;
+  type: 'section';
+};
 
 type CommonBlock = BlockBase & {
-  type: "common";
   image?: string;
+  type: 'common';
   values: Record<string, string>;
 };
 
 type FeatureGridBlock = BlockBase & {
-  type: "featureGrid";
-  title: string;
-  subtitle: string;
   items: { icon: keyof typeof iconMap; label: string }[];
+  subtitle: string;
+  title: string;
+  type: 'featureGrid';
 };
 
 type TextBlock = BlockBase & {
-  type: "text";
+  align?: CSSProperties['textAlign'];
   text: string;
-  align?: CSSProperties["textAlign"];
+  type: 'text';
 };
 
 type ButtonBlock = BlockBase & {
-  type: "button";
-  text: string;
-  href: string;
   buttonStyle?: CSSProperties;
+  href: string;
+  text: string;
+  type: 'button';
 };
 
 type ImageBlock = BlockBase & {
-  type: "image";
-  src: string;
   alt: string;
+  src: string;
+  type: 'image';
 };
 
 export type PageBlock =
   | SectionBlock
-  | CommonBlock 
+  | CommonBlock
   | HeroBlock
   | FeatureGridBlock
   | TextBlock
@@ -86,97 +88,77 @@ const iconMap = {
   Calculator,
   Receipt,
   RefreshCw,
-  PenTool,
+  PenTool
 };
 
-const getAlignClass = (align?: CSSProperties["textAlign"]) => {
-  if (align === "center") return "text-center";
-  if (align === "right") return "text-right";
-  return "text-left";
+const getAlignClass = (align?: CSSProperties['textAlign']) => {
+  if (align === 'center') return 'text-center';
+  if (align === 'right') return 'text-right';
+  return 'text-left';
 };
 
-const cursorClass = (hasIframe: boolean) => (hasIframe ? "cursor-editor" : "");
+const cursorClass = (hasIframe: boolean) => (hasIframe ? 'cursor-editor' : '');
 
-export const PageBlocks = ({
-  blocks,
-  hasIframe,
-}: {
-  blocks: PageBlock[];
-  hasIframe: boolean;
-}) => {
+export const PageBlocks = ({ blocks, hasIframe }: { blocks: PageBlock[]; hasIframe: boolean }) => {
   const renderedBlocks: ReactNode[] = [];
 
   for (let i = 0; i < blocks.length; i += 1) {
     const block = blocks[i];
 
-    if (block.type === "hero") {
+    if (block.type === 'hero') {
       const heroStartIndex = i;
       const heros: HeroBlock[] = [block];
 
-      while (i + 1 < blocks.length && blocks[i + 1].type === "hero") {
+      while (i + 1 < blocks.length && blocks[i + 1].type === 'hero') {
         heros.push(blocks[i + 1] as HeroBlock);
         i += 1;
       }
 
       renderedBlocks.push(
         <Hero
-          key={heros.map((hero) => hero.id).join("-")}
+          key={heros.map(hero => hero.id).join('-')}
           heros={heros}
           hasIframe={hasIframe}
           startIndex={heroStartIndex}
-        />,
+        />
       );
 
       continue;
     }
 
-    if (block.type === "featureGrid") {
+    if (block.type === 'featureGrid') {
       renderedBlocks.push(
         <section key={block.id} className="py-16 md:py-24 flex-1">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
-              <h2
-                className={`text-3xl font-bold text-foreground mb-4 ${cursorClass(hasIframe)}`}
-              >
-                {block.title}
-              </h2>
-              <p className={`text-muted-foreground mb-12 ${cursorClass(hasIframe)}`}>
-                {block.subtitle}
-              </p>
+              <h2 className={`text-3xl font-bold text-foreground mb-4 ${cursorClass(hasIframe)}`}>{block.title}</h2>
+              <p className={`text-muted-foreground mb-12 ${cursorClass(hasIframe)}`}>{block.subtitle}</p>
 
-              <div
-                className={`grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-10 ${cursorClass(hasIframe)}`}
-              >
+              <div className={`grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-10 ${cursorClass(hasIframe)}`}>
                 {block.items.map((feature, index) => {
                   const Icon = iconMap[feature.icon];
                   return (
                     <div key={index} className="flex flex-col items-start">
                       <div
                         className="w-full aspect-4/3 rounded-2xl flex items-center justify-center mb-4"
-                        style={{ backgroundColor: "#F9F9F9" }}
+                        style={{ backgroundColor: '#F9F9F9' }}
                       >
-                        <Icon
-                          className="w-24 h-24"
-                          style={{ color: "#F5734A" }}
-                          strokeWidth={1.5}
-                        />
+                        <Icon className="w-24 h-24" style={{ color: '#F5734A' }} strokeWidth={1.5} />
                       </div>
-                      <span className="text-lg font-bold text-foreground">
-                        {feature.label}
-                      </span>
+                      <span className="text-lg font-bold text-foreground">{feature.label}</span>
                     </div>
                   );
                 })}
               </div>
             </div>
           </div>
-        </section>,
+        </section>
       );
 
       continue;
     }
 
-    if (block.type === "text") {
+    if (block.type === 'text') {
       renderedBlocks.push(
         <section key={block.id} className="py-6">
           <div className="container mx-auto px-4">
@@ -188,13 +170,13 @@ export const PageBlocks = ({
               {block.text}
             </p>
           </div>
-        </section>,
+        </section>
       );
 
       continue;
     }
 
-    if (block.type === "button") {
+    if (block.type === 'button') {
       renderedBlocks.push(
         <section key={block.id} className="py-6">
           <div className="container mx-auto px-4">
@@ -210,13 +192,13 @@ export const PageBlocks = ({
               </Button>
             </Link>
           </div>
-        </section>,
+        </section>
       );
 
       continue;
     }
 
-    if (block.type === "image") {
+    if (block.type === 'image') {
       renderedBlocks.push(
         <section key={block.id} className="py-6">
           <div className="container mx-auto px-4">
@@ -228,7 +210,7 @@ export const PageBlocks = ({
               alt={block.alt}
             />
           </div>
-        </section>,
+        </section>
       );
     }
   }

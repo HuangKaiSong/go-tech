@@ -1,38 +1,39 @@
-import { useTranslations } from "next-intl"
-import "./index.css"
+import { useTranslations } from 'next-intl';
+// oxlint-disable import/no-unassigned-import
+import './index.css';
 
 type PrivacySection = {
-  title: string
-  paragraphs?: string[]
-  items?: string[]
-}
+  items?: string[];
+  paragraphs?: string[];
+  title: string;
+};
 
 export default function TermsOfUse() {
-  const t = useTranslations("Terms_of_Use")
-  const sections = t.raw("sections") as PrivacySection[]
+  const t = useTranslations('Terms_of_Use');
+  const sections = t.raw('sections') as PrivacySection[];
 
   return (
     <div className="privacy-page">
       <main className="privacy-wrapper">
         <article className="privacy-card">
           <header className="privacy-header">
-            <h1>{t("title")}</h1>
-            <p>{t("foreword")}</p>
-            <p>{t("languageVersion")}</p>
+            <h1>{t('title')}</h1>
+            <p>{t('foreword')}</p>
+            <p>{t('languageVersion')}</p>
           </header>
 
           <div className="privacy-content">
-            {sections.map((section) => (
+            {sections.map(section => (
               <section key={section.title} className="privacy-section">
                 <h2>{section.title}</h2>
 
-                {section.paragraphs?.map((paragraph) => (
+                {section.paragraphs?.map(paragraph => (
                   <p key={paragraph}>{paragraph}</p>
                 ))}
 
                 {section.items ? (
                   <ul>
-                    {section.items.map((item) => (
+                    {section.items.map(item => (
                       <li key={item}>{item}</li>
                     ))}
                   </ul>
@@ -43,5 +44,5 @@ export default function TermsOfUse() {
         </article>
       </main>
     </div>
-  )
+  );
 }

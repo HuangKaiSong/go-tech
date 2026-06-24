@@ -1,44 +1,57 @@
-import { Users, UserPlus, Clock, DollarSign, TrendingUp, TrendingDown, UserCheck, CalendarDays } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from "recharts";
+import { Clock, TrendingDown, TrendingUp, UserCheck, UserPlus, Users } from 'lucide-react';
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
+} from 'recharts';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const stats = [
-  { label: "總員工數", value: "1,284", change: "+12", trend: "up", icon: Users, color: "text-primary" },
-  { label: "本月新入職", value: "23", change: "+5", trend: "up", icon: UserPlus, color: "text-accent" },
-  { label: "本月離職", value: "8", change: "-2", trend: "down", icon: UserCheck, color: "text-warning" },
-  { label: "出勤率", value: "96.5%", change: "+0.3%", trend: "up", icon: Clock, color: "text-success" },
+  { label: '總員工數', value: '1,284', change: '+12', trend: 'up', icon: Users, color: 'text-primary' },
+  { label: '本月新入職', value: '23', change: '+5', trend: 'up', icon: UserPlus, color: 'text-accent' },
+  { label: '本月離職', value: '8', change: '-2', trend: 'down', icon: UserCheck, color: 'text-warning' },
+  { label: '出勤率', value: '96.5%', change: '+0.3%', trend: 'up', icon: Clock, color: 'text-success' }
 ];
 
 const departmentData = [
-  { name: "技術部", count: 320 },
-  { name: "銷售部", count: 240 },
-  { name: "市場部", count: 180 },
-  { name: "人事部", count: 80 },
-  { name: "財務部", count: 120 },
-  { name: "運營部", count: 200 },
-  { name: "客服部", count: 144 },
+  { name: '技術部', count: 320 },
+  { name: '銷售部', count: 240 },
+  { name: '市場部', count: 180 },
+  { name: '人事部', count: 80 },
+  { name: '財務部', count: 120 },
+  { name: '運營部', count: 200 },
+  { name: '客服部', count: 144 }
 ];
 
 const genderData = [
-  { name: "男性", value: 720, color: "hsl(215, 70%, 45%)" },
-  { name: "女性", value: 564, color: "hsl(200, 75%, 45%)" },
+  { name: '男性', value: 720, color: 'hsl(215, 70%, 45%)' },
+  { name: '女性', value: 564, color: 'hsl(200, 75%, 45%)' }
 ];
 
 const monthlyTrend = [
-  { month: "1月", 入職: 15, 離職: 8 },
-  { month: "2月", 入職: 20, 離職: 5 },
-  { month: "3月", 入職: 18, 離職: 10 },
-  { month: "4月", 入職: 25, 離職: 7 },
-  { month: "5月", 入職: 22, 離職: 9 },
-  { month: "6月", 入職: 23, 離職: 8 },
+  { month: '1月', 入職: 15, 離職: 8 },
+  { month: '2月', 入職: 20, 離職: 5 },
+  { month: '3月', 入職: 18, 離職: 10 },
+  { month: '4月', 入職: 25, 離職: 7 },
+  { month: '5月', 入職: 22, 離職: 9 },
+  { month: '6月', 入職: 23, 離職: 8 }
 ];
 
 const recentActivities = [
-  { action: "新員工入職", detail: "張小明 加入技術部", time: "2 小時前" },
-  { action: "請假申請", detail: "李文華 申請年假 3 天", time: "3 小時前" },
-  { action: "績效評估", detail: "Q2 績效評估已完成 85%", time: "5 小時前" },
-  { action: "培訓通知", detail: "新員工培訓將於下週一開始", time: "1 天前" },
-  { action: "薪資發放", detail: "6月份薪資已發放完成", time: "2 天前" },
+  { action: '新員工入職', detail: '張小明 加入技術部', time: '2 小時前' },
+  { action: '請假申請', detail: '李文華 申請年假 3 天', time: '3 小時前' },
+  { action: '績效評估', detail: 'Q2 績效評估已完成 85%', time: '5 小時前' },
+  { action: '培訓通知', detail: '新員工培訓將於下週一開始', time: '1 天前' },
+  { action: '薪資發放', detail: '6月份薪資已發放完成', time: '2 天前' }
 ];
 
 export default function Dashboard() {
@@ -51,7 +64,7 @@ export default function Dashboard() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {stats.map((stat) => (
+        {stats.map(stat => (
           <div key={stat.label} className="stat-card">
             <div className="flex items-center justify-between">
               <div>
@@ -63,14 +76,12 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="mt-3 flex items-center gap-1 text-xs">
-              {stat.trend === "up" ? (
+              {stat.trend === 'up' ? (
                 <TrendingUp className="h-3 w-3 text-success" />
               ) : (
                 <TrendingDown className="h-3 w-3 text-warning" />
               )}
-              <span className={stat.trend === "up" ? "text-success" : "text-warning"}>
-                {stat.change}
-              </span>
+              <span className={stat.trend === 'up' ? 'text-success' : 'text-warning'}>{stat.change}</span>
               <span className="text-muted-foreground">較上月</span>
             </div>
           </div>
@@ -104,7 +115,15 @@ export default function Dashboard() {
           <CardContent className="flex items-center justify-center">
             <ResponsiveContainer width="100%" height={260}>
               <PieChart>
-                <Pie data={genderData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={4} dataKey="value">
+                <Pie
+                  data={genderData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={90}
+                  paddingAngle={4}
+                  dataKey="value"
+                >
                   {genderData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}

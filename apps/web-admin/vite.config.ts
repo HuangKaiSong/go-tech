@@ -1,22 +1,22 @@
+import { resolve } from 'node:path';
 import react from '@vitejs/plugin-react';
-import { resolve } from "path";
 import { defineConfig, loadEnv } from 'vite';
 import glsl from 'vite-plugin-glsl';
 import { VitePWA } from 'vite-plugin-pwa';
 
 // https://vite.dev/config/
-export default defineConfig(({ mode, }) => {
-  const env = loadEnv(mode, process.cwd())
-  const { VITE_PROXY_PREFIX, VITE_PROXY_TARGET, VITE_H5_SITE_URL } = env
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd());
+  const { VITE_H5_SITE_URL, VITE_PROXY_PREFIX, VITE_PROXY_TARGET } = env;
 
   return {
     plugins: [
       glsl(),
       react({
-        babel: { plugins: ['babel-plugin-react-compiler'] },
-      }).map((p) => ({
+        babel: { plugins: ['babel-plugin-react-compiler'] }
+      }).map(p => ({
         ...p,
-        applyToEnvironment: (e) => e.name === 'client',
+        applyToEnvironment: e => e.name === 'client'
       })),
       VitePWA({
         injectRegister: 'auto',
@@ -30,52 +30,52 @@ export default defineConfig(({ mode, }) => {
               urlPattern: /\/api\//,
               handler: 'NetworkFirst',
               options: {
-                cacheName: 'go-techs-admin-v1-api',
-              },
+                cacheName: 'go-techs-admin-v1-api'
+              }
             },
             {
               urlPattern: /^https:\/\/cdnjs\.cloudflare\.com\//,
               handler: 'NetworkFirst',
               options: {
-                cacheName: 'go-techs-admin-v1-cdn',
-              },
-            },
-          ],
-        },
+                cacheName: 'go-techs-admin-v1-cdn'
+              }
+            }
+          ]
+        }
       })
     ],
     resolve: {
       alias: {
-        "@": resolve(__dirname, "./src"),
-      },
+        '@': resolve(__dirname, './src')
+      }
     },
     preview: {
-      host: "0.0.0.0",
+      host: '0.0.0.0',
       port: 5173
     },
     server: {
-      host: "0.0.0.0",
+      host: '0.0.0.0',
       proxy: {
         [VITE_PROXY_PREFIX]: {
           target: VITE_PROXY_TARGET,
           changeOrigin: true,
-          rewrite: (path) => {
-            console.log('full path => ' + VITE_PROXY_TARGET + path.replace(new RegExp(`^${VITE_PROXY_PREFIX}`), ''))
-            return path.replace(new RegExp(`^${VITE_PROXY_PREFIX}`), '')
-          },
+          rewrite: path => {
+            console.log(`full path => ${VITE_PROXY_TARGET}${path.replace(new RegExp(`^${VITE_PROXY_PREFIX}`), '')}`);
+            return path.replace(new RegExp(`^${VITE_PROXY_PREFIX}`), '');
+          }
         },
         '/h5-hook': {
           target: VITE_H5_SITE_URL,
           changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/h5-hook/, ''),
+          rewrite: path => path.replace(/^\/h5-hook/, '')
         }
       }
     },
     optimizeDeps: {
-      include: ['react', 'react-dom'],
+      include: ['react', 'react-dom']
     },
     css: {
-      devSourcemap: false,
+      devSourcemap: false
     },
     build: {
       rollupOptions: {
@@ -84,20 +84,20 @@ export default defineConfig(({ mode, }) => {
         },
         // 静态资源分类打包
         output: {
-          chunkFileNames: "static/js/[name]-[hash].js",
-          entryFileNames: "static/js/[name]-[hash].js",
-          assetFileNames: "static/[ext]/[name]-[hash].[ext]",
+          chunkFileNames: 'static/js/[name]-[hash].js',
+          entryFileNames: 'static/js/[name]-[hash].js',
+          assetFileNames: 'static/[ext]/[name]-[hash].[ext]',
           manualChunks: {
             react: ['react', 'react-dom'],
             router: ['react-router-dom'],
             ui: ['@go-tech-frontend/ui'],
             icon: ['lucide-react']
-          },
-        },
-      },
+          }
+        }
+      }
     },
     define: {
-      __DEV__: false,
+      __DEV__: false
     }
-  }
-})
+  };
+});

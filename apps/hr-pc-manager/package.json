@@ -1,13 +1,14 @@
 {
   "name": "hr-admin",
-  "private": true,
   "version": "0.0.0",
+  "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "build:dev": "vite build --mode development",
-    "lint": "eslint .",
+    "lint": "oxlint",
+    "type-check": "tsc -b",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -64,22 +65,17 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@eslint/js": "catalog:",
+    "@go-tech/tsconfig": "workspace:*",
     "@tailwindcss/typography": "catalog:",
     "@types/node": "^22.16.5",
     "@types/react": "catalog:react18",
     "@types/react-dom": "catalog:react18",
     "@vitejs/plugin-react-swc": "catalog:vite-hr",
     "autoprefixer": "catalog:",
-    "eslint": "catalog:",
-    "eslint-plugin-react-hooks": "catalog:vite-hr",
-    "eslint-plugin-react-refresh": "catalog:",
-    "globals": "catalog:vite-hr",
     "jsdom": "catalog:vite-hr",
     "postcss": "catalog:",
     "tailwindcss": "^3.4.17",
     "typescript": "catalog:",
-    "typescript-eslint": "catalog:",
     "vite": "catalog:vite-hr"
   }
 }

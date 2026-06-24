@@ -1,8 +1,8 @@
-import { useRef } from "react";
-import PanlEditor from "./PanlEditor";
+import { useRef } from 'react';
+import PanlEditor from './PanlEditor';
 
 const TargetAudience = () => {
-  const iframeRef = useRef<HTMLIFrameElement | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null!);
 
   return (
     <div className="h-[calc(100vh-64px-48px-56px-56px)] grid grid-cols-[minmax(0,1fr)_420px] gap-4">

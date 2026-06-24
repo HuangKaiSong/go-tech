@@ -1,4 +1,4 @@
-import { ClassValue, clsx } from 'clsx';
+import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
@@ -6,24 +6,19 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const truncate = (text: string, length: number) => {
-  return text.length > length ? text.slice(0, length) + '...' : text;
+  return text.length > length ? `${text.slice(0, length)}...` : text;
 };
 
-export const formatNumber = (
-  number: number,
-  locale: string = 'en-US'
-): string => {
+export const formatNumber = (number: number, locale: string = 'en-US'): string => {
   return new Intl.NumberFormat(locale, {
     style: 'decimal',
     minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
+    maximumFractionDigits: 2
   }).format(number);
 };
 
-export const isObject = (value: unknown): value is Record<any, any> =>
-  value !== null && typeof value === 'object';
-export const isFunction = (value: unknown): value is (...args: any) => any =>
-  typeof value === 'function';
+export const isObject = (value: unknown): value is Record<any, any> => value !== null && typeof value === 'object';
+export const isFunction = (value: unknown): value is (...args: any) => any => typeof value === 'function';
 export const isString = (value: unknown): value is string => typeof value === 'string';
 export const isBoolean = (value: unknown): value is boolean => typeof value === 'boolean';
 export const isNumber = (value: unknown): value is number => typeof value === 'number';

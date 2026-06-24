@@ -1,76 +1,76 @@
-import { OrderTypeEnum } from "@/constants/order"
-import { PayTypeEnum } from "@/constants/payment"
+import { OrderTypeEnum } from '@/constants/order';
+import { PayTypeEnum } from '@/constants/payment';
 
 export interface Order {
-  "id": 1
-  "orderNo": string
-  "custCode": string
-  "custName": string
-  "custPhone": string
-  "custEmail": string
-  "orderType": OrderTypeEnum
-  "originalOrder"?: any
-  "orderAmount": number
-  "discountRate": number
-  "discountAmount": number
-  "finalAmount": number
-  "payType": PayTypeEnum
-  "payEvidence": string
-  "payTime"?: string
-  "orderStatus": number
-  "createUser": number
-  "createTime": string
-  "orderItems"?: any
-  packageName: string
+  createTime: string;
+  createUser: number;
+  custCode: string;
+  custEmail: string;
+  custName: string;
+  custPhone: string;
+  discountAmount: number;
+  discountRate: number;
+  finalAmount: number;
+  id: number;
+  orderAmount: number;
+  orderItems?: any;
+  orderNo: string;
+  orderStatus: number;
+  orderType: OrderTypeEnum;
+  originalOrder?: any;
+  packageName: string;
+  payEvidence: string;
+  payTime?: string;
+  payType: PayTypeEnum;
 }
 
 export interface OrderDetail {
-  "id": number
-  "orderNo": string
-  "custCode": string
-  "custName": string
-  "custPhone": string
-  "custEmail": string
-  "orderType": OrderTypeEnum
-  "originalOrder": null
-  "orderAmount": number
-  "discountRate": number
-  "discountAmount": number
-  "finalAmount": number
-  "payType": number
-  "payEvidence": string
-  "payTime": PayTypeEnum
-  "orderStatus": number
-  "createUser": number
-  "createTime": string
-  "orderItems": {
-    "id": number
-    "orderId": number
-    "packageId": number
-    "itemType": number
-    "itemName": string
-    "price": number
-    "count": number
-    "amount": number
-  }[]
+  createTime: string;
+  createUser: number;
+  custCode: string;
+  custEmail: string;
+  custName: string;
+  custPhone: string;
+  discountAmount: number;
+  discountRate: number;
+  finalAmount: number;
+  id: number;
+  orderAmount: number;
+  orderItems: {
+    amount: number;
+    count: number;
+    id: number;
+    itemName: string;
+    itemType: number;
+    orderId: number;
+    packageId: number;
+    price: number;
+  }[];
+  orderNo: string;
+  orderStatus: number;
+  orderType: OrderTypeEnum;
+  originalOrder: null;
+  payEvidence: string;
+  payTime: PayTypeEnum;
+  payType: number;
   platformPackageDto: {
-    "id": number
-    "packageName": string
-    "unitCount": number
-    "price": number
-    "addUnitPrice": number
-    "rentSysPrice": number
-    "venueSysPrice": number
-    "accountingSysPrice": number
-    "custServiceSysPrice": number
-    "status": number
+    accountingSysPrice: number;
+    addUnitPrice: number;
+    custServiceSysPrice: number;
+    id: number;
     packageItemList: {
-      "id": number
-      "packageId": number
-      "menuId": number
-      "menuTitle": string
-      "menuIcon": string
-      level: number
-    }[]
-  }
+      id: number;
+      level: number;
+      menuIcon: string;
+      menuId: number;
+      menuTitle: string;
+      packageId: number;
+    }[];
+    packageName: string;
+    price: number;
+    rentSysPrice: number;
+    status: number;
+    unitCount: number;
+    venueSysPrice: number;
+  };
 }

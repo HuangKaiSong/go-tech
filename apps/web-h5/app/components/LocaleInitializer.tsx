@@ -8,10 +8,10 @@ type Props = {
 
 export default function LocaleInitializer({ locale }: Props) {
   useEffect(() => {
-    void fetch('/api/locale', {
+    fetch('/api/locale', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ locale }),
+      body: JSON.stringify({ locale })
     });
   }, [locale]);
 

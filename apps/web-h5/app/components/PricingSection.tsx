@@ -1,13 +1,6 @@
-import Link from "@/app/components/Link";
-import {
-  Button,
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@go-tech-frontend/ui";
-import { ChevronRight } from "lucide-react";
-import { Fragment } from 'react';
+import { Button, Card, CardContent, CardFooter, CardHeader } from '@go-tech-frontend/ui';
+import { ChevronRight } from 'lucide-react';
+import Link from '@/app/components/Link';
 
 const PricingSection = ({ packages }: { packages: Packages[] }) => {
   return (
@@ -20,38 +13,29 @@ const PricingSection = ({ packages }: { packages: Packages[] }) => {
               className="basis-3/10 relative overflow-hidden transition-all duration-300 group/card cursor-pointer border border-border hover:border-primary hover:shadow-xl"
             >
               <CardHeader className="text-center pb-2">
-                <h3 className="text-xl font-bold text-foreground">
-                  {plan.packageName}
-                </h3>
+                <h3 className="text-xl font-bold text-foreground">{plan.packageName}</h3>
                 {/* <p className="text-sm text-muted-foreground">{plan.subtitle}</p> */}
-                <p className="text-sm text-muted-foreground"></p>
+                <p className="text-sm text-muted-foreground" />
               </CardHeader>
 
               <CardContent className="text-center pt-4">
                 <div className="mb-2">
-                  <span className="text-sm text-muted-foreground line-through">
-                  </span>
+                  <span className="text-sm text-muted-foreground line-through" />
                 </div>
                 <div className="flex items-baseline justify-center gap-1 mb-2">
                   {plan.price ? (
-                    <Fragment>
+                    <>
                       <span className="text-sm text-muted-foreground">低至：</span>
-                      <span className="text-3xl font-bold text-primary">
-                        ${plan.price}
-                      </span>
-                      <span className="text-sm text-muted-foreground">
-                        HKD
-                      </span>
-                    </Fragment>
+                      <span className="text-3xl font-bold text-primary">${plan.price}</span>
+                      <span className="text-sm text-muted-foreground">HKD</span>
+                    </>
                   ) : (
                     <div className="text-3xl font-bold text-primary">敬請期待</div>
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground">
                   <span>每年收費,年費收費</span>
-                  {plan.addUnitPrice && (
-                    <span className="ml-1">+{plan.addUnitPrice} /unit</span>
-                  )}
+                  {plan.addUnitPrice && <span className="ml-1">+{plan.addUnitPrice} /unit</span>}
                 </p>
               </CardContent>
 
@@ -71,10 +55,7 @@ const PricingSection = ({ packages }: { packages: Packages[] }) => {
         </div>
 
         <div className="text-center mt-10 space-y-1">
-          <Link
-            href="/pricing-plan"
-            className="text-base font-bold text-foreground hover:text-primary underline block"
-          >
+          <Link href="/pricing-plan" className="text-base font-bold text-foreground hover:text-primary underline block">
             查看完整的定價方案
           </Link>
           <Link href="/free-trial">

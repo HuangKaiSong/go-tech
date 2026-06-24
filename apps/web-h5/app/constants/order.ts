@@ -1,4 +1,4 @@
-import { PayTypeEnum } from "./payment";
+import { PayTypeEnum } from './payment';
 
 export enum OrderTypeEnum {
   /** 购买 */
@@ -8,14 +8,14 @@ export enum OrderTypeEnum {
   /** 增值 */
   ADDITION = 3,
   /** 升级 */
-  UPGRADE = 4,
+  UPGRADE = 4
 }
 
 export enum OrderItemTypeEnum {
   /** 套餐 */
   PACKAGE = 1,
   /** 增值服务 */
-  ADDITION = 2,
+  ADDITION = 2
 }
 
 // 订单状态（1 - 待确认，2 - 待付款，3 - 已完成，4 - 已取消, 5 - 拒絕）
@@ -31,67 +31,67 @@ export enum OrderStatusEnum {
   /** 取消 */
   CANCELED = 5,
   /** 拒绝 */
-  REJECT = 6,
+  REJECT = 6
 }
 
 export type OrderItemsType = {
-  packageId?: string | number;
-  itemType: OrderItemTypeEnum;
-  itemName?: string;
-  price: number;
-  count?: number;
-  itemCode?: string
-  days?: number;
   amount?: number;
-}
+  count?: number;
+  days?: number;
+  itemCode?: string;
+  itemName?: string;
+  itemType: OrderItemTypeEnum;
+  packageId?: string | number;
+  price: number;
+};
 
 export type OrderInfoType = {
+  invoiceHeader?: string;
+  orderItems: OrderItemsType[];
   orderType: OrderTypeEnum;
   payType: PayTypeEnum | null;
-  invoiceHeader?: string;
-  orderItems: OrderItemsType[]
-}
+};
 
 export type PlatformPackageDto = {
-  id: number;
   accountingSysPrice: number;
   addUnitPrice: number;
   custServiceSysPrice: number;
-  rentSysPrice: number;
-  venueSysPrice: number;
+  id: number;
+  packageItemList: {
+    id: number;
+    level: number;
+    menuIcon: string;
+    menuId: number;
+    menuTitle: string;
+    packageId: number;
+  }[];
+  packageName: string;
   price: number;
   priceA?: number;
   priceB?: number;
   priceC?: number;
-  packageName: string;
+  rentSysPrice: number;
   unitCount: number;
-  packageItemList: {
-    level: number;
-    menuTitle: string;
-    menuIcon: string;
-    menuId: number;
-    packageId: number;
-    id: number;
-  }[]
-}
+  venueSysPrice: number;
+};
 
 export type OrderItemInfoType = {
-  packageName: string;
+  activateDate: string | null;
+  createTime: string;
+  discountAmount: number;
+  discountRate: number;
+  expireDate: string | null;
+  finalAmount: number;
+  id: number;
+  isEffective: boolean;
+  orderAmount: number;
+  orderItems: OrderItemsType[];
+  orderNo: string;
   orderStatus: OrderStatusEnum;
   orderStatusName: string;
-  createTime: string;
-  id: number;
-  orderNo: string;
+  packageName: string;
+
   payTime: string | null;
-  expireDate: string | null;
-  activateDate: string | null;
-  discountRate: number;
-  discountAmount: number;
-  finalAmount: number;
-  orderAmount: number;
-  isEffective: boolean;
 
   platformPackageDto: PlatformPackageDto;
-
-  orderItems: OrderItemsType[]
 } & OrderInfoType;

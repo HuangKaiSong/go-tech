@@ -1,18 +1,18 @@
-import * as THREE from 'three'
+import * as THREE from 'three';
 
-import Camera from './camera'
-import Renderer from './renderer'
-import sources from './sources'
-import Debug from './utils/debug'
-import IMouse from './utils/imouse'
-import Resources from './utils/resources'
-import Sizes from './utils/sizes'
-import Stats from './utils/stats'
-import Time from './utils/time'
-import PhysicsWorld from './world/physics-world'
-import World from './world/world'
+import Camera from './camera';
+import Renderer from './renderer';
+import sources from './sources';
+import Debug from './utils/debug';
+import IMouse from './utils/imouse';
+import Resources from './utils/resources';
+import Sizes from './utils/sizes';
+import Stats from './utils/stats';
+import Time from './utils/time';
+import PhysicsWorld from './world/physics-world';
+import World from './world/world';
 
-let instance: Experience | null = null
+let instance: Experience | null = null;
 
 export default class Experience {
   canvas!: HTMLCanvasElement;
@@ -30,6 +30,7 @@ export default class Experience {
   constructor(canvas?: HTMLCanvasElement) {
     // Singleton
     if (instance) {
+      // oxlint-disable-next-line no-constructor-return
       return instance;
     }
 
@@ -38,11 +39,11 @@ export default class Experience {
     // Global access
     (window as any).Experience = this;
 
-    const resolvedCanvas = canvas ?? document.querySelector('canvas')
+    const resolvedCanvas = canvas ?? document.querySelector('canvas');
     if (!(resolvedCanvas instanceof HTMLCanvasElement)) {
-      throw new Error('Experience requires an HTMLCanvasElement.')
+      throw new Error('Experience requires an HTMLCanvasElement.');
     }
-    this.canvas = resolvedCanvas
+    this.canvas = resolvedCanvas;
 
     // Panel
     this.debug = new Debug();
@@ -58,34 +59,34 @@ export default class Experience {
     this.world = new World();
 
     this.sizes.on('resize', () => {
-      this.resize()
-    })
+      this.resize();
+    });
 
     this.time.on('tick', () => {
-      this.update()
-    })
+      this.update();
+    });
   }
 
   resize(): void {
-    this.camera.resize()
-    this.world.resize()
-    this.renderer.resize()
+    this.camera.resize();
+    this.world.resize();
+    this.renderer.resize();
   }
 
   update(): void {
-    this.camera.update()
-    this.world.update()
-    this.renderer.update() // 切换为手动更新
-    this.stats.update()
-    this.iMouse.update()
+    this.camera.update();
+    this.world.update();
+    this.renderer.update(); // 切换为手动更新
+    this.stats.update();
+    this.iMouse.update();
   }
 
   destroy(): void {
-    this.sizes.off('resize')
-    this.time.stop()
-    this.renderer.instance.forceContextLoss()
-    this.renderer.instance.dispose()
-    this.debug.active && this.debug.ui?.dispose()
-    instance = null
+    this.sizes.off('resize');
+    this.time.stop();
+    this.renderer.instance.forceContextLoss();
+    this.renderer.instance.dispose();
+    this.debug.active && this.debug.ui?.dispose();
+    instance = null;
   }
 }

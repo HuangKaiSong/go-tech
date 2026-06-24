@@ -1,8 +1,5 @@
-"use client";
+'use client';
 
-import valueAddedServices from "@/app/constants/addedServices";
-import servicePlanBg from "@/assets/service-plan-bg.jpg";
-import { useAuth } from "@/contexts/AuthContext";
 import {
   Button,
   Dialog,
@@ -12,67 +9,61 @@ import {
   Input,
   Label,
   Switch,
-  toast,
-  UploadedFile,
-} from "@go-tech-frontend/ui";
-import { useSessionStorageState } from "ahooks";
-import { FileCheck } from "lucide-react";
-import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
-import Footer from "../../components/Footer";
-import Header from "../../components/Header";
-import {
-  OrderInfoType,
-  OrderItemTypeEnum,
-  OrderTypeEnum,
-} from "../../constants/order";
-import { DAYSPERMONTH, PayTypeEnum } from "../../constants/payment";
-const Fps = dynamic(() => import("../../components/payment/Fps"), {
-  ssr: false,
+  type UploadedFile,
+  toast
+} from '@go-tech-frontend/ui';
+import { useSessionStorageState } from 'ahooks';
+import { FileCheck } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
+import valueAddedServices from '@/app/constants/addedServices';
+import servicePlanBg from '@/assets/service-plan-bg.jpg';
+import { useAuth } from '@/contexts/AuthContext';
+import Footer from '../../components/Footer';
+import Header from '../../components/Header';
+import { type OrderInfoType, OrderItemTypeEnum, OrderTypeEnum } from '../../constants/order';
+import { DAYSPERMONTH, PayTypeEnum } from '../../constants/payment';
+const Fps = dynamic(() => import('../../components/payment/Fps'), {
+  ssr: false
 });
 
-const ConfirmOrder = ({
-  planId: planIdFromQuery,
-  data,
-}: {
-  planId?: string;
-  data?: Packages;
-}) => {
+const ConfirmOrder = ({ data, planId: planIdFromQuery }: { data?: Packages; planId?: string }) => {
   const router = useRouter();
   const { planId } = { planId: planIdFromQuery };
-  const { user, token } = useAuth();
+  const { token, user } = useAuth();
 
   const selectedPlan = data;
   const [hasMounted, setHasMounted] = useState(false);
 
-  const [selectedServices, setSelectedServices] = useSessionStorageState<
-    Record<string, number>
-  >("user-selected-services", {
-    defaultValue: () => ({}),
-    listenStorageChange: true,
-  });
+  const [selectedServices, setSelectedServices] = useSessionStorageState<Record<string, number>>(
+    'user-selected-services',
+    {
+      defaultValue: () => ({}),
+      listenStorageChange: true
+    }
+  );
 
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] =
-    useState<PayTypeEnum | null>(null);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PayTypeEnum | null>(null);
   // Customer info state
-  const [customerInfo, setCustomerInfo] = useState({
-    name: user?.nickname,
-    email: user?.sub,
-    phone: "",
-    company: "",
-  });
+  // const [customerInfo, setCustomerInfo] = useState({
+  //   name: user?.nickname,
+  //   email: user?.sub,
+  //   phone: '',
+  //   company: ''
+  // });
   const [month, setMonth] = useState<number>(1);
 
   const [needInvoice, setNeedInvoice] = useState<boolean>(true);
-  const [invoiceName, setInvoiceName] = useState<string>(user?.nickname || "");
+  const [invoiceName, setInvoiceName] = useState<string>(user?.nickname || '');
 
   useEffect(() => {
     setHasMounted(true);
     return () => {
       setSelectedServices({});
     };
+    // oxlint-disable react-hooks/exhaustive-deps
   }, []);
 
   const selectedServicesSafe = hasMounted ? (selectedServices ?? {}) : {};
@@ -89,15 +80,27 @@ const ConfirmOrder = ({
     if (method === PayTypeEnum.FPS) {
       setSelectedPaymentMethod(PayTypeEnum.FPS);
     } else {
-      console.log("Payment method selected:", method);
+      console.log('Payment method selected:', method);
       setShowPaymentDialog(false);
       // Handle payment logic here
     }
   };
 
+  const getServiceUnitPrice = (serviceId: string) => {
+    if (!selectedPlan) return 0;
+
+    if (serviceId === 'rentSysPrice') return selectedPlan.rentSysPrice;
+    if (serviceId === 'venueSysPrice') return selectedPlan.venueSysPrice;
+    if (serviceId === 'accountingSysPrice') return selectedPlan.accountingSysPrice;
+    if (serviceId === 'custServiceSysPrice') return selectedPlan.custServiceSysPrice;
+    if (serviceId === 'addUnitPrice') return selectedPlan.addUnitPrice;
+
+    return 0;
+  };
+
   const handleFpsPaymentConfirm = async (voucherFile: UploadedFile) => {
     toast.dismiss();
-    const toastId = toast.loading("创建订单中...");
+    const toastId = toast.loading('创建订单中...');
     const orderInfo: OrderInfoType = {
       orderType: OrderTypeEnum.PURCHASE,
       payType: selectedPaymentMethod,
@@ -108,9 +111,9 @@ const ConfirmOrder = ({
           itemName: selectedPlan?.packageName,
           price: selectedPlan!.price!,
           count: month,
-          days: month * DAYSPERMONTH,
-        },
-      ],
+          days: month * DAYSPERMONTH
+        }
+      ]
     };
     if (needInvoice) {
       // 发票抬头
@@ -129,39 +132,40 @@ const ConfirmOrder = ({
           packageId: selectedPlan?.id,
           itemName: service.name,
           // @ts-ignore
-          itemCode: serviceId.replace("Price", ""),
+          itemCode: serviceId.replace('Price', '')
         });
+        return null;
       });
     }
     const requestHeaders = new Headers({
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
-      "User-Type": "platform_customer",
+      'User-Type': 'platform_customer'
     });
 
     try {
       // 创建订单
-      const orderResponse = await fetch("/go-tech/platform/packageOrder/add", {
-        method: "POST",
+      const orderResponse = await fetch('/go-tech/platform/packageOrder/add', {
+        method: 'POST',
         headers: requestHeaders,
-        body: JSON.stringify(orderInfo),
+        body: JSON.stringify(orderInfo)
       })
         .then(res => res.json())
         .catch(err => {
           throw err;
         });
       if (orderResponse.code === 200) {
-        toast.success("訂單創建成功", { id: toastId });
+        toast.success('訂單創建成功', { id: toastId });
         const orderId = orderResponse.data;
         if (orderInfo.payType === PayTypeEnum.FPS) {
           // 上传凭证
-          await fetch("/go-tech/platform/packageOrder/payEvidence", {
-            method: "POST",
+          await fetch('/go-tech/platform/packageOrder/payEvidence', {
+            method: 'POST',
             headers: requestHeaders,
             body: JSON.stringify({
               id: orderId,
-              payEvidence: voucherFile.url,
-            }),
+              payEvidence: voucherFile.url
+            })
           })
             .catch(err => {
               throw err;
@@ -173,7 +177,7 @@ const ConfirmOrder = ({
 
         setShowPaymentDialog(false);
         setSelectedPaymentMethod(null);
-        toast.success("支付憑證已提交，我們將在確認後為您開通服務");
+        toast.success('支付憑證已提交，我們將在確認後為您開通服務');
       } else {
         toast.error(orderResponse.message);
       }
@@ -186,36 +190,15 @@ const ConfirmOrder = ({
     setSelectedPaymentMethod(null);
   };
 
-  const getServiceUnitPrice = (serviceId: string) => {
-    if (!selectedPlan) return 0;
-
-    if (serviceId === "rentSysPrice") return selectedPlan.rentSysPrice;
-    if (serviceId === "venueSysPrice") return selectedPlan.venueSysPrice;
-    if (serviceId === "accountingSysPrice")
-      return selectedPlan.accountingSysPrice;
-    if (serviceId === "custServiceSysPrice")
-      return selectedPlan.custServiceSysPrice;
-    if (serviceId === "addUnitPrice") return selectedPlan.addUnitPrice;
-
-    return 0;
-  };
-
   const addonsTotal =
     Object.entries(selectedServicesSafe).reduce(
-      (sum, [serviceId, quantity]) =>
-        sum + getServiceUnitPrice(serviceId) * quantity,
+      (sum, [serviceId, quantity]) => sum + getServiceUnitPrice(serviceId) * quantity,
       0
     ) * month;
   // @ts-ignore
   const originalPrice = (selectedPlan?.price * month || 0) + addonsTotal;
 
-  /**
-   * 优惠价格
-   * 1个月-2个月 -> price
-   * 3个月-5个月 -> priceA
-   * 6个月-11个月 -> priceB
-   * 12个月及以上 -> priceC
-   */
+  /** 优惠价格 1个月-2个月 -> price 3个月-5个月 -> priceA 6个月-11个月 -> priceB 12个月及以上 -> priceC */
   const discount = useMemo<number>(() => {
     // 原价
     let recursePrice = selectedPlan?.price;
@@ -229,8 +212,7 @@ const ConfirmOrder = ({
       recursePrice = selectedPlan?.priceA || recursePrice;
     }
 
-    const diffPrice =
-      Math.max(0, (selectedPlan?.price || 0) - (recursePrice || 0)) * month;
+    const diffPrice = Math.max(0, (selectedPlan?.price || 0) - (recursePrice || 0)) * month;
 
     return Math.max(0, diffPrice);
   }, [month, addonsTotal]);
@@ -241,29 +223,23 @@ const ConfirmOrder = ({
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
       {/* Hero Section */}
-      <section
-        className="relative pt-32 pb-16 bg-cover bg-center"
-        style={{ backgroundImage: `url(${servicePlanBg})` }}
-      >
+      <section className="relative pt-32 pb-16 bg-cover bg-center" style={{ backgroundImage: `url(${servicePlanBg})` }}>
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-primary mb-2">
-            套餐確認
-          </h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-primary mb-2">套餐確認</h1>
         </div>
       </section>
 
       {/* Main Content */}
-      <section className="py-12 flex-1" style={{ backgroundColor: "#FFF8F5" }}>
+      <section className="py-12 flex-1" style={{ backgroundColor: '#FFF8F5' }}>
         <div className="container mx-auto px-4 max-w-5xl">
           {/* Notice */}
           <p className="text-center text-sm text-muted-foreground mb-6">
-            !
-            為確保您的發票有效，請提供與貴公司營業登記相符的公司名稱，如需修改請點擊修改按鈕
+            ! 為確保您的發票有效，請提供與貴公司營業登記相符的公司名稱，如需修改請點擊修改按鈕
           </p>
 
           <div className="bg-white rounded-lg border border-border p-6 mb-6">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-1 h-6 bg-primary rounded-full"></div>
+              <div className="w-1 h-6 bg-primary rounded-full" />
               <h2 className="text-lg font-bold text-gray-700">時長</h2>
             </div>
 
@@ -283,51 +259,35 @@ const ConfirmOrder = ({
           <div className="bg-white rounded-lg border border-border p-6 mb-6">
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center gap-3">
-                <div className="w-1 h-8 bg-primary rounded-full mt-1"></div>
+                <div className="w-1 h-8 bg-primary rounded-full mt-1" />
                 <div>
-                  <h2 className="text-xl font-bold text-gray-700">
-                    {selectedPlan?.packageName}
-                  </h2>
+                  <h2 className="text-xl font-bold text-gray-700">{selectedPlan?.packageName}</h2>
                 </div>
               </div>
               <div className="text-right">
-                <span className="text-2xl font-bold text-gray-700">
-                  ${selectedPlan?.price?.toLocaleString()}
-                </span>
-                <span className="text-lg text-gray-700 ml-1"></span>
+                <span className="text-2xl font-bold text-gray-700">${selectedPlan?.price?.toLocaleString()}</span>
+                <span className="text-lg text-gray-700 ml-1" />
               </div>
             </div>
 
             <div className="mb-4">
               <div className="flex gap-4 mb-4">
-                <span className="text-sm font-medium text-muted-foreground min-w-15">
-                  套餐内容
-                </span>
-                <span className="text-sm text-gray-700">
-                  最多可創建{selectedPlan?.unitCount}個單位
-                </span>
+                <span className="text-sm font-medium text-muted-foreground min-w-15">套餐内容</span>
+                <span className="text-sm text-gray-700">最多可創建{selectedPlan?.unitCount}個單位</span>
               </div>
 
               <div className="flex gap-4">
-                <span className="text-sm font-medium text-muted-foreground min-w-15">
-                  包含功能
-                </span>
+                <span className="text-sm font-medium text-muted-foreground min-w-15">包含功能</span>
                 <div className="flex flex-wrap gap-2">
                   {selectedPlan?.packageItemList?.map((feature, index) => (
                     <div
                       key={index}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm text-muted-foreground"
-                      style={{ backgroundColor: "#FAEEEB" }}
+                      style={{ backgroundColor: '#FAEEEB' }}
                     >
                       {feature.menuIcon && (
-                        <svg
-                          className="svg-icon w-4 h-4 text-primary mr-1"
-                          aria-hidden="true"
-                        >
-                          <use
-                            href={`#icon-${feature.menuIcon}`}
-                            xlinkHref={`#icon-${feature.menuIcon}`}
-                          ></use>
+                        <svg className="svg-icon w-4 h-4 text-primary mr-1" aria-hidden="true">
+                          <use href={`#icon-${feature.menuIcon}`} xlinkHref={`#icon-${feature.menuIcon}`} />
                         </svg>
                       )}
                       <span>{feature.menuTitle}</span>
@@ -342,41 +302,30 @@ const ConfirmOrder = ({
           {Object.keys(selectedServicesSafe).length > 0 && (
             <div className="bg-white rounded-lg border border-border p-6 mb-6">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-1 h-6 bg-primary rounded-full"></div>
+                <div className="w-1 h-6 bg-primary rounded-full" />
                 <h3 className="text-lg font-bold text-gray-700">增值服務</h3>
               </div>
 
               <div className="space-y-3">
-                {Object.entries(selectedServicesSafe).map(
-                  ([serviceId, quantity]) => {
-                    const service = valueAddedServices.find(
-                      s => s.id === serviceId
-                    );
-                    if (!service) return null;
-                    const serviceTotalPrice =
-                      getServiceUnitPrice(serviceId) * quantity;
-                    const subTotalPrice = serviceTotalPrice * month;
+                {Object.entries(selectedServicesSafe).map(([serviceId, quantity]) => {
+                  const service = valueAddedServices.find(s => s.id === serviceId);
+                  if (!service) return null;
+                  const serviceTotalPrice = getServiceUnitPrice(serviceId) * quantity;
+                  const subTotalPrice = serviceTotalPrice * month;
 
-                    return (
-                      <div
-                        key={serviceId}
-                        className="flex items-center justify-between py-3 border-b border-border last:border-0"
-                      >
-                        <span className="text-sm text-gray-700">
-                          {service.name}
-                        </span>
-                        <div className="flex items-center gap-8">
-                          <span className="text-sm font-medium">
-                            ${subTotalPrice}
-                          </span>
-                          <span className="text-sm text-muted-foreground">
-                            數量 {quantity}
-                          </span>
-                        </div>
+                  return (
+                    <div
+                      key={serviceId}
+                      className="flex items-center justify-between py-3 border-b border-border last:border-0"
+                    >
+                      <span className="text-sm text-gray-700">{service.name}</span>
+                      <div className="flex items-center gap-8">
+                        <span className="text-sm font-medium">${subTotalPrice}</span>
+                        <span className="text-sm text-muted-foreground">數量 {quantity}</span>
                       </div>
-                    );
-                  }
-                )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -384,25 +333,19 @@ const ConfirmOrder = ({
           {/* Price Summary Card */}
           <div className="bg-white rounded-lg border border-border p-6 mb-8">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-1 h-6 bg-primary rounded-full"></div>
+              <div className="w-1 h-6 bg-primary rounded-full" />
               <div className="flex flex-wrap items-center gap-8">
                 <span className="text-lg font-bold text-gray-700">
                   原價：
-                  <span className="line-through">
-                    ${originalPrice?.toLocaleString()}HKD
-                  </span>
+                  <span className="line-through">${originalPrice?.toLocaleString()}HKD</span>
                 </span>
                 <span className="text-lg font-medium text-gray-700">
                   優惠：
-                  <span className="text-primary">
-                    ${discount.toLocaleString()}HKD
-                  </span>
+                  <span className="text-primary">${discount.toLocaleString()}HKD</span>
                 </span>
                 <span className="text-lg font-bold">
                   總計：
-                  <span className="text-2xl text-primary">
-                    ${totalPrice.toLocaleString()} HKD
-                  </span>
+                  <span className="text-2xl text-primary">${totalPrice.toLocaleString()} HKD</span>
                 </span>
               </div>
             </div>
@@ -410,23 +353,19 @@ const ConfirmOrder = ({
 
           <div className="bg-white rounded-lg border border-border p-6 mb-8">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-1 h-6 bg-primary rounded-full"></div>
+              <div className="w-1 h-6 bg-primary rounded-full" />
               <h2 className="text-lg font-bold text-foreground">發票信息</h2>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <FileCheck className="w-5 h-5 text-primary" />
-                <span className="text-sm text-foreground">
-                  是否需要開具發票？
-                </span>
+                <span className="text-sm text-foreground">是否需要開具發票？</span>
               </div>
               <Switch checked={needInvoice} onCheckedChange={setNeedInvoice} />
             </div>
             {needInvoice && (
               <div className="mt-4 space-y-1">
-                <Label className="text-sm text-muted-foreground">
-                  發票抬頭（公司或個人名稱）
-                </Label>
+                <Label className="text-sm text-muted-foreground">發票抬頭（公司或個人名稱）</Label>
                 <Input
                   value={invoiceName}
                   onChange={e => setInvoiceName(e.target.value)}
@@ -466,9 +405,7 @@ const ConfirmOrder = ({
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-center text-xl">
-              {selectedPaymentMethod === PayTypeEnum.FPS
-                ? "FPS 轉數快支付"
-                : "選擇支付方式"}
+              {selectedPaymentMethod === PayTypeEnum.FPS ? 'FPS 轉數快支付' : '選擇支付方式'}
             </DialogTitle>
           </DialogHeader>
 

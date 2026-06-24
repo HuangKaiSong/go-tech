@@ -1,10 +1,11 @@
 packages:
   - apps/*
   - packages/*
+  - internal/*
 
 onlyBuiltDependencies:
-  - "@parcel/watcher"
-  - "@swc/core"
+  - '@parcel/watcher'
+  - '@swc/core'
   - esbuild
   - sharp
   - unrs-resolver
@@ -14,7 +15,7 @@ ignoreWorkspaceRootCheck: true
 
 overrides:
   # 确保类型一致性
-  typescript: "^6.0.3"
+  typescript: '^6.0.3'
 
 # ── Shared version catalog ─────────────────────────────────────────────────────
 # In package.json, reference via:
@@ -27,95 +28,155 @@ overrides:
 
 catalog:
   # ── Runtime — all 4 apps ────────────────────────────────────────────────────
-  class-variance-authority: "^0.7.1"
-  clsx: "^2.1.1"
-  lucide-react: "^0.562.0"
-  tailwindcss-animate: "^1.0.7"
-  zod: "^3.25.76"
+  class-variance-authority: '^0.7.1'
+  clsx: '^2.1.1'
+  lucide-react: '^0.562.0'
+  tailwindcss-animate: '^1.0.7'
+  zod: '^3.25.76'
 
   # ── Runtime — web-h5 + web-admin ────────────────────────────────────────────
-  ahooks: "^3.9.6"
+  ahooks: '^3.9.6'
 
   # ── Runtime — web-admin + hr-pc + hr-mobile ─────────────────────────────────
-  "@hookform/resolvers": "^3.10.0"
-  "@tanstack/react-query": "^5.83.0"
-  cmdk: "^1.1.1"
-  date-fns: "^3.6.0"
-  embla-carousel-react: "^8.6.0"
-  input-otp: "^1.4.2"
-  react-hook-form: "^7.61.1"
-  react-resizable-panels: "^2.1.9"
-  react-router-dom: "^6.30.1"
-  recharts: "^2.15.4"
-  sonner: "^1.7.4"
-  tailwind-merge: "^2.6.0"
+  '@hookform/resolvers': '^3.10.0'
+  '@tanstack/react-query': '^5.83.0'
+  cmdk: '^1.1.1'
+  date-fns: '^3.6.0'
+  embla-carousel-react: '^8.6.0'
+  input-otp: '^1.4.2'
+  react-hook-form: '^7.61.1'
+  react-resizable-panels: '^2.1.9'
+  react-router-dom: '^6.30.1'
+  recharts: '^2.15.4'
+  sonner: '^1.7.4'
+  tailwind-merge: '^2.6.0'
 
   # ── Runtime — hr-pc + hr-mobile (Radix UI) ──────────────────────────────────
-  "@radix-ui/react-accordion": "^1.2.11"
-  "@radix-ui/react-alert-dialog": "^1.1.14"
-  "@radix-ui/react-aspect-ratio": "^1.1.7"
-  "@radix-ui/react-avatar": "^1.1.10"
-  "@radix-ui/react-checkbox": "^1.3.2"
-  "@radix-ui/react-collapsible": "^1.1.11"
-  "@radix-ui/react-context-menu": "^2.2.15"
-  "@radix-ui/react-dialog": "^1.1.14"
-  "@radix-ui/react-dropdown-menu": "^2.1.15"
-  "@radix-ui/react-hover-card": "^1.1.14"
-  "@radix-ui/react-label": "^2.1.7"
-  "@radix-ui/react-menubar": "^1.1.15"
-  "@radix-ui/react-navigation-menu": "^1.2.13"
-  "@radix-ui/react-popover": "^1.1.14"
-  "@radix-ui/react-progress": "^1.1.7"
-  "@radix-ui/react-radio-group": "^1.3.7"
-  "@radix-ui/react-scroll-area": "^1.2.9"
-  "@radix-ui/react-select": "^2.2.5"
-  "@radix-ui/react-separator": "^1.1.7"
-  "@radix-ui/react-slider": "^1.3.5"
-  "@radix-ui/react-slot": "^1.2.3"
-  "@radix-ui/react-switch": "^1.2.5"
-  "@radix-ui/react-tabs": "^1.1.12"
-  "@radix-ui/react-toast": "^1.2.14"
-  "@radix-ui/react-toggle": "^1.1.9"
-  "@radix-ui/react-toggle-group": "^1.1.10"
-  "@radix-ui/react-tooltip": "^1.2.7"
-
-  # ── Dev — all 4 apps ────────────────────────────────────────────────────────
-  eslint: "^9.32.0"
-  typescript: "6.0.3"
+  '@radix-ui/react-accordion': '^1.2.11'
+  '@radix-ui/react-alert-dialog': '^1.1.14'
+  '@radix-ui/react-aspect-ratio': '^1.1.7'
+  '@radix-ui/react-avatar': '^1.1.10'
+  '@radix-ui/react-checkbox': '^1.3.2'
+  '@radix-ui/react-collapsible': '^1.1.11'
+  '@radix-ui/react-context-menu': '^2.2.15'
+  '@radix-ui/react-dialog': '^1.1.14'
+  '@radix-ui/react-dropdown-menu': '^2.1.15'
+  '@radix-ui/react-hover-card': '^1.1.14'
+  '@radix-ui/react-label': '^2.1.7'
+  '@radix-ui/react-menubar': '^1.1.15'
+  '@radix-ui/react-navigation-menu': '^1.2.13'
+  '@radix-ui/react-popover': '^1.1.14'
+  '@radix-ui/react-progress': '^1.1.7'
+  '@radix-ui/react-radio-group': '^1.3.7'
+  '@radix-ui/react-scroll-area': '^1.2.9'
+  '@radix-ui/react-select': '^2.2.5'
+  '@radix-ui/react-separator': '^1.1.7'
+  '@radix-ui/react-slider': '^1.3.5'
+  '@radix-ui/react-slot': '^1.2.3'
+  '@radix-ui/react-switch': '^1.2.5'
+  '@radix-ui/react-tabs': '^1.1.12'
+  '@radix-ui/react-toast': '^1.2.14'
+  '@radix-ui/react-toggle': '^1.1.9'
+  '@radix-ui/react-toggle-group': '^1.1.10'
+  '@radix-ui/react-tooltip': '^1.2.7'
 
   # ── Dev — web-h5 + web-admin ────────────────────────────────────────────────
-  "@tailwindcss/postcss": "^4.1.18"
-  babel-plugin-react-compiler: "1.0.0"
+  '@tailwindcss/postcss': '^4.1.18'
+  babel-plugin-react-compiler: '1.0.0'
 
   # ── Dev — web-admin + hr-pc + hr-mobile ─────────────────────────────────────
-  "@eslint/js": "^9.32.0"
-  "@tailwindcss/typography": "^0.5.16"
-  autoprefixer: "^10.4.21"
-  eslint-plugin-react-refresh: "^0.4.20"
-  postcss: "^8.5.6"
-  typescript-eslint: "^8.61.1"
+  '@tailwindcss/typography': '^0.5.16'
+  autoprefixer: '^10.4.21'
+  postcss: '^8.5.6'
 
 catalogs:
   # React 19 stack — web-h5 + web-admin
   react19:
-    react: "^19.2.0"
-    react-dom: "^19.2.0"
-    "@types/react": "^19.2.5"
-    "@types/react-dom": "^19.2.3"
+    react: '^19.2.0'
+    react-dom: '^19.2.0'
+    '@types/react': '^19.2.7'
+    '@types/react-dom': '^19.2.3'
 
   # React 18 stack — hr-pc-manager + hr_mobile_manager
   react18:
-    react: "^18.3.1"
-    react-dom: "^18.3.1"
-    "@types/react": "^18.3.23"
-    "@types/react-dom": "^18.3.7"
+    react: '^18.3.1'
+    react-dom: '^18.3.1'
+    '@types/react': '^18.3.23'
+    '@types/react-dom': '^18.3.7'
 
   # Vite 5 toolchain — hr-pc-manager + hr_mobile_manager
   # (web-admin uses Vite 7 + different eslint-plugin-react-hooks major)
   vite-hr:
-    "@vitejs/plugin-react-swc": "^3.11.0"
-    eslint-plugin-react-hooks: "^5.2.0"
-    globals: "^15.15.0"
-    jsdom: "^20.0.3"
-    vite: "^5.4.19"
+    '@vitejs/plugin-react-swc': '^3.11.0'
+    jsdom: '^20.0.3'
+    vite: '^5.4.19'
 
+  # =================== 核心基础依赖 =================
+  core:
+    # React 生态核心
+    react: 19.2.0
+    react-dom: 19.2.0
+    'react-error-boundary': 6.0.0
+
+    # TypeScript
+    typescript: '^6.0.3'
+
+  # ==================== 开发工具 ====================
+  dev:
+    # 类型定义
+    '@types/node': ^24.10.2
+    '@types/react': ^19.2.7
+    '@types/react-dom': ^19.2.3
+    '@types/babel__core': ^7.20.5
+    '@types/crypto-js': ^4.2.2
+    '@types/nprogress': ^0.2.3
+    '@types/qs': ^6.14.0
+
+    # 构建和打包工具
+    '@babel/core': ^7.29.0
+    '@babel/template': ^7.28.6
+    tsdown: ^0.18.2
+    tsx: ^4.21.0
+    turbo: ^2.7.1
+    rimraf: ^6.0.1
+
+    # 代码质量工具
+    eslint: ^9.39.2
+    '@soybeanjs/eslint-config': ^1.7.4
+    oxlint: ^1.60.0
+
+    # ESLint 插件
+    'eslint-plugin-react': ^7.37.5
+    'eslint-plugin-react-hooks': ^7.0.1
+    'eslint-plugin-react-refresh': ^0.4.24
+    'eslint-plugin-sort': ^4.0.0
+
+    # Vite 插件
+    '@rolldown/plugin-babel': ^0.2.3
+    'vite-plugin-inspect': ^12.0.0-beta.2
+    'vite-plugin-remove-console': ^2.2.0
+    'vite-plugin-svg-icons': ^2.0.1
+
+    # 其他开发工具
+    'babel-plugin-react-compiler': ^1.0.0
+    'jotai-babel': ^0.1.0
+    'unplugin-auto-import': ^20.3.0
+    'unplugin-icons': ^22.5.0
+    typed-css-modules:
+      ^0.9.1
+
+      # 包管理工具
+    bumpp: ^10.0.3
+    'npm-check-updates': ^17.1.14
+    # 配置和执行工具
+    c12: ^2.0.4
+    cac: ^6.7.14
+    enquirer: ^2.4.1
+    execa: ^9.5.2
+    # 终端美化工具
+    boxen: ^8.0.1
+    'gradient-string': ^3.0.0
+    kolorist: ^1.8.0
+    # 文件处理工具
+    'fast-glob': ^3.3.3
+    picomatch: ^4.0.3

@@ -1,50 +1,46 @@
-import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  ArrowLeft, Save, Send, Search, Users, DollarSign, CalendarDays
-} from "lucide-react";
-import { toast } from "sonner";
-import { mockDistRecords, mockDistEmployees, type DistEmployee } from "./PayrollDistribute";
+import { ArrowLeft, DollarSign, Save, Search, Send } from 'lucide-react';
+import { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Textarea } from '@/components/ui/textarea';
+import { mockDistEmployees, mockDistRecords } from './PayrollDistribute';
 
-const months = [
-  "2026年03月", "2026年02月", "2026年01月",
-  "2025年12月", "2025年11月", "2025年10月",
-];
+const months = ['2026年03月', '2026年02月', '2026年01月', '2025年12月', '2025年11月', '2025年10月'];
 
-const payMethods = ["銀行轉帳", "現金", "支票"];
-const banks = ["匯豐銀行", "恒生銀行", "中銀香港", "渣打銀行", "東亞銀行", "花旗銀行"];
+const payMethods = ['銀行轉帳', '現金', '支票'];
+const banks = ['匯豐銀行', '恒生銀行', '中銀香港', '渣打銀行', '東亞銀行', '花旗銀行'];
 
 export default function PayrollDistForm() {
   const { distId } = useParams();
   const navigate = useNavigate();
-  const isEdit = !!distId;
+  const isEdit = Boolean(distId);
   const existing = isEdit ? mockDistRecords.find(r => r.id === distId) : null;
 
   const [form, setForm] = useState({
     period: existing?.period || months[0],
-    payDate: existing?.payDate || "2026-03-28",
-    payMethod: existing?.payMethod || "銀行轉帳",
-    bankName: existing?.bankName || "匯豐銀行",
-    note: existing?.note || "",
+    payDate: existing?.payDate || '2026-03-28',
+    payMethod: existing?.payMethod || '銀行轉帳',
+    bankName: existing?.bankName || '匯豐銀行',
+    note: existing?.note || ''
   });
 
-  const [employees, setEmployees] = useState(
-    mockDistEmployees.map(e => ({ ...e, selected: true }))
-  );
-  const [search, setSearch] = useState("");
+  const [employees, setEmployees] = useState(mockDistEmployees.map(e => ({ ...e, selected: true })));
+  const [search, setSearch] = useState('');
 
-  const filtered = employees.filter(e =>
-    e.name.includes(search) || e.employeeId.toLowerCase().includes(search.toLowerCase()) || e.department.includes(search)
+  const filtered = employees.filter(
+    e =>
+      e.name.includes(search) ||
+      e.employeeId.toLowerCase().includes(search.toLowerCase()) ||
+      e.department.includes(search)
   );
 
   const selectedCount = employees.filter(e => e.selected).length;
@@ -55,17 +51,17 @@ export default function PayrollDistForm() {
   };
 
   const toggleOne = (id: string) => {
-    setEmployees(prev => prev.map(e => e.id === id ? { ...e, selected: !e.selected } : e));
+    setEmployees(prev => prev.map(e => (e.id === id ? { ...e, selected: !e.selected } : e)));
   };
 
   const handleSave = () => {
-    toast.success(isEdit ? "發薪批次已更新" : "發薪批次已建立");
-    navigate("/payroll/distribute");
+    toast.success(isEdit ? '發薪批次已更新' : '發薪批次已建立');
+    navigate('/payroll/distribute');
   };
 
   const handleSaveAndSubmit = () => {
-    toast.success("已儲存並提交審核");
-    navigate("/payroll/distribute");
+    toast.success('已儲存並提交審核');
+    navigate('/payroll/distribute');
   };
 
   return (
@@ -77,12 +73,16 @@ export default function PayrollDistForm() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">{isEdit ? "編輯發薪批次" : "新增發薪批次"}</h1>
-            <p className="text-muted-foreground mt-1">{isEdit ? `編輯 ${existing?.period} 的發薪資料` : "建立新的發薪批次並設定發放資訊"}</p>
+            <h1 className="text-2xl font-bold text-foreground">{isEdit ? '編輯發薪批次' : '新增發薪批次'}</h1>
+            <p className="text-muted-foreground mt-1">
+              {isEdit ? `編輯 ${existing?.period} 的發薪資料` : '建立新的發薪批次並設定發放資訊'}
+            </p>
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => navigate(-1)}>取消</Button>
+          <Button variant="outline" onClick={() => navigate(-1)}>
+            取消
+          </Button>
           <Button variant="outline" className="gap-2" onClick={handleSave}>
             <Save className="h-4 w-4" /> 儲存草稿
           </Button>
@@ -103,39 +103,69 @@ export default function PayrollDistForm() {
               <div className="space-y-2">
                 <Label>薪資期間</Label>
                 <Select value={form.period} onValueChange={v => setForm(p => ({ ...p, period: v }))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
-                    {months.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+                    {months.map(m => (
+                      <SelectItem key={m} value={m}>
+                        {m}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
                 <Label>發薪日期</Label>
-                <Input type="date" value={form.payDate} onChange={e => setForm(p => ({ ...p, payDate: e.target.value }))} />
+                <Input
+                  type="date"
+                  value={form.payDate}
+                  onChange={e => setForm(p => ({ ...p, payDate: e.target.value }))}
+                />
               </div>
               <div className="space-y-2">
                 <Label>發薪方式</Label>
-                <Select value={form.payMethod} onValueChange={(v: "銀行轉帳" | "現金" | "支票") => setForm(p => ({ ...p, payMethod: v }))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                <Select
+                  value={form.payMethod}
+                  onValueChange={(v: '支票' | '現金' | '銀行轉帳') => setForm(p => ({ ...p, payMethod: v }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
-                    {payMethods.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+                    {payMethods.map(m => (
+                      <SelectItem key={m} value={m}>
+                        {m}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
-              {form.payMethod === "銀行轉帳" && (
+              {form.payMethod === '銀行轉帳' && (
                 <div className="space-y-2">
                   <Label>發薪銀行</Label>
                   <Select value={form.bankName} onValueChange={v => setForm(p => ({ ...p, bankName: v }))}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
-                      {banks.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}
+                      {banks.map(b => (
+                        <SelectItem key={b} value={b}>
+                          {b}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
               )}
               <div className="space-y-2">
                 <Label>備註</Label>
-                <Textarea value={form.note} onChange={e => setForm(p => ({ ...p, note: e.target.value }))} placeholder="輸入備註..." rows={3} />
+                <Textarea
+                  value={form.note}
+                  onChange={e => setForm(p => ({ ...p, note: e.target.value }))}
+                  placeholder="輸入備註..."
+                  rows={3}
+                />
               </div>
             </CardContent>
           </Card>
@@ -161,7 +191,9 @@ export default function PayrollDistForm() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">選取人數</span>
-                  <span className="font-medium">{selectedCount} / {employees.length} 人</span>
+                  <span className="font-medium">
+                    {selectedCount} / {employees.length} 人
+                  </span>
                 </div>
                 <Separator />
                 <div className="flex justify-between font-semibold text-base">
@@ -181,7 +213,12 @@ export default function PayrollDistForm() {
                 <CardTitle className="text-lg">發薪人員名單</CardTitle>
                 <div className="relative w-64">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="搜尋員工..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 h-9" />
+                  <Input
+                    placeholder="搜尋員工..."
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    className="pl-9 h-9"
+                  />
                 </div>
               </div>
             </CardHeader>
@@ -190,7 +227,10 @@ export default function PayrollDistForm() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-10">
-                      <Checkbox checked={employees.every(e => e.selected)} onCheckedChange={c => toggleAll(!!c)} />
+                      <Checkbox
+                        checked={employees.every(e => e.selected)}
+                        onCheckedChange={c => toggleAll(Boolean(c))}
+                      />
                     </TableHead>
                     <TableHead>員工</TableHead>
                     <TableHead>部門</TableHead>
@@ -203,7 +243,7 @@ export default function PayrollDistForm() {
                 </TableHeader>
                 <TableBody>
                   {filtered.map(emp => (
-                    <TableRow key={emp.id} className={!emp.selected ? "opacity-50" : ""}>
+                    <TableRow key={emp.id} className={!emp.selected ? 'opacity-50' : ''}>
                       <TableCell>
                         <Checkbox checked={emp.selected} onCheckedChange={() => toggleOne(emp.id)} />
                       </TableCell>
@@ -219,8 +259,15 @@ export default function PayrollDistForm() {
                       <TableCell className="font-mono text-muted-foreground">{emp.bankAccount}</TableCell>
                       <TableCell className="text-right font-semibold">{emp.netSalary.toLocaleString()}</TableCell>
                       <TableCell>
-                        <Badge variant="outline" className={emp.selected ? "bg-success/10 text-success border-success/20" : "bg-muted text-muted-foreground border-border"}>
-                          {emp.selected ? "已選取" : "未選取"}
+                        <Badge
+                          variant="outline"
+                          className={
+                            emp.selected
+                              ? 'bg-success/10 text-success border-success/20'
+                              : 'bg-muted text-muted-foreground border-border'
+                          }
+                        >
+                          {emp.selected ? '已選取' : '未選取'}
                         </Badge>
                       </TableCell>
                     </TableRow>

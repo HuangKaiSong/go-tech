@@ -2,44 +2,23 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Next.js: debug server-side",
-      "type": "node-terminal",
-      "request": "launch",
-      "command": "pnpm run dev:h5 -- --inspect"
-    },
-    {
-      "name": "Next.js: debug client-side",
       "type": "chrome",
       "request": "launch",
-      "url": "http://localhost:3000"
+      "name": "React Admin Debugger",
+      "url": "http://localhost:9527",
+      "webRoot": "${workspaceFolder}/apps/admin"
     },
     {
-      "name": "Next.js: debug client-side (chrome)",
-      "type": "chrome",
-      "request": "launch",
-      "url": "http://localhost:3000",
-      "reAttach": true,
-      "pathMappings": [
-        {
-          "url": "webpack://_N_E",
-          "path": "${workspaceFolder}"
-        }
-      ]
-    },
-    {
-      "name": "Next.js: debug full stack",
       "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/apps/web-h5/node_modules/next/dist/bin/next",
-      "runtimeArgs": ["--inspect"],
-      "skipFiles": ["<node_internals>/**"],
-      "serverReadyAction": {
-        "action": "debugWithEdge",
-        "killOnServerStop": true,
-        "pattern": "- Local:.+(https?://.+)",
-        "uriFormat": "%s",
-        "webRoot": "${workspaceFolder}"
-      }
+      "name": "TSX Current File Debugger",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["exec", "tsx"],
+      "skipFiles": ["<node_internals>/**", "${workspaceFolder}/node_modules/**"],
+      "program": "${file}",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
     }
   ]
 }

@@ -9,20 +9,14 @@ export async function POST(req: NextRequest) {
 
     // 验证请求体
     if (!body || typeof body !== 'object') {
-      return NextResponse.json(
-        { success: false, error: 'Invalid request body' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: 'Invalid request body' }, { status: 400 });
     }
 
-    const { token, tokenHead } = body;
+    const { token } = body;
 
     // 验证 token 是否存在
     if (!token) {
-      return NextResponse.json(
-        { success: false, error: 'Token is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: 'Token is required' }, { status: 400 });
     }
 
     let payload;
@@ -31,18 +25,12 @@ export async function POST(req: NextRequest) {
       payload = decodeJwt(token);
     } catch (decodeError) {
       console.error('JWT decode error:', decodeError);
-      return NextResponse.json(
-        { success: false, error: 'Invalid token format' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: 'Invalid token format' }, { status: 400 });
     }
 
     // 验证 payload 是否有效
     if (!payload || !payload.exp) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid token payload' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: 'Invalid token payload' }, { status: 400 });
     }
 
     const cookieStore = await cookies();
@@ -51,17 +39,14 @@ export async function POST(req: NextRequest) {
     const expiresAt = new Date(payload.exp * 1000);
 
     // 验证过期时间是否有效
-    if (isNaN(expiresAt.getTime())) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid expiration time in token' },
-        { status: 400 }
-      );
+    if (Number.isNaN(expiresAt.getTime())) {
+      return NextResponse.json({ success: false, error: 'Invalid expiration time in token' }, { status: 400 });
     }
 
     // 设置 Cookie
     cookieStore.set('GO_TECH_AUTH_TOKEN', token, {
       expires: expiresAt,
-      path: '/',
+      path: '/'
     });
 
     // const user = await httpClient.get('/go-tech/platform/platformCustomer/getInfo')

@@ -1,17 +1,9 @@
-import { LucideIcon } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Search, Plus, Download, Filter } from "lucide-react";
+import { Download, Filter, type LucideIcon, Plus, Search } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 interface Column {
   key: string;
@@ -19,25 +11,25 @@ interface Column {
 }
 
 interface PagePlaceholderProps {
-  title: string;
-  description: string;
-  icon: LucideIcon;
+  addLabel?: string;
   columns: Column[];
   data: Record<string, string | number>[];
-  statusKey?: string;
+  description: string;
+  icon: LucideIcon;
   statusColors?: Record<string, string>;
-  addLabel?: string;
+  statusKey?: string;
+  title: string;
 }
 
 export function PagePlaceholder({
-  title,
-  description,
-  icon: Icon,
+  addLabel = '新增',
   columns,
   data,
-  statusKey,
+  description,
+  icon: Icon,
   statusColors = {},
-  addLabel = "新增",
+  statusKey,
+  title
 }: PagePlaceholderProps) {
   return (
     <div>
@@ -78,7 +70,7 @@ export function PagePlaceholder({
           <Table>
             <TableHeader>
               <TableRow>
-                {columns.map((col) => (
+                {columns.map(col => (
                   <TableHead key={col.key}>{col.label}</TableHead>
                 ))}
               </TableRow>
@@ -86,13 +78,10 @@ export function PagePlaceholder({
             <TableBody>
               {data.map((row, i) => (
                 <TableRow key={i}>
-                  {columns.map((col) => (
+                  {columns.map(col => (
                     <TableCell key={col.key}>
                       {statusKey && col.key === statusKey ? (
-                        <Badge
-                          variant="secondary"
-                          className={statusColors[String(row[col.key])] || ""}
-                        >
+                        <Badge variant="secondary" className={statusColors[String(row[col.key])] || ''}>
                           {row[col.key]}
                         </Badge>
                       ) : (

@@ -1,20 +1,26 @@
-import { useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
 import {
-  User, Phone, MapPin, AlertTriangle, GraduationCap, Landmark,
-  FileText, CheckCircle2, Upload, Briefcase,
-} from "lucide-react";
+  AlertTriangle,
+  Briefcase,
+  CheckCircle2,
+  FileText,
+  GraduationCap,
+  Landmark,
+  Phone,
+  Upload,
+  User
+} from 'lucide-react';
+import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
 
-function FieldRow({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
+function FieldRow({ children, label, required }: { children: React.ReactNode; label: string; required?: boolean }) {
   return (
     <div className="space-y-1.5">
       <Label className="text-sm">
@@ -26,19 +32,33 @@ function FieldRow({ label, required, children }: { label: string; required?: boo
   );
 }
 
-function SelectField({ options, placeholder = "請選擇" }: { options: string[]; placeholder?: string }) {
+function SelectField({ options, placeholder = '請選擇' }: { options: string[]; placeholder?: string }) {
   return (
     <Select>
-      <SelectTrigger><SelectValue placeholder={placeholder} /></SelectTrigger>
+      <SelectTrigger>
+        <SelectValue placeholder={placeholder} />
+      </SelectTrigger>
       <SelectContent>
-        {options.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+        {options.map(o => (
+          <SelectItem key={o} value={o}>
+            {o}
+          </SelectItem>
+        ))}
       </SelectContent>
     </Select>
   );
 }
 
-function SectionCard({ icon: Icon, title, description, children }: {
-  icon: any; title: string; description?: string; children: React.ReactNode;
+function SectionCard({
+  children,
+  description,
+  icon: Icon,
+  title
+}: {
+  children: React.ReactNode;
+  description?: string;
+  icon: any;
+  title: string;
 }) {
   return (
     <Card>
@@ -56,7 +76,7 @@ function SectionCard({ icon: Icon, title, description, children }: {
 
 export default function EmployeeSelfService() {
   const [searchParams] = useSearchParams();
-  const employeeName = searchParams.get("name") || "";
+  const employeeName = searchParams.get('name') || '';
   const [submitted, setSubmitted] = useState(false);
 
   if (submitted) {
@@ -69,7 +89,8 @@ export default function EmployeeSelfService() {
             </div>
             <h2 className="text-xl font-bold">資料提交成功！</h2>
             <p className="text-sm text-muted-foreground">
-              感謝您填寫個人資料，HR 團隊將會審核您的資訊。<br />
+              感謝您填寫個人資料，HR 團隊將會審核您的資訊。
+              <br />
               如有疑問，請聯繫人事部門。
             </p>
           </CardContent>
@@ -85,7 +106,8 @@ export default function EmployeeSelfService() {
         <div className="max-w-3xl mx-auto">
           <h1 className="text-lg font-bold">新員工資料填寫</h1>
           <p className="text-sm opacity-80">
-            {employeeName ? `歡迎 ${employeeName}！` : "歡迎！"}請填寫以下個人資料，帶 <span className="text-destructive-foreground font-medium">*</span> 為必填項目
+            {employeeName ? `歡迎 ${employeeName}！` : '歡迎！'}請填寫以下個人資料，帶{' '}
+            <span className="text-destructive-foreground font-medium">*</span> 為必填項目
           </p>
         </div>
       </div>
@@ -101,7 +123,7 @@ export default function EmployeeSelfService() {
               <Input placeholder="請輸入英文全名" />
             </FieldRow>
             <FieldRow label="性別" required>
-              <SelectField options={["男", "女", "其他"]} />
+              <SelectField options={['男', '女', '其他']} />
             </FieldRow>
             <FieldRow label="出生日期" required>
               <Input type="date" />
@@ -110,7 +132,7 @@ export default function EmployeeSelfService() {
               <Input placeholder="請輸入國籍" />
             </FieldRow>
             <FieldRow label="婚姻狀況">
-              <SelectField options={["未婚", "已婚", "離婚", "喪偶"]} />
+              <SelectField options={['未婚', '已婚', '離婚', '喪偶']} />
             </FieldRow>
           </div>
         </SectionCard>
@@ -119,7 +141,7 @@ export default function EmployeeSelfService() {
         <SectionCard icon={FileText} title="身份證明文件" description="用於勞動合約及社保登記">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FieldRow label="證件類型" required>
-              <SelectField options={["身份證", "護照", "居留證"]} />
+              <SelectField options={['身份證', '護照', '居留證']} />
             </FieldRow>
             <FieldRow label="證件號碼" required>
               <Input placeholder="請輸入證件號碼" />
@@ -171,7 +193,7 @@ export default function EmployeeSelfService() {
               <Input placeholder="" />
             </FieldRow>
             <FieldRow label="關係" required>
-              <SelectField options={["配偶", "父母", "兄弟姐妹", "子女", "朋友", "其他"]} />
+              <SelectField options={['配偶', '父母', '兄弟姐妹', '子女', '朋友', '其他']} />
             </FieldRow>
             <FieldRow label="聯絡電話" required>
               <Input placeholder="" />
@@ -180,9 +202,15 @@ export default function EmployeeSelfService() {
           <Separator className="my-4" />
           <p className="text-xs text-muted-foreground mb-3">第二位緊急聯絡人（選填）</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <FieldRow label="姓名"><Input placeholder="" /></FieldRow>
-            <FieldRow label="關係"><SelectField options={["配偶", "父母", "兄弟姐妹", "子女", "朋友", "其他"]} /></FieldRow>
-            <FieldRow label="聯絡電話"><Input placeholder="" /></FieldRow>
+            <FieldRow label="姓名">
+              <Input placeholder="" />
+            </FieldRow>
+            <FieldRow label="關係">
+              <SelectField options={['配偶', '父母', '兄弟姐妹', '子女', '朋友', '其他']} />
+            </FieldRow>
+            <FieldRow label="聯絡電話">
+              <Input placeholder="" />
+            </FieldRow>
           </div>
         </SectionCard>
 
@@ -190,7 +218,7 @@ export default function EmployeeSelfService() {
         <SectionCard icon={GraduationCap} title="學歷資訊">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FieldRow label="最高學歷" required>
-              <SelectField options={["高中/職", "大專", "學士", "碩士", "博士"]} />
+              <SelectField options={['高中/職', '大專', '學士', '碩士', '博士']} />
             </FieldRow>
             <FieldRow label="畢業學校" required>
               <Input placeholder="" />
@@ -207,10 +235,18 @@ export default function EmployeeSelfService() {
         {/* 6. 工作經歷 */}
         <SectionCard icon={Briefcase} title="工作經歷" description="請填寫最近一份工作經歷（選填）">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FieldRow label="公司名稱"><Input placeholder="" /></FieldRow>
-            <FieldRow label="職位"><Input placeholder="" /></FieldRow>
-            <FieldRow label="在職時間（起）"><Input type="date" /></FieldRow>
-            <FieldRow label="在職時間（迄）"><Input type="date" /></FieldRow>
+            <FieldRow label="公司名稱">
+              <Input placeholder="" />
+            </FieldRow>
+            <FieldRow label="職位">
+              <Input placeholder="" />
+            </FieldRow>
+            <FieldRow label="在職時間（起）">
+              <Input type="date" />
+            </FieldRow>
+            <FieldRow label="在職時間（迄）">
+              <Input type="date" />
+            </FieldRow>
             <div className="md:col-span-2">
               <FieldRow label="工作內容描述">
                 <Textarea placeholder="簡要描述您的工作職責" rows={3} />
@@ -244,10 +280,14 @@ export default function EmployeeSelfService() {
 
         {/* 提交 */}
         <div className="flex items-center justify-between pt-2 pb-8">
-          <p className="text-xs text-muted-foreground">
-            提交即表示您確認以上資料真實無誤
-          </p>
-          <Button size="lg" onClick={() => { toast.success("資料提交成功"); setSubmitted(true); }}>
+          <p className="text-xs text-muted-foreground">提交即表示您確認以上資料真實無誤</p>
+          <Button
+            size="lg"
+            onClick={() => {
+              toast.success('資料提交成功');
+              setSubmitted(true);
+            }}
+          >
             確認提交
           </Button>
         </div>

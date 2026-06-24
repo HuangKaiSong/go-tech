@@ -1,8 +1,5 @@
-"use client";
+'use client';
 
-import Footer from "@/app/components/Footer";
-import Header from "@/app/components/Header";
-import { useAuth } from "@/contexts/AuthContext";
 import {
   Button,
   Card,
@@ -15,55 +12,52 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@go-tech-frontend/ui";
-import { ArrowLeft, Eye, EyeOff, Lock, User } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "@go-tech-frontend/ui";
+  toast
+} from '@go-tech-frontend/ui';
+import { ArrowLeft, Eye, EyeOff, Lock, User } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import Footer from '@/app/components/Footer';
+import Header from '@/app/components/Header';
+import { useAuth } from '@/contexts/AuthContext';
 
-const Settings = ({user, token}: any) => {
-  const { setUser } = useAuth()
+const Settings = ({ token, user }: any) => {
+  const { setUser } = useAuth();
   const router = useRouter();
-  
+
   // 個人資料狀態
   const [profileData, setProfileData] = useState({
     custName: user.custName,
     email: user.email,
     phone: user.phone,
-    companyName: user.companyName,
+    companyName: user.companyName
   });
   const [isProfileLoading, setIsProfileLoading] = useState(false);
 
   // 密碼修改狀態
   const [passwordData, setPasswordData] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
   });
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isPasswordLoading, setIsPasswordLoading] = useState(false);
 
-  const handleProfileChange =
-    (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-      setProfileData(prev => ({ ...prev, [field]: e.target.value }));
-    };
+  const handleProfileChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    setProfileData(prev => ({ ...prev, [field]: e.target.value }));
+  };
 
-  const handlePasswordChange =
-    (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-      setPasswordData(prev => ({ ...prev, [field]: e.target.value }));
-    };
+  const handlePasswordChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPasswordData(prev => ({ ...prev, [field]: e.target.value }));
+  };
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (
-      !profileData.custName.trim() ||
-      !profileData.email.trim() ||
-      !profileData.phone.trim()
-    ) {
-      toast.error("請填寫所有必填欄位");
+    if (!profileData.custName.trim() || !profileData.email.trim() || !profileData.phone.trim()) {
+      toast.error('請填寫所有必填欄位');
       return;
     }
 
@@ -75,27 +69,28 @@ const Settings = ({user, token}: any) => {
         headers: {
           'Content-Type': 'application/json',
           'User-Type': 'platform_customer',
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify(profileData),
-      }).then(res => res.json()).catch(err => {
-        toast.error(err.message);
+        body: JSON.stringify(profileData)
       })
+        .then(res => res.json())
+        .catch(err => {
+          toast.error(err.message);
+        });
       if (response.code === 200) {
-        fetch("/api/auth/signin", {
-          method: "POST",
-          body: JSON.stringify(response.data),
+        fetch('/api/auth/signin', {
+          method: 'POST',
+          body: JSON.stringify(response.data)
         })
           .then(res => res.json())
           .then(res => {
             setUser(res.data);
-            toast.success("個人資料已更新");
+            toast.success('個人資料已更新');
           });
       }
     } catch (error: any) {
       toast.error(error.message);
       console.log(error);
-      
     } finally {
       setIsProfileLoading(false);
     }
@@ -105,22 +100,22 @@ const Settings = ({user, token}: any) => {
     e.preventDefault();
 
     if (!passwordData.currentPassword.trim()) {
-      toast.error("請輸入當前密碼");
+      toast.error('請輸入當前密碼');
       return;
     }
 
     if (!passwordData.newPassword.trim()) {
-      toast.error("請輸入新密碼");
+      toast.error('請輸入新密碼');
       return;
     }
 
     if (passwordData.newPassword.length < 6) {
-      toast.error("新密碼長度至少為6個字符");
+      toast.error('新密碼長度至少為6個字符');
       return;
     }
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.error("兩次輸入的新密碼不一致");
+      toast.error('兩次輸入的新密碼不一致');
       return;
     }
 
@@ -131,13 +126,13 @@ const Settings = ({user, token}: any) => {
         headers: {
           'Content-Type': 'application/json',
           'User-Type': 'platform_customer',
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
           oldPassword: passwordData.currentPassword,
-          newPassword: passwordData.newPassword,
+          newPassword: passwordData.newPassword
         })
-      })
+      });
       if (!response.ok) {
         const statusCode = response.status;
         if (statusCode === 404) {
@@ -152,11 +147,11 @@ const Settings = ({user, token}: any) => {
 
       if (result && result.code === 200) {
         setPasswordData({
-          currentPassword: "",
-          newPassword: "",
-          confirmPassword: "",
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
         });
-        toast.success("密碼修改成功");
+        toast.success('密碼修改成功');
       }
     } catch (error: any) {
       toast.error(error.message);
@@ -190,12 +185,8 @@ const Settings = ({user, token}: any) => {
             <ArrowLeft className="w-4 h-4" />
             返回
           </button>
-          <h1 className="text-3xl md:text-4xl font-bold text-primary">
-            帳戶設定
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            管理您的個人資料與安全設定
-          </p>
+          <h1 className="text-3xl md:text-4xl font-bold text-primary">帳戶設定</h1>
+          <p className="text-muted-foreground mt-2">管理您的個人資料與安全設定</p>
         </div>
       </section>
 
@@ -235,7 +226,7 @@ const Settings = ({user, token}: any) => {
                           type="text"
                           placeholder="請輸入您的姓名"
                           value={profileData.custName}
-                          onChange={handleProfileChange("custName")}
+                          onChange={handleProfileChange('custName')}
                           className="h-12"
                         />
                       </div>
@@ -249,7 +240,7 @@ const Settings = ({user, token}: any) => {
                           type="email"
                           placeholder="請輸入您的電子郵箱"
                           value={profileData.email}
-                          onChange={handleProfileChange("email")}
+                          onChange={handleProfileChange('email')}
                           className="h-12"
                         />
                       </div>
@@ -263,7 +254,7 @@ const Settings = ({user, token}: any) => {
                           type="tel"
                           placeholder="請輸入您的聯繫電話"
                           value={profileData.phone}
-                          onChange={handleProfileChange("phone")}
+                          onChange={handleProfileChange('phone')}
                           className="h-12"
                         />
                       </div>
@@ -274,19 +265,15 @@ const Settings = ({user, token}: any) => {
                           type="text"
                           placeholder="請輸入您的公司名稱"
                           value={profileData.companyName}
-                          onChange={handleProfileChange("companyName")}
+                          onChange={handleProfileChange('companyName')}
                           className="h-12"
                         />
                       </div>
 
                       <Separator className="my-6" />
 
-                      <Button
-                        type="submit"
-                        disabled={isProfileLoading}
-                        className="w-full h-12 text-base font-semibold"
-                      >
-                        {isProfileLoading ? "保存中..." : "保存修改"}
+                      <Button type="submit" disabled={isProfileLoading} className="w-full h-12 text-base font-semibold">
+                        {isProfileLoading ? '保存中...' : '保存修改'}
                       </Button>
                     </form>
                   </CardContent>
@@ -311,24 +298,18 @@ const Settings = ({user, token}: any) => {
                         </label>
                         <div className="relative">
                           <Input
-                            type={showCurrentPassword ? "text" : "password"}
+                            type={showCurrentPassword ? 'text' : 'password'}
                             placeholder="請輸入當前密碼"
                             value={passwordData.currentPassword}
-                            onChange={handlePasswordChange("currentPassword")}
+                            onChange={handlePasswordChange('currentPassword')}
                             className="h-12 pr-12"
                           />
                           <button
                             type="button"
-                            onClick={() =>
-                              setShowCurrentPassword(!showCurrentPassword)
-                            }
+                            onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                           >
-                            {showCurrentPassword ? (
-                              <EyeOff className="w-5 h-5" />
-                            ) : (
-                              <Eye className="w-5 h-5" />
-                            )}
+                            {showCurrentPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                           </button>
                         </div>
                       </div>
@@ -340,10 +321,10 @@ const Settings = ({user, token}: any) => {
                         </label>
                         <div className="relative">
                           <Input
-                            type={showNewPassword ? "text" : "password"}
+                            type={showNewPassword ? 'text' : 'password'}
                             placeholder="請輸入新密碼（至少6個字符）"
                             value={passwordData.newPassword}
-                            onChange={handlePasswordChange("newPassword")}
+                            onChange={handlePasswordChange('newPassword')}
                             className="h-12 pr-12"
                           />
                           <button
@@ -351,11 +332,7 @@ const Settings = ({user, token}: any) => {
                             onClick={() => setShowNewPassword(!showNewPassword)}
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                           >
-                            {showNewPassword ? (
-                              <EyeOff className="w-5 h-5" />
-                            ) : (
-                              <Eye className="w-5 h-5" />
-                            )}
+                            {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                           </button>
                         </div>
                       </div>
@@ -367,24 +344,18 @@ const Settings = ({user, token}: any) => {
                         </label>
                         <div className="relative">
                           <Input
-                            type={showConfirmPassword ? "text" : "password"}
+                            type={showConfirmPassword ? 'text' : 'password'}
                             placeholder="請再次輸入新密碼"
                             value={passwordData.confirmPassword}
-                            onChange={handlePasswordChange("confirmPassword")}
+                            onChange={handlePasswordChange('confirmPassword')}
                             className="h-12 pr-12"
                           />
                           <button
                             type="button"
-                            onClick={() =>
-                              setShowConfirmPassword(!showConfirmPassword)
-                            }
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                           >
-                            {showConfirmPassword ? (
-                              <EyeOff className="w-5 h-5" />
-                            ) : (
-                              <Eye className="w-5 h-5" />
-                            )}
+                            {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                           </button>
                         </div>
                       </div>
@@ -404,7 +375,7 @@ const Settings = ({user, token}: any) => {
                         disabled={isPasswordLoading}
                         className="w-full h-12 text-base font-semibold"
                       >
-                        {isPasswordLoading ? "修改中..." : "確認修改密碼"}
+                        {isPasswordLoading ? '修改中...' : '確認修改密碼'}
                       </Button>
                     </form>
                   </CardContent>

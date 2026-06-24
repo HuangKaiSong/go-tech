@@ -1,4 +1,4 @@
-import { Loader2 } from "lucide-react";
+import { Loader2 } from 'lucide-react';
 
 export const Loading = () => (
   <div className="flex h-full min-h-[50vh] w-full items-center justify-center">

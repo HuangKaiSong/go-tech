@@ -1,28 +1,28 @@
-import { CSSProperties } from "react";
+import { type CSSProperties } from 'react';
 
 export enum BlockType {
-  Common = "common",
-  Hero = "hero",
-  Text = "text",
-  Button = "button",
-  Image = "image",
+  Button = 'button',
+  Common = 'common',
+  Hero = 'hero',
+  Image = 'image',
+  Text = 'text'
 }
 
 export enum PageKey {
-  Common = "common",
-  Home = "home",
-  SystemFeatures = "system-features",
-  TargetAudience = "target-audience",
-  CoreAdvantages = "core-advantages",
+  Common = 'common',
+  CoreAdvantages = 'core-advantages',
+  Home = 'home',
+  SystemFeatures = 'system-features',
+  TargetAudience = 'target-audience'
 }
 
 export type SelectedElementInfo = {
-  id: string;
-  tagName: string;
   className: string;
+  dataset?: Record<string, string>;
+  id: string;
   innerHTML: string;
   outerHTML: string;
-  dataset?: Record<string, string>;
+  tagName: string;
 };
 
 export type AdminBlockBase = {
@@ -31,52 +31,47 @@ export type AdminBlockBase = {
 };
 
 export type CommonBlock = AdminBlockBase & {
-  type: BlockType.Common;
+  content?: string;
   image?: string;
   title?: string;
-  content?: string;
+  type: BlockType.Common;
   values?: Record<string, string>;
-}
+};
 
 export type AdminHeroBlock = AdminBlockBase & {
-  type: BlockType.Hero;
+  backgroundImage: string;
+  buttonLink?: string;
+  buttonStyle?: string;
+  buttonText?: string;
+  contentStyle?: CSSProperties;
+  overlayGradient?: string;
+  sectionStyle?: CSSProperties;
+  subtitle: string;
+  subtitleStyle?: CSSProperties;
   title: string;
   titleSecondary?: string;
-  subtitle: string;
-  titleStyle?: CSSProperties;
   titleSecondaryStyle?: CSSProperties;
-  subtitleStyle?: CSSProperties;
-  buttonText?: string;
-  buttonLink?: string;
-  backgroundImage: string;
-  overlayGradient?: string;
-  buttonStyle?: string;
-  sectionStyle?: CSSProperties;
-  contentStyle?: CSSProperties;
+  titleStyle?: CSSProperties;
+  type: BlockType.Hero;
 };
 
 export type AdminTextBlock = AdminBlockBase & {
-  type: BlockType.Text;
+  align?: CSSProperties['textAlign'];
   text: string;
-  align?: CSSProperties["textAlign"];
+  type: BlockType.Text;
 };
 
 export type AdminButtonBlock = AdminBlockBase & {
-  type: BlockType.Button;
-  text: string;
-  href: string;
   buttonStyle?: CSSProperties;
+  href: string;
+  text: string;
+  type: BlockType.Button;
 };
 
 export type AdminImageBlock = AdminBlockBase & {
-  type: BlockType.Image;
-  src: string;
   alt: string;
+  src: string;
+  type: BlockType.Image;
 };
 
-export type AdminBlock =
-  | CommonBlock
-  | AdminHeroBlock
-  | AdminTextBlock
-  | AdminButtonBlock
-  | AdminImageBlock;
+export type AdminBlock = CommonBlock | AdminHeroBlock | AdminTextBlock | AdminButtonBlock | AdminImageBlock;

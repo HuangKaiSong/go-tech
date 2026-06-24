@@ -8,7 +8,7 @@ export async function sendToBetterStack(level: string, message: any, extra = {})
     dt: new Date().toISOString(),
     level,
     // 将额外上下文合并到日志主体中
-    ...extra,
+    ...extra
   };
 
   try {
@@ -16,9 +16,9 @@ export async function sendToBetterStack(level: string, message: any, extra = {})
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${LOG_SOURCE_TOKEN}`,
+        Authorization: `Bearer ${LOG_SOURCE_TOKEN}`
       },
-      body: JSON.stringify(logEntry),
+      body: JSON.stringify(logEntry)
     });
   } catch (error) {
     // 上报失败时降级到控制台，避免阻塞主流程

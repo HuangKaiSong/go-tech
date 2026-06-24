@@ -1,7 +1,7 @@
 import { FolderApi, Pane } from 'tweakpane';
 
 type ExtendPane = Pane & {
-  addFolder: (params: { title: string; expanded?: boolean }) => FolderApi
+  addFolder: (params: { expanded?: boolean; title: string }) => FolderApi;
 };
 
 export default class Debug {
@@ -9,10 +9,10 @@ export default class Debug {
   ui: ExtendPane | null = null;
 
   constructor() {
-    this.active = window.location.hash === '#debug'
+    this.active = window.location.hash === '#debug';
 
     if (this.active) {
-      this.ui = new Pane() as ExtendPane
+      this.ui = new Pane() as ExtendPane;
     }
   }
 }

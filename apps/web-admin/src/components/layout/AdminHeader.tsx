@@ -1,4 +1,3 @@
-import { useAuth } from "@/hooks/use-auth";
 import {
   Avatar,
   AvatarFallback,
@@ -7,21 +6,22 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@go-tech-frontend/ui";
-import { ChevronDown, LogOut, User } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+  DropdownMenuTrigger
+} from '@go-tech-frontend/ui';
+import { ChevronDown, LogOut, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/use-auth';
 
 const AdminHeader = () => {
   const navigate = useNavigate();
-  const { user, setToken } = useAuth();
+  const { setToken, user } = useAuth();
   if (!user) {
     return null;
   }
 
   const handleLogout = () => {
     setToken(undefined);
-    navigate("/login", { replace: true });
+    navigate('/login', { replace: true });
   };
 
   return (
@@ -34,9 +34,7 @@ const AdminHeader = () => {
               {user.sub?.slice(0, 2)}
             </AvatarFallback>
           </Avatar>
-          <span className="text-sm font-medium text-foreground">
-            {user.nickname}
-          </span>
+          <span className="text-sm font-medium text-foreground">{user.nickname}</span>
           <ChevronDown className="w-4 h-4 text-muted-foreground" />
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-48">

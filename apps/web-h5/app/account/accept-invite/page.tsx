@@ -1,24 +1,32 @@
-'use client'
+'use client';
 
-import Link from "@/app/components/Link";
-import authBackground from "@/assets/auth-background.jpg";
 // import LogoImg from "@/assets/Gotech_Logo.webp";
-import { Button } from "@go-tech-frontend/ui";
-import { LogIn, UserPlus, X } from "lucide-react";
-import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { Button } from '@go-tech-frontend/ui';
+import { LogIn, UserPlus, X } from 'lucide-react';
+import Image from 'next/image';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Link from '@/app/components/Link';
+import authBackground from '@/assets/auth-background.jpg';
+// import { useState } from "react";
 
-type Step = "choose" | "register" | "login" | "success";
+type Step = 'choose' | 'login' | 'register' | 'success';
+
+const step: Step = 'choose';
+
+const Logo = () => (
+  <div className="flex flex-col items-center mb-8">
+    <Image src="/images/Gotech_Logo.webp" alt="logo" className="w-40 h-auto" loading="eager" width={160} height={160} />
+  </div>
+);
 
 const AcceptInvite = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
   // const token = searchParams.get("token");
-  const email = searchParams.get("email") || "";
+  const email = searchParams.get('email') || '';
 
-  const [step, setStep] = useState<Step>("choose");
+  // const [step, setStep] = useState<Step>("choose");
 
   // if (!token) {
   //   return (
@@ -43,19 +51,6 @@ const AcceptInvite = () => {
   //   );
   // }
 
-  const Logo = () => (
-    <div className="flex flex-col items-center mb-8">
-      <Image
-        src="/images/Gotech_Logo.webp"
-        alt="logo"
-        className="w-40 h-auto"
-        loading="eager"
-        width={160}
-        height={160}
-      />
-    </div>
-  );
-
   return (
     <div className="min-h-screen relative flex items-center justify-center p-4">
       <Image
@@ -75,18 +70,20 @@ const AcceptInvite = () => {
         <Logo />
 
         {/* Choose: register or login */}
-        {step === "choose" && (
+        {step === 'choose' && (
           <div className="space-y-6">
             <div className="text-center">
               <h1 className="text-2xl font-bold text-foreground mb-2">接受邀請</h1>
               <p className="text-sm text-muted-foreground">您已被邀請加入 Go Techs 系統</p>
-              <p className="text-sm text-muted-foreground mt-1">邀請郵箱：<span className="font-medium text-foreground">{email}</span></p>
+              <p className="text-sm text-muted-foreground mt-1">
+                邀請郵箱：<span className="font-medium text-foreground">{email}</span>
+              </p>
             </div>
 
             <div className="space-y-3">
               <Button
                 onClick={() => {
-                  router.push(`/account/register?email=${email}&type=user`)
+                  router.push(`/account/register?email=${email}&type=user`);
                 }}
                 className="w-full h-14 text-lg font-semibold"
               >
@@ -101,7 +98,7 @@ const AcceptInvite = () => {
               <Button
                 variant="outline"
                 onClick={() => {
-                  router.push(`/account/login?email=${email}&type=user`)
+                  router.push(`/account/login?email=${email}&type=user`);
                 }}
                 className="w-full h-14 text-lg font-semibold"
               >

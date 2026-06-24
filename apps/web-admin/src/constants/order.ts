@@ -6,26 +6,26 @@ export enum OrderTypeEnum {
   /** 增值 */
   ADDITION = 3,
   /** 升级 */
-  UPGRADE = 4,
+  UPGRADE = 4
 }
 
 export const OrderTypeLabel: Record<OrderTypeEnum, string> = {
-  [OrderTypeEnum.PURCHASE]: "购买",
-  [OrderTypeEnum.RENEWAL]: "续费",
-  [OrderTypeEnum.ADDITION]: "增值",
-  [OrderTypeEnum.UPGRADE]: "升级",
+  [OrderTypeEnum.PURCHASE]: '购买',
+  [OrderTypeEnum.RENEWAL]: '续费',
+  [OrderTypeEnum.ADDITION]: '增值',
+  [OrderTypeEnum.UPGRADE]: '升级'
 };
 
 export enum OrderItemTypeEnum {
   /** 套餐 */
   PACKAGE = 1,
   /** 增值服务 */
-  ADDITION = 2,
+  ADDITION = 2
 }
 
 export const OrderItemTypeLabel: Record<OrderItemTypeEnum, string> = {
-  [OrderItemTypeEnum.PACKAGE]: "套餐",
-  [OrderItemTypeEnum.ADDITION]: "增值服务",
+  [OrderItemTypeEnum.PACKAGE]: '套餐',
+  [OrderItemTypeEnum.ADDITION]: '增值服务'
 };
 
 // 订单状态（1 - 待确认，2 - 待付款，3 - 已完成，4 - 已取消, 5 - 拒絕）
@@ -41,14 +41,14 @@ export enum OrderStatusEnum {
   /** 取消 */
   CANCELED = 5,
   /** 拒绝 */
-  REJECT = 6,
+  REJECT = 6
 }
 
 export const OrderStatusLabel: Record<OrderStatusEnum, string> = {
-  [OrderStatusEnum.WAIT_PAY]: "待付款",
-  [OrderStatusEnum.PROCESSING]: "待確認",
-  [OrderStatusEnum.ACTIVATION]: "待開通",
-  [OrderStatusEnum.CANCELED]: "已取消",
-  [OrderStatusEnum.COMPLETED]: "已完成",
-  [OrderStatusEnum.REJECT]: "已拒絕",
+  [OrderStatusEnum.WAIT_PAY]: '待付款',
+  [OrderStatusEnum.PROCESSING]: '待確認',
+  [OrderStatusEnum.ACTIVATION]: '待開通',
+  [OrderStatusEnum.CANCELED]: '已取消',
+  [OrderStatusEnum.COMPLETED]: '已完成',
+  [OrderStatusEnum.REJECT]: '已拒絕'
 };

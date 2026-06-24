@@ -1,158 +1,268 @@
-import { useState } from "react";
-import MobileLayout from "@/components/MobileLayout";
-import { CalendarDays, Clock, Receipt, Plane, LogOut, ChevronRight, Plus, ArrowLeft, Check, X as XIcon, RotateCcw, User, CheckCircle2, Circle, AlertCircle } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog";
+import {
+  AlertCircle,
+  ArrowLeft,
+  CalendarDays,
+  Check,
+  CheckCircle2,
+  ChevronRight,
+  Circle,
+  Clock,
+  LogOut,
+  Plane,
+  Plus,
+  Receipt,
+  RotateCcw,
+  X as XIcon
+} from 'lucide-react';
+import { useState } from 'react';
+import MobileLayout from '@/components/MobileLayout';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '@/components/ui/alert-dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const applicationTypes = [
-  { icon: CalendarDays, label: "請假申請", desc: "類別/起止時間/事由", color: "bg-primary" },
-  { icon: Clock, label: "加班申請", desc: "日期/時段/預計工時", color: "bg-warning" },
-  { icon: Receipt, label: "報銷申請", desc: "金額/幣別/發票附件", color: "bg-accent" },
-  { icon: Plane, label: "出差申請", desc: "城市/國家/起止日期", color: "bg-info" },
-  { icon: LogOut, label: "離職申請", desc: "離職日期/原因/交接", color: "bg-destructive" },
+  { icon: CalendarDays, label: '請假申請', desc: '類別/起止時間/事由', color: 'bg-primary' },
+  { icon: Clock, label: '加班申請', desc: '日期/時段/預計工時', color: 'bg-warning' },
+  { icon: Receipt, label: '報銷申請', desc: '金額/幣別/發票附件', color: 'bg-accent' },
+  { icon: Plane, label: '出差申請', desc: '城市/國家/起止日期', color: 'bg-info' },
+  { icon: LogOut, label: '離職申請', desc: '離職日期/原因/交接', color: 'bg-destructive' }
 ];
 
-const tabs = ["我的申請", "待審批", "已審核"];
+const tabs = ['我的申請', '待審批', '已審核'];
 
 type Record = {
-  title: string;
+  applicant: string;
+  approvalFlow: {
+    comment?: string;
+    name: string;
+    role: string;
+    status: 'approved' | 'pending' | 'rejected' | 'waiting';
+    time?: string;
+  }[];
   date: string;
-  status: string;
-  statusColor: string;
   days: string;
-  type: string;
+  endDate: string;
   reason: string;
   startDate: string;
-  endDate: string;
-  applicant: string;
-  approvalFlow: { name: string; role: string; status: "approved" | "pending" | "rejected" | "waiting"; time?: string; comment?: string }[];
+  status: string;
+  statusColor: string;
+  title: string;
+  type: string;
 };
 
 const myRecords: Record[] = [
   {
-    title: "年假申請", date: "2026/03/05", status: "已通過", statusColor: "text-success bg-success/10", days: "3天",
-    type: "請假", reason: "家庭旅遊，前往日本東京", startDate: "2026/03/10", endDate: "2026/03/12", applicant: "王小明",
+    title: '年假申請',
+    date: '2026/03/05',
+    status: '已通過',
+    statusColor: 'text-success bg-success/10',
+    days: '3天',
+    type: '請假',
+    reason: '家庭旅遊，前往日本東京',
+    startDate: '2026/03/10',
+    endDate: '2026/03/12',
+    applicant: '王小明',
     approvalFlow: [
-      { name: "王小明", role: "申請人", status: "approved", time: "03/05 09:00" },
-      { name: "李主管", role: "直屬主管", status: "approved", time: "03/05 14:30", comment: "核准，注意交接" },
-      { name: "張經理", role: "部門經理", status: "approved", time: "03/06 10:00", comment: "同意" },
-    ],
+      { name: '王小明', role: '申請人', status: 'approved', time: '03/05 09:00' },
+      { name: '李主管', role: '直屬主管', status: 'approved', time: '03/05 14:30', comment: '核准，注意交接' },
+      { name: '張經理', role: '部門經理', status: 'approved', time: '03/06 10:00', comment: '同意' }
+    ]
   },
   {
-    title: "加班申請", date: "2026/03/01", status: "審批中", statusColor: "text-warning bg-warning/10", days: "3小時",
-    type: "加班", reason: "專案交付期限緊迫，需趕工完成報告", startDate: "2026/03/01 18:00", endDate: "2026/03/01 21:00", applicant: "王小明",
+    title: '加班申請',
+    date: '2026/03/01',
+    status: '審批中',
+    statusColor: 'text-warning bg-warning/10',
+    days: '3小時',
+    type: '加班',
+    reason: '專案交付期限緊迫，需趕工完成報告',
+    startDate: '2026/03/01 18:00',
+    endDate: '2026/03/01 21:00',
+    applicant: '王小明',
     approvalFlow: [
-      { name: "王小明", role: "申請人", status: "approved", time: "03/01 17:30" },
-      { name: "李主管", role: "直屬主管", status: "pending" },
-      { name: "張經理", role: "部門經理", status: "waiting" },
-    ],
+      { name: '王小明', role: '申請人', status: 'approved', time: '03/01 17:30' },
+      { name: '李主管', role: '直屬主管', status: 'pending' },
+      { name: '張經理', role: '部門經理', status: 'waiting' }
+    ]
   },
   {
-    title: "報銷申請", date: "2026/02/28", status: "已駁回", statusColor: "text-destructive bg-destructive/10", days: "NT$3,200",
-    type: "報銷", reason: "客戶拜訪交通費及餐費", startDate: "2026/02/25", endDate: "2026/02/25", applicant: "王小明",
+    title: '報銷申請',
+    date: '2026/02/28',
+    status: '已駁回',
+    statusColor: 'text-destructive bg-destructive/10',
+    days: 'NT$3,200',
+    type: '報銷',
+    reason: '客戶拜訪交通費及餐費',
+    startDate: '2026/02/25',
+    endDate: '2026/02/25',
+    applicant: '王小明',
     approvalFlow: [
-      { name: "王小明", role: "申請人", status: "approved", time: "02/28 10:00" },
-      { name: "李主管", role: "直屬主管", status: "rejected", time: "02/28 16:00", comment: "缺少發票附件，請補齊後重新提交" },
-      { name: "張經理", role: "部門經理", status: "waiting" },
-    ],
+      { name: '王小明', role: '申請人', status: 'approved', time: '02/28 10:00' },
+      {
+        name: '李主管',
+        role: '直屬主管',
+        status: 'rejected',
+        time: '02/28 16:00',
+        comment: '缺少發票附件，請補齊後重新提交'
+      },
+      { name: '張經理', role: '部門經理', status: 'waiting' }
+    ]
   },
   {
-    title: "事假申請", date: "2026/02/20", status: "已通過", statusColor: "text-success bg-success/10", days: "1天",
-    type: "請假", reason: "個人事務處理", startDate: "2026/02/22", endDate: "2026/02/22", applicant: "王小明",
+    title: '事假申請',
+    date: '2026/02/20',
+    status: '已通過',
+    statusColor: 'text-success bg-success/10',
+    days: '1天',
+    type: '請假',
+    reason: '個人事務處理',
+    startDate: '2026/02/22',
+    endDate: '2026/02/22',
+    applicant: '王小明',
     approvalFlow: [
-      { name: "王小明", role: "申請人", status: "approved", time: "02/20 08:30" },
-      { name: "李主管", role: "直屬主管", status: "approved", time: "02/20 11:00", comment: "核准" },
-      { name: "張經理", role: "部門經理", status: "approved", time: "02/20 15:00", comment: "同意" },
-    ],
-  },
+      { name: '王小明', role: '申請人', status: 'approved', time: '02/20 08:30' },
+      { name: '李主管', role: '直屬主管', status: 'approved', time: '02/20 11:00', comment: '核准' },
+      { name: '張經理', role: '部門經理', status: 'approved', time: '02/20 15:00', comment: '同意' }
+    ]
+  }
 ];
 
 const pendingRecords: Record[] = [
   {
-    title: "年假申請", date: "2026/03/08", status: "待審批", statusColor: "text-warning bg-warning/10", days: "2天",
-    type: "請假", reason: "回鄉探親", startDate: "2026/03/15", endDate: "2026/03/16", applicant: "陳大華",
+    title: '年假申請',
+    date: '2026/03/08',
+    status: '待審批',
+    statusColor: 'text-warning bg-warning/10',
+    days: '2天',
+    type: '請假',
+    reason: '回鄉探親',
+    startDate: '2026/03/15',
+    endDate: '2026/03/16',
+    applicant: '陳大華',
     approvalFlow: [
-      { name: "陳大華", role: "申請人", status: "approved", time: "03/08 09:00" },
-      { name: "我（李主管）", role: "直屬主管", status: "pending" },
-      { name: "張經理", role: "部門經理", status: "waiting" },
-    ],
+      { name: '陳大華', role: '申請人', status: 'approved', time: '03/08 09:00' },
+      { name: '我（李主管）', role: '直屬主管', status: 'pending' },
+      { name: '張經理', role: '部門經理', status: 'waiting' }
+    ]
   },
   {
-    title: "加班申請", date: "2026/03/07", status: "待審批", statusColor: "text-warning bg-warning/10", days: "4小時",
-    type: "加班", reason: "系統上線前最終測試", startDate: "2026/03/09 18:00", endDate: "2026/03/09 22:00", applicant: "林小芳",
+    title: '加班申請',
+    date: '2026/03/07',
+    status: '待審批',
+    statusColor: 'text-warning bg-warning/10',
+    days: '4小時',
+    type: '加班',
+    reason: '系統上線前最終測試',
+    startDate: '2026/03/09 18:00',
+    endDate: '2026/03/09 22:00',
+    applicant: '林小芳',
     approvalFlow: [
-      { name: "林小芳", role: "申請人", status: "approved", time: "03/07 16:00" },
-      { name: "我（李主管）", role: "直屬主管", status: "pending" },
-      { name: "張經理", role: "部門經理", status: "waiting" },
-    ],
-  },
+      { name: '林小芳', role: '申請人', status: 'approved', time: '03/07 16:00' },
+      { name: '我（李主管）', role: '直屬主管', status: 'pending' },
+      { name: '張經理', role: '部門經理', status: 'waiting' }
+    ]
+  }
 ];
 
 const reviewedRecords: Record[] = [
   {
-    title: "出差申請", date: "2026/02/25", status: "已通過", statusColor: "text-success bg-success/10", days: "5天",
-    type: "出差", reason: "參加上海技術研討會", startDate: "2026/03/01", endDate: "2026/03/05", applicant: "趙志強",
+    title: '出差申請',
+    date: '2026/02/25',
+    status: '已通過',
+    statusColor: 'text-success bg-success/10',
+    days: '5天',
+    type: '出差',
+    reason: '參加上海技術研討會',
+    startDate: '2026/03/01',
+    endDate: '2026/03/05',
+    applicant: '趙志強',
     approvalFlow: [
-      { name: "趙志強", role: "申請人", status: "approved", time: "02/25 10:00" },
-      { name: "我（李主管）", role: "直屬主管", status: "approved", time: "02/25 14:00", comment: "核准，注意安全" },
-      { name: "張經理", role: "部門經理", status: "approved", time: "02/26 09:00", comment: "同意" },
-    ],
-  },
+      { name: '趙志強', role: '申請人', status: 'approved', time: '02/25 10:00' },
+      { name: '我（李主管）', role: '直屬主管', status: 'approved', time: '02/25 14:00', comment: '核准，注意安全' },
+      { name: '張經理', role: '部門經理', status: 'approved', time: '02/26 09:00', comment: '同意' }
+    ]
+  }
 ];
 
-type ViewMode = "list" | "detail" | "approval";
+type ViewMode = 'approval' | 'detail' | 'list';
+
+const getStepStatusClass = (status: string) => {
+  if (status === 'approved') return 'text-success bg-success/10';
+  if (status === 'rejected') return 'text-destructive bg-destructive/10';
+  if (status === 'pending') return 'text-warning bg-warning/10';
+  return 'text-muted-foreground bg-muted';
+};
+
+const getFlowIcon = (status: string) => {
+  switch (status) {
+    case 'approved':
+      return <CheckCircle2 className="w-5 h-5 text-success" />;
+    case 'rejected':
+      return <AlertCircle className="w-5 h-5 text-destructive" />;
+    case 'pending':
+      return <Clock className="w-5 h-5 text-warning" />;
+    default:
+      return <Circle className="w-5 h-5 text-muted-foreground" />;
+  }
+};
+
+const getFlowLabel = (status: string) => {
+  switch (status) {
+    case 'approved':
+      return '已通過';
+    case 'rejected':
+      return '已駁回';
+    case 'pending':
+      return '審批中';
+    default:
+      return '等待中';
+  }
+};
 
 const Applications = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [showNewDialog, setShowNewDialog] = useState(false);
-  const [viewMode, setViewMode] = useState<ViewMode>("list");
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [selectedRecord, setSelectedRecord] = useState<Record | null>(null);
   const [showRecallDialog, setShowRecallDialog] = useState(false);
   const [showApproveDialog, setShowApproveDialog] = useState(false);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
-  const [approvalComment, setApprovalComment] = useState("");
+  const [approvalComment, setApprovalComment] = useState('');
 
-  const currentRecords = activeTab === 0 ? myRecords : activeTab === 1 ? pendingRecords : reviewedRecords;
+  const currentRecords = [myRecords, pendingRecords, reviewedRecords][activeTab] ?? reviewedRecords;
 
   const handleRecordClick = (record: Record) => {
     setSelectedRecord(record);
-    setViewMode(activeTab === 1 ? "approval" : "detail");
+    setViewMode(activeTab === 1 ? 'approval' : 'detail');
   };
 
   const handleBack = () => {
-    setViewMode("list");
+    setViewMode('list');
     setSelectedRecord(null);
-    setApprovalComment("");
-  };
-
-  const getFlowIcon = (status: string) => {
-    switch (status) {
-      case "approved": return <CheckCircle2 className="w-5 h-5 text-success" />;
-      case "rejected": return <AlertCircle className="w-5 h-5 text-destructive" />;
-      case "pending": return <Clock className="w-5 h-5 text-warning" />;
-      default: return <Circle className="w-5 h-5 text-muted-foreground" />;
-    }
-  };
-
-  const getFlowLabel = (status: string) => {
-    switch (status) {
-      case "approved": return "已通過";
-      case "rejected": return "已駁回";
-      case "pending": return "審批中";
-      default: return "等待中";
-    }
+    setApprovalComment('');
   };
 
   // Detail / Approval view
-  if (viewMode !== "list" && selectedRecord) {
-    const isApproval = viewMode === "approval";
-    const canRecall = selectedRecord.status === "審批中";
+  if (viewMode !== 'list' && selectedRecord) {
+    const isApproval = viewMode === 'approval';
+    const canRecall = selectedRecord.status === '審批中';
 
     return (
-      <MobileLayout title={isApproval ? "審批詳情" : "申請詳情"}>
+      <MobileLayout title={isApproval ? '審批詳情' : '申請詳情'}>
         <div className="px-5 pt-4">
           {/* Back button */}
-          <button onClick={handleBack} className="flex items-center gap-1.5 text-sm text-muted-foreground mb-4 active:opacity-70">
+          <button
+            onClick={handleBack}
+            className="flex items-center gap-1.5 text-sm text-muted-foreground mb-4 active:opacity-70"
+          >
             <ArrowLeft className="w-4 h-4" />
             返回列表
           </button>
@@ -207,7 +317,9 @@ const Applications = () => {
                   <div className="flex flex-col items-center">
                     {getFlowIcon(step.status)}
                     {i < selectedRecord.approvalFlow.length - 1 && (
-                      <div className={`w-0.5 flex-1 my-1 ${step.status === "approved" || step.status === "rejected" ? "bg-border" : "bg-muted"}`} />
+                      <div
+                        className={`w-0.5 flex-1 my-1 ${step.status === 'approved' || step.status === 'rejected' ? 'bg-border' : 'bg-muted'}`}
+                      />
                     )}
                   </div>
                   {/* Content */}
@@ -218,12 +330,11 @@ const Applications = () => {
                         <p className="text-xs text-muted-foreground">{step.role}</p>
                       </div>
                       <div className="text-right">
-                        <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
-                          step.status === "approved" ? "text-success bg-success/10" :
-                          step.status === "rejected" ? "text-destructive bg-destructive/10" :
-                          step.status === "pending" ? "text-warning bg-warning/10" :
-                          "text-muted-foreground bg-muted"
-                        }`}>
+                        <span
+                          className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${getStepStatusClass(
+                            step.status
+                          )}`}
+                        >
                           {getFlowLabel(step.status)}
                         </span>
                         {step.time && <p className="text-[10px] text-muted-foreground mt-0.5">{step.time}</p>}
@@ -241,7 +352,7 @@ const Applications = () => {
           </div>
 
           {/* Action buttons */}
-          {isApproval ? (
+          {isApproval && (
             <div className="flex gap-3 mb-6">
               <button
                 onClick={() => setShowRejectDialog(true)}
@@ -258,7 +369,8 @@ const Applications = () => {
                 通過
               </button>
             </div>
-          ) : canRecall ? (
+          )}
+          {!isApproval && canRecall && (
             <button
               onClick={() => setShowRecallDialog(true)}
               className="w-full bg-warning/10 text-warning rounded-xl py-3 text-sm font-medium active:scale-[0.98] transition-transform flex items-center justify-center gap-1.5 mb-6"
@@ -266,7 +378,7 @@ const Applications = () => {
               <RotateCcw className="w-4 h-4" />
               撤回申請
             </button>
-          ) : null}
+          )}
         </div>
 
         {/* Recall confirmation */}
@@ -274,11 +386,18 @@ const Applications = () => {
           <AlertDialogContent className="max-w-[85vw] rounded-2xl">
             <AlertDialogHeader>
               <AlertDialogTitle className="text-base">確認撤回</AlertDialogTitle>
-              <AlertDialogDescription className="text-xs">撤回後此申請將取消，如需重新提交請建立新申請。確定要撤回嗎？</AlertDialogDescription>
+              <AlertDialogDescription className="text-xs">
+                撤回後此申請將取消，如需重新提交請建立新申請。確定要撤回嗎？
+              </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel className="text-xs">取消</AlertDialogCancel>
-              <AlertDialogAction className="text-xs bg-warning text-warning-foreground hover:bg-warning/90" onClick={handleBack}>確認撤回</AlertDialogAction>
+              <AlertDialogAction
+                className="text-xs bg-warning text-warning-foreground hover:bg-warning/90"
+                onClick={handleBack}
+              >
+                確認撤回
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
@@ -292,13 +411,15 @@ const Applications = () => {
             </AlertDialogHeader>
             <textarea
               value={approvalComment}
-              onChange={(e) => setApprovalComment(e.target.value)}
+              onChange={e => setApprovalComment(e.target.value)}
               placeholder="輸入審批意見..."
               className="w-full border border-border rounded-lg p-3 text-sm bg-background text-foreground placeholder:text-muted-foreground resize-none h-20 focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
             <AlertDialogFooter>
               <AlertDialogCancel className="text-xs">取消</AlertDialogCancel>
-              <AlertDialogAction className="text-xs" onClick={handleBack}>確認通過</AlertDialogAction>
+              <AlertDialogAction className="text-xs" onClick={handleBack}>
+                確認通過
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
@@ -312,13 +433,18 @@ const Applications = () => {
             </AlertDialogHeader>
             <textarea
               value={approvalComment}
-              onChange={(e) => setApprovalComment(e.target.value)}
+              onChange={e => setApprovalComment(e.target.value)}
               placeholder="輸入駁回原因..."
               className="w-full border border-border rounded-lg p-3 text-sm bg-background text-foreground placeholder:text-muted-foreground resize-none h-20 focus:outline-none focus:ring-2 focus:ring-destructive/30"
             />
             <AlertDialogFooter>
               <AlertDialogCancel className="text-xs">取消</AlertDialogCancel>
-              <AlertDialogAction className="text-xs bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={handleBack}>確認駁回</AlertDialogAction>
+              <AlertDialogAction
+                className="text-xs bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={handleBack}
+              >
+                確認駁回
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
@@ -346,9 +472,7 @@ const Applications = () => {
               key={tab}
               onClick={() => setActiveTab(i)}
               className={`flex-1 py-2 text-xs font-medium rounded-lg transition-all ${
-                activeTab === i
-                  ? "bg-card text-foreground shadow-sm"
-                  : "text-muted-foreground"
+                activeTab === i ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'
               }`}
             >
               {tab}
@@ -398,7 +522,7 @@ const Applications = () => {
             <DialogDescription className="text-xs">請選擇申請類型</DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-2 gap-3 pt-1">
-            {applicationTypes.map((type) => (
+            {applicationTypes.map(type => (
               <button
                 key={type.label}
                 onClick={() => setShowNewDialog(false)}

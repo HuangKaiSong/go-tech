@@ -12,24 +12,20 @@ import {
   TabsList,
   TabsTrigger,
   Textarea,
-  UploadedFile,
-} from "@go-tech-frontend/ui";
-import { useAsyncEffect } from "ahooks";
-import { RefreshCcwIcon } from "lucide-react";
-import { CSSProperties, useEffect, useRef, useState } from "react";
-import { fetchAndConvertToFile, rgbToHex } from "../utils";
+  type UploadedFile
+} from '@go-tech-frontend/ui';
+import { useAsyncEffect } from 'ahooks';
+import { RefreshCcwIcon } from 'lucide-react';
+import { type CSSProperties, useEffect, useRef, useState } from 'react';
+import { fetchAndConvertToFile, rgbToHex } from '../utils';
 
-function getStyleValue(
-  element: Element | null,
-  cssProp: string,
-  fallbackCamelProp?: keyof CSSStyleDeclaration,
-) {
-  if (!element) return "";
+function getStyleValue(element: Element | null, cssProp: string, fallbackCamelProp?: keyof CSSStyleDeclaration) {
+  if (!element) return '';
   const snapshotValue = readSnapshotStyle(element, cssProp);
   if (snapshotValue) return snapshotValue;
 
   const view = element.ownerDocument?.defaultView;
-  if (!view) return "";
+  if (!view) return '';
 
   const computed = view.getComputedStyle(element);
   if (computed.getPropertyValue(cssProp)) {
@@ -40,70 +36,51 @@ function getStyleValue(
     return computed[fallbackCamelProp] as string;
   }
 
-  return "";
+  return '';
 }
 
 function readSnapshotStyle(element: Element | null, cssProp: string) {
-  if (!element) return "";
-  const raw = element.getAttribute("data-computed-style");
-  if (!raw) return "";
+  if (!element) return '';
+  const raw = element.getAttribute('data-computed-style');
+  if (!raw) return '';
   try {
     const parsed = JSON.parse(raw) as Record<string, string>;
-    return parsed[cssProp] || "";
+    return parsed[cssProp] || '';
   } catch {
-    return "";
+    return '';
   }
 }
 
 export default function Home({
   element,
-  sync,
   onPatchBlock,
+  sync
 }: {
   element: HTMLElement;
+  onPatchBlock: (blockId: string, blockSeq: number | undefined, patch: any) => void;
   sync: (payload: Record<string, unknown>) => void;
-  onPatchBlock: (
-    blockId: string,
-    blockSeq: number | undefined,
-    patch: any,
-  ) => void;
 }) {
   if (!element) return null;
 
-  const role = element.dataset.blockRole || "";
-  const blockId = element.dataset.blockId || "home-section";
+  const role = element.dataset.blockRole || '';
+  const blockId = element.dataset.blockId || 'home-section';
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>首页 ({role || "Section"})</CardTitle>
+        <CardTitle>首页 ({role || 'Section'})</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        {blockId.includes("section") ? (
-          <Section
-            key={element.outerHTML}
-            element={element}
-            sync={sync}
-            onPatchBlock={onPatchBlock}
-          />
+        {blockId.includes('section') ? (
+          <Section key={element.outerHTML} element={element} sync={sync} onPatchBlock={onPatchBlock} />
         ) : null}
 
-        {blockId.includes("audiences") ? (
-          <Audiences
-            key={element.outerHTML}
-            element={element}
-            sync={sync}
-            onPatchBlock={onPatchBlock}
-          />
+        {blockId.includes('audiences') ? (
+          <Audiences key={element.outerHTML} element={element} sync={sync} onPatchBlock={onPatchBlock} />
         ) : null}
 
-        {blockId.includes("testimonial") ? (
-          <Testimonial
-            key={element.outerHTML}
-            element={element}
-            sync={sync}
-            onPatchBlock={onPatchBlock}
-          />
+        {blockId.includes('testimonial') ? (
+          <Testimonial key={element.outerHTML} element={element} sync={sync} onPatchBlock={onPatchBlock} />
         ) : null}
       </CardContent>
     </Card>
@@ -112,51 +89,40 @@ export default function Home({
 
 function Section({
   element,
-  sync,
   onPatchBlock,
+  sync
 }: {
   element: HTMLElement;
+  // oxlint-disable-next-line eslint/max-params
+  onPatchBlock: (blockId: string, blockSeq: number | undefined, patch: any, type?: string) => void;
   sync: (payload: Record<string, unknown>) => void;
-  onPatchBlock: (
-    blockId: string,
-    blockSeq: number | undefined,
-    patch: any,
-    type?: string,
-  ) => void;
 }) {
-  const role = element.dataset.blockRole || "";
-  const blockId = element.dataset.blockId || "home-section";
+  const blockId = element.dataset.blockId || 'home-section';
   const originTitle = element.querySelector('[data-block-role="title"]');
   const originLine = element.querySelector('[data-block-role="line"]');
   const originIntro = element.querySelector('[data-block-role="intro"]');
 
   const titleInfo = {
-    content: originTitle.textContent || "",
+    content: originTitle?.textContent || '',
     style: {
-      fontSize: getStyleValue(originTitle, "font-size", "fontSize").replace(
-        "px",
-        "",
-      ),
-      color: rgbToHex(getStyleValue(originTitle, "color")),
-    },
+      fontSize: getStyleValue(originTitle, 'font-size', 'fontSize').replace('px', ''),
+      color: rgbToHex(getStyleValue(originTitle, 'color'))
+    }
   };
 
   const lineInfo = {
-    width: getStyleValue(originLine, "width").replace("px", ""),
-    height: getStyleValue(originLine, "height").replace("px", ""),
-    backgroundColor: rgbToHex(getStyleValue(originLine, "background-color")),
-    bottom: getStyleValue(originLine, "bottom").replace("px", ""),
+    width: getStyleValue(originLine, 'width').replace('px', ''),
+    height: getStyleValue(originLine, 'height').replace('px', ''),
+    backgroundColor: rgbToHex(getStyleValue(originLine, 'background-color')),
+    bottom: getStyleValue(originLine, 'bottom').replace('px', '')
   };
 
   const introInfo = {
-    content: originIntro?.textContent || "",
+    content: originIntro?.textContent || '',
     style: {
-      fontSize: getStyleValue(originIntro, "font-size", "fontSize").replace(
-        "px",
-        "",
-      ),
-      color: rgbToHex(getStyleValue(originIntro, "color")),
-    },
+      fontSize: getStyleValue(originIntro, 'font-size', 'fontSize').replace('px', ''),
+      color: rgbToHex(getStyleValue(originIntro, 'color'))
+    }
   };
 
   const [title, setTitle] = useState(titleInfo);
@@ -165,68 +131,68 @@ function Section({
 
   const applyIntro = () => {
     const style: CSSProperties = {
-      fontSize: intro.style.fontSize ? Number(intro.style.fontSize) : "1rem",
-      color: intro.style.color || undefined,
+      fontSize: intro.style.fontSize ? Number(intro.style.fontSize) : '1rem',
+      color: intro.style.color || undefined
     };
     sync({
-      type: "UPDATE_ELEMENT_TEXT",
+      type: 'UPDATE_ELEMENT_TEXT',
       text: intro.content,
-      block: { id: blockId, role: "intro" },
+      block: { id: blockId, role: 'intro' }
     });
     sync({
-      type: "UPDATE_ELEMENT_STYLE",
+      type: 'UPDATE_ELEMENT_STYLE',
       style,
-      block: { id: blockId, role: "intro" },
+      block: { id: blockId, role: 'intro' }
     });
     onPatchBlock(
       blockId,
       undefined,
       {
         intro: intro.content,
-        introStyle: style,
+        introStyle: style
       },
-      "section",
+      'section'
     );
   };
 
   const applyLine = () => {
     const lineStyle: CSSProperties = {
       background: line.backgroundColor || undefined,
-      height: line.height ? Number(line.height) : "1px",
-      width: line.width ? Number(line.width) : "100%",
-      bottom: line.bottom ? Number(line.bottom) : undefined,
+      height: line.height ? Number(line.height) : '1px',
+      width: line.width ? Number(line.width) : '100%',
+      bottom: line.bottom ? Number(line.bottom) : undefined
     };
 
     sync({
-      type: "UPDATE_ELEMENT_STYLE",
+      type: 'UPDATE_ELEMENT_STYLE',
       style: lineStyle,
-      block: { id: blockId, role: "line" },
+      block: { id: blockId, role: 'line' }
     });
 
     onPatchBlock(
       blockId,
       undefined,
       {
-        lineStyle,
+        lineStyle
       },
-      "section",
+      'section'
     );
   };
 
   const applyTitle = () => {
     const style: CSSProperties = {
-      fontSize: title.style.fontSize ? Number(title.style.fontSize) : "1rem",
-      color: title.style.color || undefined,
+      fontSize: title.style.fontSize ? Number(title.style.fontSize) : '1rem',
+      color: title.style.color || undefined
     };
     sync({
-      type: "UPDATE_ELEMENT_TEXT",
+      type: 'UPDATE_ELEMENT_TEXT',
       text: title.content,
-      block: { id: blockId, role: "title" },
+      block: { id: blockId, role: 'title' }
     });
     sync({
-      type: "UPDATE_ELEMENT_STYLE",
+      type: 'UPDATE_ELEMENT_STYLE',
       style,
-      block: { id: blockId, role: "title" },
+      block: { id: blockId, role: 'title' }
     });
 
     onPatchBlock(
@@ -234,9 +200,9 @@ function Section({
       undefined,
       {
         title: title.content,
-        titleStyle: style,
+        titleStyle: style
       },
-      "section",
+      'section'
     );
   };
 
@@ -254,10 +220,10 @@ function Section({
               rows={3}
               placeholder="输入文字"
               value={title.content}
-              onChange={(e) => {
-                setTitle((prev) => ({
+              onChange={e => {
+                setTitle(prev => ({
                   ...prev,
-                  content: e.target.value,
+                  content: e.target.value
                 }));
               }}
             />
@@ -270,13 +236,13 @@ function Section({
                 type="number"
                 min="10"
                 value={Number(title.style.fontSize)}
-                onChange={(e) => {
-                  setTitle((prev) => ({
+                onChange={e => {
+                  setTitle(prev => ({
                     ...prev,
                     style: {
                       ...prev.style,
-                      fontSize: e.target.value,
-                    },
+                      fontSize: e.target.value
+                    }
                   }));
                 }}
               />
@@ -287,13 +253,13 @@ function Section({
                 id="textColor"
                 type="color"
                 value={title.style.color}
-                onChange={(e) => {
-                  setTitle((prev) => ({
+                onChange={e => {
+                  setTitle(prev => ({
                     ...prev,
                     style: {
                       ...prev.style,
-                      color: e.target.value,
-                    },
+                      color: e.target.value
+                    }
                   }));
                 }}
               />
@@ -318,10 +284,10 @@ function Section({
               id="bgColor"
               type="color"
               value={line.backgroundColor}
-              onChange={(e) => {
-                setLine((prev) => ({
+              onChange={e => {
+                setLine(prev => ({
                   ...prev,
-                  backgroundColor: e.target.value,
+                  backgroundColor: e.target.value
                 }));
               }}
             />
@@ -333,10 +299,10 @@ function Section({
               type="number"
               min="0"
               value={Number(line.width)}
-              onChange={(e) =>
-                setLine((prev) => ({
+              onChange={e =>
+                setLine(prev => ({
                   ...prev,
-                  width: e.target.value,
+                  width: e.target.value
                 }))
               }
             />
@@ -348,10 +314,10 @@ function Section({
               type="number"
               min="0"
               value={Number(line.height)}
-              onChange={(e) =>
-                setLine((prev) => ({
+              onChange={e =>
+                setLine(prev => ({
                   ...prev,
-                  height: e.target.value,
+                  height: e.target.value
                 }))
               }
             />
@@ -362,10 +328,10 @@ function Section({
               id="bottom"
               type="number"
               value={Number(line.bottom)}
-              onChange={(e) =>
-                setLine((prev) => ({
+              onChange={e =>
+                setLine(prev => ({
                   ...prev,
-                  bottom: e.target.value,
+                  bottom: e.target.value
                 }))
               }
             />
@@ -390,10 +356,10 @@ function Section({
               rows={3}
               placeholder="输入文字"
               value={intro.content}
-              onChange={(e) => {
-                setIntro((prev) => ({
+              onChange={e => {
+                setIntro(prev => ({
                   ...prev,
-                  content: e.target.value,
+                  content: e.target.value
                 }));
               }}
             />
@@ -406,13 +372,13 @@ function Section({
                 type="number"
                 min="10"
                 value={Number(intro.style.fontSize)}
-                onChange={(e) => {
-                  setIntro((prev) => ({
+                onChange={e => {
+                  setIntro(prev => ({
                     ...prev,
                     style: {
                       ...prev.style,
-                      fontSize: e.target.value,
-                    },
+                      fontSize: e.target.value
+                    }
                   }));
                 }}
               />
@@ -423,13 +389,13 @@ function Section({
                 id="textColor"
                 type="color"
                 value={intro.style.color}
-                onChange={(e) => {
-                  setIntro((prev) => ({
+                onChange={e => {
+                  setIntro(prev => ({
                     ...prev,
                     style: {
                       ...prev.style,
-                      color: e.target.value,
-                    },
+                      color: e.target.value
+                    }
                   }));
                 }}
               />
@@ -448,51 +414,40 @@ function Section({
 
 function Audiences({
   element,
-  sync,
   onPatchBlock,
+  sync
 }: {
   element: HTMLElement;
+  // oxlint-disable-next-line eslint/max-params
+  onPatchBlock: (blockId: string, blockSeq: number | undefined, patch: any, type?: string) => void;
   sync: (payload: Record<string, unknown>) => void;
-  onPatchBlock: (
-    blockId: string,
-    blockSeq: number | undefined,
-    patch: any,
-    type?: string,
-  ) => void;
 }) {
-  const audiences = Array.from(
-    element.querySelectorAll('[data-block-role="audiences"]'),
-  );
+  const audiences = Array.from(element.querySelectorAll('[data-block-role="audiences"]'));
   type AudienceItem = {
     blockId: string;
-    sort: string;
-    title: string;
     description: string;
+    fileList?: UploadedFile[];
     initialSrc: string;
     prevSrc: string;
-    fileList?: UploadedFile[];
+    sort: string;
+    title: string;
   };
-  const audiencesInfo: AudienceItem[] = audiences.map((audience) => {
-    const blockId = (audience as HTMLElement).dataset.blockId;
-    const sort = (audience as HTMLElement).dataset.blockSeq;
+  const audiencesInfo: AudienceItem[] = audiences.map(audience => {
+    const blockId = (audience as HTMLElement).dataset.blockId!;
+    const sort = (audience as HTMLElement).dataset.blockSeq!;
 
-    const title =
-      audience.querySelector('[data-block-role="title"]')?.textContent || "";
-    const description =
-      audience.querySelector('[data-block-role="description"]')?.textContent ||
-      "";
+    const title = audience.querySelector('[data-block-role="title"]')?.textContent || '';
+    const description = audience.querySelector('[data-block-role="description"]')?.textContent || '';
 
     const initialSrc =
-      (
-        audience.querySelector('[data-block-role="img"]') as HTMLImageElement
-      )?.getAttribute("src") || "";
+      (audience.querySelector('[data-block-role="img"]') as HTMLImageElement)?.getAttribute('src') || '';
     let prevSrc = initialSrc;
     const h5SiteUrl = import.meta.env.VITE_H5_SITE_URL;
 
-    if (initialSrc.startsWith("http")) {
+    if (initialSrc.startsWith('http')) {
       prevSrc = initialSrc;
     }
-    if (initialSrc.startsWith("/")) {
+    if (initialSrc.startsWith('/')) {
       prevSrc = `${h5SiteUrl}${initialSrc}`;
     }
 
@@ -502,7 +457,7 @@ function Audiences({
       title,
       description,
       initialSrc,
-      prevSrc,
+      prevSrc
     };
   });
   const initialAudiences = useRef<AudienceItem[]>([]);
@@ -510,60 +465,57 @@ function Audiences({
 
   const applySyncTarget = () => {
     const initialMap = new Map(
-      initialAudiences.current.map((item) => [
-        `${item.blockId || ""}-${item.sort || ""}`,
-        item,
-      ]),
+      initialAudiences.current.map(item => [`${item.blockId || ''}-${item.sort || ''}`, item])
     );
 
-    audienceItems.forEach((audience) => {
-      const key = `${audience.blockId || ""}-${audience.sort || ""}`;
+    audienceItems.forEach(audience => {
+      const key = `${audience.blockId || ''}-${audience.sort || ''}`;
       const initial = initialMap.get(key);
 
       if (audience.title !== initial?.title) {
         sync({
-          type: "UPDATE_ELEMENT_TEXT",
+          type: 'UPDATE_ELEMENT_TEXT',
           text: audience.title,
-          block: { id: initial.blockId, role: "title", seq: initial.sort },
+          block: { id: initial!.blockId, role: 'title', seq: initial!.sort }
         });
       }
 
       if (audience.description !== initial?.description) {
         sync({
-          type: "UPDATE_ELEMENT_TEXT",
+          type: 'UPDATE_ELEMENT_TEXT',
           text: audience.description,
           block: {
             id: audience.blockId,
-            role: "description",
-            seq: audience.sort,
-          },
+            role: 'description',
+            seq: audience.sort
+          }
         });
       }
 
       if (audience.initialSrc && audience.initialSrc !== initial?.initialSrc) {
         sync({
-          type: "UPDATE_ELEMENT_ATTR",
-          attr: "src",
+          type: 'UPDATE_ELEMENT_ATTR',
+          attr: 'src',
           value: audience.initialSrc,
-          block: { id: audience.blockId, role: "img", seq: audience.sort },
+          block: { id: audience.blockId, role: 'img', seq: audience.sort }
         });
       }
     });
 
     const targetAudiences = audienceItems
-      .map((item) => {
+      .map(item => {
         delete item.fileList;
         return item;
       })
-      .sort((a, b) => Number(b.sort) - Number(a.sort));
+      .toSorted((a, b) => Number(b.sort) - Number(a.sort));
 
     onPatchBlock(
-      "home-audiences",
+      'home-audiences',
       undefined,
       {
-        audiences: targetAudiences,
+        audiences: targetAudiences
       },
-      "audiences",
+      'audiences'
     );
   };
 
@@ -572,7 +524,7 @@ function Audiences({
 
     const loadFiles = async () => {
       const nextItems = await Promise.all(
-        audiencesInfo.map(async (audience) => {
+        audiencesInfo.map(async audience => {
           if (!audience.initialSrc) return audience;
 
           try {
@@ -581,21 +533,21 @@ function Audiences({
               {
                 file,
                 previewUrl: audience.prevSrc,
-                status: "success",
+                status: 'success',
                 progress: 100,
                 url: audience.initialSrc,
-                id: audience.prevSrc || audience.initialSrc,
-              },
+                id: audience.prevSrc || audience.initialSrc
+              }
             ];
 
             return {
               ...audience,
-              fileList,
+              fileList
             };
           } catch {
             return audience;
           }
-        }),
+        })
       );
 
       if (!cancelled) {
@@ -604,7 +556,7 @@ function Audiences({
       }
     };
 
-    void loadFiles();
+    loadFiles();
 
     return () => {
       cancelled = true;
@@ -617,7 +569,7 @@ function Audiences({
       <div className="flex items-center justify-between mb-4">
         <TabsList className="flex items-center gap-4">
           {audiences.map((audience, index) => {
-            const value = (audience as HTMLElement).dataset.blockSeq;
+            const value = (audience as HTMLElement).dataset.blockSeq!;
 
             return (
               <TabsTrigger key={value} value={value}>
@@ -630,30 +582,26 @@ function Audiences({
           <RefreshCcwIcon />
         </Button>
       </div>
-      {audienceItems.map((audience) => {
+      {audienceItems.map(audience => {
         return (
-          <TabsContent
-            key={audience.sort}
-            value={`${audience.sort}`}
-            className="space-y-2"
-          >
+          <TabsContent key={audience.sort} value={`${audience.sort}`} className="space-y-2">
             <div className="space-y-2">
               <Label htmlFor="backgroundImageUrl">背景图</Label>
               <FileUpload
                 maxCount={1}
                 uploadUrl="/api/pms-resource/web-back/minio/upload"
                 list={audience.fileList}
-                onChange={(files) => {
+                onChange={files => {
                   audience.fileList = files;
-                  const file = files.find((f) => f.status === "success");
+                  const file = files.find(f => f.status === 'success');
                   if (!file) {
                     audience.fileList = [];
                   } else {
                     audience.prevSrc = file.previewUrl;
-                    audience.initialSrc = file.url;
+                    audience.initialSrc = file.url!;
                   }
 
-                  setAudienceItems((prev) => {
+                  setAudienceItems(prev => {
                     return Array.from(new Set([...prev, ...audienceItems]));
                   });
                 }}
@@ -665,9 +613,9 @@ function Audiences({
                 id="title"
                 placeholder="输入文字"
                 value={audience.title}
-                onChange={(e) => {
+                onChange={e => {
                   audience.title = e.target.value;
-                  setAudienceItems((prev) => {
+                  setAudienceItems(prev => {
                     return Array.from(new Set([...prev, ...audienceItems]));
                   });
                 }}
@@ -678,9 +626,9 @@ function Audiences({
               <Textarea
                 id="description"
                 value={audience.description}
-                onChange={(e) => {
+                onChange={e => {
                   audience.description = e.target.value;
-                  setAudienceItems((prev) => {
+                  setAudienceItems(prev => {
                     return Array.from(new Set([...prev, ...audienceItems]));
                   });
                 }}
@@ -697,43 +645,34 @@ function Audiences({
 
 function Testimonial({
   element,
-  sync,
   onPatchBlock,
+  sync
 }: {
   element: HTMLElement;
+  // oxlint-disable-next-line eslint/max-params
+  onPatchBlock: (blockId: string, blockSeq: number | undefined, patch: any, type?: string) => void;
   sync: (payload: Record<string, unknown>) => void;
-  onPatchBlock: (
-    blockId: string,
-    blockSeq: number | undefined,
-    patch: any,
-    type?: string,
-  ) => void;
 }) {
-  const titleContent =
-    element.querySelector('[data-block-role="title"]')?.textContent || "";
-  const descriptionContent =
-    element.querySelector('[data-block-role="description"]')?.textContent || "";
-  const itemsContent =
-    element.querySelector('[data-block-role="items"]')?.childNodes || [];
-  const initialImage =
-    element.querySelector('[data-block-role="image"]').getAttribute("src") ||
-    "";
+  const titleContent = element.querySelector('[data-block-role="title"]')?.textContent || '';
+  const descriptionContent = element.querySelector('[data-block-role="description"]')?.textContent || '';
+  const itemsContent = element.querySelector('[data-block-role="items"]')?.childNodes || [];
+  const initialImage = element.querySelector('[data-block-role="image"]')?.getAttribute('src') || '';
 
   const [title, setTitle] = useState(titleContent);
   const [description, setDescription] = useState(descriptionContent);
   const [items, setItems] = useState(() => {
-    return Array.from(itemsContent).map((node) => {
-      const text = (node as HTMLElement).textContent || "";
-      return text.replace(/^\s*-\s*/, "");
+    return Array.from(itemsContent).map(node => {
+      const text = (node as HTMLElement).textContent || '';
+      return text.replace(/^\s*-\s*/, '');
     });
   });
 
-  const [fileList, setFileList] = useState([]);
+  const [fileList, setFileList] = useState<UploadedFile[]>([]);
 
   useAsyncEffect(async () => {
     let prevSrc = initialImage;
     const file = await fetchAndConvertToFile(initialImage);
-    if (initialImage.startsWith("/_next")) {
+    if (initialImage.startsWith('/_next')) {
       prevSrc = `/h5-hook${prevSrc}`;
     }
 
@@ -741,61 +680,61 @@ function Testimonial({
       {
         file,
         previewUrl: prevSrc,
-        status: "success",
+        status: 'success',
         progress: 100,
         url: initialImage,
-        id: prevSrc || initialImage,
-      },
+        id: prevSrc || initialImage
+      }
     ]);
   }, [initialImage]);
 
   const applySync = () => {
-    const file = fileList?.find((item) => item.status === "success");
+    const file = fileList?.find(item => item.status === 'success');
     const patchData: {
-      title: string;
       description: string;
-      items: string[];
       image?: string;
+      items: string[];
+      title: string;
     } = {
       title,
       description,
-      items,
+      items
     };
 
     sync({
-      type: "UPDATE_ELEMENT_TEXT",
+      type: 'UPDATE_ELEMENT_TEXT',
       text: patchData.title,
-      block: { id: "home-testimonial", role: "title" },
+      block: { id: 'home-testimonial', role: 'title' }
     });
     sync({
-      type: "UPDATE_ELEMENT_TEXT",
+      type: 'UPDATE_ELEMENT_TEXT',
       text: patchData.description,
-      block: { id: "home-testimonial", role: "description" },
+      block: { id: 'home-testimonial', role: 'description' }
     });
 
     let el = ``;
-    patchData.items.map((item) => {
+    patchData.items.forEach(item => {
       el += `<div>- ${item}</div>`;
     });
 
     sync({
-      type: "SET_ELEMENT",
+      type: 'SET_ELEMENT',
       element: el,
-      block: { id: "home-testimonial", role: "items" },
+      block: { id: 'home-testimonial', role: 'items' }
     });
 
     if (file) {
       patchData.image = file.url;
       sync({
-        type: "UPDATE_ELEMENT_ATTR",
-        attr: "src",
+        type: 'UPDATE_ELEMENT_ATTR',
+        attr: 'src',
         value: file.url,
-        block: { id: "home-testimonial", role: "image" },
+        block: { id: 'home-testimonial', role: 'image' }
       });
     }
 
     // 准备 blocks
-    onPatchBlock("home-testimonial", undefined, patchData, "testimonial");
+    onPatchBlock('home-testimonial', undefined, patchData, 'testimonial');
   };
 
   return (
@@ -809,7 +748,7 @@ function Testimonial({
           rows={3}
           placeholder="输入文字"
           value={title}
-          onChange={(e) => {
+          onChange={e => {
             setTitle(e.target.value);
           }}
         />
@@ -823,7 +762,7 @@ function Testimonial({
           rows={3}
           placeholder="输入文字"
           value={description}
-          onChange={(e) => {
+          onChange={e => {
             setDescription(e.target.value);
           }}
         />
@@ -839,9 +778,9 @@ function Testimonial({
               cols={1}
               placeholder="输入文字"
               value={item}
-              onChange={(e) => {
+              onChange={e => {
                 const value = e.target.value;
-                setItems((prev) => {
+                setItems(prev => {
                   const next = [...prev];
                   next[index] = value;
                   return next;
@@ -859,7 +798,7 @@ function Testimonial({
           maxCount={1}
           uploadUrl="/api/pms-resource/web-back/minio/upload"
           list={fileList}
-          onChange={(files) => {
+          onChange={files => {
             setFileList(files);
           }}
         />

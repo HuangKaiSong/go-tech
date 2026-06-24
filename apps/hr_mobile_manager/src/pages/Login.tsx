@@ -1,15 +1,15 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Eye, EyeOff, Shield, Smartphone } from "lucide-react";
+import { Eye, EyeOff, Shield, Smartphone } from 'lucide-react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 const Login = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  const [account, setAccount] = useState("");
-  const [password, setPassword] = useState("");
+  const [account, setAccount] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -18,7 +18,7 @@ const Login = () => {
     // Simulate login
     setTimeout(() => {
       setIsLoading(false);
-      navigate("/dashboard");
+      navigate('/dashboard');
     }, 800);
   };
 
@@ -43,25 +43,29 @@ const Login = () => {
       <div className="flex-1 -mt-8 rounded-t-3xl bg-background px-6 pt-8 pb-6">
         <form onSubmit={handleLogin} className="space-y-5">
           <div className="space-y-2">
-            <Label htmlFor="account" className="text-sm font-medium text-foreground">帳號</Label>
+            <Label htmlFor="account" className="text-sm font-medium text-foreground">
+              帳號
+            </Label>
             <Input
               id="account"
               placeholder="請輸入帳號或手機號碼"
               value={account}
-              onChange={(e) => setAccount(e.target.value)}
+              onChange={e => setAccount(e.target.value)}
               className="h-12 rounded-xl bg-secondary border-0 px-4"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-sm font-medium text-foreground">密碼</Label>
+            <Label htmlFor="password" className="text-sm font-medium text-foreground">
+              密碼
+            </Label>
             <div className="relative">
               <Input
                 id="password"
-                type={showPassword ? "text" : "password"}
+                type={showPassword ? 'text' : 'password'}
                 placeholder="請輸入密碼"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={e => setPassword(e.target.value)}
                 className="h-12 rounded-xl bg-secondary border-0 px-4 pr-12"
               />
               <button
@@ -85,7 +89,7 @@ const Login = () => {
             disabled={isLoading}
             className="w-full h-12 rounded-xl text-base font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-all"
           >
-            {isLoading ? "登入中..." : "登入"}
+            {isLoading ? '登入中...' : '登入'}
           </Button>
         </form>
 
@@ -98,24 +102,15 @@ const Login = () => {
 
         {/* SSO options */}
         <div className="flex justify-center gap-6">
-          {[
-            { icon: <Smartphone className="w-5 h-5" />, label: "手機驗證" },
-          ].map((item) => (
-            <button
-              key={item.label}
-              className="flex flex-col items-center gap-1.5 text-muted-foreground"
-            >
-              <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center">
-                {item.icon}
-              </div>
+          {[{ icon: <Smartphone className="w-5 h-5" />, label: '手機驗證' }].map(item => (
+            <button key={item.label} className="flex flex-col items-center gap-1.5 text-muted-foreground">
+              <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center">{item.icon}</div>
               <span className="text-xs">{item.label}</span>
             </button>
           ))}
         </div>
 
-        <p className="text-center text-xs text-muted-foreground mt-8">
-          v1.0.0 · 登入即表示同意服務條款
-        </p>
+        <p className="text-center text-xs text-muted-foreground mt-8">v1.0.0 · 登入即表示同意服務條款</p>
       </div>
     </div>
   );

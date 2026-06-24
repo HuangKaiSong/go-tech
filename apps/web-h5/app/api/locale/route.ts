@@ -7,7 +7,7 @@ export async function POST(request: Request) {
   const cookieStore = await cookies();
 
   cookieStore.set('GO_TECH_LANGUAGE', locale, {
-    path: '/',
+    path: '/'
   });
 
   return NextResponse.json({ success: true });

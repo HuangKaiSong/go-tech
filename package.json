@@ -1,22 +1,45 @@
 {
-	"name": "go-tech-frontend",
-	"version": "0.0.1",
-	"author": {
-		"name": "super_hks"
-	},
-	"scripts": {
-		"dev:h5": "pnpm --filter web-h5 run dev",
-		"build:h5": "pnpm --filter web-h5 run build",
-		"start:h5": "pnpm --filter web-h5 run start",
-		"dev:admin": "pnpm --filter web-admin run dev",
-		"build:admin": "pnpm --filter web-admin run build",
-		"preview:admin": "pnpm --filter web-admin run preview",
-		"dev:hr-m": "pnpm --filter hr-mobile-manager run dev",
-		"build:hr-m": "pnpm --filter hr-mobile-manager run build",
-		"start:hr-m": "pnpm --filter hr-mobile-manager run start",
-		"dev:hr-admin": "pnpm --filter hr-admin run dev",
-		"build:hr-admin": "pnpm --filter hr-admin run build",
-		"start:hr-admin": "pnpm --filter hr-admin run start"
-	},
-	"packageManager": "pnpm@10.17.0"
+  "name": "go-tech-frontend",
+  "version": "0.0.1",
+  "author": {
+    "name": "super_hks",
+    "email": "3292339490@qq.com",
+    "url": "https://github.com/HuangKaiSong"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "oxlint",
+    "format": "oxfmt .",
+    "format:check": "oxfmt --check .",
+    "type-check": "turbo run type-check",
+    "dev:h5": "pnpm --filter web-h5 run dev",
+    "build:h5": "pnpm --filter web-h5 run build",
+    "start:h5": "pnpm --filter web-h5 run start",
+    "dev:admin": "pnpm --filter web-admin run dev",
+    "build:admin": "pnpm --filter web-admin run build",
+    "preview:admin": "pnpm --filter web-admin run preview",
+    "dev:hr-m": "pnpm --filter hr-mobile-manager run dev",
+    "build:hr-m": "pnpm --filter hr-mobile-manager run build",
+    "start:hr-m": "pnpm --filter hr-mobile-manager run start",
+    "dev:hr-admin": "pnpm --filter hr-admin run dev",
+    "build:hr-admin": "pnpm --filter hr-admin run build",
+    "start:hr-admin": "pnpm --filter hr-admin run start"
+  },
+  "devDependencies": {
+    "@go-tech/config": "workspace:*",
+    "@go-tech/tsconfig": "workspace:*",
+    "@types/react": "catalog:dev",
+    "@types/react-dom": "catalog:dev",
+    "oxfmt": "^0.45.0",
+    "oxlint": "catalog:dev",
+    "rimraf": "catalog:dev",
+    "tsdown": "catalog:dev",
+    "turbo": "catalog:dev",
+    "typescript": "catalog:core"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@10.17.0"
 }
