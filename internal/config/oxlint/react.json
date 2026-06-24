@@ -1,7 +1,7 @@
 {
   "$schema": "../../../node_modules/oxlint/configuration_schema.json",
   "extends": ["./base.json"],
-  "plugins": ["node", "import", "unicorn", "typescript", "eslint", "oxc", "vitest", "react"],
+  "plugins": ["node", "import", "unicorn", "typescript", "eslint", "oxc", "react"],
   "rules": {
     "import/no-absolute-path": "warn",
     "import/no-empty-named-blocks": ["error"],
