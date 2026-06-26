@@ -417,11 +417,10 @@ const CreateOrder = () => {
       Object.entries(upgradeSelectedServices).map(([serviceId, quantity]) => {
         const service = valueAddedServices.find(s => s.id === serviceId);
         if (!service) return null;
-        const serviceTotalPrice = getServiceUnitPrice(serviceId) * month;
         orderInfo.orderItems.push({
           itemType: OrderItemTypeEnum.ADDITION,
           count: quantity,
-          price: serviceTotalPrice,
+          price: getServiceUnitPrice(serviceId),
           packageId: currentPlan?.id,
           itemName: service.name,
           itemCode: service.id.replace('Price', '')
