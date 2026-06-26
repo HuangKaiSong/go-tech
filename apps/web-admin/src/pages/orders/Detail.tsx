@@ -1,5 +1,6 @@
-import { Badge, Button, Dialog, DialogContent, DialogHeader, DialogTitle } from '@go-tech-frontend/ui';
+import { Badge, Button } from '@go-tech-frontend/ui';
 import { useQuery } from '@tanstack/react-query';
+import { Image as ImageEl } from 'antd';
 import { ArrowLeft, FileText, Image } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -289,23 +290,14 @@ const OrderDetailPage = () => {
         </div>
       </div>
 
-      {/* Payment Proof Preview Dialog */}
-      <Dialog open={proofPreviewOpen} onOpenChange={setProofPreviewOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Image className="w-5 h-5 text-primary" />
-              支付憑證
-            </DialogTitle>
-          </DialogHeader>
-
-          {orderDetail.payEvidence && (
-            <div className="relative">
-              <img src={orderDetail.payEvidence} alt="支付憑證" className="w-full h-auto rounded-lg" />
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Payment Proof Preview */}
+      <ImageEl
+        preview={{
+          open: proofPreviewOpen,
+          src: orderDetail.payEvidence,
+          onOpenChange: setProofPreviewOpen
+        }}
+      />
     </div>
   );
 };

@@ -5,8 +5,9 @@ import AdminLayout from '@/components/layout/AdminLayout';
 import Login from '@/pages/Login';
 import NotFound from '@/pages/NotFound';
 
-const OrdersPage = lazyPage(() => import('@/pages/OrdersPage'));
-const OrderDetailPage = lazyPage(() => import('@/pages/OrderDetailPage'));
+const OrdersPage = lazyPage(() => import('@/pages/orders/List'));
+const OrderDetailPage = lazyPage(() => import('@/pages/orders/Detail'));
+const CreateOrderPage = lazyPage(() => import('@/pages/orders/Create'));
 const CustomersPage = lazyPage(() => import('@/pages/CustomersPage'));
 const CustomerDetailPage = lazyPage(() => import('@/pages/CustomerDetailPage'));
 const SystemUsersPage = lazyPage(() => import('@/pages/SystemUsersPage'));
@@ -34,6 +35,10 @@ export const routes: RouteObject[] = [
   {
     element: <AdminLayout />,
     children: [
+      {
+        path: '/orders/create',
+        element: <CreateOrderPage />
+      },
       {
         path: '/orders',
         element: <OrdersPage />
