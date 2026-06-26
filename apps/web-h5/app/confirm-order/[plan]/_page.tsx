@@ -18,7 +18,8 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import valueAddedServices from '@/app/constants/addedServices';
-import { type PromotionOption, getPromotionDiscount, toArray } from '@/app/constants/promotion';
+import { type PromotionOption, getPromotionDiscount } from '@/app/constants/promotion';
+import { usePromotions } from '@/app/hooks/usePromotions';
 import servicePlanBg from '@/assets/service-plan-bg.jpg';
 import { useAuth } from '@/contexts/AuthContext';
 import Footer from '../../components/Footer';
@@ -217,15 +218,6 @@ const ConfirmOrder = ({
   const [needInvoice, setNeedInvoice] = useState<boolean>(true);
   const [invoiceName, setInvoiceName] = useState<string>(user?.nickname || '');
 
-  // 优惠活动 / 优惠码（活动优惠由服务端 page.tsx 预取并通过 props 传入）
-  /** 当前选中的优惠活动 id（null 表示不使用优惠） */
-  const [selectedPromotionId, setSelectedPromotionId] = useState<number | null>(null);
-  /** 优惠码输入框内容 */
-  const [promotionCode, setPromotionCode] = useState('');
-  /** 通过优惠码成功兑换、可供选择的优惠活动 */
-  const [appliedCodePromotions, setAppliedCodePromotions] = useState<PromotionOption[]>([]);
-  const [applyingCode, setApplyingCode] = useState(false);
-
   useEffect(() => {
     setHasMounted(true);
   }, []);
@@ -296,79 +288,19 @@ const ConfirmOrder = ({
   /** 优惠前的应付金额（套餐费 + 增值服务 - 时长折扣） */
   const promotionBaseAmount = Math.max(0, originalPrice - discount);
 
-  /** 活动优惠 + 优惠码兑换的优惠，仅保留对当前套餐有效的，并去重 */
-  const availablePromotions = useMemo<PromotionOption[]>(() => {
-    const list: PromotionOption[] = [];
-    const seen = new Set<number>();
-    for (const promotion of [...promotions, ...appliedCodePromotions]) {
-      const id = promotion?.promotionId;
-      const matchesPackage = String(promotion?.packageId) === String(selectedPlan?.id);
-      if (typeof id === 'number' && matchesPackage && !seen.has(id)) {
-        seen.add(id);
-        list.push(promotion);
-      }
-    }
-    return list;
-  }, [promotions, appliedCodePromotions, selectedPlan?.id]);
-
-  // 默认选中优惠力度最大的优惠活动；用户已手动选择则不覆盖
-  useEffect(() => {
-    if (availablePromotions.length === 0) return;
-    if (selectedPromotionId !== null && availablePromotions.some(p => p.promotionId === selectedPromotionId)) return;
-    const best = availablePromotions.reduce((a, b) =>
-      getPromotionDiscount(b, promotionBaseAmount) > getPromotionDiscount(a, promotionBaseAmount) ? b : a
-    );
-    setSelectedPromotionId(best.promotionId);
-    // oxlint-disable-next-line react-hooks/exhaustive-deps
-  }, [availablePromotions]);
-
-  const { promotionDiscount, selectedPromotion } = useMemo(() => {
-    const promotion = availablePromotions.find(p => p.promotionId === selectedPromotionId) ?? null;
-    return {
-      selectedPromotion: promotion,
-      promotionDiscount: promotion ? getPromotionDiscount(promotion, promotionBaseAmount) : 0
-    };
-  }, [availablePromotions, selectedPromotionId, promotionBaseAmount]);
+  const {
+    applyingCode,
+    availablePromotions,
+    handleApplyCode,
+    promotionCode,
+    promotionDiscount,
+    selectedPromotion,
+    selectedPromotionId,
+    setPromotionCode,
+    setSelectedPromotionId
+  } = usePromotions({ baseAmount: promotionBaseAmount, packageId: selectedPlan?.id, promotions, token });
 
   const totalPrice = Math.max(0, originalPrice - discount - promotionDiscount);
-
-  /** 输入优惠码兑换优惠 */
-  const handleApplyCode = async () => {
-    const code = promotionCode.trim();
-    if (!code) {
-      toast.error('請輸入優惠碼');
-      return;
-    }
-    setApplyingCode(true);
-    try {
-      const res = await fetch(
-        `/go-tech/platform/promotion/search?promotionCode=${encodeURIComponent(code)}&packageId=${selectedPlan?.id}`,
-        { headers: { Authorization: `Bearer ${token}`, 'User-Type': 'platform_customer' } }
-      );
-      const response = await res.json();
-      if (!res.ok || !response || response.code !== 200 || !response.data) {
-        throw new Error(response?.message || '優惠碼無效或不適用於該套餐');
-      }
-      const valid = toArray<PromotionOption>(response.data).filter(
-        p => String(p.packageId) === String(selectedPlan?.id)
-      );
-      if (valid.length === 0) {
-        throw new Error('優惠碼不適用於該套餐');
-      }
-      setAppliedCodePromotions(prev => {
-        const map = new Map(prev.map(p => [p.promotionId, p]));
-        valid.forEach(p => map.set(p.promotionId, p));
-        return [...map.values()];
-      });
-      setSelectedPromotionId(valid[0].promotionId);
-      setPromotionCode('');
-      toast.success('優惠碼已應用');
-    } catch (error) {
-      toast.error((error as Error).message);
-    } finally {
-      setApplyingCode(false);
-    }
-  };
 
   const handleFpsPaymentConfirm = async (voucherFile: UploadedFile) => {
     toast.dismiss();
