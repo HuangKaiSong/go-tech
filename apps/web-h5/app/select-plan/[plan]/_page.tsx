@@ -18,10 +18,34 @@ const getIconHref = (value: string) => {
   return `#icon-${normalized}`;
 };
 
+const renewalOptions = [
+  { id: '1', label: '1个月', months: 1, discount: 0 },
+  { id: '2', label: '2个月', months: 2, discount: 0 },
+  { id: '3', label: '3个月', months: 3, discount: 0 },
+  { id: '6', label: '6个月', months: 6, discount: 0 },
+  { id: 'custom', label: '自定义月数', months: 12, discount: 0 }
+];
+
+const computeServiceTotal = (priceEach: number, qty: number, months: number) => {
+  return priceEach * qty * months;
+};
+
 const SelectPlan = ({ plan }: { plan: Packages }) => {
   const router = useRouter();
   const [needAddons, setNeedAddons] = useState(true);
   const [hasMounted, setHasMounted] = useState(false);
+  const [selectedPeriod, setSelectedPeriod] = useState('1');
+  const [customMonths, setCustomMonths] = useState(12);
+  const selectedOption = renewalOptions.find(opt => opt.id === selectedPeriod)!;
+  const selectedMonths = selectedOption.id === 'custom' ? customMonths : selectedOption.months;
+
+  const [, setStoredMonths] = useSessionStorageState<number>('user-selected-months', { defaultValue: 1 });
+  useEffect(() => {
+    setStoredMonths(selectedMonths);
+  }, [selectedMonths, setStoredMonths]);
+
+  const planTotal = plan.price * selectedMonths;
+
   const [selectedServices, setSelectedServices] = useSessionStorageState<Record<string, number>>(
     'user-selected-services',
     {
@@ -52,6 +76,18 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
       return { ...prev, [serviceId]: newValue };
     });
   };
+
+  // 增值服务小计总价
+  const servicePriceMap: Record<string, number> = {
+    rentSysPrice: plan.rentSysPrice,
+    venueSysPrice: plan.venueSysPrice,
+    accountingSysPrice: plan.accountingSysPrice,
+    custServiceSysPrice: plan.custServiceSysPrice,
+    addUnitPrice: plan.addUnitPrice
+  };
+  const addonsGrandTotal = Object.entries(selectedServicesSafe).reduce((sum, [id, qty]) => {
+    return sum + (servicePriceMap[id] ?? 0) * qty * selectedMonths;
+  }, 0);
 
   const handleGoBack = () => {
     router.push('/service-plan');
@@ -86,7 +122,7 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
               </div>
               <div className="text-right">
                 <span className="text-2xl font-bold text-primary">${plan.price.toLocaleString()}</span>
-                <span className="text-lg text-primary ml-1">HKD</span>
+                <span className="text-lg text-primary ml-1">HKD / 月</span>
               </div>
             </div>
 
@@ -96,7 +132,7 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
                 <span className="text-sm text-gray-700">最多可創建{plan.unitCount}個單位</span>
               </div>
 
-              <div className="flex gap-4">
+              <div className="flex gap-4 mb-4">
                 <span className="text-sm font-medium text-muted-foreground min-w-15">包含功能</span>
                 <div className="flex flex-wrap gap-2">
                   {plan.packageItemList.map((feature, index) => (
@@ -113,6 +149,46 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
                       <span>{feature.menuTitle}</span>
                     </div>
                   ))}
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-border/60">
+                <span className="text-sm font-medium text-muted-foreground min-w-[60px]">開通月份</span>
+                <div className="flex flex-wrap gap-2 flex-1">
+                  {renewalOptions.map(option => {
+                    const isActive = selectedPeriod === option.id;
+
+                    return (
+                      <button
+                        key={option.id}
+                        onClick={() => setSelectedPeriod(option.id)}
+                        className={`px-4 py-2 rounded-md border-2 text-sm font-bold transition-colors ${
+                          isActive
+                            ? 'border-primary text-primary bg-white'
+                            : 'border-border text-foreground bg-white hover:border-primary/50'
+                        }`}
+                      >
+                        {option.id === 'custom' ? '自定義' : `${option.months} 個月`}
+                      </button>
+                    );
+                  })}
+                  {selectedPeriod === 'custom' && (
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min={1}
+                        value={customMonths}
+                        onChange={e => setCustomMonths(Math.max(1, Number(e.target.value)))}
+                        className="w-20 px-2 py-1.5 rounded-md border-2 border-primary text-sm font-bold text-primary text-center focus:outline-none"
+                      />
+                      <span className="text-sm font-bold text-primary">個月</span>
+                    </div>
+                  )}
+                </div>
+                <div className="text-right">
+                  <span className="text-xs text-muted-foreground">套餐小計：</span>
+                  <span className="text-base font-bold text-primary">${planTotal.toLocaleString()}</span>
+                  <span className="text-xs text-primary ml-1">HKD</span>
                 </div>
               </div>
             </div>
@@ -149,14 +225,26 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
             {/* Expanded addon selection */}
             {needAddons && (
               <div className="mt-6">
-                <p className="text-sm text-primary mb-4">
-                  請選擇增值服務 <span className="text-primary">（可多選）</span>
-                </p>
+                <div className="flex flex-row justify-between">
+                  <div className="text-sm text-primary mb-4">
+                    請選擇增值服務{' '}
+                    <span className="text-primary">（可多選，依套餐開通月份計算 {selectedMonths} 個月）</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xs text-muted-foreground">增值服務總計：</span>
+                    <span className="text-base font-bold text-primary">${addonsGrandTotal.toLocaleString()}</span>
+                    <span className="text-xs text-primary ml-1">HKD</span>
+                  </div>
+                </div>
 
                 <div className="space-y-3" suppressHydrationWarning>
                   {valueAddedServices.map(service => {
                     const isSelected = selectedServicesSafe[service.id] !== undefined;
                     const quantity = selectedServicesSafe[service.id] || 0;
+
+                    const svcTotal = isSelected
+                      ? computeServiceTotal(servicePriceMap[service.id], quantity, selectedMonths)
+                      : 0;
 
                     return (
                       <div
@@ -180,35 +268,32 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
 
                         <div className="flex items-center gap-4">
                           <span className="text-sm font-medium text-primary">
-                            +
-                            {(
-                              {
-                                rentSysPrice: plan.rentSysPrice,
-                                venueSysPrice: plan.venueSysPrice,
-                                accountingSysPrice: plan.accountingSysPrice,
-                                custServiceSysPrice: plan.custServiceSysPrice,
-                                addUnitPrice: plan.addUnitPrice
-                              } as Record<string, number>
-                            )[service.id] ?? 0}{' '}
-                            HKD Each
+                            +{servicePriceMap[service.id] ?? 0} HKD Each / 月
                           </span>
 
                           {isSelected && (
-                            <div className="flex items-center gap-2">
-                              <button
-                                onClick={() => updateQuantity(service.id, -1)}
-                                className="w-8 h-8 rounded border border-border flex items-center justify-center hover:bg-muted hover:text-foreground transition-colors"
-                              >
-                                <Minus className="w-4 h-4" />
-                              </button>
-                              <span className="w-8 text-center text-sm font-medium">{quantity}</span>
-                              <button
-                                onClick={() => updateQuantity(service.id, 1)}
-                                className="w-8 h-8 rounded border border-border flex items-center justify-center hover:bg-muted hover:text-foreground transition-colors"
-                              >
-                                <Plus className="w-4 h-4" />
-                              </button>
-                            </div>
+                            <>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => updateQuantity(service.id, -1)}
+                                  className="w-8 h-8 rounded border border-border flex items-center justify-center hover:bg-muted hover:text-foreground transition-colors"
+                                >
+                                  <Minus className="w-4 h-4" />
+                                </button>
+                                <span className="w-8 text-center text-sm font-medium">{quantity}</span>
+                                <button
+                                  onClick={() => updateQuantity(service.id, 1)}
+                                  className="w-8 h-8 rounded border border-border flex items-center justify-center hover:bg-muted hover:text-foreground transition-colors"
+                                >
+                                  <Plus className="w-4 h-4" />
+                                </button>
+                              </div>
+                              <div className="text-right min-w-[120px]">
+                                <span className="text-xs text-muted-foreground">小計：</span>
+                                <span className="text-base font-bold text-primary">${svcTotal.toLocaleString()}</span>
+                                <span className="text-xs text-primary ml-1">HKD</span>
+                              </div>
+                            </>
                           )}
                         </div>
                       </div>

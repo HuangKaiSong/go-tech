@@ -50,6 +50,7 @@ export type OrderInfoType = {
   orderItems: OrderItemsType[];
   orderType: OrderTypeEnum;
   payType: PayTypeEnum | null;
+  promotionId?: number;
 };
 
 export type PlatformPackageDto = {

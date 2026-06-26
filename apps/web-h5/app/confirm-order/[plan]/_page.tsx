@@ -28,7 +28,194 @@ const Fps = dynamic(() => import('../../components/payment/Fps'), {
   ssr: false
 });
 
-const ConfirmOrder = ({ data, planId: planIdFromQuery }: { data?: Packages; planId?: string }) => {
+/** 优惠查询接口返回的单条优惠（已按套餐拍平，ruleType 1=滿減 2=按百分比） */
+export interface PromotionOption {
+  discountValue?: number;
+  packageId: number;
+  packageName?: string;
+  promotionDesc?: string;
+  promotionId: number;
+  promotionName: string;
+  promotionNo: string;
+  ruleType: 1 | 2;
+  thresholdAmount?: number;
+}
+
+/** 后端可能返回单条或列表，统一规整为数组 */
+const toArray = <T,>(data: T | T[] | null | undefined): T[] => {
+  if (Array.isArray(data)) return data;
+  if (data) return [data];
+  return [];
+};
+
+/** 根据优惠规则计算优惠金额：ruleType 1=滿減，2=按百分比 */
+const getPromotionDiscount = (promotion: PromotionOption, baseAmount: number) => {
+  const value = Number(promotion.discountValue) || 0;
+  if (promotion.ruleType === 1) {
+    const threshold = Number(promotion.thresholdAmount) || 0;
+    return baseAmount >= threshold ? Math.min(baseAmount, value) : 0;
+  }
+  if (promotion.ruleType === 2) {
+    return Math.min(baseAmount, Math.round((baseAmount * value) / 100));
+  }
+  return 0;
+};
+
+interface PromotionPanelProps {
+  applying: boolean;
+  baseAmount: number;
+  code: string;
+  onApply: () => void;
+  onCodeChange: (value: string) => void;
+  onSelect: (id: number | null) => void;
+  promotions: PromotionOption[];
+  selectedPromotionId: number | null;
+}
+
+/** 优惠活动选择 + 优惠码输入（H5 主题样式） */
+const PromotionPanel = ({
+  applying,
+  baseAmount,
+  code,
+  onApply,
+  onCodeChange,
+  onSelect,
+  promotions,
+  selectedPromotionId
+}: PromotionPanelProps) => {
+  return (
+    <div className="bg-white rounded-lg border border-border p-6 mb-6">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-1 h-6 bg-primary rounded-full" />
+        <h3 className="text-lg font-bold text-gray-700">優惠活動</h3>
+      </div>
+
+      {promotions.length > 0 ? (
+        <div className="space-y-3">
+          {promotions.map(promotion => {
+            const isSelected = selectedPromotionId === promotion.promotionId;
+            const amount = getPromotionDiscount(promotion, baseAmount);
+            return (
+              <label
+                key={promotion.promotionId}
+                className={`flex items-center justify-between p-4 rounded-lg border cursor-pointer transition-colors ${
+                  isSelected ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <input
+                    type="radio"
+                    name="promotion"
+                    checked={isSelected}
+                    onChange={() => onSelect(promotion.promotionId)}
+                    className="w-4 h-4 text-primary focus:ring-primary"
+                  />
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">{promotion.promotionName}</p>
+                    {promotion.promotionDesc && (
+                      <p className="text-xs text-muted-foreground">{promotion.promotionDesc}</p>
+                    )}
+                  </div>
+                </div>
+                <span className="text-sm font-medium text-primary shrink-0">-${amount.toLocaleString()} HKD</span>
+              </label>
+            );
+          })}
+          <label
+            className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${
+              selectedPromotionId === null ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
+            }`}
+          >
+            <input
+              type="radio"
+              name="promotion"
+              checked={selectedPromotionId === null}
+              onChange={() => onSelect(null)}
+              className="w-4 h-4 text-primary focus:ring-primary"
+            />
+            <span className="text-sm text-gray-700">不使用優惠</span>
+          </label>
+        </div>
+      ) : (
+        <p className="text-sm text-muted-foreground">該套餐暫無可用優惠活動</p>
+      )}
+
+      {/* 优惠码 */}
+      <div className="mt-4 flex items-center gap-2">
+        <Input
+          value={code}
+          onChange={e => onCodeChange(e.target.value)}
+          placeholder="輸入優惠碼"
+          className="h-10 flex-1"
+          onKeyDown={e => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              onApply();
+            }
+          }}
+        />
+        <Button
+          variant="outline"
+          className="h-10 text-primary border-primary hover:bg-primary/5"
+          disabled={applying}
+          onClick={onApply}
+        >
+          {applying ? '驗證中...' : '使用優惠碼'}
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+interface PriceSummaryProps {
+  durationDiscount: number;
+  originalPrice: number;
+  promotionDiscount: number;
+  totalPrice: number;
+}
+
+/** 費用匯總卡片：原價 / 時長優惠 / 活動優惠 / 總計 */
+const PriceSummary = ({ durationDiscount, originalPrice, promotionDiscount, totalPrice }: PriceSummaryProps) => {
+  return (
+    <div className="bg-white rounded-lg border border-border p-6 mb-8">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-1 h-6 bg-primary rounded-full" />
+        <div className="flex flex-wrap items-center gap-8">
+          <span className="text-lg font-bold text-gray-700">
+            原價：
+            <span className="line-through">${originalPrice?.toLocaleString()}HKD</span>
+          </span>
+          {durationDiscount > 0 && (
+            <span className="text-lg font-medium text-gray-700">
+              時長優惠：
+              <span className="text-primary">${durationDiscount.toLocaleString()}HKD</span>
+            </span>
+          )}
+          {promotionDiscount > 0 && (
+            <span className="text-lg font-medium text-gray-700">
+              活動優惠：
+              <span className="text-primary">${promotionDiscount.toLocaleString()}HKD</span>
+            </span>
+          )}
+          <span className="text-lg font-bold">
+            總計：
+            <span className="text-2xl text-primary">${totalPrice.toLocaleString()} HKD</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ConfirmOrder = ({
+  data,
+  planId: planIdFromQuery,
+  promotions = []
+}: {
+  data?: Packages;
+  planId?: string;
+  promotions?: PromotionOption[];
+}) => {
   const router = useRouter();
   const { planId } = { planId: planIdFromQuery };
   const { token, user } = useAuth();
@@ -53,17 +240,26 @@ const ConfirmOrder = ({ data, planId: planIdFromQuery }: { data?: Packages; plan
   //   phone: '',
   //   company: ''
   // });
+  const [storedMonths] = useSessionStorageState<number>('user-selected-months', { defaultValue: 1 });
   const [month, setMonth] = useState<number>(1);
+  useEffect(() => {
+    if (storedMonths) setMonth(storedMonths);
+  }, [storedMonths]);
 
   const [needInvoice, setNeedInvoice] = useState<boolean>(true);
   const [invoiceName, setInvoiceName] = useState<string>(user?.nickname || '');
 
+  // 优惠活动 / 优惠码（活动优惠由服务端 page.tsx 预取并通过 props 传入）
+  /** 当前选中的优惠活动 id（null 表示不使用优惠） */
+  const [selectedPromotionId, setSelectedPromotionId] = useState<number | null>(null);
+  /** 优惠码输入框内容 */
+  const [promotionCode, setPromotionCode] = useState('');
+  /** 通过优惠码成功兑换、可供选择的优惠活动 */
+  const [appliedCodePromotions, setAppliedCodePromotions] = useState<PromotionOption[]>([]);
+  const [applyingCode, setApplyingCode] = useState(false);
+
   useEffect(() => {
     setHasMounted(true);
-    return () => {
-      setSelectedServices({});
-    };
-    // oxlint-disable react-hooks/exhaustive-deps
   }, []);
 
   const selectedServicesSafe = hasMounted ? (selectedServices ?? {}) : {};
@@ -98,6 +294,114 @@ const ConfirmOrder = ({ data, planId: planIdFromQuery }: { data?: Packages; plan
     return 0;
   };
 
+  const addonsTotal =
+    Object.entries(selectedServicesSafe).reduce(
+      (sum, [serviceId, quantity]) => sum + getServiceUnitPrice(serviceId) * quantity,
+      0
+    ) * month;
+  // @ts-ignore
+  const originalPrice = (selectedPlan?.price * month || 0) + addonsTotal;
+
+  /** 优惠价格 1个月-2个月 -> price 3个月-5个月 -> priceA 6个月-11个月 -> priceB 12个月及以上 -> priceC */
+  const discount = useMemo<number>(() => {
+    // 原价
+    let recursePrice = selectedPlan?.price;
+    if (month >= 12) {
+      recursePrice = selectedPlan?.priceC || recursePrice;
+    }
+    if (month >= 6 && month < 12) {
+      recursePrice = selectedPlan?.priceB || recursePrice;
+    }
+    if (month >= 3 && month < 6) {
+      recursePrice = selectedPlan?.priceA || recursePrice;
+    }
+
+    const diffPrice = Math.max(0, (selectedPlan?.price || 0) - (recursePrice || 0)) * month;
+
+    return Math.max(0, diffPrice);
+  }, [month, addonsTotal]);
+
+  // ---------------------------------------------------------------------------
+  // 优惠活动 / 优惠码
+  // ---------------------------------------------------------------------------
+
+  /** 优惠前的应付金额（套餐费 + 增值服务 - 时长折扣） */
+  const promotionBaseAmount = Math.max(0, originalPrice - discount);
+
+  /** 活动优惠 + 优惠码兑换的优惠，仅保留对当前套餐有效的，并去重 */
+  const availablePromotions = useMemo<PromotionOption[]>(() => {
+    const list: PromotionOption[] = [];
+    const seen = new Set<number>();
+    for (const promotion of [...promotions, ...appliedCodePromotions]) {
+      const id = promotion?.promotionId;
+      const matchesPackage = String(promotion?.packageId) === String(selectedPlan?.id);
+      if (typeof id === 'number' && matchesPackage && !seen.has(id)) {
+        seen.add(id);
+        list.push(promotion);
+      }
+    }
+    return list;
+  }, [promotions, appliedCodePromotions, selectedPlan?.id]);
+
+  // 默认选中优惠力度最大的优惠活动；用户已手动选择则不覆盖
+  useEffect(() => {
+    if (availablePromotions.length === 0) return;
+    if (selectedPromotionId !== null && availablePromotions.some(p => p.promotionId === selectedPromotionId)) return;
+    const best = availablePromotions.reduce((a, b) =>
+      getPromotionDiscount(b, promotionBaseAmount) > getPromotionDiscount(a, promotionBaseAmount) ? b : a
+    );
+    setSelectedPromotionId(best.promotionId);
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
+  }, [availablePromotions]);
+
+  const { promotionDiscount, selectedPromotion } = useMemo(() => {
+    const promotion = availablePromotions.find(p => p.promotionId === selectedPromotionId) ?? null;
+    return {
+      selectedPromotion: promotion,
+      promotionDiscount: promotion ? getPromotionDiscount(promotion, promotionBaseAmount) : 0
+    };
+  }, [availablePromotions, selectedPromotionId, promotionBaseAmount]);
+
+  const totalPrice = Math.max(0, originalPrice - discount - promotionDiscount);
+
+  /** 输入优惠码兑换优惠 */
+  const handleApplyCode = async () => {
+    const code = promotionCode.trim();
+    if (!code) {
+      toast.error('請輸入優惠碼');
+      return;
+    }
+    setApplyingCode(true);
+    try {
+      const res = await fetch(
+        `/go-tech/platform/promotion/search?promotionCode=${encodeURIComponent(code)}&packageId=${selectedPlan?.id}`,
+        { headers: { Authorization: `Bearer ${token}`, 'User-Type': 'platform_customer' } }
+      );
+      const response = await res.json();
+      if (!res.ok || !response || response.code !== 200 || !response.data) {
+        throw new Error(response?.message || '優惠碼無效或不適用於該套餐');
+      }
+      const valid = toArray<PromotionOption>(response.data).filter(
+        p => String(p.packageId) === String(selectedPlan?.id)
+      );
+      if (valid.length === 0) {
+        throw new Error('優惠碼不適用於該套餐');
+      }
+      setAppliedCodePromotions(prev => {
+        const map = new Map(prev.map(p => [p.promotionId, p]));
+        valid.forEach(p => map.set(p.promotionId, p));
+        return [...map.values()];
+      });
+      setSelectedPromotionId(valid[0].promotionId);
+      setPromotionCode('');
+      toast.success('優惠碼已應用');
+    } catch (error) {
+      toast.error((error as Error).message);
+    } finally {
+      setApplyingCode(false);
+    }
+  };
+
   const handleFpsPaymentConfirm = async (voucherFile: UploadedFile) => {
     toast.dismiss();
     const toastId = toast.loading('创建订单中...');
@@ -118,6 +422,11 @@ const ConfirmOrder = ({ data, planId: planIdFromQuery }: { data?: Packages; plan
     if (needInvoice) {
       // 发票抬头
       orderInfo.invoiceHeader = invoiceName;
+    }
+
+    // 优惠活动 / 优惠码
+    if (selectedPromotion) {
+      orderInfo.promotionId = selectedPromotion.promotionId;
     }
 
     if (selectedServices) {
@@ -152,6 +461,7 @@ const ConfirmOrder = ({ data, planId: planIdFromQuery }: { data?: Packages; plan
       })
         .then(res => res.json())
         .catch(err => {
+          toast.dismiss();
           throw err;
         });
       if (orderResponse.code === 200) {
@@ -177,11 +487,14 @@ const ConfirmOrder = ({ data, planId: planIdFromQuery }: { data?: Packages; plan
 
         setShowPaymentDialog(false);
         setSelectedPaymentMethod(null);
-        toast.success('支付憑證已提交，我們將在確認後為您開通服務');
+        // 下单成功后才清空已选增值服务，避免带入下一笔订单（刷新页面不应清空）
+        setSelectedServices({});
+        toast.success('支付憑證已提交，我們將在確認後為您開通服務', { id: toastId });
       } else {
-        toast.error(orderResponse.message);
+        toast.error(orderResponse.message, { id: toastId });
       }
     } catch (error) {
+      toast.dismiss();
       console.log(error);
     }
   };
@@ -189,35 +502,6 @@ const ConfirmOrder = ({ data, planId: planIdFromQuery }: { data?: Packages; plan
   const handleBackToPaymentMethods = () => {
     setSelectedPaymentMethod(null);
   };
-
-  const addonsTotal =
-    Object.entries(selectedServicesSafe).reduce(
-      (sum, [serviceId, quantity]) => sum + getServiceUnitPrice(serviceId) * quantity,
-      0
-    ) * month;
-  // @ts-ignore
-  const originalPrice = (selectedPlan?.price * month || 0) + addonsTotal;
-
-  /** 优惠价格 1个月-2个月 -> price 3个月-5个月 -> priceA 6个月-11个月 -> priceB 12个月及以上 -> priceC */
-  const discount = useMemo<number>(() => {
-    // 原价
-    let recursePrice = selectedPlan?.price;
-    if (month >= 12) {
-      recursePrice = selectedPlan?.priceC || recursePrice;
-    }
-    if (month >= 6 && month < 12) {
-      recursePrice = selectedPlan?.priceB || recursePrice;
-    }
-    if (month >= 3 && month < 6) {
-      recursePrice = selectedPlan?.priceA || recursePrice;
-    }
-
-    const diffPrice = Math.max(0, (selectedPlan?.price || 0) - (recursePrice || 0)) * month;
-
-    return Math.max(0, diffPrice);
-  }, [month, addonsTotal]);
-
-  const totalPrice = originalPrice - discount;
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -330,26 +614,25 @@ const ConfirmOrder = ({ data, planId: planIdFromQuery }: { data?: Packages; plan
             </div>
           )}
 
+          {/* Promotion Card */}
+          <PromotionPanel
+            promotions={availablePromotions}
+            selectedPromotionId={selectedPromotionId}
+            onSelect={setSelectedPromotionId}
+            baseAmount={promotionBaseAmount}
+            code={promotionCode}
+            onCodeChange={setPromotionCode}
+            applying={applyingCode}
+            onApply={handleApplyCode}
+          />
+
           {/* Price Summary Card */}
-          <div className="bg-white rounded-lg border border-border p-6 mb-8">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-1 h-6 bg-primary rounded-full" />
-              <div className="flex flex-wrap items-center gap-8">
-                <span className="text-lg font-bold text-gray-700">
-                  原價：
-                  <span className="line-through">${originalPrice?.toLocaleString()}HKD</span>
-                </span>
-                <span className="text-lg font-medium text-gray-700">
-                  優惠：
-                  <span className="text-primary">${discount.toLocaleString()}HKD</span>
-                </span>
-                <span className="text-lg font-bold">
-                  總計：
-                  <span className="text-2xl text-primary">${totalPrice.toLocaleString()} HKD</span>
-                </span>
-              </div>
-            </div>
-          </div>
+          <PriceSummary
+            originalPrice={originalPrice}
+            durationDiscount={discount}
+            promotionDiscount={promotionDiscount}
+            totalPrice={totalPrice}
+          />
 
           <div className="bg-white rounded-lg border border-border p-6 mb-8">
             <div className="flex items-center gap-3 mb-4">
