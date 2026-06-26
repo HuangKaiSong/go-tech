@@ -205,16 +205,18 @@ const CreateOrder = () => {
         },
         body: JSON.stringify(_data)
       });
-      const response = await res.json();
-      if (!response || !response.code || response.code !== 200) {
-        throw new Error('Failed to fetch data');
+      const result = await res.json().catch(() => null);
+      if (!res.ok || !result || result.code !== 200) {
+        throw new Error(result?.message || '請求失敗，請稍後重試');
       }
-
-      return response;
+      return result;
     },
     onSuccess: _data => {
       toast.success('订单创建成功', { id: toastId.current! });
       return _data;
+    },
+    onError(error) {
+      toast.error(error.message, { id: toastId.current! });
     }
   });
   const payEvidenceMu = useMutation({
