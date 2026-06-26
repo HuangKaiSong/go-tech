@@ -21,13 +21,14 @@ import {
 import dayjs from 'dayjs';
 import { ArrowLeft, CheckCircle, Clock, CreditCard, Package, RefreshCw, Settings } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Footer from '@/app/components/Footer';
 import Header from '@/app/components/Header';
 import Link from '@/app/components/Link';
 import Fps from '@/app/components/payment/Fps';
 import { type OrderItemInfoType, OrderItemTypeEnum, OrderTypeEnum } from '@/app/constants/order';
 import { DAYSPERMONTH, PayTypeEnum } from '@/app/constants/payment';
+import { type PromotionOption, getPromotionDiscount, toArray } from '@/app/constants/promotion';
 import { useAuth } from '@/contexts/AuthContext';
 
 const renewalOptions = [
@@ -37,7 +38,112 @@ const renewalOptions = [
   { id: 'custom', label: '自定义月数', months: 6, discount: 0 }
 ];
 
-const RenewOrder = ({ detail, id: _id }: { detail: OrderItemInfoType; id: string }) => {
+interface RenewPromotionCardProps {
+  applying: boolean;
+  baseAmount: number;
+  code: string;
+  onApply: () => void;
+  onCodeChange: (value: string) => void;
+  onSelect: (id: number | null) => void;
+  promotions: PromotionOption[];
+  selectedPromotionId: number | null;
+}
+
+/** 优惠活动选择 + 优惠码输入（续费页 Card 主题样式） */
+const RenewPromotionCard = ({
+  applying,
+  baseAmount,
+  code,
+  onApply,
+  onCodeChange,
+  onSelect,
+  promotions,
+  selectedPromotionId
+}: RenewPromotionCardProps) => {
+  return (
+    <Card>
+      <CardHeader>
+        <h2 className="text-lg font-bold">優惠活動</h2>
+      </CardHeader>
+      <CardContent>
+        {promotions.length > 0 ? (
+          <RadioGroup
+            value={selectedPromotionId === null ? 'none' : String(selectedPromotionId)}
+            onValueChange={value => onSelect(value === 'none' ? null : Number(value))}
+            className="space-y-3"
+          >
+            {promotions.map(promotion => {
+              const amount = getPromotionDiscount(promotion, baseAmount);
+              const active = selectedPromotionId === promotion.promotionId;
+              return (
+                <div
+                  key={promotion.promotionId}
+                  className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-colors ${
+                    active ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
+                  }`}
+                  onClick={() => onSelect(promotion.promotionId)}
+                >
+                  <div className="flex items-center gap-3">
+                    <RadioGroupItem value={String(promotion.promotionId)} id={`promo-${promotion.promotionId}`} />
+                    <Label htmlFor={`promo-${promotion.promotionId}`} className="cursor-pointer">
+                      <span className="font-medium">{promotion.promotionName}</span>
+                      {promotion.promotionDesc && (
+                        <span className="block text-xs text-muted-foreground">{promotion.promotionDesc}</span>
+                      )}
+                    </Label>
+                  </div>
+                  <span className="font-medium text-primary">-${amount.toLocaleString()}</span>
+                </div>
+              );
+            })}
+            <div
+              className={`flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition-colors ${
+                selectedPromotionId === null ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
+              }`}
+              onClick={() => onSelect(null)}
+            >
+              <RadioGroupItem value="none" id="promo-none" />
+              <Label htmlFor="promo-none" className="cursor-pointer">
+                不使用優惠
+              </Label>
+            </div>
+          </RadioGroup>
+        ) : (
+          <p className="text-sm text-muted-foreground">該套餐暫無可用優惠活動</p>
+        )}
+
+        {/* 优惠码 */}
+        <div className="mt-4 flex items-center gap-2">
+          <Input
+            value={code}
+            onChange={e => onCodeChange(e.target.value)}
+            placeholder="輸入優惠碼"
+            className="h-10 flex-1"
+            onKeyDown={e => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                onApply();
+              }
+            }}
+          />
+          <Button variant="outline" className="h-10" disabled={applying} onClick={onApply}>
+            {applying ? '驗證中...' : '使用優惠碼'}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+const RenewOrder = ({
+  detail,
+  id: _id,
+  promotions = []
+}: {
+  detail: OrderItemInfoType;
+  id: string;
+  promotions?: PromotionOption[];
+}) => {
   const router = useRouter();
   const order = detail;
   const { token } = useAuth();
@@ -46,6 +152,13 @@ const RenewOrder = ({ detail, id: _id }: { detail: OrderItemInfoType; id: string
   const [customMonths, setCustomMonths] = useState(6);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PayTypeEnum | null>(null);
+  /** 当前选中的优惠活动 id（null 表示不使用优惠） */
+  const [selectedPromotionId, setSelectedPromotionId] = useState<number | null>(null);
+  /** 优惠码输入框内容 */
+  const [promotionCode, setPromotionCode] = useState('');
+  /** 通过优惠码成功兑换、可供选择的优惠活动 */
+  const [appliedCodePromotions, setAppliedCodePromotions] = useState<PromotionOption[]>([]);
+  const [applyingCode, setApplyingCode] = useState(false);
 
   if (!order) {
     return (
@@ -97,7 +210,85 @@ const RenewOrder = ({ detail, id: _id }: { detail: OrderItemInfoType; id: string
 
   const addServicePrice = addService.reduce((acc, item) => acc + item.price! * item.count! * months, 0);
 
-  const finalPrice = addServicePrice + originalPrice - discountAmount;
+  // ---------------------------------------------------------------------------
+  // 优惠活动 / 优惠码
+  // ---------------------------------------------------------------------------
+  const packageId = order.platformPackageDto?.id;
+
+  /** 优惠前的应付金额（套餐费 + 增值服务 - 时长折扣） */
+  const promotionBaseAmount = Math.max(0, addServicePrice + originalPrice - discountAmount);
+
+  /** 活动优惠 + 优惠码兑换的优惠，仅保留对当前套餐有效的，并去重 */
+  const availablePromotions = useMemo<PromotionOption[]>(() => {
+    const list: PromotionOption[] = [];
+    const seen = new Set<number>();
+    for (const promotion of [...promotions, ...appliedCodePromotions]) {
+      const pid = promotion?.promotionId;
+      const matchesPackage = String(promotion?.packageId) === String(packageId);
+      if (typeof pid === 'number' && matchesPackage && !seen.has(pid)) {
+        seen.add(pid);
+        list.push(promotion);
+      }
+    }
+    return list;
+  }, [promotions, appliedCodePromotions, packageId]);
+
+  // 默认选中优惠力度最大的优惠活动；用户已手动选择则不覆盖
+  useEffect(() => {
+    if (availablePromotions.length === 0) return;
+    if (selectedPromotionId !== null && availablePromotions.some(p => p.promotionId === selectedPromotionId)) return;
+    const best = availablePromotions.reduce((a, b) =>
+      getPromotionDiscount(b, promotionBaseAmount) > getPromotionDiscount(a, promotionBaseAmount) ? b : a
+    );
+    setSelectedPromotionId(best.promotionId);
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
+  }, [availablePromotions]);
+
+  const { promotionDiscount, selectedPromotion } = useMemo(() => {
+    const promotion = availablePromotions.find(p => p.promotionId === selectedPromotionId) ?? null;
+    return {
+      selectedPromotion: promotion,
+      promotionDiscount: promotion ? getPromotionDiscount(promotion, promotionBaseAmount) : 0
+    };
+  }, [availablePromotions, selectedPromotionId, promotionBaseAmount]);
+
+  const finalPrice = Math.max(0, promotionBaseAmount - promotionDiscount);
+
+  /** 输入优惠码兑换优惠 */
+  const handleApplyCode = async () => {
+    const code = promotionCode.trim();
+    if (!code) {
+      toast.error('請輸入優惠碼');
+      return;
+    }
+    setApplyingCode(true);
+    try {
+      const res = await fetch(
+        `/go-tech/platform/promotion/search?promotionCode=${encodeURIComponent(code)}&packageId=${packageId}`,
+        { headers: { Authorization: `Bearer ${token}`, 'User-Type': 'platform_customer' } }
+      );
+      const response = await res.json();
+      if (!res.ok || !response || response.code !== 200 || !response.data) {
+        throw new Error(response?.message || '優惠碼無效或不適用於該套餐');
+      }
+      const valid = toArray<PromotionOption>(response.data).filter(p => String(p.packageId) === String(packageId));
+      if (valid.length === 0) {
+        throw new Error('優惠碼不適用於該套餐');
+      }
+      setAppliedCodePromotions(prev => {
+        const map = new Map(prev.map(p => [p.promotionId, p]));
+        valid.forEach(p => map.set(p.promotionId, p));
+        return [...map.values()];
+      });
+      setSelectedPromotionId(valid[0].promotionId);
+      setPromotionCode('');
+      toast.success('優惠碼已應用');
+    } catch (error) {
+      toast.error((error as Error).message);
+    } finally {
+      setApplyingCode(false);
+    }
+  };
 
   // 計算新到期日
   const currentExpiry = dayjs(new Date(order.expireDate || ''));
@@ -150,6 +341,11 @@ const RenewOrder = ({ detail, id: _id }: { detail: OrderItemInfoType; id: string
       });
     }
 
+    // 优惠活动 / 优惠码
+    if (selectedPromotion) {
+      orderInfo.promotionId = selectedPromotion.promotionId;
+    }
+
     const requestHeaders = new Headers({
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
@@ -189,9 +385,9 @@ const RenewOrder = ({ detail, id: _id }: { detail: OrderItemInfoType; id: string
         setShowPaymentDialog(false);
         setSelectedPaymentMethod(null);
         router.push('/my-orders');
-        toast.success('支付憑證已提交，我們將在確認後為您續費');
+        toast.success('支付憑證已提交，我們將在確認後為您續費', { id: toastId });
       } else {
-        toast.error(orderResponse.message);
+        toast.error(orderResponse.message, { id: toastId });
       }
     } catch (error) {
       console.log(error);
@@ -360,6 +556,18 @@ const RenewOrder = ({ detail, id: _id }: { detail: OrderItemInfoType; id: string
               </CardContent>
             </Card>
 
+            {/* 優惠活動 */}
+            <RenewPromotionCard
+              promotions={availablePromotions}
+              selectedPromotionId={selectedPromotionId}
+              onSelect={setSelectedPromotionId}
+              baseAmount={promotionBaseAmount}
+              code={promotionCode}
+              onCodeChange={setPromotionCode}
+              applying={applyingCode}
+              onApply={handleApplyCode}
+            />
+
             {/* 價格明細 */}
             <Card>
               <CardHeader>
@@ -384,8 +592,15 @@ const RenewOrder = ({ detail, id: _id }: { detail: OrderItemInfoType; id: string
 
                 {discountAmount > 0 && (
                   <div className="flex justify-between items-center text-green-600">
-                    <span>優惠折扣</span>
+                    <span>時長優惠</span>
                     <span>-${discountAmount.toLocaleString()}</span>
+                  </div>
+                )}
+
+                {promotionDiscount > 0 && (
+                  <div className="flex justify-between items-center text-green-600">
+                    <span>活動優惠</span>
+                    <span>-${promotionDiscount.toLocaleString()}</span>
                   </div>
                 )}
 

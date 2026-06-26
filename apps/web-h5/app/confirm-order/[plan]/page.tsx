@@ -1,7 +1,8 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { type PromotionOption, toArray } from '@/app/constants/promotion';
 import { getBaseUrl } from '@/lib/http';
-import PageClient, { type PromotionOption } from './_page';
+import PageClient from './_page';
 
 export default async function ConfirmOrderPage({ params }: { params: { plan: string } | Promise<{ plan: string }> }) {
   const cookieStore = await cookies();
@@ -29,12 +30,7 @@ export default async function ConfirmOrderPage({ params }: { params: { plan: str
     const promotionResponse = (await fetch(`${baseUrl}/go-tech/platform/promotion/search?packageId=${plan}`, {
       headers: { Authorization: `Bearer ${token}`, 'User-Type': 'platform_customer' }
     }).then(res => res.json())) as HttpBaseResponse<PromotionOption | PromotionOption[]>;
-    const promotionData = promotionResponse?.data;
-    if (Array.isArray(promotionData)) {
-      promotions = promotionData;
-    } else if (promotionData) {
-      promotions = [promotionData];
-    }
+    promotions = toArray<PromotionOption>(promotionResponse?.data);
   } catch {
     // 忽略：优惠获取失败不影响下单
   }
