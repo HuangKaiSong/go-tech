@@ -1,0 +1,29 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "web-h5",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["dev:h5"],
+      "port": 3000
+    },
+    {
+      "name": "web-admin",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["dev:admin"],
+      "port": 5173
+    },
+    {
+      "name": "hr-mobile-manager",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["dev:hr-m"],
+      "port": 5174
+    },
+    {
+      "name": "hr-admin",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["dev:hr-admin"],
+      "port": 5175
+    }
+  ]
+}
