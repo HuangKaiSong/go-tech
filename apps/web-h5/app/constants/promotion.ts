@@ -18,6 +18,24 @@ export const toArray = <T>(data: T | T[] | null | undefined): T[] => {
   return [];
 };
 
+/** 客户端按套餐查询可用优惠活动（失败时返回空数组，不阻断流程） */
+export const fetchPromotions = async (
+  packageId: number | string | undefined,
+  token?: string
+): Promise<PromotionOption[]> => {
+  if (!packageId) return [];
+  try {
+    const res = await fetch(`/go-tech/platform/promotion/search?packageId=${packageId}`, {
+      headers: { Authorization: `Bearer ${token}`, 'User-Type': 'platform_customer' }
+    });
+    const data = await res.json();
+    if (!res.ok || data?.code !== 200) return [];
+    return toArray<PromotionOption>(data?.data);
+  } catch {
+    return [];
+  }
+};
+
 /** 根据优惠规则计算优惠金额：ruleType 1=滿減，2=按百分比 */
 export const getPromotionDiscount = (promotion: PromotionOption, baseAmount: number) => {
   const value = Number(promotion.discountValue) || 0;

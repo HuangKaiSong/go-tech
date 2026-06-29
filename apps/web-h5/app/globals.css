@@ -18,6 +18,26 @@
     auto;
 }
 
+/* 默认隐藏滚动条，悬浮在内容上时才显示 */
+.scroll-on-hover {
+  scrollbar-width: none; /* Firefox */
+  scrollbar-color: hsl(var(--primary)) transparent; /* Firefox: thumb track */
+}
+.scroll-on-hover::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.scroll-on-hover::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 9999px;
+}
+.scroll-on-hover:hover {
+  scrollbar-width: thin; /* Firefox */
+}
+.scroll-on-hover:hover::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--primary));
+}
+
 .svg-icon {
   width: 1em;
   height: 1em;

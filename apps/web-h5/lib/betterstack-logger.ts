@@ -1,4 +1,5 @@
 export async function sendToBetterStack(level: string, message: any, extra = {}) {
+  if (process.env.NODE_ENV === 'development') return
   // 从环境变量读取配置
   const LOG_SOURCE_TOKEN = process.env.NEXT_PUBLIC_BETTERSTACK_SOURCE_TOKEN;
   const LOG_INGEST_URL = process.env.NEXT_PUBLIC_BETTERSTACK_INGEST_URL as string;

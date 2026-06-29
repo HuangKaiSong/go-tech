@@ -1,6 +1,7 @@
-import type { NextConfig } from 'next';
+import path from 'node:path';
 import createNextIntlPlugin from 'next-intl/plugin';
 import { type Rewrite } from 'next/dist/lib/load-custom-routes';
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -44,6 +45,13 @@ const nextConfig: NextConfig = {
         pathname: '/go-tech/**'
       }
     ]
+  },
+  // logging: {
+  //   browserToTerminal: true,
+  //   serverFunctions: true
+  // },
+  turbopack: {
+    root: path.join(__dirname, '../../')
   }
 };
 

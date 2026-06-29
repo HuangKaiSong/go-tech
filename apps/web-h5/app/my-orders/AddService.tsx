@@ -14,18 +14,21 @@ import dayjs from 'dayjs';
 import { Minus, Plus } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-import { type FC, useState } from 'react';
+import { type FC, useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import valueAddedServices, { type SpecificValueAddedServicesId } from '../constants/addedServices';
 import { type OrderItemInfoType, OrderItemTypeEnum, OrderTypeEnum } from '../constants/order';
 import { DAYSPERMONTH, PayTypeEnum } from '../constants/payment';
+import { type PromotionOption, fetchPromotions } from '../constants/promotion';
+import { usePromotions } from '../hooks/usePromotions';
+import { PromotionSection } from './PromotionSection';
 const PaymentPanel = dynamic(() => import('../components/payment/Panel'), {
   ssr: false
 });
 
 type AddServiceProps = {
   data: OrderItemInfoType;
-  onOpenChange: (open: boolean) => void;
+  onOpenChangeAction: (open: boolean) => void;
   open: boolean;
 };
 
@@ -38,7 +41,7 @@ function fmt(num: number) {
 
 export const AddService: FC<AddServiceProps> = ({
   data,
-  onOpenChange: setShowAddonsDialog,
+  onOpenChangeAction: setShowAddonsDialog,
   open: showAddonsDialog
 }) => {
   const currentOrder = data;
@@ -47,6 +50,20 @@ export const AddService: FC<AddServiceProps> = ({
   const router = useRouter();
   const [selectedServices, setSelectedServices] = useState<Record<string, number>>({});
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [promotions, setPromotions] = useState<PromotionOption[]>([]);
+
+  const packageId = currentOrder?.platformPackageDto?.id;
+
+  // 拉取当前套餐可用的优惠活动
+  useEffect(() => {
+    let active = true;
+    fetchPromotions(packageId, token).then(list => {
+      if (active) setPromotions(list);
+    });
+    return () => {
+      active = false;
+    };
+  }, [packageId, token]);
 
   const toggleService = (serviceId: string) => {
     setSelectedServices(prev => {
@@ -107,6 +124,24 @@ export const AddService: FC<AddServiceProps> = ({
     }, 0);
   };
 
+  // 优惠前应付金额
+  const addonsBaseAmount = calculateAddonsTotal();
+
+  const {
+    applyingCode,
+    availablePromotions,
+    handleApplyCode,
+    promotionCode,
+    promotionDiscount,
+    selectedPromotion,
+    selectedPromotionId,
+    setPromotionCode,
+    setSelectedPromotionId
+  } = usePromotions({ baseAmount: addonsBaseAmount, packageId, promotions, token });
+
+  // 优惠后实付金额
+  const finalTotal = Math.max(0, addonsBaseAmount - promotionDiscount);
+
   const handleConfirmAddons = () => {
     setShowPaymentDialog(true);
   };
@@ -146,6 +181,11 @@ export const AddService: FC<AddServiceProps> = ({
       return null;
     });
 
+    // 优惠活动 / 优惠码
+    if (selectedPromotion) {
+      orderInfo.promotionId = selectedPromotion.promotionId;
+    }
+
     try {
       // 创建订单
       const orderResponse = await fetch('/go-tech/platform/packageOrder/add', {
@@ -181,7 +221,7 @@ export const AddService: FC<AddServiceProps> = ({
         setShowPaymentDialog(false);
         toast.success('支付憑證已提交，我們將在確認後為您增加增值服務');
       } else {
-        toast.error(orderResponse.message);
+        toast.error(orderResponse.message, { id: toastId });
       }
     } catch (error) {
       console.log(error);
@@ -191,14 +231,14 @@ export const AddService: FC<AddServiceProps> = ({
   return (
     <>
       <Dialog open={showAddonsDialog} onOpenChange={setShowAddonsDialog}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="sm:max-w-lg max-h-[calc(100dvh-2rem)] flex flex-col overflow-hidden">
           <DialogHeader>
             <DialogTitle>購買增值服務</DialogTitle>
           </DialogHeader>
           {(() => {
             const { daysRemaining, expiryDate, ratio } = getProrationInfo();
             return (
-              <div className="space-y-4 mt-4">
+              <div className="space-y-4 mt-4 flex-1 min-h-0 overflow-y-auto pr-1 scroll-on-hover">
                 <div className="p-3 rounded-lg bg-[#FFF8F5] border text-sm text-muted-foreground">
                   按當前訂單剩餘 <span className="font-medium text-foreground">{daysRemaining}</span> 天計費（至{' '}
                   {expiryDate} 到期），費用按單價 x {(ratio * 100).toFixed(2)}% 折算。
@@ -211,7 +251,7 @@ export const AddService: FC<AddServiceProps> = ({
                   return (
                     <div
                       key={service.id}
-                      className={`p-4 rounded-lg border-2 transition-colors ${
+                      className={`p-4 rounded-lg border transition-colors ${
                         isSelected ? 'border-primary bg-primary/5' : 'border-border'
                       }`}
                     >
@@ -264,18 +304,40 @@ export const AddService: FC<AddServiceProps> = ({
                   );
                 })}
 
+                {/* 優惠活動 */}
+                <PromotionSection
+                  promotions={availablePromotions}
+                  selectedPromotionId={selectedPromotionId}
+                  onSelect={setSelectedPromotionId}
+                  baseAmount={addonsBaseAmount}
+                  code={promotionCode}
+                  onCodeChange={setPromotionCode}
+                  applying={applyingCode}
+                  onApply={handleApplyCode}
+                />
+
                 <Separator />
 
+                <div className="flex justify-between items-center text-sm text-muted-foreground">
+                  <span>小計</span>
+                  <span>${fmt(addonsBaseAmount)} HKD</span>
+                </div>
+                {promotionDiscount > 0 && (
+                  <div className="flex justify-between items-center text-sm text-green-600">
+                    <span>活動優惠</span>
+                    <span>-${fmt(promotionDiscount)} HKD</span>
+                  </div>
+                )}
                 <div className="flex justify-between items-center text-lg font-bold">
                   <span>總計</span>
-                  <span className="text-primary">${fmt(calculateAddonsTotal())} HKD</span>
+                  <span className="text-primary">${fmt(finalTotal)} HKD</span>
                 </div>
 
                 <div className="flex gap-3 pt-2">
                   <Button variant="outline" className="flex-1" onClick={() => setShowAddonsDialog(false)}>
                     取消
                   </Button>
-                  <Button className="flex-1" disabled={calculateAddonsTotal() === 0} onClick={handleConfirmAddons}>
+                  <Button className="flex-1" disabled={addonsBaseAmount === 0} onClick={handleConfirmAddons}>
                     確認購買
                   </Button>
                 </div>
@@ -289,7 +351,7 @@ export const AddService: FC<AddServiceProps> = ({
       <PaymentPanel
         open={showPaymentDialog}
         onOpenChange={setShowPaymentDialog}
-        price={calculateAddonsTotal()}
+        price={finalTotal}
         handleBackToPaymentMethods={handleBackToPaymentMethods}
         handleFpsPaymentConfirm={handleFpsPaymentConfirm}
       />

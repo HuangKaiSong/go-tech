@@ -320,12 +320,12 @@ const MyOrders = () => {
 
       {/* 購買增值服務對話框 */}
       {showAddonsDialog && selectOrder && (
-        <AddService data={selectOrder} open={showAddonsDialog} onOpenChange={setShowAddonsDialog} />
+        <AddService data={selectOrder} open={showAddonsDialog} onOpenChangeAction={setShowAddonsDialog} />
       )}
 
       {/* 套餐升級對話框 */}
       {showUpgradeDialog && selectOrder && (
-        <Upgrade data={selectOrder} open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog} />
+        <Upgrade data={selectOrder} open={showUpgradeDialog} onOpenChangeAction={setShowUpgradeDialog} />
       )}
 
       {/* 支付方式選擇對話框 */}

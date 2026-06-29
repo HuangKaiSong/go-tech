@@ -17,16 +17,19 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { type FC, useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePromotions } from '../hooks/usePromotions';
 import valueAddedServices, { type SpecificValueAddedServicesId } from '../constants/addedServices';
 import { type OrderItemInfoType, OrderItemTypeEnum, OrderTypeEnum, type PlatformPackageDto } from '../constants/order';
 import { DAYSPERMONTH, PayTypeEnum } from '../constants/payment';
+import { type PromotionOption, fetchPromotions } from '../constants/promotion';
+import { PromotionSection } from './PromotionSection';
 const PaymentPanel = dynamic(() => import('../components/payment/Panel'), {
   ssr: false
 });
 
 type UpgradeProps = {
   data: OrderItemInfoType;
-  onOpenChange: (open: boolean) => void;
+  onOpenChangeAction: (open: boolean) => void;
   open: boolean;
 };
 
@@ -37,7 +40,11 @@ function fmt(num: number) {
   });
 }
 
-export const Upgrade: FC<UpgradeProps> = ({ data, onOpenChange: setShowUpgradeDialog, open: showUpgradeDialog }) => {
+export const Upgrade: FC<UpgradeProps> = ({
+  data,
+  onOpenChangeAction: setShowUpgradeDialog,
+  open: showUpgradeDialog
+}) => {
   const currentOrder = data;
 
   const { token } = useAuth();
@@ -46,6 +53,7 @@ export const Upgrade: FC<UpgradeProps> = ({ data, onOpenChange: setShowUpgradeDi
 
   const [upgradePlans, setUpgradePlans] = useState<PlatformPackageDto[]>([]);
   const [selectedUpgradePlan, setSelectedUpgradePlan] = useState<number | null>(null);
+  const [promotions, setPromotions] = useState<PromotionOption[]>([]);
 
   // oxlint-disable
   const [upgradeSelectedServices, _setUpgradeSelectedServices] = useState<Record<string, number>>({});
@@ -134,6 +142,42 @@ export const Upgrade: FC<UpgradeProps> = ({ data, onOpenChange: setShowUpgradeDi
     return Math.max(0, newCost - remainingCredit);
   };
 
+  // ---------------------------------------------------------------------------
+  // 优惠活动 / 优惠码（以升级后的新套餐为准）
+  // ---------------------------------------------------------------------------
+  // 优惠前应付金额（升级尾款 + 增值服务）
+  const upgradeBaseAmount = getUpgradePrice() + calculateUpgradeAddonsTotal();
+
+  // 切换升级套餐时拉取该套餐可用的优惠活动
+  useEffect(() => {
+    let active = true;
+    if (!selectedUpgradePlan) {
+      setPromotions([]);
+      return;
+    }
+    fetchPromotions(selectedUpgradePlan, token).then(list => {
+      if (active) setPromotions(list);
+    });
+    return () => {
+      active = false;
+    };
+  }, [selectedUpgradePlan, token]);
+
+  const {
+    applyingCode,
+    availablePromotions,
+    handleApplyCode,
+    promotionCode,
+    promotionDiscount,
+    selectedPromotion,
+    selectedPromotionId,
+    setPromotionCode,
+    setSelectedPromotionId
+  } = usePromotions({ baseAmount: upgradeBaseAmount, packageId: selectedUpgradePlan ?? undefined, promotions, token });
+
+  // 优惠后实付金额
+  const finalTotal = Math.max(0, upgradeBaseAmount - promotionDiscount);
+
   const handleConfirmUpgrade = () => {
     setShowPaymentDialog(true);
   };
@@ -179,6 +223,11 @@ export const Upgrade: FC<UpgradeProps> = ({ data, onOpenChange: setShowUpgradeDi
       });
       return null;
     });
+
+    // 优惠活动 / 优惠码
+    if (selectedPromotion) {
+      orderInfo.promotionId = selectedPromotion.promotionId;
+    }
 
     try {
       // 创建订单
@@ -259,7 +308,7 @@ export const Upgrade: FC<UpgradeProps> = ({ data, onOpenChange: setShowUpgradeDi
               return <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="沒有可用的升級方案" />;
             }
             return (
-              <div className="space-y-4 mt-4 flex-1 min-h-0 overflow-y-auto pr-1">
+              <div className="space-y-4 mt-4 flex-1 min-h-0 overflow-y-auto pr-1 scroll-on-hover">
                 <p className="text-sm text-muted-foreground">選擇您想升級的套餐方案，享受更多功能與服務</p>
                 {upgradePlans.map(plan => {
                   const isCurrentPlan = currentOrder?.packageName === plan.packageName;
@@ -394,6 +443,20 @@ export const Upgrade: FC<UpgradeProps> = ({ data, onOpenChange: setShowUpgradeDi
                   </>
                 )}
 
+                {/* 優惠活動 */}
+                {selectedUpgradePlan && (
+                  <PromotionSection
+                    promotions={availablePromotions}
+                    selectedPromotionId={selectedPromotionId}
+                    onSelect={setSelectedPromotionId}
+                    baseAmount={upgradeBaseAmount}
+                    code={promotionCode}
+                    onCodeChange={setPromotionCode}
+                    applying={applyingCode}
+                    onApply={handleApplyCode}
+                  />
+                )}
+
                 <Separator />
 
                 {/* 費用匯總 */}
@@ -434,12 +497,16 @@ export const Upgrade: FC<UpgradeProps> = ({ data, onOpenChange: setShowUpgradeDi
                           <span>${fmt(calculateUpgradeAddonsTotal())} HKD</span>
                         </div>
                       )}
+                      {promotionDiscount > 0 && (
+                        <div className="flex justify-between text-sm text-green-600">
+                          <span>活動優惠</span>
+                          <span>-${fmt(promotionDiscount)} HKD</span>
+                        </div>
+                      )}
                       <Separator />
                       <div className="flex justify-between items-center text-lg font-bold">
                         <span>總計</span>
-                        <span className="text-primary">
-                          ${fmt(getUpgradePrice() + calculateUpgradeAddonsTotal())} HKD
-                        </span>
+                        <span className="text-primary">${fmt(finalTotal)} HKD</span>
                       </div>
                     </div>
                   );
@@ -462,7 +529,7 @@ export const Upgrade: FC<UpgradeProps> = ({ data, onOpenChange: setShowUpgradeDi
       <PaymentPanel
         open={showPaymentDialog}
         onOpenChange={setShowPaymentDialog}
-        price={getUpgradePrice() + calculateUpgradeAddonsTotal()}
+        price={finalTotal}
         handleBackToPaymentMethods={handleBackToPaymentMethods}
         handleFpsPaymentConfirm={handleFpsPaymentConfirm}
       />

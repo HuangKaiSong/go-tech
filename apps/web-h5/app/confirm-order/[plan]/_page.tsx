@@ -279,6 +279,7 @@ const ConfirmOrder = ({
     const diffPrice = Math.max(0, (selectedPlan?.price || 0) - (recursePrice || 0)) * month;
 
     return Math.max(0, diffPrice);
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, [month, addonsTotal]);
 
   // ---------------------------------------------------------------------------
