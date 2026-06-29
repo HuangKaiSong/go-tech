@@ -4,10 +4,10 @@
     "*.css": "tailwindcss"
   },
   "tailwindCSS.lint.suggestCanonicalClasses": "ignore",
-  "tailwindCSS.classAttributes": ["class", "className", "headerClassName", "classNames"],
+  "tailwindCSS.classAttributes": [ "class", "className", "headerClassName", "classNames" ],
   "tailwindCSS.experimental.classRegex": [
-    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
-    ["tv\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
+    [ "cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]" ],
+    [ "tv\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]" ]
   ],
 
   // workbench
@@ -85,18 +85,18 @@
   },
 
   // i18n-ally
-  "i18n-ally.localesPaths": ["packages/web/admin-i18n/src/langs"],
+  "i18n-ally.localesPaths": [ "packages/web/admin-i18n/src/langs" ],
   "i18n-ally.pathMatcher": "{locale}/{namespace}.json",
   "i18n-ally.namespace": true,
   "i18n-ally.keystyle": "nested",
   "i18n-ally.sourceLanguage": "zh-cn",
   "i18n-ally.displayLanguage": "zh-cn",
-  "i18n-ally.enabledFrameworks": ["react-i18next"],
-  "i18n-ally.enabledParsers": ["ts", "json"],
+  "i18n-ally.enabledFrameworks": [ "react-i18next" ],
+  "i18n-ally.enabledParsers": [ "ts", "json" ],
   "i18n-ally.editor.preferEditor": true,
   "i18n-ally.extract.targetPickingStrategy": "most-similar",
-  "i18n-ally.ignoreFiles": ["**/index.ts"],
-  "i18n-ally.translate.engines": ["deepl", "google"],
+  "i18n-ally.ignoreFiles": [ "**/index.ts" ],
+  "i18n-ally.translate.engines": [ "deepl", "google" ],
   "i18n-ally.parsers.typescript.compilerOptions": {
     "ignoreDeprecations": "6.0",
     "moduleResolution": "node",
@@ -170,21 +170,22 @@
   },
 
   // typescript
-  "typescript.tsserver.exclude": ["**/node_modules", "**/dist", "**/.turbo", "**/.next", "**/coverage"],
+  "typescript.tsserver.exclude": [ "**/node_modules", "**/dist", "**/.turbo", "**/.next", "**/coverage" ],
   "js/ts.tsdk.path": "node_modules/typescript/lib",
 
   "vitest.configSearchPatternExclude": "**/packages/**",
 
-  "unocss.root": ["./apps/admin"],
+  "unocss.root": [ "./apps/admin" ],
 
   // debug
   "debug.onTaskErrors": "debugAnyway",
   "diffEditor.ignoreTrimWhitespace": false,
   "npm.packageManager": "pnpm",
 
-  "errorLens.enabledDiagnosticLevels": ["warning", "error"],
-  "errorLens.excludeBySource": ["cSpell", "Grammarly"],
+  "errorLens.enabledDiagnosticLevels": [ "warning", "error" ],
+  "errorLens.excludeBySource": [ "cSpell", "Grammarly" ],
   "[typescriptreact]": {
     "editor.defaultFormatter": "oxc.oxc-vscode"
-  }
+  },
+  "commentTranslate.hover.enabled": true
 }
