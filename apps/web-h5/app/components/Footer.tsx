@@ -6,7 +6,14 @@ const Footer = () => {
     <footer className="bg-black/70 text-white/80 py-12">
       <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-5 gap-8 mb-8">
-          <Image src="/images/Gotech_Logo.webp" alt="logo" width={120} height={120} className="w-full max-w-30" />
+          <Image
+            src="/images/Gotech_Logo.webp"
+            loading="eager"
+            alt="logo"
+            width={120}
+            height={120}
+            className="w-full max-w-30"
+          />
           <div>
             <h4 className="font-semibold mb-4">公司業務</h4>
             <ul className="space-y-2 text-sm text-white/70">
