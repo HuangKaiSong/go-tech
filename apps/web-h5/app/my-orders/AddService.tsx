@@ -18,7 +18,7 @@ import { type FC, useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import valueAddedServices, { type SpecificValueAddedServicesId } from '../constants/addedServices';
 import { type OrderItemInfoType, OrderItemTypeEnum, OrderTypeEnum } from '../constants/order';
-import { DAYSPERMONTH, PayTypeEnum } from '../constants/payment';
+import { DAYSPERMONTH, PayTypeEnum, openWebManagedCashier } from '../constants/payment';
 import { type PromotionOption, fetchPromotions } from '../constants/promotion';
 import { usePromotions } from '../hooks/usePromotions';
 import { PromotionSection } from './PromotionSection';
@@ -150,17 +150,18 @@ export const AddService: FC<AddServiceProps> = ({
     setShowPaymentDialog(false);
   };
 
-  const handleFpsPaymentConfirm = async (voucherFile: UploadedFile) => {
-    toast.dismiss();
-    const toastId = toast.loading('創建增值服務訂單中...');
-    const headers = new Headers({
+  const requestHeaders = () =>
+    new Headers({
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
       'User-Type': 'platform_customer'
     });
+
+  /** 构建增值服务订单数据（FPS 与线上支付一致，仅 payType 不同） */
+  const buildOrderInfo = (payType: PayTypeEnum) => {
     const orderInfo: any = {
       orderType: OrderTypeEnum.ADDITION,
-      payType: PayTypeEnum.FPS,
+      payType,
       originalOrder: currentOrder.orderNo,
       orderItems: []
     };
@@ -185,6 +186,14 @@ export const AddService: FC<AddServiceProps> = ({
     if (selectedPromotion) {
       orderInfo.promotionId = selectedPromotion.promotionId;
     }
+    return orderInfo;
+  };
+
+  const handleFpsPaymentConfirm = async (voucherFile: UploadedFile) => {
+    toast.dismiss();
+    const toastId = toast.loading('創建增值服務訂單中...');
+    const headers = requestHeaders();
+    const orderInfo = buildOrderInfo(PayTypeEnum.FPS);
 
     try {
       // 创建订单
@@ -200,23 +209,21 @@ export const AddService: FC<AddServiceProps> = ({
       if (orderResponse.code === 200) {
         toast.success('增值服務訂單創建成功', { id: toastId });
         const orderId = orderResponse.data;
-        if (orderInfo.payType === PayTypeEnum.FPS) {
-          // 上传凭证
-          await fetch('/go-tech/platform/packageOrder/payEvidence', {
-            method: 'POST',
-            headers,
-            body: JSON.stringify({
-              id: orderId,
-              payEvidence: voucherFile.url
-            })
+        // 上传凭证
+        await fetch('/go-tech/platform/packageOrder/payEvidence', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            id: orderId,
+            payEvidence: voucherFile.url
           })
-            .catch(err => {
-              throw err;
-            })
-            .then(res => res.json());
+        })
+          .catch(err => {
+            throw err;
+          })
+          .then(res => res.json());
 
-          router.push(`/my-orders/${orderId}`);
-        }
+        router.push(`/my-orders/${orderId}`);
 
         setShowPaymentDialog(false);
         toast.success('支付憑證已提交，我們將在確認後為您增加增值服務');
@@ -225,6 +232,34 @@ export const AddService: FC<AddServiceProps> = ({
       }
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  /** 线上支付：先创建增值服务订单（payType=Online），再生成全托管收银台并跳转 */
+  const handleOnlinePaymentConfirm = async () => {
+    toast.dismiss();
+    const toastId = toast.loading('創建增值服務訂單中...');
+    const orderInfo = buildOrderInfo(PayTypeEnum.Online);
+
+    try {
+      const orderResponse = await fetch('/go-tech/platform/packageOrder/add', {
+        method: 'POST',
+        headers: requestHeaders(),
+        body: JSON.stringify(orderInfo)
+      }).then(res => res.json());
+
+      if (orderResponse.code !== 200) {
+        toast.error(orderResponse.message, { id: toastId });
+        return;
+      }
+
+      // 后端返回 OrderAddResponse（含签名等参数），以 GET 表单方式喚起全托管收银台
+      toast.success('正在跳转至收银台', { id: toastId });
+      setShowPaymentDialog(false);
+      openWebManagedCashier(orderResponse.data);
+    } catch (error) {
+      console.log(error);
+      toast.error('創建增值服務訂單失敗，請稍後重試', { id: toastId });
     }
   };
 
@@ -354,6 +389,7 @@ export const AddService: FC<AddServiceProps> = ({
         price={finalTotal}
         handleBackToPaymentMethods={handleBackToPaymentMethods}
         handleFpsPaymentConfirm={handleFpsPaymentConfirm}
+        handleOnlinePaymentConfirm={handleOnlinePaymentConfirm}
       />
     </>
   );

@@ -6,10 +6,6 @@ import {
   Card,
   CardContent,
   CardHeader,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
   Input,
   Label,
   RadioGroup,
@@ -20,17 +16,21 @@ import {
 } from '@go-tech-frontend/ui';
 import dayjs from 'dayjs';
 import { ArrowLeft, CheckCircle, Clock, CreditCard, Package, RefreshCw, Settings } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import Footer from '@/app/components/Footer';
 import Header from '@/app/components/Header';
 import Link from '@/app/components/Link';
-import Fps from '@/app/components/payment/Fps';
 import { type OrderItemInfoType, OrderItemTypeEnum, OrderTypeEnum } from '@/app/constants/order';
-import { DAYSPERMONTH, PayTypeEnum } from '@/app/constants/payment';
+import { DAYSPERMONTH, PayTypeEnum, openWebManagedCashier } from '@/app/constants/payment';
 import { type PromotionOption, getPromotionDiscount } from '@/app/constants/promotion';
 import { usePromotions } from '@/app/hooks/usePromotions';
 import { useAuth } from '@/contexts/AuthContext';
+
+const PaymentPanel = dynamic(() => import('@/app/components/payment/Panel'), {
+  ssr: false
+});
 
 const renewalOptions = [
   { id: '1month', label: '續費1个月', months: 1, discount: 0 },
@@ -152,7 +152,6 @@ const RenewOrder = ({
   const [selectedPeriod, setSelectedPeriod] = useState('1month');
   const [customMonths, setCustomMonths] = useState(6);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PayTypeEnum | null>(null);
 
   if (!order) {
     return (
@@ -235,22 +234,21 @@ const RenewOrder = ({
   };
 
   const handleBackToPaymentMethods = () => {
-    setSelectedPaymentMethod(null);
+    setShowPaymentDialog(false);
   };
 
-  // const handlePaymentSelect = (method: PayTypeEnum) => {
-  //   console.log("Selected payment method:", method);
-  //   setShowPaymentDialog(false);
-  //   // 這裡可以跳轉到支付頁面或顯示成功訊息
-  //   router.push("/my-orders");
-  // };
+  const requestHeaders = () =>
+    new Headers({
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+      'User-Type': 'platform_customer'
+    });
 
-  const handleFpsPaymentConfirm = async (voucherFile: UploadedFile) => {
-    toast.dismiss();
-    const toastId = toast.loading('創建續費訂單中...');
+  /** 构建续费订单数据（FPS 与线上支付一致，仅 payType 不同） */
+  const buildOrderInfo = (payType: PayTypeEnum) => {
     const orderInfo: any = {
       orderType: OrderTypeEnum.RENEWAL,
-      payType: selectedPaymentMethod,
+      payType,
       originalOrder: detail.orderNo,
       orderItems: [
         {
@@ -276,23 +274,24 @@ const RenewOrder = ({
         return null;
       });
     }
-
     // 优惠活动 / 优惠码
     if (selectedPromotion) {
       orderInfo.promotionId = selectedPromotion.promotionId;
     }
+    return orderInfo;
+  };
 
-    const requestHeaders = new Headers({
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-      'User-Type': 'platform_customer'
-    });
+  const handleFpsPaymentConfirm = async (voucherFile: UploadedFile) => {
+    toast.dismiss();
+    const toastId = toast.loading('創建續費訂單中...');
+    const orderInfo = buildOrderInfo(PayTypeEnum.FPS);
+    const headers = requestHeaders();
 
     try {
       // 创建订单
       const orderResponse = await fetch('/go-tech/platform/packageOrder/add', {
         method: 'POST',
-        headers: requestHeaders,
+        headers,
         body: JSON.stringify(orderInfo)
       })
         .then(res => res.json())
@@ -302,24 +301,21 @@ const RenewOrder = ({
       if (orderResponse.code === 200) {
         toast.success('續費訂單創建成功', { id: toastId });
         const orderId = orderResponse.data;
-        if (orderInfo.payType === PayTypeEnum.FPS) {
-          // 上传凭证
-          await fetch('/go-tech/platform/packageOrder/payEvidence', {
-            method: 'POST',
-            headers: requestHeaders,
-            body: JSON.stringify({
-              id: orderId,
-              payEvidence: voucherFile.url
-            })
+        // 上传凭证
+        await fetch('/go-tech/platform/packageOrder/payEvidence', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            id: orderId,
+            payEvidence: voucherFile.url
           })
-            .catch(err => {
-              throw err;
-            })
-            .then(res => res.json());
-        }
+        })
+          .catch(err => {
+            throw err;
+          })
+          .then(res => res.json());
 
         setShowPaymentDialog(false);
-        setSelectedPaymentMethod(null);
         router.push('/my-orders');
         toast.success('支付憑證已提交，我們將在確認後為您續費', { id: toastId });
       } else {
@@ -327,6 +323,34 @@ const RenewOrder = ({
       }
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  /** 线上支付：先创建续费订单（payType=Online），再生成全托管收银台并跳转 */
+  const handleOnlinePaymentConfirm = async () => {
+    toast.dismiss();
+    const toastId = toast.loading('創建續費訂單中...');
+    const orderInfo = buildOrderInfo(PayTypeEnum.Online);
+
+    try {
+      const orderResponse = await fetch('/go-tech/platform/packageOrder/add', {
+        method: 'POST',
+        headers: requestHeaders(),
+        body: JSON.stringify(orderInfo)
+      }).then(res => res.json());
+
+      if (orderResponse.code !== 200) {
+        toast.error(orderResponse.message, { id: toastId });
+        return;
+      }
+
+      // 后端返回 OrderAddResponse（含签名等参数），以 GET 表单方式喚起全托管收银台
+      toast.success('正在跳转至收银台', { id: toastId });
+      setShowPaymentDialog(false);
+      openWebManagedCashier(orderResponse.data);
+    } catch (error) {
+      console.log(error);
+      toast.error('創建續費訂單失敗，請稍後重試', { id: toastId });
     }
   };
 
@@ -586,67 +610,15 @@ const RenewOrder = ({
         </div>
       </section>
 
-      {/* 支付方式選擇 Dialog */}
-      <Dialog
+      {/* 支付弹框 */}
+      <PaymentPanel
         open={showPaymentDialog}
-        onOpenChange={open => {
-          setShowPaymentDialog(open);
-          if (!open) {
-            setSelectedPaymentMethod(null);
-          }
-        }}
-      >
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="text-center text-xl">
-              {selectedPaymentMethod === PayTypeEnum.FPS ? 'FPS 轉數快支付' : '選擇支付方式'}
-            </DialogTitle>
-          </DialogHeader>
-
-          {selectedPaymentMethod === PayTypeEnum.FPS ? (
-            <Fps
-              price={finalPrice}
-              handleBackToPaymentMethods={handleBackToPaymentMethods}
-              handleFpsPaymentConfirm={handleFpsPaymentConfirm}
-            />
-          ) : (
-            <div className="grid gap-4 py-4">
-              <Button
-                variant="outline"
-                disabled
-                onClick={() => setSelectedPaymentMethod(PayTypeEnum.WechatPay)}
-                className="h-14 text-lg justify-start gap-4 hover:bg-green-50 hover:border-green-500 hover:text-primary"
-              >
-                <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-sm font-bold">微</span>
-                </div>
-                微信支付
-              </Button>
-              <Button
-                variant="outline"
-                disabled
-                onClick={() => setSelectedPaymentMethod(PayTypeEnum.Alipay)}
-                className="h-14 text-lg justify-start gap-4 hover:bg-blue-50 hover:border-blue-500 hover:text-primary"
-              >
-                <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-sm font-bold">支</span>
-                </div>
-                支付寶支付
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setSelectedPaymentMethod(PayTypeEnum.FPS)}
-                className="h-14 text-lg justify-start gap-4 hover:bg-orange-50 hover:border-orange-500 hover:text-primary"
-              >
-                <div className="w-8 h-8 bg-linear-to-br from-orange-400 to-orange-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-xs font-bold">FPS</span>
-                </div>
-                FPS 轉數快
-              </Button>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+        onOpenChange={setShowPaymentDialog}
+        price={finalPrice}
+        handleBackToPaymentMethods={handleBackToPaymentMethods}
+        handleFpsPaymentConfirm={handleFpsPaymentConfirm}
+        handleOnlinePaymentConfirm={handleOnlinePaymentConfirm}
+      />
 
       <Footer />
     </div>

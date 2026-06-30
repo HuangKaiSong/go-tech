@@ -20,7 +20,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { usePromotions } from '../hooks/usePromotions';
 import valueAddedServices, { type SpecificValueAddedServicesId } from '../constants/addedServices';
 import { type OrderItemInfoType, OrderItemTypeEnum, OrderTypeEnum, type PlatformPackageDto } from '../constants/order';
-import { DAYSPERMONTH, PayTypeEnum } from '../constants/payment';
+import { DAYSPERMONTH, PayTypeEnum, openWebManagedCashier } from '../constants/payment';
 import { type PromotionOption, fetchPromotions } from '../constants/promotion';
 import { PromotionSection } from './PromotionSection';
 const PaymentPanel = dynamic(() => import('../components/payment/Panel'), {
@@ -182,19 +182,20 @@ export const Upgrade: FC<UpgradeProps> = ({
     setShowPaymentDialog(true);
   };
 
-  const handleFpsPaymentConfirm = async (voucherFile: UploadedFile) => {
-    toast.dismiss();
-    const toastId = toast.loading('創建升級訂單中...');
-    const plan = upgradePlans.find(p => p.id === selectedUpgradePlan);
-    const orderPackageInfo = data.orderItems.find(item => item.itemType === OrderItemTypeEnum.PACKAGE);
-    const headers = new Headers({
+  const requestHeaders = () =>
+    new Headers({
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
       'User-Type': 'platform_customer'
     });
+
+  /** 构建升级订单数据（FPS 与线上支付一致，仅 payType 不同） */
+  const buildOrderInfo = (payType: PayTypeEnum) => {
+    const plan = upgradePlans.find(p => p.id === selectedUpgradePlan);
+    const orderPackageInfo = data.orderItems.find(item => item.itemType === OrderItemTypeEnum.PACKAGE);
     const orderInfo: any = {
       orderType: OrderTypeEnum.UPGRADE,
-      payType: PayTypeEnum.FPS,
+      payType,
       originalOrder: currentOrder.orderNo,
       orderItems: [
         {
@@ -228,6 +229,14 @@ export const Upgrade: FC<UpgradeProps> = ({
     if (selectedPromotion) {
       orderInfo.promotionId = selectedPromotion.promotionId;
     }
+    return orderInfo;
+  };
+
+  const handleFpsPaymentConfirm = async (voucherFile: UploadedFile) => {
+    toast.dismiss();
+    const toastId = toast.loading('創建升級訂單中...');
+    const headers = requestHeaders();
+    const orderInfo = buildOrderInfo(PayTypeEnum.FPS);
 
     try {
       // 创建订单
@@ -243,23 +252,21 @@ export const Upgrade: FC<UpgradeProps> = ({
       if (orderResponse.code === 200) {
         toast.success('升級訂單創建成功', { id: toastId });
         const orderId = orderResponse.data;
-        if (orderInfo.payType === PayTypeEnum.FPS) {
-          // 上传凭证
-          await fetch('/go-tech/platform/packageOrder/payEvidence', {
-            method: 'POST',
-            headers,
-            body: JSON.stringify({
-              id: orderId,
-              payEvidence: voucherFile.url
-            })
+        // 上传凭证
+        await fetch('/go-tech/platform/packageOrder/payEvidence', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            id: orderId,
+            payEvidence: voucherFile.url
           })
-            .catch(err => {
-              throw err;
-            })
-            .then(res => res.json());
+        })
+          .catch(err => {
+            throw err;
+          })
+          .then(res => res.json());
 
-          router.push(`/my-orders/${orderId}`);
-        }
+        router.push(`/my-orders/${orderId}`);
 
         setShowPaymentDialog(false);
         toast.success('支付憑證已提交，我們將在確認後為您升級');
@@ -268,6 +275,34 @@ export const Upgrade: FC<UpgradeProps> = ({
       }
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  /** 线上支付：先创建升级订单（payType=Online），再生成全托管收银台并跳转 */
+  const handleOnlinePaymentConfirm = async () => {
+    toast.dismiss();
+    const toastId = toast.loading('創建升級訂單中...');
+    const orderInfo = buildOrderInfo(PayTypeEnum.Online);
+
+    try {
+      const orderResponse = await fetch('/go-tech/platform/packageOrder/add', {
+        method: 'POST',
+        headers: requestHeaders(),
+        body: JSON.stringify(orderInfo)
+      }).then(res => res.json());
+
+      if (orderResponse.code !== 200) {
+        toast.error(orderResponse.message, { id: toastId });
+        return;
+      }
+
+      // 后端返回 OrderAddResponse（含签名等参数），以 GET 表单方式喚起全托管收银台
+      toast.success('正在跳转至收银台', { id: toastId });
+      setShowPaymentDialog(false);
+      openWebManagedCashier(orderResponse.data);
+    } catch (error) {
+      console.log(error);
+      toast.error('創建升級訂單失敗，請稍後重試', { id: toastId });
     }
   };
 
@@ -532,6 +567,7 @@ export const Upgrade: FC<UpgradeProps> = ({
         price={finalTotal}
         handleBackToPaymentMethods={handleBackToPaymentMethods}
         handleFpsPaymentConfirm={handleFpsPaymentConfirm}
+        handleOnlinePaymentConfirm={handleOnlinePaymentConfirm}
       />
     </>
   );

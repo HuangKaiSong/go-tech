@@ -1,14 +1,17 @@
 'use client';
 
 import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, type UploadedFile } from '@go-tech-frontend/ui';
+import { CreditCard } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import { type FC, useState } from 'react';
+import { type FC, useEffect, useState } from 'react';
 import { PayTypeEnum } from '@/app/constants/payment';
 const Fps = dynamic(() => import('./Fps'), { ssr: false });
 
 type PanelProps = {
   handleBackToPaymentMethods: () => void;
   handleFpsPaymentConfirm: (voucherFile: UploadedFile) => void;
+  /** 线上支付：由父组件先创建业务订单（packageOrder/add 或 reAdd，payType=Online）， 再生成 KPay 全托管收银台并跳转。Panel 仅负责触发与 loading 态。 */
+  handleOnlinePaymentConfirm: () => Promise<void> | void;
   onOpenChange: (open: boolean) => void;
   open: boolean;
   price: number;
@@ -17,19 +20,36 @@ type PanelProps = {
 export const Panel: FC<PanelProps> = ({
   handleBackToPaymentMethods,
   handleFpsPaymentConfirm,
+  handleOnlinePaymentConfirm,
   onOpenChange,
   open,
   price
 }) => {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PayTypeEnum | null>(null);
+  const [onlineLoading, setOnlineLoading] = useState(false);
+
+  // 弹框关闭时（含父组件主动关闭）重置已选支付方式，避免下次打开仍停留在上次的子视图
+  useEffect(() => {
+    if (!open) {
+      setSelectedPaymentMethod(null);
+    }
+  }, [open]);
+
+  const handleOnlinePayment = async () => {
+    if (onlineLoading) return;
+    setOnlineLoading(true);
+    try {
+      await handleOnlinePaymentConfirm();
+    } finally {
+      setOnlineLoading(false);
+    }
+  };
 
   const handlePaymentSelect = (method: PayTypeEnum) => {
     if (method === PayTypeEnum.FPS) {
       setSelectedPaymentMethod(PayTypeEnum.FPS);
-    } else {
-      console.log('Payment method selected:', method);
-      onOpenChange(false);
-      // Handle payment logic here
+    } else if (method === PayTypeEnum.Online) {
+      handleOnlinePayment();
     }
   };
 
@@ -38,7 +58,7 @@ export const Panel: FC<PanelProps> = ({
       open={open}
       onOpenChange={flag => {
         onOpenChange(flag);
-        if (!open) {
+        if (!flag) {
           setSelectedPaymentMethod(null);
         }
       }}
@@ -60,25 +80,15 @@ export const Panel: FC<PanelProps> = ({
           <div className="grid gap-4 py-4">
             <Button
               variant="outline"
-              disabled
-              onClick={() => handlePaymentSelect(PayTypeEnum.WechatPay)}
-              className="h-14 text-lg justify-start gap-4 hover:bg-green-50 hover:border-green-500 hover:text-primary"
-            >
-              <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
-                <span className="text-white text-sm font-bold">微</span>
-              </div>
-              微信支付
-            </Button>
-            <Button
-              variant="outline"
-              disabled
-              onClick={() => handlePaymentSelect(PayTypeEnum.Alipay)}
+              loading={onlineLoading}
+              disabled={onlineLoading}
+              onClick={() => handlePaymentSelect(PayTypeEnum.Online)}
               className="h-14 text-lg justify-start gap-4 hover:bg-blue-50 hover:border-blue-500 hover:text-primary"
             >
-              <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-                <span className="text-white text-sm font-bold">支</span>
+              <div className="w-8 h-8 bg-linear-to-br from-blue-500 to-green-500 rounded-lg flex items-center justify-center">
+                <CreditCard className="w-5 h-5 text-white" />
               </div>
-              支付寶支付
+              线上支付
             </Button>
             <Button
               variant="outline"

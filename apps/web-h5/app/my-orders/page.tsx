@@ -11,7 +11,7 @@ import Header from '@/app/components/Header';
 import Link from '@/app/components/Link';
 import { useAuth } from '@/contexts/AuthContext';
 import { type OrderItemInfoType, OrderStatusEnum } from '../constants/order';
-import { PayTypeEnum } from '../constants/payment';
+import { PayTypeEnum, openWebManagedCashier } from '../constants/payment';
 import { AddService } from './AddService';
 import { Upgrade } from './Upgrade';
 
@@ -96,6 +96,43 @@ const MyOrders = () => {
       }
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  /** 线上支付：对已存在订单重新发起支付（reAdd，payType=Online），再生成全托管收银台并跳转 */
+  const handleOnlinePaymentConfirm = async () => {
+    toast.dismiss();
+    if (!selectOrder) {
+      return;
+    }
+    const toastId = toast.loading('正在準備數據中...');
+    try {
+      // 与 FPS 请求数据一致，仅 payType 不同（线上支付无需 payEvidence）
+      const orderResponse = await fetch('/go-tech/platform/packageOrder/reAdd', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+          'User-Type': 'platform_customer'
+        },
+        body: JSON.stringify({
+          id: selectOrder.id,
+          payType: PayTypeEnum.Online
+        })
+      }).then(res => res.json());
+
+      if (orderResponse.code !== 200) {
+        toast.error(orderResponse.message, { id: toastId });
+        return;
+      }
+
+      // 后端返回 OrderAddResponse（含签名等参数），以 GET 表单方式喚起全托管收银台
+      toast.success('正在跳转至收银台', { id: toastId });
+      setShowPaymentDialog(false);
+      openWebManagedCashier(orderResponse.data);
+    } catch (error) {
+      console.log(error);
+      toast.error('操作失敗，請稍後重試', { id: toastId });
     }
   };
 
@@ -336,6 +373,7 @@ const MyOrders = () => {
           price={selectOrder.finalAmount}
           handleBackToPaymentMethods={handleBackToPaymentMethods}
           handleFpsPaymentConfirm={handleFpsPaymentConfirm}
+          handleOnlinePaymentConfirm={handleOnlinePaymentConfirm}
         />
       )}
       <Footer />
