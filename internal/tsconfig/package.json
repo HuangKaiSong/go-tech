@@ -11,6 +11,7 @@
     "./node.json": "./node.json",
     "./vite-react.json": "./vite-react.json",
     "./library.json": "./library.json",
-    "./web.json": "./web.json"
+    "./web.json": "./web.json",
+    "./web-app.json": "./web-app.json"
   }
 }

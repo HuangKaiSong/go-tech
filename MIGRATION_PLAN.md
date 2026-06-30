@@ -17,7 +17,7 @@ Applications (apps/*)            ← 业务薄壳，只写页面与装配
         ▲
 Web Kit (packages/web/*)         ← 布局 / 主题 / UI / 构建预设
         ▲
-Adapter (@skyroc/adapter-*)      ← UI 库适配层
+Adapter (@go-tech/adapter-*)      ← UI 库适配层
         ▲
 Core (packages/@core/*)          ← 平台无关内核，禁止依赖 DOM
 ```
@@ -101,12 +101,12 @@ internal/*                       工程配置（不参与运行时）
 >
 > - 新增 4 个跨端内核包（均位于 `packages/core/*`，`tsconfig` extends `@go-tech/tsconfig/library.json`，`lib: ["ESNext"]` 不含 DOM）：
 >   - `@go-tech/core-utils`：`cn` / `truncate` / `formatNumber` / 类型守卫。
->   - `@go-tech/core-hooks`：`useCountDown` / `useLatest`（React peer，timer 用 node 类型，无 DOM）。
->   - `@go-tech/core-types`：`HttpBaseResponse` / `User` / `Tenant` / `Packages` / `MenuType`。
+>   - `@go-tech/hooks`：`useCountDown` / `useLatest`（React peer，timer 用 node 类型，无 DOM）。
+>   - `@go-tech/types`：`HttpBaseResponse` / `User` / `Tenant` / `Packages` / `MenuType`。
 >   - `@go-tech/core-http`：runtime-agnostic `HttpClient` + 可注入 `HttpAdapter`（`getBaseUrl`/`getToken`/`defaultHeaders`/`onError`/`onUnauthorized`/`returnErrorBody`）。
 > - `apps/web-h5/lib/http.ts` 改为注入 Next.js `cookies()` adapter 消费内核；导出 `httpClient`/`getBaseUrl` 不变。
-> - `web-h5` 的 `types/*.d.ts` 改为从 `@go-tech/core-types` re-export（保留全局 ambient，零调用点改动）。
-> - 全仓 `@go-tech-frontend/lib` 引用（33 处）重定向到 `@go-tech/core-utils` / `@go-tech/core-hooks`；`packages/lib` 保留为已弃用的 re-export shim（沙箱无法删除，可后续手动移除）。
+> - `web-h5` 的 `types/*.d.ts` 改为从 `@go-tech/types` re-export（保留全局 ambient，零调用点改动）。
+> - 全仓 `@go-tech-frontend/lib` 引用（33 处）重定向到 `@go-tech/core-utils` / `@go-tech/hooks`；`packages/lib` 保留为已弃用的 re-export shim（沙箱无法删除，可后续手动移除）。
 > - `pnpm-workspace.yaml` 增加 `packages/core/*` glob。
 > - 验收通过：4 个 core 包 + `web-h5` + `web-admin` 的 `tsc` 全绿；向 core 包注入 `document`/`window` 会编译报错（已实测）。oxlint/oxfmt 为平台原生二进制，请在本机 `pnpm lint` / `pnpm format` 跑。
 > - 待办（阶段 1 范围外）：`web-admin` / HR 应用的内联 fetch 迁移到 `core-http` adapter（属阶段 3 service 层）；`web-admin/src/types` 收敛进 `core-types`。
@@ -114,7 +114,7 @@ internal/*                       工程配置（不参与运行时）
 **目标**：把平台无关逻辑下沉到 `packages/core/*`，明确「禁止 DOM」边界。
 
 1. `packages/core/utils`（`@go-tech/core-utils`）：迁移 `packages/lib` 中纯函数（`cn`、`truncate`、`formatNumber`、类型守卫）。`cn` 依赖 clsx+tailwind-merge，属纯逻辑，可保留在此。
-2. `packages/core/types`（`@go-tech/core-types`）：抽取跨应用共享的领域类型（订单、用户、套餐、HR 实体等，目前散落在各 app 的 `types/`）。
+2. `packages/core/types`（`@go-tech/types`）：抽取跨应用共享的领域类型（订单、用户、套餐、HR 实体等，目前散落在各 app 的 `types/`）。
 3. `packages/core/http`（`@go-tech/core-http`）：**统一请求内核**。
    - 抽象出与运行时无关的 `HttpClient`（基于 fetch），把「取 token」「baseUrl」「错误处理」做成可注入的 adapter。
    - `web-h5` 注入 Next.js `cookies()` 适配；Vite 应用注入 localStorage/cookie 适配。这样 `web-h5/lib/http.ts` 的 server-only 逻辑与 admin/HR 共用同一内核。
@@ -136,7 +136,7 @@ internal/*                       工程配置（不参与运行时）
 
 ### 阶段 3 — 共享 service / 状态基础设施（中风险）
 
-**目标**：对齐 skyroc 的 `@skyroc/service`——可复用的请求 + 查询层。
+**目标**：对齐 skyroc 的 `@go-tech/service`——可复用的请求 + 查询层。
 
 1. `packages/core/service`（`@go-tech/core-service`）：在 `core-http` 之上封装 TanStack Query 的 `queryClient` 工厂、统一 `queryKey` 约定、错误/鉴权拦截与跳转 adapter。
 2. 各业务 API 改为「定义一次 service 函数 + 类型」，四端共用。web-admin 现有 React Query 调用迁移到该层。

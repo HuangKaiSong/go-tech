@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Web Application",
+  "extends": "./web.json",
+  "compilerOptions": {
+    "types": [
+      "vite/client",
+      "node",
+      "unplugin-icons/types/react",
+      "@go-tech/types/types",
+      "@go-tech/web-admin-theme/types"
+    ]
+  }
+}

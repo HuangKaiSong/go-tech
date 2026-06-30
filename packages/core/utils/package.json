@@ -8,15 +8,29 @@
   "main": "./src/index.ts",
   "module": "./src/index.ts",
   "types": "./src/index.ts",
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "types": "./src/index.ts",
+  "typesVersions": {
+    "*": {
+      "path": [
+        "./src/path.ts"
+      ],
+      "web": [
+        "./src/web/index.ts"
+      ]
+    }
+  },
   "exports": {
     ".": "./src/index.ts",
-    "./package.json": "./package.json"
+    "./path": "./src/path.ts",
+    "./web": "./src/web/index.ts"
   },
   "scripts": {
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "clsx": "catalog:",
+    "clsx": "catalog:utils",
     "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {

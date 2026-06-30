@@ -1,0 +1,7 @@
+{
+  "extends": "@go-tech/tsconfig/library.json",
+  "compilerOptions": {
+    "outDir": "dist"
+  },
+  "include": ["src"]
+}

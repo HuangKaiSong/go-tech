@@ -1,0 +1,7 @@
+{
+  "extends": "@go-tech/tsconfig/web.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
+  },
+  "include": ["src", "tsdown.config.ts"]
+}

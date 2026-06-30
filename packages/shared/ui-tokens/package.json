@@ -1,0 +1,60 @@
+{
+  "name": "@go-tech/ui-tokens",
+  "version": "0.1.1",
+  "private": false,
+  "type": "module",
+  "description": "Cross-platform design tokens: colors, spacing, radius, typography. Zero runtime dependencies.",
+  "keywords": [
+    "cross-platform",
+    "design-system",
+    "design-tokens",
+    "nativewind",
+    "skyroc",
+    "soybean-admin",
+    "tailwind",
+    "ui"
+  ],
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "types": "./src/index.ts",
+  "typesVersions": {
+    "*": {
+      "colors": [
+        "./src/colors.ts"
+      ],
+      "radius": [
+        "./src/radius.ts"
+      ],
+      "spacing": [
+        "./src/spacing.ts"
+      ],
+      "typography": [
+        "./src/typography.ts"
+      ]
+    }
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./colors": "./src/colors.ts",
+    "./radius": "./src/radius.ts",
+    "./spacing": "./src/spacing.ts",
+    "./typography": "./src/typography.ts"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "clean": "rimraf dist",
+    "dev": "tsdown --watch",
+    "typecheck": "tsc --noEmit --skipLibCheck"
+  },
+  "devDependencies": {
+    "@go-tech/tsconfig": "workspace:*",
+    "rimraf": "catalog:dev",
+    "tsdown": "catalog:dev",
+    "typescript": "catalog:core"
+  }
+}

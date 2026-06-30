@@ -1,0 +1,10 @@
+{
+  "extends": "@go-tech/tsconfig/web.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": ".",
+    "types": [ "vite/client", "@go-tech/types/types" ]
+  },
+  "include": [ "src/**/*", "tsdown.config.ts" ],
+  "exclude": [ "node_modules", "dist" ]
+}

@@ -1,5 +1,5 @@
 {
-  "name": "@go-tech/core-hooks",
+  "name": "@go-tech/hooks",
   "version": "1.0.0",
   "private": true,
   "description": "Platform-agnostic React hooks (pure logic, no DOM)",

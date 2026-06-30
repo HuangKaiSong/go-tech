@@ -1,0 +1,73 @@
+{
+  "name": "@go-tech/web-ui-compose",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Composite stateless UI components built on @go-tech/ui primitives",
+  "keywords": [
+    "components",
+    "composite",
+    "react",
+    "soybean-admin",
+    "typescript",
+    "ui"
+  ],
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "clean": "rimraf dist",
+    "dev": "tsdown --watch",
+    "lint": "oxlint --fix",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit --skipLibCheck"
+  },
+  "dependencies": {
+    "@better-scroll/core": "catalog:web",
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
+    "@iconify/react": "catalog:ui-shared",
+    "@go-tech/color": "workspace:*",
+    "@go-tech/core-utils": "workspace:*",
+    "ahooks": "catalog:utils",
+    "clsx": "catalog:utils",
+    "tailwind-variants": "catalog:utils"
+  },
+  "peerDependencies": {
+    "@tanstack/react-query": "^5.90.0",
+    "antd": ">=6.0.0",
+    "i18next": "^25.0.0",
+    "motion": "^12.0.0",
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0",
+    "react-i18next": "^16.0.0"
+  },
+  "devDependencies": {
+    "@go-tech/config": "workspace:*",
+    "@go-tech/types": "workspace:*",
+    "@soybeanjs/eslint-config": "catalog:dev",
+    "@types/react": "catalog:dev",
+    "@types/react-dom": "catalog:dev",
+    "@tanstack/react-query": "catalog:core",
+    "antd": "catalog:web",
+    "i18next": "catalog:i18n",
+    "motion": "catalog:ui-shared",
+    "oxlint": "catalog:dev",
+    "react": "catalog:core",
+    "react-dom": "catalog:core",
+    "react-i18next": "catalog:i18n",
+    "typescript": "catalog:core"
+  }
+}

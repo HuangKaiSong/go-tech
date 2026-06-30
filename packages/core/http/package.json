@@ -16,7 +16,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@go-tech/core-types": "workspace:*"
+    "@go-tech/types": "workspace:*"
   },
   "devDependencies": {
     "@go-tech/tsconfig": "workspace:*",

@@ -1,0 +1,57 @@
+{
+  "name": "@go-tech/core-state",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Jotai state management wrapper - Cross-platform support",
+  "keywords": [
+    "atom",
+    "jotai",
+    "react",
+    "state",
+    "store"
+  ],
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "types": "./src/index.ts",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./src/*"
+      ]
+    }
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "clean": "rimraf dist",
+    "dev": "tsdown --watch",
+    "lint": "oxlint --fix",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit --skipLibCheck"
+  },
+  "devDependencies": {
+    "@go-tech/config": "workspace:*",
+    "@go-tech/tsconfig": "workspace:*",
+    "jotai": "catalog:core",
+    "oxlint": "catalog:dev",
+    "react": "catalog:core",
+    "react-dom": "catalog:core",
+    "rimraf": "catalog:dev",
+    "tsdown": "catalog:dev",
+    "typescript": "catalog:core"
+  },
+  "peerDependencies": {
+    "jotai": ">=2.0.0",
+    "react": ">=18.0.0"
+  }
+}

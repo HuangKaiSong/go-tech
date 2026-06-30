@@ -1,4 +1,4 @@
-import type { User as CoreUser } from '@go-tech/core-types';
+import type { User as CoreUser } from '@go-tech/types';
 
 declare global {
   type User = CoreUser;

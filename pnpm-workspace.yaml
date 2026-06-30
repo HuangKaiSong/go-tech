@@ -30,19 +30,13 @@ overrides:
 catalog:
   # ── Runtime — all 4 apps ────────────────────────────────────────────────────
   class-variance-authority: '^0.7.1'
-  clsx: '^2.1.1'
   lucide-react: '^0.562.0'
   tailwindcss-animate: '^1.0.7'
-  zod: '^3.25.76'
-
-  # ── Runtime — web-h5 + web-admin ────────────────────────────────────────────
-  ahooks: '^3.9.6'
 
   # ── Runtime — web-admin + hr-pc + hr-mobile ─────────────────────────────────
   '@hookform/resolvers': '^3.10.0'
   '@tanstack/react-query': '^5.83.0'
   cmdk: '^1.1.1'
-  date-fns: '^3.6.0'
   embla-carousel-react: '^8.6.0'
   input-otp: '^1.4.2'
   react-hook-form: '^7.61.1'
@@ -50,7 +44,6 @@ catalog:
   react-router-dom: '^6.30.1'
   recharts: '^2.15.4'
   sonner: '^1.7.4'
-  tailwind-merge: '^2.6.0'
 
   # ── Runtime — hr-pc + hr-mobile (Radix UI) ──────────────────────────────────
   '@radix-ui/react-accordion': '^1.2.11'
@@ -105,6 +98,23 @@ catalogs:
     '@types/react': '^18.3.23'
     '@types/react-dom': '^18.3.7'
 
+  # ==================== 共享工具库 ====================
+  utils:
+    # 通用工具
+    dayjs: ^1.11.19
+    date-fns: ^4.1.0
+    nanoid: ^5.0.9
+    clsx: ^2.1.1
+    colord: ^2.9.3
+    klona: ^2.0.6
+    'crypto-js': ^4.2.0
+    localforage: ^1.10.0
+    'tailwind-merge': ^3.4.0
+    'tailwind-variants': ^3.2.2
+    defu: ^6.1.4
+    ahooks: ^3.9.6
+    zod: ^4.1.13
+
   # Vite 5 toolchain — hr-pc-manager + hr_mobile_manager
   # (web-admin uses Vite 7 + different eslint-plugin-react-hooks major)
   vite-hr:
@@ -121,6 +131,9 @@ catalogs:
 
     # TypeScript
     typescript: '^6.0.3'
+
+    # 状态管理
+    jotai: ^2.16.0
 
   # ==================== 开发工具 ====================
   dev:

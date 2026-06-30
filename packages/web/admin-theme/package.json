@@ -1,0 +1,80 @@
+{
+  "name": "@go-tech/web-admin-theme",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Web Ant Design theme utilities - config, presets, hooks, CSS variables, dark mode, system theme detection",
+  "keywords": [
+    "ant-design",
+    "antd",
+    "color-scheme",
+    "css-variables",
+    "dark-mode",
+    "hooks",
+    "oklch",
+    "react",
+    "system-theme",
+    "theme",
+    "theme-config",
+    "theme-presets",
+    "theme-utilities"
+  ],
+  "homepage": "https://github.com/Ohh-889/skyroc-admin/tree/main/packages/web/antdtheme#readme",
+  "bugs": {
+    "url": "https://github.com/Ohh-889/skyroc-admin/issues"
+  },
+  "license": "MIT",
+  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ohh-889/skyroc-admin.git",
+    "directory": "packages/web/antdtheme"
+  },
+  "sideEffects": false,
+  "types": "./src/index.ts",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./src/*"
+      ]
+    }
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./types": "./src/types/theme.d.ts"
+  },
+  "scripts": {
+    "lint": "oxlint --fix",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit --skipLibCheck"
+  },
+  "dependencies": {
+    "@go-tech/adapter-antd-theme": "workspace:*",
+    "@go-tech/color": "workspace:*",
+    "@go-tech/hooks": "workspace:*",
+    "@go-tech/web-ui-antd": "workspace:*",
+    "@go-tech/web-ui-compose": "workspace:*",
+    "@go-tech/utils": "workspace:*",
+    "antd": "catalog:web",
+    "defu": "catalog:utils",
+    "jotai": "catalog:core"
+  },
+  "peerDependencies": {
+    "antd": ">=6.0.0",
+    "react": ">=19.0.0"
+  },
+  "devDependencies": {
+    "@go-tech/config": "workspace:*",
+    "@go-tech/tsconfig": "workspace:*",
+    "@testing-library/jest-dom": "catalog:dev",
+    "@testing-library/react": "catalog:dev",
+    "oxlint": "catalog:dev",
+    "react": "catalog:core",
+    "react-dom": "catalog:core",
+    "typescript": "catalog:core"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

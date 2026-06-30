@@ -66,7 +66,7 @@ const AdminSidebar = () => {
           </div>
           <span className="text-sm font-semibold text-primary">Go Techs</span>
         </div> */}
-        <img alt="logo" loading="lazy" width="85" height="85" decoding="async" src={Logo}></img>
+        <img alt="logo" loading="lazy" width="85" height="85" decoding="async" src={Logo} />
       </div>
 
       {/* Navigation */}

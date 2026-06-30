@@ -1,0 +1,57 @@
+{
+  "name": "@sa/uno-config",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "UnoCSS preset configuration for Soybean Admin themes, shortcuts, and design tokens",
+  "keywords": [
+    "design-system",
+    "preset",
+    "soybean-admin",
+    "theme",
+    "typescript",
+    "unocss"
+  ],
+  "author": {
+    "name": "Hks",
+    "email": "3292339490@qq.com",
+    "url": "https://github.com/HuangKaiSong"
+  },
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "types": "./src/index.ts",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./src/*"
+      ]
+    }
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "clean": "rimraf dist",
+    "dev": "tsdown --watch",
+    "lint": "oxlint --fix",
+    "typecheck": "tsc --noEmit --skipLibCheck"
+  },
+  "dependencies": {
+    "@go-tech/color": "workspace:*",
+    "colord": "catalog:utils",
+    "glob": "^11.0.0"
+  },
+  "devDependencies": {
+    "@go-tech/tsconfig": "workspace:*",
+    "oxlint": "catalog:dev",
+    "rimraf": "catalog:dev",
+    "tsdown": "catalog:dev",
+    "typescript": "catalog:core",
+    "unocss": "^66.5.11"
+  }
+}

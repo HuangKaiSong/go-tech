@@ -43,9 +43,9 @@
     "@supabase/supabase-js": "^2.106.2",
     "@tanstack/react-query": "catalog:",
     "class-variance-authority": "catalog:",
-    "clsx": "catalog:",
+    "clsx": "catalog:utils",
     "cmdk": "catalog:",
-    "date-fns": "catalog:",
+    "date-fns": "catalog:utils",
     "embla-carousel-react": "catalog:",
     "input-otp": "catalog:",
     "lucide-react": "catalog:",
@@ -58,11 +58,11 @@
     "react-router-dom": "catalog:",
     "recharts": "catalog:",
     "sonner": "catalog:",
-    "tailwind-merge": "catalog:",
+    "tailwind-merge": "catalog:utils",
     "tailwindcss-animate": "catalog:",
     "vaul": "^0.9.9",
     "xlsx": "^0.18.5",
-    "zod": "catalog:"
+    "zod": "catalog:utils"
   },
   "devDependencies": {
     "@go-tech/tsconfig": "workspace:*",

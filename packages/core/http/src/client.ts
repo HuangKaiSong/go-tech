@@ -1,4 +1,4 @@
-import type { HttpBaseResponse } from '@go-tech/core-types';
+import type { HttpBaseResponse } from '@go-tech/types';
 import { HttpError } from './types';
 import type { HttpAdapter, RequestOptions } from './types';
 
