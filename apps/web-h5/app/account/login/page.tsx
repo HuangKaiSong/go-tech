@@ -37,7 +37,7 @@ const Login = () => {
     });
 
     if (!result.success) {
-      toast.error(result.error.errors.at(0)?.message);
+      toast.error(result.error.message);
       return;
     }
 

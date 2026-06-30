@@ -52,7 +52,7 @@ const nextConfig: NextConfig = {
   //   serverFunctions: true
   // },
   turbopack: {
-    root: path.join(__dirname, '../../')
+    root: path.join(/*turbopackIgnore: true*/__dirname, '../../')
   }
 };
 

@@ -1,8 +1,7 @@
-import { readFile } from 'node:fs/promises';
-import path from 'node:path';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { httpClient } from '@/lib/http';
 import { InvoicePDF } from './InvoicePDF';
+import { LOGO_DATA_URI } from './logo';
 
 const PDF_CACHE_TTL_MS = 60 * 1000;
 const PDF_CACHE_MAX_ENTRIES = 100;
@@ -42,21 +41,8 @@ function ensureCacheLimit() {
   }
 }
 
-// ─── Logo：模块加载时立即触发，不等请求 ───
-const logoDataUriPromise: Promise<string | null> = (async () => {
-  const candidates = [
-    path.resolve(process.cwd(), 'public/images/Gotech_Logo.png'),
-    path.resolve(process.cwd(), 'apps/web-h5/public/images/Gotech_Logo.png')
-  ];
-  for (const candidate of candidates) {
-    try {
-      // oxlint-disable
-      const image = await readFile(candidate);
-      return `data:image/png;base64,${image.toString('base64')}`;
-    } catch {}
-  }
-  return null;
-})();
+// ─── Logo：内联为 data URI，避免运行时 fs 读取导致 Turbopack 追踪整个项目 ───
+const logoDataUri: string = LOGO_DATA_URI;
 
 // // ─── Warmup：模块加载时预热字体和渲染引擎 ───
 // (async () => {
@@ -101,8 +87,7 @@ async function fetchInvoice(id: string): Promise<{ fetchMs: number; invoice: any
 }
 
 async function generatePdf(id: string): Promise<GenerateResult | null> {
-  // ✅ Logo 加载 + API 请求并行
-  const [logoUrl, fetched] = await Promise.all([logoDataUriPromise, fetchInvoice(id)]);
+  const fetched = await fetchInvoice(id);
 
   if (!fetched) return null;
   const { fetchMs, invoice } = fetched;
@@ -138,7 +123,7 @@ async function generatePdf(id: string): Promise<GenerateResult | null> {
       subtotal={subtotal}
       total={total}
       amountDue={due}
-      logoUrl={logoUrl ?? undefined}
+      logoUrl={logoDataUri}
       useCjkFont={useCjkFont}
     />
   );

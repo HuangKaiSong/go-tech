@@ -68,7 +68,7 @@ const Register = () => {
     const result = sendCodeSchema.safeParse(formData);
 
     if (!result.success) {
-      const message = result.error.errors.at(0)?.message || '';
+      const message = result.error.message || '';
       toast.error(message);
       return;
     }
@@ -106,7 +106,7 @@ const Register = () => {
     const result = verificationCodeSchema.safeParse(formData);
 
     if (!result.success) {
-      const message = result.error.errors.at(0)?.message || '';
+      const message = result.error.message || '';
       toast.error(message);
       return;
     }
@@ -151,7 +151,7 @@ const Register = () => {
     const result = forgetPwdVerifySchema.safeParse(formData);
 
     if (!result.success) {
-      const message = result.error.errors.at(0)?.message || '';
+      const message = result.error.message || '';
       toast.error(message);
       return;
     }

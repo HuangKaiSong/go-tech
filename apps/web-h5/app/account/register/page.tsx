@@ -1,7 +1,7 @@
 'use client';
 
-import { useCountDown } from '@go-tech/hooks';
 import { Button, Checkbox, Input, toast } from '@go-tech-frontend/ui';
+import { useCountDown } from '@go-tech/hooks';
 import { CircleAlert, X } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -17,9 +17,9 @@ const verificationCodeSchema = z.object({
 });
 
 const signupSchema = verificationCodeSchema.extend({
-  name: z.string({ required_error: '请输入用户名' }).min(2, '请输入用户名').max(50).trim(),
-  phone: z.string({ required_error: '請輸入電話' }).min(1, '請輸入電話').min(7, '電話至少需要7個字符').trim(),
-  company: z.string({ required_error: '请输入公司名称' }).min(2).max(50).trim(),
+  name: z.string({ message: '请输入用户名' }).min(2, '请输入用户名').max(50).trim(),
+  phone: z.string({ message: '請輸入電話' }).min(1, '請輸入電話').min(7, '電話至少需要7個字符').trim(),
+  company: z.string({ message: '请输入公司名称' }).min(2).max(50).trim(),
   verificationCode: z.string({ message: '请输入验证码' }).min(1, '请输入验证码').length(6).trim()
 });
 
@@ -149,7 +149,7 @@ const Register = () => {
     const result = verificationCodeSchema.safeParse(formData);
 
     if (!result.success) {
-      const message = result.error.errors.at(0)?.message || '';
+      const message = result.error.message || '';
       toast.error(message);
       return;
     }
@@ -191,7 +191,7 @@ const Register = () => {
     const result = signupSchema.safeParse(formData);
 
     if (!result.success) {
-      const message = result.error.errors.at(0)?.message || '';
+      const message = result.error.message || '';
       toast.error(message);
       return;
     }
@@ -248,7 +248,7 @@ const Register = () => {
     const result = signupSchema2.safeParse(formData);
 
     if (!result.success) {
-      const message = result.error.errors.at(0)?.message || '';
+      const message = result.error.message || '';
       toast.error(message);
       return;
     }

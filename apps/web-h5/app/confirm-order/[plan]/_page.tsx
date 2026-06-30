@@ -1,17 +1,6 @@
 'use client';
 
-import {
-  Button,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  Input,
-  Label,
-  Switch,
-  type UploadedFile,
-  toast
-} from '@go-tech-frontend/ui';
+import { Button, Input, Label, Switch, type UploadedFile, toast } from '@go-tech-frontend/ui';
 import { useSessionStorageState } from 'ahooks';
 import { FileCheck } from 'lucide-react';
 import dynamic from 'next/dynamic';
@@ -25,8 +14,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import Footer from '../../components/Footer';
 import Header from '../../components/Header';
 import { type OrderInfoType, OrderItemTypeEnum, OrderTypeEnum } from '../../constants/order';
-import { DAYSPERMONTH, PayTypeEnum } from '../../constants/payment';
-const Fps = dynamic(() => import('../../components/payment/Fps'), {
+import { DAYSPERMONTH, PayTypeEnum, openWebManagedCashier } from '../../constants/payment';
+const PaymentPanel = dynamic(() => import('../../components/payment/Panel'), {
   ssr: false
 });
 
@@ -201,7 +190,6 @@ const ConfirmOrder = ({
   );
 
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PayTypeEnum | null>(null);
   // Customer info state
   // const [customerInfo, setCustomerInfo] = useState({
   //   name: user?.nickname,
@@ -230,16 +218,6 @@ const ConfirmOrder = ({
 
   const handleConfirmPayment = () => {
     setShowPaymentDialog(true);
-  };
-
-  const handlePaymentSelect = (method: PayTypeEnum) => {
-    if (method === PayTypeEnum.FPS) {
-      setSelectedPaymentMethod(PayTypeEnum.FPS);
-    } else {
-      console.log('Payment method selected:', method);
-      setShowPaymentDialog(false);
-      // Handle payment logic here
-    }
   };
 
   const getServiceUnitPrice = (serviceId: string) => {
@@ -303,12 +281,18 @@ const ConfirmOrder = ({
 
   const totalPrice = Math.max(0, originalPrice - discount - promotionDiscount);
 
-  const handleFpsPaymentConfirm = async (voucherFile: UploadedFile) => {
-    toast.dismiss();
-    const toastId = toast.loading('创建订单中...');
-    const orderInfo: OrderInfoType = {
-      orderType: OrderTypeEnum.PURCHASE,
-      payType: selectedPaymentMethod,
+  const requestHeaders = () =>
+    new Headers({
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+      'User-Type': 'platform_customer'
+    });
+
+  /** 构建增值服务订单数据（FPS 与线上支付一致，仅 payType 不同） */
+  const buildOrderInfo = (payType: PayTypeEnum) => {
+    const orderInfo: any = {
+      orderType: OrderTypeEnum.ADDITION,
+      payType,
       orderItems: [
         {
           packageId: selectedPlan?.id,
@@ -347,17 +331,20 @@ const ConfirmOrder = ({
         return null;
       });
     }
-    const requestHeaders = new Headers({
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-      'User-Type': 'platform_customer'
-    });
+    return orderInfo;
+  };
+
+  const handleFpsPaymentConfirm = async (voucherFile: UploadedFile) => {
+    toast.dismiss();
+    const toastId = toast.loading('创建订单中...');
+    const orderInfo: OrderInfoType = buildOrderInfo(PayTypeEnum.FPS);
+    const headers = requestHeaders();
 
     try {
       // 创建订单
       const orderResponse = await fetch('/go-tech/platform/packageOrder/add', {
         method: 'POST',
-        headers: requestHeaders,
+        headers,
         body: JSON.stringify(orderInfo)
       })
         .then(res => res.json())
@@ -372,7 +359,7 @@ const ConfirmOrder = ({
           // 上传凭证
           await fetch('/go-tech/platform/packageOrder/payEvidence', {
             method: 'POST',
-            headers: requestHeaders,
+            headers,
             body: JSON.stringify({
               id: orderId,
               payEvidence: voucherFile.url
@@ -387,7 +374,6 @@ const ConfirmOrder = ({
         }
 
         setShowPaymentDialog(false);
-        setSelectedPaymentMethod(null);
         // 下单成功后才清空已选增值服务，避免带入下一笔订单（刷新页面不应清空）
         setSelectedServices({});
         toast.success('支付憑證已提交，我們將在確認後為您開通服務', { id: toastId });
@@ -400,8 +386,36 @@ const ConfirmOrder = ({
     }
   };
 
+  /** 线上支付：先创建增值服务订单（payType=Online），再生成全托管收银台并跳转 */
+  const handleOnlinePaymentConfirm = async () => {
+    toast.dismiss();
+    const toastId = toast.loading('創建增值服務訂單中...');
+    const orderInfo = buildOrderInfo(PayTypeEnum.Online);
+
+    try {
+      const orderResponse = await fetch('/go-tech/platform/packageOrder/add', {
+        method: 'POST',
+        headers: requestHeaders(),
+        body: JSON.stringify(orderInfo)
+      }).then(res => res.json());
+
+      if (orderResponse.code !== 200) {
+        toast.error(orderResponse.message, { id: toastId });
+        return;
+      }
+
+      // 后端返回 OrderAddResponse（含签名等参数），以 GET 表单方式喚起全托管收银台
+      toast.success('正在跳转至收银台', { id: toastId });
+      setShowPaymentDialog(false);
+      openWebManagedCashier(orderResponse.data);
+    } catch (error) {
+      console.log(error);
+      toast.error('創建增值服務訂單失敗，請稍後重試', { id: toastId });
+    }
+  };
+
   const handleBackToPaymentMethods = () => {
-    setSelectedPaymentMethod(null);
+    setShowPaymentDialog(false);
   };
 
   return (
@@ -577,66 +591,14 @@ const ConfirmOrder = ({
       </section>
 
       {/* 支付弹框 */}
-      <Dialog
+      <PaymentPanel
         open={showPaymentDialog}
-        onOpenChange={open => {
-          setShowPaymentDialog(open);
-          if (!open) {
-            setSelectedPaymentMethod(null);
-          }
-        }}
-      >
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="text-center text-xl">
-              {selectedPaymentMethod === PayTypeEnum.FPS ? 'FPS 轉數快支付' : '選擇支付方式'}
-            </DialogTitle>
-          </DialogHeader>
-
-          {selectedPaymentMethod === PayTypeEnum.FPS ? (
-            <Fps
-              price={totalPrice}
-              handleBackToPaymentMethods={handleBackToPaymentMethods}
-              handleFpsPaymentConfirm={handleFpsPaymentConfirm}
-            />
-          ) : (
-            <div className="grid gap-4 py-4">
-              <Button
-                variant="outline"
-                disabled
-                onClick={() => handlePaymentSelect(PayTypeEnum.WechatPay)}
-                className="h-14 text-lg justify-start gap-4 hover:bg-green-50 hover:border-green-500 hover:text-primary"
-              >
-                <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-sm font-bold">微</span>
-                </div>
-                微信支付
-              </Button>
-              <Button
-                variant="outline"
-                disabled
-                onClick={() => handlePaymentSelect(PayTypeEnum.Alipay)}
-                className="h-14 text-lg justify-start gap-4 hover:bg-blue-50 hover:border-blue-500 hover:text-primary"
-              >
-                <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-sm font-bold">支</span>
-                </div>
-                支付寶支付
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => handlePaymentSelect(PayTypeEnum.FPS)}
-                className="h-14 text-lg justify-start gap-4 hover:bg-orange-50 hover:border-orange-500 hover:text-primary"
-              >
-                <div className="w-8 h-8 bg-linear-to-br from-orange-400 to-orange-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-xs font-bold">FPS</span>
-                </div>
-                FPS 轉數快
-              </Button>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+        onOpenChange={setShowPaymentDialog}
+        price={totalPrice}
+        handleBackToPaymentMethods={handleBackToPaymentMethods}
+        handleFpsPaymentConfirm={handleFpsPaymentConfirm}
+        handleOnlinePaymentConfirm={handleOnlinePaymentConfirm}
+      />
 
       <Footer />
     </div>

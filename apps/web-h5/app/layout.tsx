@@ -1,5 +1,5 @@
-import { existsSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { decodeJwt } from 'jose';
 import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
@@ -53,14 +53,11 @@ export default async function RootLayout({
       });
   }
 
-  const iconDirCandidates = [
-    resolve(process.cwd(), 'public/icons/svg'),
-    resolve(process.cwd(), 'apps/web-h5/public/icons/svg')
-  ];
-  const iconDirs = iconDirCandidates.filter(dir => existsSync(dir));
+  // 相对模块文件解析图标目录，避免使用 process.cwd() 触发 Turbopack 追踪整个项目
+  const iconsDir = resolve(dirname(fileURLToPath(import.meta.url)), '../public/icons/svg');
 
   const { html: svgSpriteHtml } = await createSvgSpriteHtml({
-    iconDirs: iconDirs.length > 0 ? iconDirs : [iconDirCandidates[0]],
+    iconDirs: [iconsDir],
     customDomId: '__svg__icons__dom__',
     symbolId: 'icon-[name]'
   });
