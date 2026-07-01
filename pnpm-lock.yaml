@@ -152,6 +152,9 @@ catalogs:
       specifier: ^1.0.7
       version: 1.0.7
   dev:
+    '@types/crypto-js':
+      specifier: ^4.2.2
+      version: 4.2.2
     '@types/node':
       specifier: ^24.10.2
       version: 24.10.7
@@ -212,9 +215,24 @@ catalogs:
     colord:
       specifier: ^2.9.3
       version: 2.9.3
+    crypto-js:
+      specifier: ^4.2.0
+      version: 4.2.0
     date-fns:
       specifier: ^4.1.0
       version: 4.1.0
+    dayjs:
+      specifier: ^1.11.19
+      version: 1.11.19
+    klona:
+      specifier: ^2.0.6
+      version: 2.0.6
+    localforage:
+      specifier: ^1.10.0
+      version: 1.10.0
+    nanoid:
+      specifier: ^5.0.9
+      version: 5.1.16
     tailwind-merge:
       specifier: ^3.4.0
       version: 3.4.0
@@ -661,7 +679,7 @@ importers:
       '@go-tech-frontend/ui':
         specifier: workspace:*
         version: link:../../packages/ui
-      '@go-tech/core-utils':
+      '@go-tech/utils':
         specifier: workspace:*
         version: link:../../packages/core/utils
       '@hookform/resolvers':
@@ -969,7 +987,7 @@ importers:
 
   packages/core/color:
     dependencies:
-      '@go-tech/core-utils':
+      '@go-tech/utils':
         specifier: workspace:*
         version: link:../utils
       colord:
@@ -1003,7 +1021,7 @@ importers:
 
   packages/core/hooks:
     dependencies:
-      '@go-tech/core-utils':
+      '@go-tech/utils':
         specifier: workspace:*
         version: link:../utils
       '@types/react':
@@ -1069,6 +1087,18 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
+  packages/core/type-utils:
+    devDependencies:
+      rimraf:
+        specifier: catalog:dev
+        version: 6.1.3
+      tsdown:
+        specifier: catalog:dev
+        version: 0.18.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(typescript@6.0.3)
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+
   packages/core/types:
     devDependencies:
       '@go-tech/tsconfig':
@@ -1080,28 +1110,67 @@ importers:
 
   packages/core/utils:
     dependencies:
+      '@go-tech/type-utils':
+        specifier: workspace:*
+        version: link:../type-utils
       clsx:
         specifier: catalog:utils
         version: 2.1.1
+      colord:
+        specifier: catalog:utils
+        version: 2.9.3
+      crypto-js:
+        specifier: catalog:utils
+        version: 4.2.0
+      dayjs:
+        specifier: catalog:utils
+        version: 1.11.19
+      klona:
+        specifier: catalog:utils
+        version: 2.0.6
+      localforage:
+        specifier: catalog:utils
+        version: 1.10.0
+      nanoid:
+        specifier: catalog:utils
+        version: 5.1.16
+      radash:
+        specifier: ^12.1.1
+        version: 12.1.1
       tailwind-merge:
-        specifier: ^3.4.0
+        specifier: catalog:utils
         version: 3.4.0
     devDependencies:
+      '@go-tech/config':
+        specifier: workspace:*
+        version: link:../../../internal/config
       '@go-tech/tsconfig':
         specifier: workspace:*
         version: link:../../../internal/tsconfig
+      '@types/crypto-js':
+        specifier: catalog:dev
+        version: 4.2.2
+      oxlint:
+        specifier: catalog:dev
+        version: 1.70.0
+      rimraf:
+        specifier: catalog:dev
+        version: 6.1.3
+      tsdown:
+        specifier: catalog:dev
+        version: 0.18.4(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(typescript@6.0.3)
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
 
   packages/lib:
     dependencies:
-      '@go-tech/core-utils':
-        specifier: workspace:*
-        version: link:../core/utils
       '@go-tech/hooks':
         specifier: workspace:*
         version: link:../core/hooks
+      '@go-tech/utils':
+        specifier: workspace:*
+        version: link:../core/utils
 
   packages/styles:
     dependencies:
@@ -1161,7 +1230,7 @@ importers:
 
   packages/ui:
     dependencies:
-      '@go-tech/core-utils':
+      '@go-tech/utils':
         specifier: workspace:*
         version: link:../core/utils
       '@radix-ui/react-accordion':
@@ -4635,6 +4704,9 @@ packages:
   '@types/cannon@0.1.13':
     resolution: {integrity: sha512-Yf5nvCblc/PHGA8/wtTOFd1AdS1EhFmHpyPL/tWRk1CRoFAb0M9Kj52dMUwxmNGAguAeS+9siiNi/hk03hhUEA==}
 
+  '@types/crypto-js@4.2.2':
+    resolution: {integrity: sha512-sDOLlVbHhXpAUAL0YHDUUwDZf3iN4Bwi4W6a0W0b+QcAezUbRtH4FVb+9J4h+XFPW7l/gQ9F8qC7P+Ec4k8QVQ==}
+
   '@types/culori@4.0.1':
     resolution: {integrity: sha512-43M51r/22CjhbOXyGT361GZ9vncSVQ39u62x5eJdBQFviI8zWp2X5jzqg7k4M6PVgDQAClpy2bUe2dtwEgEDVQ==}
 
@@ -5234,6 +5306,9 @@ packages:
   cross-spawn@7.0.6:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
     engines: {node: '>= 8'}
+
+  crypto-js@4.2.0:
+    resolution: {integrity: sha512-KALDyEYgpY+Rlob/iriUtjV6d5Eq+Y191A5g4UqLAi8CyGP9N1+FdVbkc1SxKc2r4YAYqG8JzO2KGL+AizD70Q==}
 
   crypto-random-string@2.0.0:
     resolution: {integrity: sha512-v1plID3y9r/lPhviJ1wrXpLeyUIGAZ2SHNYTEapm7/8A9nLPoyvVp3RK/EPFqn5kEznyWgYZNsRtYYIWbuG8KA==}
@@ -5957,6 +6032,9 @@ packages:
     engines: {node: '>=0.10.0'}
     hasBin: true
 
+  immediate@3.0.6:
+    resolution: {integrity: sha512-XXOFtyqDjNDAQxVfYxuF7g9Il/IbWmmlQg2MYKOH8ExIT1qg6xc4zyS3HaEEATgs1btfzxq15ciUiY7gjSXRGQ==}
+
   import-meta-resolve@4.2.0:
     resolution: {integrity: sha512-Iqv2fzaTQN28s/FwZAoFq0ZSs/7hMAHJVX+w8PZl3cY19Pxk6jFFalxQoIfW2826i/fDLXv8IiEZRIT0lDuWcg==}
 
@@ -6308,6 +6386,10 @@ packages:
     resolution: {integrity: sha512-dcS1ul+9tmeD95T+x28/ehLgd9mENa3LsvDTtzm3vyBEO7RPptvAD+t44WVXaUjTBRcrpFeFlC8WCruUR456hw==}
     engines: {node: '>=0.10.0'}
 
+  klona@2.0.6:
+    resolution: {integrity: sha512-dhG34DXATL5hSxJbIexCft8FChFXtmskoZYnoPWjXQuebWYCNkVeV3KkGegCK9CP1oswI/vQibS2GY7Em/sJJA==}
+    engines: {node: '>= 8'}
+
   leven@3.1.0:
     resolution: {integrity: sha512-qsda+H8jTaUaN/x5vzW2rzc+8Rw4TAQ/4KjB46IwK5VH+IlVeeeje/EoZRpiXvIqjFgK84QffqPztGI3VBLG1A==}
     engines: {node: '>=6'}
@@ -6315,6 +6397,9 @@ packages:
   levn@0.4.1:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
     engines: {node: '>= 0.8.0'}
+
+  lie@3.1.1:
+    resolution: {integrity: sha512-RiNhHysUjhrDQntfYSfY4MU24coXXdEOgw9WGcKHNeEwffDYbF//u87M1EWaMGzuFoSbqW0C9C6lEEhDOAswfw==}
 
   lightningcss-android-arm64@1.30.2:
     resolution: {integrity: sha512-BH9sEdOCahSgmkVhBLeU7Hc9DWeZ1Eb6wNS6Da8igvUwAe0sqROHddIlvU06q3WyXVEOYDZ6ykBZQnjTbmo4+A==}
@@ -6470,6 +6555,9 @@ packages:
     resolution: {integrity: sha512-I5d00Pd/jwMD2QCduo657+YM/6L3KZu++pmX9VFncxaxvHcru9jx1lBaFft+r4Mt2jK0Yhp41XlRAihzPxHNCg==}
     engines: {node: '>=4.0.0'}
 
+  localforage@1.10.0:
+    resolution: {integrity: sha512-14/H1aX7hzBBmmh7sGPd+AOMkkIrHM3Z1PAyGgZigA1H1p5O5ANnMyWzvpAETtG68/dC4pC0ncy3+PPGzXZHPg==}
+
   locate-path@6.0.0:
     resolution: {integrity: sha512-iPZK6eYjbxRu3uB4/WZ3EsEIMJFMqAoopl3R+zuq0UjcAm/MO6KCweDgPfP3elTztoKP3KtnVHxTn2NHBSDVUw==}
     engines: {node: '>=10'}
@@ -6603,6 +6691,11 @@ packages:
   nanoid@3.3.12:
     resolution: {integrity: sha512-ZB9RH/39qpq5Vu6Y+NmUaFhQR6pp+M2Xt76XBnEwDaGcVAqhlvxrl3B2bKS5D3NH3QR76v3aSrKaF/Kiy7lEtQ==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
+    hasBin: true
+
+  nanoid@5.1.16:
+    resolution: {integrity: sha512-kVrnsrJqMR8+oLJnGEmSWw9BivK5mt7H3FZatVRjrc5wGqFYuBxX1yG7+A7Gi5AefkX6t/oCkizcQgpu0cY1dQ==}
+    engines: {node: ^18 || >=20}
     hasBin: true
 
   nanomatch@1.2.13:
@@ -6987,6 +7080,10 @@ packages:
 
   queue@6.0.2:
     resolution: {integrity: sha512-iHZWu+q3IdFZFX36ro/lKBkSvfkztY5Y7HMiPlOUjhupPcG2JMfst2KKEpu5XndviX/3UhFbRngUPNKtgvtZiA==}
+
+  radash@12.1.1:
+    resolution: {integrity: sha512-h36JMxKRqrAxVD8201FrCpyeNuUY9Y5zZwujr20fFO77tpUtGa6EZzfKw/3WaiBX95fq7+MpsuMLNdSnORAwSA==}
+    engines: {node: '>=14.18.0'}
 
   randombytes@2.1.0:
     resolution: {integrity: sha512-vYl3iOX+4CKUWuxGi9Ukhie6fsqXqS9FE2Zaic4tNFD2N2QQaXOMFbuKK4QmDHC0JO6B1Zp41J0LpT0oR68amQ==}
@@ -11984,6 +12081,8 @@ snapshots:
 
   '@types/cannon@0.1.13': {}
 
+  '@types/crypto-js@4.2.2': {}
+
   '@types/culori@4.0.1': {}
 
   '@types/d3-array@3.2.2': {}
@@ -12740,6 +12839,8 @@ snapshots:
       path-key: 3.1.1
       shebang-command: 2.0.0
       which: 2.0.2
+
+  crypto-js@4.2.0: {}
 
   crypto-random-string@2.0.0: {}
 
@@ -13589,6 +13690,8 @@ snapshots:
 
   image-size@0.5.5: {}
 
+  immediate@3.0.6: {}
+
   import-meta-resolve@4.2.0: {}
 
   import-without-cache@0.2.5: {}
@@ -13920,12 +14023,18 @@ snapshots:
 
   kind-of@6.0.3: {}
 
+  klona@2.0.6: {}
+
   leven@3.1.0: {}
 
   levn@0.4.1:
     dependencies:
       prelude-ls: 1.2.1
       type-check: 0.4.0
+
+  lie@3.1.1:
+    dependencies:
+      immediate: 3.0.6
 
   lightningcss-android-arm64@1.30.2:
     optional: true
@@ -14040,6 +14149,10 @@ snapshots:
       big.js: 5.2.2
       emojis-list: 3.0.0
       json5: 1.0.2
+
+  localforage@1.10.0:
+    dependencies:
+      lie: 3.1.1
 
   locate-path@6.0.0:
     dependencies:
@@ -14182,6 +14295,8 @@ snapshots:
       thenify-all: 1.6.0
 
   nanoid@3.3.12: {}
+
+  nanoid@5.1.16: {}
 
   nanomatch@1.2.13:
     dependencies:
@@ -14604,6 +14719,8 @@ snapshots:
   queue@6.0.2:
     dependencies:
       inherits: 2.0.4
+
+  radash@12.1.1: {}
 
   randombytes@2.1.0:
     dependencies:
