@@ -54,6 +54,7 @@ export function unregisterStorage(name: string): boolean {
  *
  * @internal
  */
+// oxlint-disable-next-line no-underscore-dangle
 export function __clearStorageRegistry(): void {
   registry.clear();
 }
