@@ -45,8 +45,13 @@ export default defineConfig(({ mode }) => {
       })
     ],
     resolve: {
+      // 确保整个应用（含 workspace 依赖 @go-tech-frontend/ui）只使用同一份 React，
+      // 否则会出现 "Invalid hook call / more than one copy of React" 报错。
+      dedupe: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime'],
       alias: {
-        '@': resolve(__dirname, './src')
+        '@': resolve(__dirname, './src'),
+        react: resolve(__dirname, 'node_modules/react'),
+        'react-dom': resolve(__dirname, 'node_modules/react-dom')
       }
     },
     preview: {
