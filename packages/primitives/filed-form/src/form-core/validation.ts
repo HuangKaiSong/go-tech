@@ -7,7 +7,7 @@
  * messages
  */
 
-import { isEqual, isNil } from '@skyroc/utils';
+import { isEqual, isNil } from '@go-tech/utils';
 
 import type { StoreValue } from './types';
 import type { ValidateMessages } from './validate';
@@ -172,7 +172,7 @@ class RuleChecker {
   private typeChecks: Record<RuleType, Check[]> = {} as any;
   private customCheck: Check | null = null;
 
-  constructor(private messages: ValidateMessages = {}) {}
+  constructor(private messages: ValidateMessages = {}) { }
 
   /** Register a base validation check (runs for all rules) */
   registerBase(check: Check) {

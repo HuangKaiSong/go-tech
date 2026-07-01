@@ -5,8 +5,8 @@
  * Provides reactive access to field error states with multiple usage patterns
  */
 
-import type { AllPathsKeys } from '@skyroc/type-utils';
-import { isString } from '@skyroc/utils';
+import type { AllPathsKeys } from '@go-tech/type-utils';
+import { isString } from '@go-tech/utils';
 
 import type { FormInstance } from './FieldContext';
 import { useFieldState } from './useFieldState';
@@ -28,13 +28,13 @@ export type ErrorShape<
   Names extends readonly AllPathsKeys<Values>[] | undefined = undefined
 > = Names extends readonly AllPathsKeys<Values>[]
   ? {
-      /** Error arrays for each specified field */
-      [K in Names[number]]: string[];
-    }
+    /** Error arrays for each specified field */
+    [K in Names[number]]: string[];
+  }
   : {
-      /** Error arrays for all form fields */
-      [K in AllPathsKeys<Values>]: string[];
-    };
+    /** Error arrays for all form fields */
+    [K in AllPathsKeys<Values>]: string[];
+  };
 
 /**
  * Hook overload: Get errors for a single field

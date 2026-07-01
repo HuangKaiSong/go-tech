@@ -1,11 +1,11 @@
-# @skyroc/hooks
+# @go-tech/hooks
 
 与业务无关的通用 React Hooks 集合。通过 subpath exports 区分平台无关 hooks 和浏览器特定 hooks。
 
 ## 架构
 
 ```js
-@skyroc/hooks
+@go-tech/hooks
 ├── "."      → 平台无关 hooks（React Native 安全）
 └── "./web"  → 浏览器 hooks + re-export 全部平台无关 hooks
 ```
@@ -33,10 +33,10 @@
 
 ```ts
 // Web 应用 — 从 ./web 导入，拿到全部 hooks
-import { useArray, useCopy, useLoading } from '@skyroc/hooks/web';
+import { useArray, useCopy, useLoading } from '@go-tech/hooks/web';
 
 // React Native — 从主出口导入，只有平台安全的 hooks
-import { useArray, useLoading } from '@skyroc/hooks';
+import { useArray, useLoading } from '@go-tech/hooks';
 ```
 
 ## 新增 Hook 规则

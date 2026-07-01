@@ -1,7 +1,7 @@
 'use client';
 
-import type { AllPathsKeys, PathToDeepType, ShapeFromPaths } from '@skyroc/type-utils';
-import { isObject, isString } from '@skyroc/utils';
+import type { AllPathsKeys, PathToDeepType, ShapeFromPaths } from '@go-tech/type-utils';
+import { isObject, isString } from '@go-tech/utils';
 import type { FormInstance } from './FieldContext';
 import { useFieldContext } from './FieldContext';
 import { useFieldState } from './useFieldState';

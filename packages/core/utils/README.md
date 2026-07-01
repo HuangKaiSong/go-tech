@@ -1,45 +1,45 @@
-# @skyroc/utils
+# @go-tech/utils
 
 平台无关的通用工具函数集，提供日期处理、加密、存储封装、ID 生成、数组/对象操作等基础能力，并通过独立子路径暴露浏览器专用工具。
 
 ## 两个入口
 
-| 入口 | 导入路径 | 适用环境 |
-| --- | --- | --- |
-| 主入口 | `@skyroc/utils` | 平台无关（Node.js / 浏览器 / SSR 均可） |
-| Web 子路径 | `@skyroc/utils/web` | 仅浏览器环境 |
+| 入口       | 导入路径             | 适用环境                                |
+| ---------- | -------------------- | --------------------------------------- |
+| 主入口     | `@go-tech/utils`     | 平台无关（Node.js / 浏览器 / SSR 均可） |
+| Web 子路径 | `@go-tech/utils/web` | 仅浏览器环境                            |
 
 ## 安装
 
 包已在 monorepo 内，直接引用：
 
 ```ts
-import { cn, nanoid, isNil, formatDate } from '@skyroc/utils';
-import { downloadFileFromUrl, openWindow } from '@skyroc/utils/web';
+import { cn, nanoid, isNil, formatDate } from '@go-tech/utils';
+import { downloadFileFromUrl, openWindow } from '@go-tech/utils/web';
 ```
 
 ## 模块一览
 
-| 模块 | 主要导出 | 说明 |
-| --- | --- | --- |
-| `cn` | `cn` | Tailwind class 合并（clsx + tailwind-merge） |
-| `crypto` | `Crypto` | AES 对称加密/解密类 |
-| `nanoid` | `nanoid` | URL 安全唯一 ID 生成 |
-| `klona` | `jsonClone` | JSON 安全深拷贝 |
-| `storage` | `createStorage`, `createLocalforage` | 类型安全存储封装 |
-| `date` | `formatDate`, `addDate` 等 20+ 函数 | 分层日期工具（格式化/运算/边界/比较） |
-| `array` | `toArray`, `arraysEqual` | 数组规范化与无序等价比较 |
-| `reg` | `REG_USER_NAME` 等 7 个正则 | 常用表单校验正则常量 |
-| `object` | `shallowEqual`, `diffObject` 等 | 对象浅比较与递归 diff |
-| `utils` | `isNil`, `isMacOs` 等 | 基础类型守卫与环境检测 |
-| `emitter` | `Emitter` | 轻量级类型安全事件总线 |
-| `createSubject` | `createSubject` | 轻量 RxJS Subject 实现 |
-| `priority-queue` | `PriorityQueue` | 泛型优先级队列（ID 去重 + 变更订阅） |
-| `singleflight` | `Singleflight`, `createSingleflight` | 合并同 key 的并发请求 |
-| `radash` | 全部 radash 导出 | 函数式工具集（re-export） |
-| `web/download` | `downloadFileFromUrl` 等 | 多策略文件下载（仅浏览器） |
-| `web/window` | `openWindow` | 安全新窗口打开（仅浏览器） |
-| `web/class` | `toggleHtmlClass` | HTML class 切换（仅浏览器） |
+| 模块             | 主要导出                             | 说明                                         |
+| ---------------- | ------------------------------------ | -------------------------------------------- |
+| `cn`             | `cn`                                 | Tailwind class 合并（clsx + tailwind-merge） |
+| `crypto`         | `Crypto`                             | AES 对称加密/解密类                          |
+| `nanoid`         | `nanoid`                             | URL 安全唯一 ID 生成                         |
+| `klona`          | `jsonClone`                          | JSON 安全深拷贝                              |
+| `storage`        | `createStorage`, `createLocalforage` | 类型安全存储封装                             |
+| `date`           | `formatDate`, `addDate` 等 20+ 函数  | 分层日期工具（格式化/运算/边界/比较）        |
+| `array`          | `toArray`, `arraysEqual`             | 数组规范化与无序等价比较                     |
+| `reg`            | `REG_USER_NAME` 等 7 个正则          | 常用表单校验正则常量                         |
+| `object`         | `shallowEqual`, `diffObject` 等      | 对象浅比较与递归 diff                        |
+| `utils`          | `isNil`, `isMacOs` 等                | 基础类型守卫与环境检测                       |
+| `emitter`        | `Emitter`                            | 轻量级类型安全事件总线                       |
+| `createSubject`  | `createSubject`                      | 轻量 RxJS Subject 实现                       |
+| `priority-queue` | `PriorityQueue`                      | 泛型优先级队列（ID 去重 + 变更订阅）         |
+| `singleflight`   | `Singleflight`, `createSingleflight` | 合并同 key 的并发请求                        |
+| `radash`         | 全部 radash 导出                     | 函数式工具集（re-export）                    |
+| `web/download`   | `downloadFileFromUrl` 等             | 多策略文件下载（仅浏览器）                   |
+| `web/window`     | `openWindow`                         | 安全新窗口打开（仅浏览器）                   |
+| `web/class`      | `toggleHtmlClass`                    | HTML class 切换（仅浏览器）                  |
 
 ---
 
@@ -48,7 +48,7 @@ import { downloadFileFromUrl, openWindow } from '@skyroc/utils/web';
 组合 [clsx](https://github.com/lukeed/clsx) 与 [tailwind-merge](https://github.com/dcastil/tailwind-merge)：先条件组合，再解决 Tailwind 工具类冲突。
 
 ```ts
-import { cn } from '@skyroc/utils';
+import { cn } from '@go-tech/utils';
 
 cn('px-4 py-2', 'px-6');
 // 'py-2 px-6'（px-4 被 px-6 覆盖）
@@ -64,7 +64,7 @@ cn('text-red-500', { 'font-bold': true, 'text-blue-500': false });
 泛型加密类，基于 [crypto-js](https://github.com/brix/crypto-js) AES 实现，常用于本地存储敏感数据的加密保护。
 
 ```ts
-import { Crypto } from '@skyroc/utils';
+import { Crypto } from '@go-tech/utils';
 
 type TokenPayload = { accessToken: string; expiresAt: number };
 
@@ -85,10 +85,10 @@ const payload = crypto.decrypt(cipher); // TokenPayload | null
 直接 re-export 自 [nanoid](https://github.com/ai/nanoid)，生成 URL 安全的随机唯一字符串。
 
 ```ts
-import { nanoid } from '@skyroc/utils';
+import { nanoid } from '@go-tech/utils';
 
-nanoid();    // 'V1StGXR8_Z5jdHi6B-myT'（默认 21 位）
-nanoid(10);  // 'IRFa-VaY2b'（指定长度）
+nanoid(); // 'V1StGXR8_Z5jdHi6B-myT'（默认 21 位）
+nanoid(10); // 'IRFa-VaY2b'（指定长度）
 ```
 
 ---
@@ -98,7 +98,7 @@ nanoid(10);  // 'IRFa-VaY2b'（指定长度）
 来自 [klona/json](https://github.com/lukeed/klona)，基于 JSON 序列化的快速深拷贝。
 
 ```ts
-import { jsonClone } from '@skyroc/utils';
+import { jsonClone } from '@go-tech/utils';
 
 const original = { a: 1, b: { c: [2, 3] } };
 const clone = jsonClone(original);
@@ -118,7 +118,7 @@ console.log(original.b.c); // [2, 3]（不受影响）
 类型安全的 `localStorage` / `sessionStorage` 封装，支持泛型约束与 key 前缀。
 
 ```ts
-import { createStorage } from '@skyroc/utils';
+import { createStorage } from '@go-tech/utils';
 
 type AppStorage = {
   token: string;
@@ -141,7 +141,7 @@ storage.clear();
 基于 [localforage](https://localforage.github.io/localForage/) 的异步存储封装，支持 IndexedDB / WebSQL / localStorage。
 
 ```ts
-import { createLocalforage } from '@skyroc/utils';
+import { createLocalforage } from '@go-tech/utils';
 
 type CacheStorage = {
   dashboardData: { charts: unknown[]; updatedAt: number };
@@ -155,10 +155,10 @@ const data = await cache.getItem('dashboardData'); // CacheStorage['dashboardDat
 
 **选型建议：**
 
-| 场景 | 推荐 |
-| --- | --- |
-| 同步读写，数据量小 | `createStorage('local', ...)` |
-| 仅当前 tab 生命周期 | `createStorage('session', ...)` |
+| 场景                | 推荐                             |
+| ------------------- | -------------------------------- |
+| 同步读写，数据量小  | `createStorage('local', ...)`    |
+| 仅当前 tab 生命周期 | `createStorage('session', ...)`  |
 | 大体积数据（> 5MB） | `createLocalforage('indexedDB')` |
 
 ---
@@ -183,67 +183,80 @@ compare.ts  → 返回 boolean，用于条件判断
 ### DATE_FORMAT 常量
 
 ```ts
-import { DATE_FORMAT } from '@skyroc/utils';
+import { DATE_FORMAT } from '@go-tech/utils';
 
-DATE_FORMAT.DATE             // 'YYYY-MM-DD'
-DATE_FORMAT.DATE_TIME        // 'YYYY-MM-DD HH:mm:ss'
-DATE_FORMAT.DATE_TIME_MINUTE // 'YYYY-MM-DD HH:mm'
-DATE_FORMAT.TIME             // 'HH:mm:ss'
-DATE_FORMAT.DATE_CN          // 'YYYY年MM月DD日'
+DATE_FORMAT.DATE; // 'YYYY-MM-DD'
+DATE_FORMAT.DATE_TIME; // 'YYYY-MM-DD HH:mm:ss'
+DATE_FORMAT.DATE_TIME_MINUTE; // 'YYYY-MM-DD HH:mm'
+DATE_FORMAT.TIME; // 'HH:mm:ss'
+DATE_FORMAT.DATE_CN; // 'YYYY年MM月DD日'
 ```
 
 ### format — 格式化
 
 ```ts
-import { formatDate, formatDateTime, formatTime, fromTimestamp, formatDuration, humanizeDuration } from '@skyroc/utils';
+import {
+  formatDate,
+  formatDateTime,
+  formatTime,
+  fromTimestamp,
+  formatDuration,
+  humanizeDuration
+} from '@go-tech/utils';
 
-formatDate(new Date());                          // '2026-04-22'
-formatDateTime(new Date());                      // '2026-04-22 14:30:00'
-formatTime(new Date());                          // '14:30:00'
-fromTimestamp(1745000000);                       // 秒级自动转毫秒
-fromTimestamp(1745000000000);                    // 毫秒级直接使用
-formatDuration(3661000);                         // '01:01:01'
-humanizeDuration(86400000);                      // 'a day'
+formatDate(new Date()); // '2026-04-22'
+formatDateTime(new Date()); // '2026-04-22 14:30:00'
+formatTime(new Date()); // '14:30:00'
+fromTimestamp(1745000000); // 秒级自动转毫秒
+fromTimestamp(1745000000000); // 毫秒级直接使用
+formatDuration(3661000); // '01:01:01'
+humanizeDuration(86400000); // 'a day'
 ```
 
 ### calc — 运算
 
 ```ts
-import { toTimestamp, toUnixTimestamp, addDate, subtractDate, diffDate, fromNow, toNow } from '@skyroc/utils';
+import { toTimestamp, toUnixTimestamp, addDate, subtractDate, diffDate, fromNow, toNow } from '@go-tech/utils';
 
-toTimestamp('2026-04-22');                       // 毫秒级时间戳
-toUnixTimestamp('2026-04-22');                   // 秒级时间戳
-addDate('2026-04-22', 7).format('YYYY-MM-DD');  // '2026-04-29'
-subtractDate('2026-04-22', 1, 'month');          // 上个月同日
-diffDate('2026-04-22', '2026-04-01');            // 21（天）
-fromNow('2026-04-19');                           // '3 days ago'
+toTimestamp('2026-04-22'); // 毫秒级时间戳
+toUnixTimestamp('2026-04-22'); // 秒级时间戳
+addDate('2026-04-22', 7).format('YYYY-MM-DD'); // '2026-04-29'
+subtractDate('2026-04-22', 1, 'month'); // 上个月同日
+diffDate('2026-04-22', '2026-04-01'); // 21（天）
+fromNow('2026-04-19'); // '3 days ago'
 ```
 
 ### boundary — 边界与范围
 
 ```ts
 import {
-  startOfDay, endOfDay,
-  startOfWeek, endOfWeek,
-  startOfMonth, endOfMonth,
-  getTodayRange, getYesterdayRange,
-  getThisWeekRange, getThisMonthRange,
-  getThisYearRange, getLastDaysRange,
-} from '@skyroc/utils';
+  startOfDay,
+  endOfDay,
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
+  getTodayRange,
+  getYesterdayRange,
+  getThisWeekRange,
+  getThisMonthRange,
+  getThisYearRange,
+  getLastDaysRange
+} from '@go-tech/utils';
 
 const [start, end] = getThisMonthRange(); // 本月起止
-const [from, to] = getLastDaysRange(7);   // 最近 7 天
+const [from, to] = getLastDaysRange(7); // 最近 7 天
 ```
 
 ### compare — 比较
 
 ```ts
-import { isValidDate, isBefore, isAfter, isSame, isToday, isYesterday, isTomorrow } from '@skyroc/utils';
+import { isValidDate, isBefore, isAfter, isSame, isToday, isYesterday, isTomorrow } from '@go-tech/utils';
 
-isValidDate('2026-04-22');                           // true
-isBefore('2026-04-01', '2026-04-22');               // true
+isValidDate('2026-04-22'); // true
+isBefore('2026-04-01', '2026-04-22'); // true
 isSame('2026-04-22 10:00', '2026-04-22 15:00', 'day'); // true
-isToday(new Date());                                 // true
+isToday(new Date()); // true
 ```
 
 ---
@@ -255,13 +268,13 @@ isToday(new Date());                                 // true
 将"单值 / 数组 / null / undefined"三种形态统一规范化为数组。
 
 ```ts
-import { toArray } from '@skyroc/utils';
+import { toArray } from '@go-tech/utils';
 
-toArray('hello');    // ['hello']
+toArray('hello'); // ['hello']
 toArray(['a', 'b']); // ['a', 'b']
-toArray(null);       // []
-toArray(undefined);  // []
-toArray(0);          // [0]（非 nil 的 falsy 值也会被包裹）
+toArray(null); // []
+toArray(undefined); // []
+toArray(0); // [0]（非 nil 的 falsy 值也会被包裹）
 ```
 
 ### arraysEqual
@@ -269,11 +282,11 @@ toArray(0);          // [0]（非 nil 的 falsy 值也会被包裹）
 无序判断两个数组的元素集合是否等价（基于 Map 计数，`O(n)` 时间复杂度，浅比较）。
 
 ```ts
-import { arraysEqual } from '@skyroc/utils';
+import { arraysEqual } from '@go-tech/utils';
 
 arraysEqual([1, 2, 3], [3, 2, 1]); // true（顺序无关）
 arraysEqual([1, 1, 2], [1, 2, 2]); // false（计数不同）
-arraysEqual([], []);                // true
+arraysEqual([], []); // true
 ```
 
 ---
@@ -283,24 +296,24 @@ arraysEqual([], []);                // true
 7 个预定义正则常量，均为非全局模式（无 `g` 标志），可安全复用于 `test()`。
 
 ```ts
-import { REG_USER_NAME, REG_PHONE, REG_PWD, REG_EMAIL, REG_CODE_SIX, REG_CODE_FOUR, REG_URL } from '@skyroc/utils';
+import { REG_USER_NAME, REG_PHONE, REG_PWD, REG_EMAIL, REG_CODE_SIX, REG_CODE_FOUR, REG_URL } from '@go-tech/utils';
 ```
 
-| 常量 | 规则 | 合法示例 |
-| --- | --- | --- |
-| `REG_USER_NAME` | 4-16 位：中文/英文/数字/`_`/`-` | `alice_01`、`张三` |
-| `REG_PHONE` | 中国大陆 11 位手机号 | `13812345678` |
-| `REG_PWD` | 6-18 位：字母/数字/`_` | `pass_123` |
-| `REG_EMAIL` | 标准邮箱格式 | `user@example.com` |
-| `REG_CODE_SIX` | 恰好 6 位纯数字 | `123456` |
-| `REG_CODE_FOUR` | 恰好 4 位纯数字 | `1234` |
-| `REG_URL` | HTTP / HTTPS URL | `https://example.com/path?q=1` |
+| 常量            | 规则                            | 合法示例                       |
+| --------------- | ------------------------------- | ------------------------------ |
+| `REG_USER_NAME` | 4-16 位：中文/英文/数字/`_`/`-` | `alice_01`、`张三`             |
+| `REG_PHONE`     | 中国大陆 11 位手机号            | `13812345678`                  |
+| `REG_PWD`       | 6-18 位：字母/数字/`_`          | `pass_123`                     |
+| `REG_EMAIL`     | 标准邮箱格式                    | `user@example.com`             |
+| `REG_CODE_SIX`  | 恰好 6 位纯数字                 | `123456`                       |
+| `REG_CODE_FOUR` | 恰好 4 位纯数字                 | `1234`                         |
+| `REG_URL`       | HTTP / HTTPS URL                | `https://example.com/path?q=1` |
 
 ```ts
 // 与 Zod 配合使用
 const loginSchema = z.object({
   phone: z.string().regex(REG_PHONE, '手机号格式不正确'),
-  password: z.string().regex(REG_PWD, '密码为 6-18 位字母、数字或下划线'),
+  password: z.string().regex(REG_PWD, '密码为 6-18 位字母、数字或下划线')
 });
 ```
 
@@ -309,7 +322,7 @@ const loginSchema = z.object({
 ## object — 对象工具
 
 ```ts
-import { shallowEqual, diffObject, isObjectType, isEventObject } from '@skyroc/utils';
+import { shallowEqual, diffObject, isObjectType, isEventObject } from '@go-tech/utils';
 ```
 
 ### shallowEqual(a, b) → boolean
@@ -317,7 +330,7 @@ import { shallowEqual, diffObject, isObjectType, isEventObject } from '@skyroc/u
 浅比较：先用 `Object.is` 判断引用，再逐键用 `Object.is` 比较一级属性值。
 
 ```ts
-shallowEqual({ a: 1, b: 2 }, { a: 1, b: 2 });             // true
+shallowEqual({ a: 1, b: 2 }, { a: 1, b: 2 }); // true
 shallowEqual({ a: 1, b: { c: 3 } }, { a: 1, b: { c: 3 } }); // false（嵌套对象引用不同）
 ```
 
@@ -335,18 +348,18 @@ diffObject({ name: 'Alice', age: 30 }, { name: 'Alice', age: 31 });
 ## utils — 基础工具
 
 ```ts
-import { noop, isNil, isHttpUrl, isWindow, isMacOs, isWindowsOs, isPC } from '@skyroc/utils';
+import { noop, isNil, isHttpUrl, isWindow, isMacOs, isWindowsOs, isPC } from '@go-tech/utils';
 ```
 
-| 函数 | 说明 |
-| --- | --- |
-| `noop()` | 空函数，用作可选回调的默认值 |
-| `isNil(val)` | 类型守卫：`null \| undefined` |
-| `isHttpUrl(url)` | 判断是否以 `http://` 或 `https://` 开头 |
-| `isWindow(value)` | 类型守卫：是否为 `window` 对象 |
-| `isMacOs()` | 检测 macOS 环境（依赖 `navigator`） |
-| `isWindowsOs()` | 检测 Windows 环境（依赖 `navigator`） |
-| `isPC()` | 检测 PC 端（非移动设备） |
+| 函数              | 说明                                    |
+| ----------------- | --------------------------------------- |
+| `noop()`          | 空函数，用作可选回调的默认值            |
+| `isNil(val)`      | 类型守卫：`null \| undefined`           |
+| `isHttpUrl(url)`  | 判断是否以 `http://` 或 `https://` 开头 |
+| `isWindow(value)` | 类型守卫：是否为 `window` 对象          |
+| `isMacOs()`       | 检测 macOS 环境（依赖 `navigator`）     |
+| `isWindowsOs()`   | 检测 Windows 环境（依赖 `navigator`）   |
+| `isPC()`          | 检测 PC 端（非移动设备）                |
 
 ```ts
 // 快捷键按系统区分
@@ -367,7 +380,7 @@ if (isHttpUrl(path)) {
 轻量级发布/订阅实现，支持泛型事件映射、通配符监听、粘性事件与键控隔离。
 
 ```ts
-import { Emitter } from '@skyroc/utils';
+import { Emitter } from '@go-tech/utils';
 
 type AppEvents = {
   login: [user: string, timestamp: number];
@@ -393,21 +406,21 @@ off(); // 取消订阅
 **键控事件（Map 模式）：** `onMap / emitMap` 在事件名之外再加一层 `key` 隔离，适合同一事件按实例区分的场景。
 
 ```ts
-bus.onMap('update', 'panel-A', (data) => {});
+bus.onMap('update', 'panel-A', data => {});
 bus.emitMap('update', 'panel-A', { value: 1 }); // 只触发 panel-A
 ```
 
 ### API 汇总
 
-| 方法 | 说明 |
-| --- | --- |
-| `emit(event, ...args)` | 触发事件 |
-| `emitMap(event, key, ...args)` | 触发键控事件 |
-| `on(event, fn)` | 注册监听器，返回取消订阅函数 |
-| `onMap(event, key, fn)` | 注册键控监听器 |
-| `off(event, fn?)` | 移除监听器，不传 `fn` 则移除该事件所有监听器 |
-| `offMap(event, key, fn)` | 移除键控监听器 |
-| `offAll()` | 清除所有监听器和粘性事件缓存 |
+| 方法                           | 说明                                         |
+| ------------------------------ | -------------------------------------------- |
+| `emit(event, ...args)`         | 触发事件                                     |
+| `emitMap(event, key, ...args)` | 触发键控事件                                 |
+| `on(event, fn)`                | 注册监听器，返回取消订阅函数                 |
+| `onMap(event, key, fn)`        | 注册键控监听器                               |
+| `off(event, fn?)`              | 移除监听器，不传 `fn` 则移除该事件所有监听器 |
+| `offMap(event, key, fn)`       | 移除键控监听器                               |
+| `offAll()`                     | 清除所有监听器和粘性事件缓存                 |
 
 ---
 
@@ -416,7 +429,7 @@ bus.emitMap('update', 'panel-A', { value: 1 }); // 只触发 panel-A
 简化版 [RxJS Subject](https://rxjs.dev/guide/subject)，用于多播值推送与模块间单向数据流。Subject 既是生产者（可 `next` 推送值），也是消费者（可被 `subscribe` 订阅）。
 
 ```ts
-import { createSubject } from '@skyroc/utils';
+import { createSubject } from '@go-tech/utils';
 
 const subject = createSubject<string>();
 
@@ -427,15 +440,15 @@ sub.unsubscribe();
 subject.complete(); // 关闭，之后 next() 无效
 ```
 
-| 方法 | 说明 |
-| --- | --- |
-| `next(value)` | 向所有活跃订阅者推送值 |
+| 方法                        | 说明                               |
+| --------------------------- | ---------------------------------- |
+| `next(value)`               | 向所有活跃订阅者推送值             |
 | `subscribe(fn \| observer)` | 注册订阅者，返回 `{ unsubscribe }` |
-| `unsubscribe()` | 移除所有订阅者（不关闭） |
-| `complete()` | 关闭 Subject |
-| `hasObservers()` | 是否有活跃订阅者 |
-| `closed` | 是否已关闭（只读） |
-| `size` | 当前订阅者数量（只读） |
+| `unsubscribe()`             | 移除所有订阅者（不关闭）           |
+| `complete()`                | 关闭 Subject                       |
+| `hasObservers()`            | 是否有活跃订阅者                   |
+| `closed`                    | 是否已关闭（只读）                 |
+| `size`                      | 当前订阅者数量（只读）             |
 
 **与 Emitter 的选择：** 需要多个不同具名事件 → `Emitter`；只需一条单类型数据流 → `createSubject`。
 
@@ -446,13 +459,13 @@ subject.complete(); // 关闭，之后 next() 无效
 泛型优先级队列，核心能力：**ID 去重**、**外部排序策略**、**变更订阅**、**惰性缓存**。
 
 ```ts
-import { PriorityQueue } from '@skyroc/utils';
+import { PriorityQueue } from '@go-tech/utils';
 
 type Task = { taskId: string; priority: number; createdAt: number };
 
 const queue = new PriorityQueue<Task>({
   getId: t => t.taskId,
-  compare: (a, b) => a.priority - b.priority || a.createdAt - b.createdAt,
+  compare: (a, b) => a.priority - b.priority || a.createdAt - b.createdAt
 });
 
 queue.enqueue({ taskId: '1', priority: 2, createdAt: 1000 });
@@ -460,29 +473,29 @@ queue.enqueue({ taskId: '2', priority: 1, createdAt: 2000 });
 queue.enqueue({ taskId: '1', priority: 2, createdAt: 1000 }); // 重复，被忽略
 
 queue.peek()?.taskId; // '2'（priority 1 优先）
-queue.dequeue();      // 取出 taskId='2'
+queue.dequeue(); // 取出 taskId='2'
 ```
 
 ### 写操作
 
-| 方法 | 说明 | 返回 |
-| --- | --- | --- |
-| `enqueue(item)` | 单条入队（幂等，id 存在则跳过） | `boolean` |
-| `enqueueMany(items)` | 批量入队，触发一次排序 | `number`（实际入队数） |
-| `dequeue()` | 移除并返回队首 | `T \| undefined` |
-| `remove(id)` | 按 id 移除 | `boolean` |
-| `removeBy(predicate)` | 按条件批量移除 | `number`（实际移除数） |
-| `clear()` | 清空队列 | `void` |
+| 方法                  | 说明                            | 返回                   |
+| --------------------- | ------------------------------- | ---------------------- |
+| `enqueue(item)`       | 单条入队（幂等，id 存在则跳过） | `boolean`              |
+| `enqueueMany(items)`  | 批量入队，触发一次排序          | `number`（实际入队数） |
+| `dequeue()`           | 移除并返回队首                  | `T \| undefined`       |
+| `remove(id)`          | 按 id 移除                      | `boolean`              |
+| `removeBy(predicate)` | 按条件批量移除                  | `number`（实际移除数） |
+| `clear()`             | 清空队列                        | `void`                 |
 
 ### 读操作与订阅
 
 ```ts
-queue.peek();        // 查看队首，不移除
-queue.has('id');     // 是否存在
-queue.get('id');     // 按 id 获取
-queue.toArray();     // 完整有序快照（readonly）
-queue.size;          // 数量
-queue.isEmpty;       // 是否为空
+queue.peek(); // 查看队首，不移除
+queue.has('id'); // 是否存在
+queue.get('id'); // 按 id 获取
+queue.toArray(); // 完整有序快照（readonly）
+queue.size; // 数量
+queue.isEmpty; // 是否为空
 
 // 变更订阅（适配 Jotai / Zustand）
 const unsub = queue.subscribe(sorted => {
@@ -502,15 +515,13 @@ unsub(); // 取消
 ### 类形式 — 在 Service 中组合
 
 ```ts
-import { Singleflight } from '@skyroc/utils';
+import { Singleflight } from '@go-tech/utils';
 
 class UserService {
   private sf = new Singleflight();
 
   fetchProfile(id: string) {
-    return this.sf.do(`profile:${id}`, () =>
-      fetch(`/api/users/${id}/profile`).then(r => r.json())
-    );
+    return this.sf.do(`profile:${id}`, () => fetch(`/api/users/${id}/profile`).then(r => r.json()));
   }
 }
 
@@ -518,14 +529,14 @@ class UserService {
 const [a, b, c] = await Promise.all([
   service.fetchProfile('alice'),
   service.fetchProfile('alice'),
-  service.fetchProfile('alice'),
+  service.fetchProfile('alice')
 ]);
 ```
 
 ### 工厂函数形式 — 模块级
 
 ```ts
-import { createSingleflight } from '@skyroc/utils';
+import { createSingleflight } from '@go-tech/utils';
 
 const sf = createSingleflight();
 
@@ -536,32 +547,32 @@ async function fetchConfig() {
 
 ### API
 
-| 方法 | 说明 |
-| --- | --- |
+| 方法             | 说明                                                       |
+| ---------------- | ---------------------------------------------------------- |
 | `sf.do(key, fn)` | 执行 fn，相同 key 飞行期间共享 Promise，落定后缓存自动清除 |
-| `sf.forget(key)` | 手动清除某 key 的缓存，强制下次重新执行 |
-| `sf.reset()` | 清除所有缓存 |
+| `sf.forget(key)` | 手动清除某 key 的缓存，强制下次重新执行                    |
+| `sf.reset()`     | 清除所有缓存                                               |
 
 ---
 
 ## radash — 函数式工具集
 
-完整 re-export [radash](https://radash-docs.vercel.app/) 的所有导出，可直接从 `@skyroc/utils` 导入。
+完整 re-export [radash](https://radash-docs.vercel.app/) 的所有导出，可直接从 `@go-tech/utils` 导入。
 
 ```ts
-import { group, unique, omit, pick, diff, sleep, retry } from '@skyroc/utils';
+import { group, unique, omit, pick, diff, sleep, retry } from '@go-tech/utils';
 ```
 
 > **注意：** radash 的 `diff` 是**数组差集**工具（返回第一个数组中不在第二个数组里的元素），本包的对象递归比较函数已重命名为 `diffObject` 以避免歧义。
 
 ---
 
-## @skyroc/utils/web — 浏览器专用工具
+## @go-tech/utils/web — 浏览器专用工具
 
 通过独立子路径导入，避免在 Node.js / SSR 环境中意外引入 BOM API。
 
 ```ts
-import { downloadFileFromUrl, openWindow, toggleHtmlClass } from '@skyroc/utils/web';
+import { downloadFileFromUrl, openWindow, toggleHtmlClass } from '@go-tech/utils/web';
 ```
 
 ### 文件下载
@@ -591,7 +602,7 @@ await downloadFileFromUrl({ source: 'https://example.com/report.pdf' });
 
 await downloadFileFromUrl({
   source: 'https://example.com/export?id=123',
-  fileName: '月度报表.xlsx',
+  fileName: '月度报表.xlsx'
 });
 ```
 
@@ -601,7 +612,7 @@ await downloadFileFromUrl({
 // Base64 / DataURL
 downloadFileFromBase64({
   source: 'data:application/pdf;base64,JVBERi0x...',
-  fileName: 'document.pdf',
+  fileName: 'document.pdf'
 });
 
 // Blob（配合 axios responseType: 'blob'）
@@ -618,9 +629,9 @@ await downloadFileFromImageUrl({ source: 'https://cdn.example.com/avatar.png', f
 ### openWindow — 安全新窗口
 
 ```ts
-openWindow('https://docs.example.com');                    // 新 tab（默认）
-openWindow('/settings', { target: '_self' });              // 当前 tab
-openWindow('https://external.com', { secure: false });     // 关闭安全策略
+openWindow('https://docs.example.com'); // 新 tab（默认）
+openWindow('/settings', { target: '_self' }); // 当前 tab
+openWindow('https://external.com', { secure: false }); // 关闭安全策略
 ```
 
 默认开启 `noopener,noreferrer` 防止 opener 劫持。
@@ -632,7 +643,7 @@ openWindow('https://external.com', { secure: false });     // 关闭安全策略
 ```ts
 const dark = toggleHtmlClass('dark');
 
-dark.add();    // <html class="dark">
+dark.add(); // <html class="dark">
 dark.remove(); // <html class="">
 ```
 

@@ -100,8 +100,8 @@ const VirtualList = <T, TScrollElement extends HTMLDivElement = HTMLDivElement, 
 
   useImperativeHandle(ref, () => {
     return {
-      containerRef: rootRef.current as TScrollElement,
-      ...elementVirtualizer
+      ...elementVirtualizer,
+      containerRef: rootRef.current as TScrollElement
     } as unknown as VirtualizerList<TScrollElement, TItemElement>;
   }, [elementVirtualizer, rootRef]);
 

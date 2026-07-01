@@ -1,7 +1,7 @@
 // oxlint-disable max-params
 /** Core type definitions for the form system Contains fundamental types used throughout the form implementation */
 
-import type { NamePath } from '@skyroc/utils';
+import type { NamePath } from '@go-tech/utils';
 
 import type { ChangeMask } from './event';
 

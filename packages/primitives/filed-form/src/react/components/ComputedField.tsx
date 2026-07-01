@@ -1,14 +1,14 @@
 'use client';
 
 /**
- * ComputedField component for reactive computed form fields
- * Automatically recalculates its value based on dependencies and renders as read-only
+ * ComputedField component for reactive computed form fields Automatically recalculates its value based on dependencies
+ * and renders as read-only
  */
 
+import type { AllPathsKeys } from '@go-tech/type-utils';
+import { Slot } from '@radix-ui/react-slot';
 import type { ReactElement } from 'react';
 import { useEffect, useState } from 'react';
-import { Slot } from '@radix-ui/react-slot';
-import type { AllPathsKeys } from '@skyroc/type-utils';
 import type { StoreValue } from '../../form-core/types';
 import type { Rule } from '../../form-core/validation';
 import { useFieldContext } from '../hooks/FieldContext';
@@ -32,34 +32,33 @@ export type ComputedFieldProps<Values, T extends AllPathsKeys<Values> = AllPaths
 } & Record<string, any>;
 
 /**
- * ComputedField component that creates a reactive computed field
- * The field automatically recalculates when its dependencies change
- * and renders as a read-only field
+ * ComputedField component that creates a reactive computed field The field automatically recalculates when its
+ * dependencies change and renders as a read-only field
  *
  * @example
- * ```tsx
- * // Example: Calculate total price based on quantity and unit price
- * <Form>
- *   <Field name="quantity" >
- *     <Input />
- *   </Field>
- *   <Field name="unitPrice" >
- *     <Input />
- *   </Field>
+ *   ```tsx
+ *   // Example: Calculate total price based on quantity and unit price
+ *   <Form>
+ *     <Field name="quantity">
+ *       <Input />
+ *     </Field>
+ *     <Field name="unitPrice">
+ *       <Input />
+ *     </Field>
  *
- *   <ComputedField
- *     name="totalPrice"
- *     deps={['quantity', 'unitPrice']}
- *     compute={(get) => {
- *       const quantity = get('quantity') || 0;
- *       const unitPrice = get('unitPrice') || 0;
- *       return quantity * unitPrice;
- *     }}
- *   >
- *     <Input placeholder="Total Price (calculated)" />
- *   </ComputedField>
- * </Form>
- * ```
+ *     <ComputedField
+ *       name="totalPrice"
+ *       deps={['quantity', 'unitPrice']}
+ *       compute={get => {
+ *         const quantity = get('quantity') || 0;
+ *         const unitPrice = get('unitPrice') || 0;
+ *         return quantity * unitPrice;
+ *       }}
+ *     >
+ *       <Input placeholder="Total Price (calculated)" />
+ *     </ComputedField>
+ *   </Form>;
+ *   ```
  */
 function ComputedField<Values = any>({
   children,

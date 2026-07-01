@@ -5,7 +5,7 @@
  */
 import { useEffect, useState } from 'react';
 
-import { type NamePath, deepGet, keyOfName } from '@skyroc/utils';
+import { type NamePath, deepGet, keyOfName } from '@go-tech/utils';
 import type { ArrayOpAction, Middleware } from '../../form-core/middleware';
 
 import { type FormInstance, type InternalFormInstance, useFieldContext } from './FieldContext';
@@ -109,84 +109,84 @@ export function useUndoRedo<Values = any>(form?: FormInstance<Values>) {
   // Middleware to intercept form actions and track changes for undo/redo
   const mw: Middleware<Values> =
     ({ getState }) =>
-    next =>
-    action => {
-      // Capture the form state before the action is applied
-      const stateBefore = getState();
-      const batch: Patch[] = [];
+      next =>
+        action => {
+          // Capture the form state before the action is applied
+          const stateBefore = getState();
+          const batch: Patch[] = [];
 
-      // Handle different types of form actions
-      switch (action.type) {
-        case 'setFieldValue': {
-          // Track single field value changes
-          const k = keyOfName(action.name);
-          const prev = deepGet(stateBefore, k);
+          // Handle different types of form actions
+          switch (action.type) {
+            case 'setFieldValue': {
+              // Track single field value changes
+              const k = keyOfName(action.name);
+              const prev = deepGet(stateBefore, k);
 
-          batch.push({ name: k, next: action.value, prev, type: 'set' });
-          break;
-        }
-        case 'setFieldsValue': {
-          // Track multiple field value changes
-          Object.entries(action.values as Record<string, unknown>).forEach(([k1, v]) => {
-            const prev = deepGet(stateBefore, k1 as any);
-            batch.push({ name: keyOfName(k1), next: v, prev, type: 'set' });
-          });
-          break;
-        }
-        case 'arrayOp': {
-          // Track array operations (insert, remove, move, swap, replace)
-          const { args, name } = action;
+              batch.push({ name: k, next: action.value, prev, type: 'set' });
+              break;
+            }
+            case 'setFieldsValue': {
+              // Track multiple field value changes
+              Object.entries(action.values as Record<string, unknown>).forEach(([k1, v]) => {
+                const prev = deepGet(stateBefore, k1 as any);
+                batch.push({ name: keyOfName(k1), next: v, prev, type: 'set' });
+              });
+              break;
+            }
+            case 'arrayOp': {
+              // Track array operations (insert, remove, move, swap, replace)
+              const { args, name } = action;
 
-          const arr = (deepGet(stateBefore, name) as any[]) ?? [];
+              const arr = (deepGet(stateBefore, name) as any[]) ?? [];
 
-          let inverse: any = null;
+              let inverse: any = null;
 
-          // Create inverse operations for each array operation type
-          switch (args.op) {
-            case 'insert':
-              // Inverse of insert is remove at the same index
-              inverse = { index: args.index, op: 'remove' };
+              // Create inverse operations for each array operation type
+              switch (args.op) {
+                case 'insert':
+                  // Inverse of insert is remove at the same index
+                  inverse = { index: args.index, op: 'remove' };
+                  break;
+                case 'remove':
+                  // Inverse of remove is insert the removed item back at the same index
+                  inverse = { index: args.index, item: arr[args.index], op: 'insert' };
+                  break;
+                case 'move':
+                  // Inverse of move is move back from destination to source
+                  inverse = { from: args.to, op: 'move', to: args.from };
+                  break;
+                case 'swap':
+                  // Inverse of swap is swap back (same operation)
+                  inverse = { from: args.to, op: 'swap', to: args.from };
+                  break;
+                case 'replace':
+                  // Inverse of replace is replace with the original item
+                  inverse = { index: args.index, item: arr[args.index], op: 'replace' };
+                  break;
+                default:
+                  break;
+              }
+
+              batch.push({ args, inverse, name, type: 'arrayOp' });
               break;
-            case 'remove':
-              // Inverse of remove is insert the removed item back at the same index
-              inverse = { index: args.index, item: arr[args.index], op: 'insert' };
-              break;
-            case 'move':
-              // Inverse of move is move back from destination to source
-              inverse = { from: args.to, op: 'move', to: args.from };
-              break;
-            case 'swap':
-              // Inverse of swap is swap back (same operation)
-              inverse = { from: args.to, op: 'swap', to: args.from };
-              break;
-            case 'replace':
-              // Inverse of replace is replace with the original item
-              inverse = { index: args.index, item: arr[args.index], op: 'replace' };
-              break;
+            }
             default:
               break;
           }
 
-          batch.push({ args, inverse, name, type: 'arrayOp' });
-          break;
-        }
-        default:
-          break;
-      }
+          // Execute the original action
+          const ret = next(action);
 
-      // Execute the original action
-      const ret = next(action);
+          // If we tracked any changes, add them to the undo stack
+          if (batch.length > 0) {
+            setUndoStack(prev => [...prev, batch]);
 
-      // If we tracked any changes, add them to the undo stack
-      if (batch.length > 0) {
-        setUndoStack(prev => [...prev, batch]);
+            // Clear redo stack when a new operation is performed
+            setRedoStack([]);
+          }
 
-        // Clear redo stack when a new operation is performed
-        setRedoStack([]);
-      }
-
-      return ret;
-    };
+          return ret;
+        };
 
   /** Applies a batch of patches in the specified direction (undo or redo) */
   const applyBatch = (batch: Patch[], dir: 'redo' | 'undo') => {

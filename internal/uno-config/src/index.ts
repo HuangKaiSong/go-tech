@@ -1,7 +1,7 @@
 import type { Preset, PresetWind3Theme, Rule } from 'unocss';
-import { allShortcuts } from './shortcuts';
+import { allShortcuts } from '../shortcuts';
 
-export { allShortcuts, flexShortcuts, positionShortcuts, textShortcuts } from './shortcuts';
+export { allShortcuts, flexShortcuts, positionShortcuts, textShortcuts } from '../shortcuts';
 
 /** Theme color keys */
 const themeColorKeys = [

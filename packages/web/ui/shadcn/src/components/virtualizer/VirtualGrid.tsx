@@ -1,19 +1,15 @@
 'use client';
 /* eslint-disable react-hooks/incompatible-library */
 
+import { cn } from '@go-tech/utils';
+import { Slot } from '@radix-ui/react-slot';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import type { CSSProperties } from 'react';
 import { Fragment, useImperativeHandle, useRef } from 'react';
-import { useVirtualizer } from '@tanstack/react-virtual';
-import { Slot } from '@radix-ui/react-slot';
-import { cn } from '@go-tech/utils';
-import { virtualizerVariants } from './virtualizer-variants';
 import type { VirtualGridProps, VirtualizerGrid } from './types';
+import { virtualizerVariants } from './virtualizer-variants';
 
-const VirtualGrid = <
-  T,
-  TScrollElement extends HTMLDivElement = HTMLDivElement,
-  TItemElement extends Element = Element
->(
+const VirtualGrid = <T, TScrollElement extends HTMLDivElement = HTMLDivElement, TItemElement extends Element = Element>(
   props: VirtualGridProps<T, TScrollElement, TItemElement>
 ) => {
   const {
@@ -45,11 +41,9 @@ const VirtualGrid = <
 
   const rowCount = Math.ceil(data.length / columns);
 
-  const getRowSize = (index: number) =>
-    typeof rowHeight === 'function' ? rowHeight(index) : rowHeight;
+  const getRowSize = (index: number) => (typeof rowHeight === 'function' ? rowHeight(index) : rowHeight);
 
-  const getColumnSize = (index: number) =>
-    typeof columnWidth === 'function' ? columnWidth(index) : columnWidth;
+  const getColumnSize = (index: number) => (typeof columnWidth === 'function' ? columnWidth(index) : columnWidth);
 
   // Vertical virtualization: rows
   const rowVirtualizer = useVirtualizer<TScrollElement, TItemElement>({
@@ -88,33 +82,24 @@ const VirtualGrid = <
 
   useImperativeHandle(ref, () => {
     return {
-      containerRef: rootRef.current as TScrollElement,
       rowVirtualizer,
       columnVirtualizer,
-      ...rowVirtualizer
+      ...rowVirtualizer,
+      containerRef: rootRef.current as TScrollElement
     } as unknown as VirtualizerGrid<TScrollElement, TItemElement>;
   }, [rowVirtualizer, columnVirtualizer, rootRef]);
 
   return (
-    <div
-      {...containerProps}
-      className={mergedRootCls}
-      ref={rootRef}
-      style={containerStyle}
-    >
-      <div
-        className={innerCls}
-        style={innerStyle}
-      >
+    <div {...containerProps} className={mergedRootCls} ref={rootRef} style={containerStyle}>
+      <div className={innerCls} style={innerStyle}>
         {rowVirtualizer.getVirtualItems().map(virtualRow => (
           <Fragment key={virtualRow.index}>
-            {columnVirtualizer.getVirtualItems().map((virtualColumn) => {
+            {columnVirtualizer.getVirtualItems().map(virtualColumn => {
               const rowIndex = virtualRow.index;
               const colIndex = virtualColumn.index;
               const dataIndex = rowIndex * columns + colIndex;
 
-              if (dataIndex >= data.length)
-                return null;
+              if (dataIndex >= data.length) return null;
 
               const item = data[dataIndex];
 
@@ -135,10 +120,7 @@ const VirtualGrid = <
                 : `${rowIndex}-${colIndex}`;
 
               return (
-                <Slot
-                  key={String(key)}
-                  style={cellStyle}
-                >
+                <Slot key={String(key)} style={cellStyle}>
                   {renderCell(item, rowIndex, colIndex)}
                 </Slot>
               );

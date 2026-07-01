@@ -18,7 +18,7 @@ import type {
   PathToDeepType,
   ShapeFromPaths,
   Wrap
-} from '@skyroc/type-utils';
+} from '@go-tech/type-utils';
 import type { ChangeMask } from '../../form-core/event';
 import type { Action, ArrayOpArgs, Middleware } from '../../form-core/middleware';
 import type { FieldEntity, Meta, StoreValue } from '../../form-core/types';
@@ -42,15 +42,15 @@ export type ListRenderItem = {
  */
 type BuildMetaShape<T, P extends string> = P extends `${infer K}.${infer R}`
   ? K extends keyof T
-    ? T[K] extends readonly (infer U)[]
-      ? Wrap<Extract<K, string>, Array<BuildMetaShape<U, R>>>
-      : Wrap<Extract<K, string>, BuildMetaShape<T[K], R>>
-    : never
+  ? T[K] extends readonly (infer U)[]
+  ? Wrap<Extract<K, string>, Array<BuildMetaShape<U, R>>>
+  : Wrap<Extract<K, string>, BuildMetaShape<T[K], R>>
+  : never
   : P extends `${infer K}`
-    ? K extends keyof T
-      ? Wrap<Extract<K, string>, Meta<P, PathToDeepType<T, P>>>
-      : never
-    : never;
+  ? K extends keyof T
+  ? Wrap<Extract<K, string>, Meta<P, PathToDeepType<T, P>>>
+  : never
+  : never;
 
 /**
  * Converts an array of field paths into a hierarchical Meta structure
@@ -313,13 +313,13 @@ export interface InternalFieldHooks<Values = any> {
  * Combines all form operation interfaces for external API
  */
 export interface FormInstance<Values = any>
-  extends ValuesOptions<Values>, StateOptions<Values>, OperationOptions<Values> {}
+  extends ValuesOptions<Values>, StateOptions<Values>, OperationOptions<Values> { }
 
 /**
  * Combined interface for all internal form hooks
  * Used internally for form configuration and field management
  */
-export interface InternalFormHooks<Values = any> extends InternalCallbacks<Values>, InternalFieldHooks<Values> {}
+export interface InternalFormHooks<Values = any> extends InternalCallbacks<Values>, InternalFieldHooks<Values> { }
 
 /**
  * Internal form context interface

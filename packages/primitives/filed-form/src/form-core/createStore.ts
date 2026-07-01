@@ -23,7 +23,7 @@ import {
   keyOfName,
   microtask,
   toArray
-} from '@skyroc/utils';
+} from '@go-tech/utils';
 import { type ChangeMask, ChangeTag } from './event';
 import type { Action, ArrayOpArgs, Middleware, ValidateFieldsOptions } from './middleware';
 import { compose } from './middleware';

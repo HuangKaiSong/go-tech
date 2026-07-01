@@ -1,8 +1,8 @@
 'use client';
 
 /* eslint-disable react/hook-use-state */
-import type { AllPathsKeys, PathToDeepType } from '@skyroc/type-utils';
-import { deepGet, isArray, isNil, isObject } from '@skyroc/utils';
+import type { AllPathsKeys, PathToDeepType } from '@go-tech/type-utils';
+import { deepGet, isArray, isNil, isObject } from '@go-tech/utils';
 import { useEffect, useState } from 'react';
 import { flushSync } from 'react-dom';
 

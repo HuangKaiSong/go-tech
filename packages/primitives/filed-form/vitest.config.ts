@@ -1,12 +1,12 @@
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { COVERAGE_EXCLUDE, baseCoverageConfig, baseTestConfig } from '@skyroc/config/vitest';
+import { COVERAGE_EXCLUDE, baseCoverageConfig, baseTestConfig } from '@go-tech/config/vitest';
 import { defineConfig } from 'vitest/config';
 
 const workspaceRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 
 /**
- * @skyroc/form 测试配置
+ * @go-tech/form 测试配置
  *
  * 继承仓库共享 Vitest 配置，覆盖 core 和 React 集成测试。
  */

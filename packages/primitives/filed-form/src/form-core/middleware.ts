@@ -3,8 +3,8 @@
  * Provides type-safe action definitions and middleware composition utilities
  */
 
-import type { AllPathsKeys, PathToDeepType } from '@skyroc/type-utils';
-import type { NamePath } from '@skyroc/utils';
+import type { AllPathsKeys, PathToDeepType } from '@go-tech/type-utils';
+import type { NamePath } from '@go-tech/utils';
 
 import type { ValidateOptions } from './validation';
 

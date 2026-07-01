@@ -86,11 +86,11 @@ export interface CardFooterProps
 export interface CardContentProps
   extends WithClassName,
   Omit<React.HTMLAttributes<HTMLDivElement>, 'className' | 'title'> {
-/**
- * If true, the card content will be scrollable.
- * When true, adds overflow-auto to the content wrapper.
- * @default true
- */
+  /**
+   * If true, the card content will be scrollable.
+   * When true, adds overflow-auto to the content wrapper.
+   * @default true
+   */
   scrollable?: boolean;
   /**
    * The size variant of the content affecting padding.

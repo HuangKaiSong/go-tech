@@ -5,8 +5,8 @@
  * Provides helper functions to transform validation issues and create generic resolvers
  */
 
-import type { AllPathsKeys } from '@skyroc/type-utils';
-import { keyOfName } from '@skyroc/utils';
+import type { AllPathsKeys } from '@go-tech/type-utils';
+import { keyOfName } from '@go-tech/utils';
 import type { Action, Middleware } from '../middleware';
 import type { StandardSchemaV1NormalizedIssue } from './standard';
 
@@ -54,42 +54,42 @@ export function createGenericResolver<Values = any>(
 ): Middleware<Values> {
   return ({ dispatch, getState }) =>
     next =>
-    async action => {
-      // Only handle validation actions, pass through others
-      if (action.type !== 'validateField' && action.type !== 'validateFields') {
-        return next(action);
-      }
-
-      // Get current form state for validation
-      const state = getState();
-
-      // Handle single field validation
-      if (action.type === 'validateField') {
-        // Convert field name to dot-notation string
-        const name = keyOfName(action.name) as AllPathsKeys<Values>;
-        // Run validation for the specific field
-        const issues = await validate(state, name);
-
-        // Filter issues to only include ones for this specific field
-        const filtered = issues.filter(it => it.path.join('.') === name);
-
-        if (filtered.length > 0) {
-          // Dispatch validation errors if any found
-          dispatchIssues(dispatch, filtered);
-        } else {
-          // Clear errors for this field if validation passed
-          dispatch({ entries: [[name, []]], type: 'setExternalErrors' });
+      async action => {
+        // Only handle validation actions, pass through others
+        if (action.type !== 'validateField' && action.type !== 'validateFields') {
+          return next(action);
         }
 
-        return;
-      }
+        // Get current form state for validation
+        const state = getState();
 
-      // Handle multiple fields validation
-      if (action.type === 'validateFields') {
-        // Run validation for all specified fields (or all fields if none specified)
-        const issues = await validate(state, action.name?.map(keyOfName));
-        // Dispatch all validation issues
-        dispatchIssues(dispatch, issues);
-      }
-    };
+        // Handle single field validation
+        if (action.type === 'validateField') {
+          // Convert field name to dot-notation string
+          const name = keyOfName(action.name) as AllPathsKeys<Values>;
+          // Run validation for the specific field
+          const issues = await validate(state, name);
+
+          // Filter issues to only include ones for this specific field
+          const filtered = issues.filter(it => it.path.join('.') === name);
+
+          if (filtered.length > 0) {
+            // Dispatch validation errors if any found
+            dispatchIssues(dispatch, filtered);
+          } else {
+            // Clear errors for this field if validation passed
+            dispatch({ entries: [[name, []]], type: 'setExternalErrors' });
+          }
+
+          return;
+        }
+
+        // Handle multiple fields validation
+        if (action.type === 'validateFields') {
+          // Run validation for all specified fields (or all fields if none specified)
+          const issues = await validate(state, action.name?.map(keyOfName));
+          // Dispatch all validation issues
+          dispatchIssues(dispatch, issues);
+        }
+      };
 }
