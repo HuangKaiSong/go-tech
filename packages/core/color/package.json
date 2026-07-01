@@ -41,7 +41,7 @@
     "typecheck": "tsc --noEmit --skipLibCheck"
   },
   "dependencies": {
-    "@go-tech/core-utils": "workspace:*",
+    "@go-tech/utils": "workspace:*",
     "colord": "2.9.3",
     "culori": "^4.0.2"
   },

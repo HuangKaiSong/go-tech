@@ -1,13 +1,24 @@
 {
-  "name": "@go-tech/core-utils",
-  "version": "1.0.0",
-  "private": true,
-  "description": "Platform-agnostic utilities (no DOM, no framework)",
+  "name": "@go-tech/utils",
+  "version": "2.0.2",
   "type": "module",
+  "description": "Platform-agnostic utility functions with ./web subpath for browser-only utilities (download, window, BOM helpers)",
+  "keywords": [
+    "browser",
+    "crypto",
+    "date",
+    "dayjs",
+    "platform-agnostic",
+    "react",
+    "storage",
+    "typescript",
+    "utility"
+  ],
   "sideEffects": false,
-  "main": "./src/index.ts",
-  "module": "./src/index.ts",
-  "types": "./src/index.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "main": "./src/index.ts",
   "module": "./src/index.ts",
   "types": "./src/index.ts",
@@ -27,14 +38,31 @@
     "./web": "./src/web/index.ts"
   },
   "scripts": {
-    "type-check": "tsc --noEmit"
+    "build": "tsdown",
+    "clean": "rimraf dist",
+    "dev": "tsdown --watch",
+    "lint": "oxlint --fix",
+    "typecheck": "tsc --noEmit --skipLibCheck"
   },
   "dependencies": {
+    "@go-tech/type-utils": "workspace:*",
     "clsx": "catalog:utils",
-    "tailwind-merge": "^3.4.0"
+    "colord": "catalog:utils",
+    "crypto-js": "catalog:utils",
+    "dayjs": "catalog:utils",
+    "klona": "catalog:utils",
+    "localforage": "catalog:utils",
+    "nanoid": "catalog:utils",
+    "radash": "^12.1.1",
+    "tailwind-merge": "catalog:utils"
   },
   "devDependencies": {
+    "@go-tech/config": "workspace:*",
     "@go-tech/tsconfig": "workspace:*",
+    "@types/crypto-js": "catalog:dev",
+    "oxlint": "catalog:dev",
+    "rimraf": "catalog:dev",
+    "tsdown": "catalog:dev",
     "typescript": "catalog:core"
   }
 }

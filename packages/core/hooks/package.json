@@ -16,7 +16,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@go-tech/core-utils": "workspace:*",
+    "@go-tech/utils": "workspace:*",
     "dayjs": "^1.11.19"
   },
   "peerDependencies": {

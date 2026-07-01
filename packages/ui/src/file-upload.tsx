@@ -1,4 +1,4 @@
-import { cn } from '@go-tech/core-utils';
+import { cn } from '@go-tech/utils';
 import { AlertCircle, Download, FileImage, Upload, X, ZoomIn } from 'lucide-react';
 import * as React from 'react';
 import { useCallback, useRef, useState } from 'react';

@@ -2,14 +2,14 @@
   "name": "@go-tech-frontend/lib",
   "version": "1.0.0",
   "private": true,
-  "description": "DEPRECATED back-compat shim — use @go-tech/core-utils and @go-tech/hooks",
+  "description": "DEPRECATED back-compat shim — use @go-tech/utils and @go-tech/hooks",
   "keywords": [ ],
   "license": "ISC",
   "author": "",
   "main": "./src/index.ts",
   "dependencies": {
     "@go-tech/hooks": "workspace:*",
-    "@go-tech/core-utils": "workspace:*"
+    "@go-tech/utils": "workspace:*"
   },
   "packageManager": "pnpm@10.17.0"
 }

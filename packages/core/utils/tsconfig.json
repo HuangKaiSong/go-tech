@@ -1,11 +1,7 @@
 {
-  "$schema": "https://json.schemastore.org/tsconfig",
-  "extends": "@go-tech/tsconfig/library.json",
+  "extends": "@go-tech/tsconfig/web.json",
   "compilerOptions": {
-    "noEmit": true,
-    "declaration": false,
-    "declarationMap": false,
-    "emitDeclarationOnly": false
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
   },
   "include": ["src"]
 }

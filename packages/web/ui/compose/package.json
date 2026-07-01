@@ -40,7 +40,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@iconify/react": "catalog:ui-shared",
     "@go-tech/color": "workspace:*",
-    "@go-tech/core-utils": "workspace:*",
+    "@go-tech/utils": "workspace:*",
     "ahooks": "catalog:utils",
     "clsx": "catalog:utils",
     "tailwind-variants": "catalog:utils"

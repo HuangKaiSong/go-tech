@@ -1,4 +1,4 @@
-import { isNumber } from '@go-tech/core-utils';
+import { isNumber } from '@go-tech/utils';
 import dayjs from 'dayjs';
 import { useEffect, useMemo, useState } from 'react';
 import useLatest from '../useLatest';
