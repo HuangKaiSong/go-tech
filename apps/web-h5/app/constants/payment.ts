@@ -72,7 +72,7 @@ export function openWebManagedCashier(data: OrderAddResponse): void {
   if (typeof document === 'undefined') return;
 
   const fields: Record<string, string> = {
-    orderNo: data.managedOrderNo,
+    managedOrderNo: data.managedOrderNo,
     language: data.language,
     'K-Merchant-Code': data.merchantCode,
     'K-Nonce-Str': data.nonceStr,

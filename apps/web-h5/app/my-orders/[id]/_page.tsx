@@ -15,12 +15,17 @@ import {
 import { ArrowLeft, CheckCircle, Download, Minus, Package, Plus, RefreshCw, Settings } from 'lucide-react';
 import type { GetStaticPaths, GetStaticProps } from 'next';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Footer from '@/app/components/Footer';
 import Header from '@/app/components/Header';
 import Link from '@/app/components/Link';
 import { OrderStatusEnum } from '@/app/constants/order';
 import { PayTypeEnum, PayTypelabel } from '@/app/constants/payment';
+import { useAuth } from '@/contexts/AuthContext';
+
+// 线上支付回跳后轮询配置
+const POLL_INTERVAL = 5000; // 每 5 秒查询一次
+const POLL_MAX_ATTEMPTS = 60; // 最多 60 次（约 5 分钟）
 
 // 增值服務列表
 const valueAddedServices = [
@@ -69,11 +74,64 @@ const getStatusColor = (status: OrderStatusEnum) => {
 
 const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
   const router = useRouter();
-  const order = detail;
+  const { token } = useAuth();
 
+  const [order, setOrder] = useState(detail);
+  const [isPolling, setIsPolling] = useState(false);
   const [showAddonsDialog, setShowAddonsDialog] = useState(false);
   const [selectedServices, setSelectedServices] = useState<Record<string, number>>({});
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+
+  /**
+   * 线上支付回跳后轮询订单状态。 仅当同时满足以下条件才开启轮询：
+   *
+   * 1. 回跳来源 from=kpay
+   * 2. 支付方式为线上支付（payType=Online）
+   * 3. 当前订单状态为待付款（WAIT_PAY） 一旦状态变更（支付成功/失败等）或达到最大次数即停止。
+   */
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (!token) return;
+
+    const fromKpay = new URLSearchParams(window.location.search).get('from') === 'kpay';
+    const shouldPoll =
+      fromKpay && order?.payType === PayTypeEnum.Online && order?.orderStatus === OrderStatusEnum.WAIT_PAY;
+    if (!shouldPoll) return;
+
+    setIsPolling(true);
+    let attempts = 0;
+    const timer = setInterval(async () => {
+      attempts += 1;
+      try {
+        const res = await fetch(`/go-tech/platform/packageOrder/detail/${_orderId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Type': 'platform_customer',
+            Authorization: `Bearer ${token}`
+          }
+        }).then(r => r.json());
+
+        if (res.code === 200 && res.data && res.data.orderStatus !== OrderStatusEnum.WAIT_PAY) {
+          // 状态已更新，保留服务端已过滤的套餐功能列表，刷新其余字段后停止轮询
+          setOrder((prev: any) => ({ ...res.data, platformPackageDto: prev?.platformPackageDto }));
+          clearInterval(timer);
+          setIsPolling(false);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+      if (attempts >= POLL_MAX_ATTEMPTS) {
+        clearInterval(timer);
+        setIsPolling(false);
+      }
+    }, POLL_INTERVAL);
+
+    return () => {
+      clearInterval(timer);
+      setIsPolling(false);
+    };
+  }, [token, _orderId, order?.payType, order?.orderStatus]);
 
   const toggleService = (serviceId: string) => {
     setSelectedServices(prev => {
@@ -154,7 +212,17 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
               <h1 className="text-3xl md:text-4xl font-bold text-primary mb-2">訂單詳情</h1>
               <p className="text-muted-foreground">訂單編號：{order.orderNo}</p>
             </div>
-            <Badge className={`text-sm px-3 py-1 ${getStatusColor(order.orderStatus)}`}>{order.orderStatusName}</Badge>
+            <div className="flex items-center gap-2">
+              {isPolling && (
+                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <RefreshCw className="w-3 h-3 animate-spin" />
+                  支付確認中…
+                </span>
+              )}
+              <Badge className={`text-sm px-3 py-1 ${getStatusColor(order.orderStatus)}`}>
+                {order.orderStatusName}
+              </Badge>
+            </div>
           </div>
         </div>
       </section>

@@ -291,7 +291,7 @@ const ConfirmOrder = ({
   /** 构建增值服务订单数据（FPS 与线上支付一致，仅 payType 不同） */
   const buildOrderInfo = (payType: PayTypeEnum) => {
     const orderInfo: any = {
-      orderType: OrderTypeEnum.ADDITION,
+      orderType: OrderTypeEnum.PURCHASE,
       payType,
       orderItems: [
         {
@@ -389,7 +389,7 @@ const ConfirmOrder = ({
   /** 线上支付：先创建增值服务订单（payType=Online），再生成全托管收银台并跳转 */
   const handleOnlinePaymentConfirm = async () => {
     toast.dismiss();
-    const toastId = toast.loading('創建增值服務訂單中...');
+    const toastId = toast.loading('创建订单中...');
     const orderInfo = buildOrderInfo(PayTypeEnum.Online);
 
     try {
