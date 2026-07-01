@@ -1,4 +1,4 @@
-import { cn } from '@go-tech/core-utils';
+import { cn } from '@go-tech/utils';
 import { ChevronDown, ChevronRight, FileText, Gift, MessageSquareText, Package, Settings, Users } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';

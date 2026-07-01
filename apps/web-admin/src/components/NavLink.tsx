@@ -1,4 +1,4 @@
-import { cn } from '@go-tech/core-utils';
+import { cn } from '@go-tech/utils';
 import { forwardRef } from 'react';
 import { NavLink as RouterNavLink, type NavLinkProps } from 'react-router-dom';
 

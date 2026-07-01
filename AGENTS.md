@@ -17,12 +17,12 @@
 
 **Cross-platform core (`packages/core/*`, prefix `@go-tech/*`)** — platform-agnostic kernel, **must not import DOM / `next` / `react-dom`** (enforced by `tsconfig` with `lib: ["ESNext"]`):
 
-- `@go-tech/core-utils`: `cn`, `truncate`, `formatNumber`, type guards
+- `@go-tech/utils`: `cn`, `truncate`, `formatNumber`, type guards
 - `@go-tech/hooks`: `useCountDown`, `useLatest` (React peer)
 - `@go-tech/types`: shared domain types (`HttpBaseResponse`, `User`, `Tenant`, `Packages`, `MenuType`)
 - `@go-tech/core-http`: runtime-agnostic `HttpClient` + injectable `HttpAdapter` (each app supplies token/baseUrl/error handling; web-h5 injects the Next.js `cookies()` adapter)
 
-> `@go-tech-frontend/lib` is **deprecated** — it now re-exports from `@go-tech/core-utils` and `@go-tech/hooks`. Import from the core packages directly.
+> `@go-tech-frontend/lib` is **deprecated** — it now re-exports from `@go-tech/utils` and `@go-tech/hooks`. Import from the core packages directly.
 
 ---
 
@@ -100,7 +100,7 @@ Components in `packages/ui/src/` use this pattern:
 import { forwardRef } from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "@go-tech/core-utils";
+import { cn } from "@go-tech/utils";
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none disabled:pointer-events-none",
@@ -208,23 +208,23 @@ Types: `feat`, `fix`, `refactor`, `chore`
 
 ## Key Files & Utilities
 
-### From `@go-tech/core-utils` & `@go-tech/hooks`
+### From `@go-tech/utils` & `@go-tech/hooks`
 
 ```typescript
 // Class merging (Tailwind + utility classes)
-import { cn } from '@go-tech/core-utils';
+import { cn } from '@go-tech/utils';
 cn('px-2 py-1', condition && 'bg-red-500');
 
 // Text truncation
-import { truncate } from '@go-tech/core-utils';
+import { truncate } from '@go-tech/utils';
 truncate('long text', 10); // Returns "long text..."
 
 // Number formatting
-import { formatNumber } from '@go-tech/core-utils';
+import { formatNumber } from '@go-tech/utils';
 formatNumber(1000); // Returns "1,000"
 
 // Type guards
-import { isObject, isString, isUndef } from '@go-tech/core-utils';
+import { isObject, isString, isUndef } from '@go-tech/utils';
 
 // Hooks
 import { useCountDown, useLatest } from '@go-tech/hooks';
@@ -276,7 +276,7 @@ Example:
 
 ```typescript
 import { Button } from "@go-tech-frontend/ui";
-import { cn } from "@go-tech/core-utils";
+import { cn } from "@go-tech/utils";
 
 export function MyComponent() {
   return (
