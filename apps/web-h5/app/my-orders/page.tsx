@@ -1,6 +1,18 @@
 'use client';
 
-import { Badge, Button, Card, CardContent, CardHeader, type UploadedFile, toast } from '@go-tech-frontend/ui';
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  type UploadedFile,
+  toast
+} from '@go-tech-frontend/ui';
 import { useAsyncEffect } from 'ahooks';
 import { ArrowUpCircle, Eye, Package, RefreshCw, Settings, ShoppingCart } from 'lucide-react';
 import dynamic from 'next/dynamic';
@@ -11,11 +23,11 @@ import Header from '@/app/components/Header';
 import Link from '@/app/components/Link';
 import { useAuth } from '@/contexts/AuthContext';
 import { type OrderItemInfoType, OrderStatusEnum } from '../constants/order';
-import { PayTypeEnum, openWebManagedCashier } from '../constants/payment';
 import { AddService } from './AddService';
 import { Upgrade } from './Upgrade';
 
-const PaymentPanel = dynamic(() => import('../components/payment/Panel'), {
+// REJECT 订单重新上传支付凭证：直接复用 FPS 凭证上传界面
+const Fps = dynamic(() => import('../components/payment/Fps'), {
   ssr: false
 });
 
@@ -55,60 +67,15 @@ const MyOrders = () => {
     setShowPaymentDialog(false);
   };
 
+  /** REJECT 订单重新上传支付凭证：对已存在订单调用 payEvidence 重新上传凭证（不再 reAdd/重新下单） */
   const handleFpsPaymentConfirm = async (file: UploadedFile) => {
     toast.dismiss();
     if (!selectOrder) {
       return;
     }
-    const toastId = toast.loading('正在準備數據中...');
-    const headers = new Headers({
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-      'User-Type': 'platform_customer'
-    });
-    const orderInfo: any = {
-      id: selectOrder.id,
-      payType: PayTypeEnum.FPS,
-      payEvidence: file.url
-    };
-
+    const toastId = toast.loading('正在提交支付憑證...');
     try {
-      // 创建订单
-      const orderResponse = await fetch('/go-tech/platform/packageOrder/reAdd', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(orderInfo)
-      })
-        .then(res => res.json())
-        .catch(err => {
-          throw err;
-        });
-      if (orderResponse.code === 200) {
-        toast.success('操作订单成功', { id: toastId });
-        if (orderInfo.payType === PayTypeEnum.FPS) {
-          toast.success('支付憑證已提交，我們將在確認後為您更新订单');
-          router.push(`/my-orders/${selectOrder.id}`);
-        }
-
-        setShowPaymentDialog(false);
-      } else {
-        toast.error(orderResponse.message);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  /** 线上支付：对已存在订单重新发起支付（reAdd，payType=Online），再生成全托管收银台并跳转 */
-  const handleOnlinePaymentConfirm = async () => {
-    toast.dismiss();
-    if (!selectOrder) {
-      return;
-    }
-    const toastId = toast.loading('正在準備數據中...');
-    try {
-      // 与 FPS 请求数据一致，仅 payType 不同（线上支付无需 payEvidence）
-      const orderResponse = await fetch('/go-tech/platform/packageOrder/reAdd', {
+      const res = await fetch('/go-tech/platform/packageOrder/payEvidence', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -117,22 +84,20 @@ const MyOrders = () => {
         },
         body: JSON.stringify({
           id: selectOrder.id,
-          payType: PayTypeEnum.Online
+          payEvidence: file.url
         })
-      }).then(res => res.json());
+      }).then(r => r.json());
 
-      if (orderResponse.code !== 200) {
-        toast.error(orderResponse.message, { id: toastId });
-        return;
+      if (res.code === 200) {
+        toast.success('支付憑證已提交，我們將在確認後為您更新订单', { id: toastId });
+        setShowPaymentDialog(false);
+        router.push(`/my-orders/${selectOrder.id}`);
+      } else {
+        toast.error(res.message, { id: toastId });
       }
-
-      // 后端返回 OrderAddResponse（含签名等参数），以 GET 表单方式喚起全托管收银台
-      toast.success('正在跳转至收银台', { id: toastId });
-      setShowPaymentDialog(false);
-      openWebManagedCashier(orderResponse.data);
     } catch (error) {
       console.log(error);
-      toast.error('操作失敗，請稍後重試', { id: toastId });
+      toast.error('提交失敗，請稍後重試', { id: toastId });
     }
   };
 
@@ -292,7 +257,7 @@ const MyOrders = () => {
                           }}
                         >
                           <RefreshCw className="w-4 h-4" />
-                          重新購買
+                          重新上傳支付憑證
                         </Button>
                       )}
                       {order.isEffective && (
@@ -365,16 +330,20 @@ const MyOrders = () => {
         <Upgrade data={selectOrder} open={showUpgradeDialog} onOpenChangeAction={setShowUpgradeDialog} />
       )}
 
-      {/* 支付方式選擇對話框 */}
+      {/* 重新上傳支付憑證對話框（REJECT 订单，直接进入凭证上传） */}
       {showPaymentDialog && selectOrder && (
-        <PaymentPanel
-          open={showPaymentDialog}
-          onOpenChange={setShowPaymentDialog}
-          price={selectOrder.finalAmount}
-          handleBackToPaymentMethods={handleBackToPaymentMethods}
-          handleFpsPaymentConfirm={handleFpsPaymentConfirm}
-          handleOnlinePaymentConfirm={handleOnlinePaymentConfirm}
-        />
+        <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="text-center text-xl">重新上傳支付憑證</DialogTitle>
+            </DialogHeader>
+            <Fps
+              price={selectOrder.finalAmount}
+              handleBackToPaymentMethods={handleBackToPaymentMethods}
+              handleFpsPaymentConfirm={handleFpsPaymentConfirm}
+            />
+          </DialogContent>
+        </Dialog>
       )}
       <Footer />
     </div>
