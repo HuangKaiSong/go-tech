@@ -23,7 +23,7 @@ import Footer from '@/app/components/Footer';
 import Header from '@/app/components/Header';
 import Link from '@/app/components/Link';
 import { type OrderItemInfoType, OrderItemTypeEnum, OrderTypeEnum } from '@/app/constants/order';
-import { DAYSPERMONTH, PayTypeEnum, openWebManagedCashier } from '@/app/constants/payment';
+import { DAYSPERMONTH, PayTypeEnum, stashWebManagedCashier } from '@/app/constants/payment';
 import { type PromotionOption, getPromotionDiscount } from '@/app/constants/promotion';
 import { usePromotions } from '@/app/hooks/usePromotions';
 import { useAuth } from '@/contexts/AuthContext';
@@ -344,10 +344,11 @@ const RenewOrder = ({
         return;
       }
 
-      // 后端返回 OrderAddResponse（含签名等参数），以 GET 表单方式喚起全托管收银台
-      toast.success('正在跳转至收银台', { id: toastId });
+      // 后端返回 OrderAddResponse（含签名等参数）；先跳转订单详情，再由详情页唤起第三方支付
+      toast.success('訂單創建成功，正在跳转...', { id: toastId });
       setShowPaymentDialog(false);
-      openWebManagedCashier(orderResponse.data);
+      stashWebManagedCashier(orderResponse.data);
+      router.push(`/my-orders/${orderResponse.data.orderId}`);
     } catch (error) {
       console.log(error);
       toast.error('創建續費訂單失敗，請稍後重試', { id: toastId });

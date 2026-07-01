@@ -68,6 +68,51 @@ export const KPAY_WEB_MANAGED_CASHIER_URL =
  * 这里按 KPay 文档以自动提交的 GET 表单方式跳转到收银台，无需再请求后端生成收银台。
  * 支付完成后 KPay 会按下单时设置的 returnUrl 跳回；最终结果以后端 webhook 落库的订单状态为准。
  */
+const CASHIER_PENDING_KEY = 'KPAY_CASHIER_PENDING';
+
+/**
+ * 暂存待唤起的收银台数据。
+ * 线上支付下单成功后调用，随后跳转到订单详情页；详情页挂载时再消费并跳转第三方支付。
+ */
+export function stashWebManagedCashier(data: OrderAddResponse): void {
+  if (typeof sessionStorage === 'undefined') return;
+  try {
+    sessionStorage.setItem(CASHIER_PENDING_KEY, JSON.stringify(data));
+  } catch (error) {
+    console.error('stashWebManagedCashier error:', error);
+  }
+}
+
+/**
+ * 读取暂存的收银台数据（仅当与当前订单匹配，不删除）。
+ * 订单详情页挂载时调用：返回非空表示该订单需要跳转第三方支付。
+ * 注意：读取后不删除，真正跳转前再调用 {@link clearWebManagedCashier}，
+ * 以兼容 React 严格模式的 effect 双调用，并避免从支付页返回时重复跳转。
+ */
+export function peekWebManagedCashier(orderId: string | number): OrderAddResponse | null {
+  if (typeof sessionStorage === 'undefined') return null;
+  try {
+    const raw = sessionStorage.getItem(CASHIER_PENDING_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw) as OrderAddResponse;
+    if (String(data.orderId) !== String(orderId)) return null;
+    return data;
+  } catch (error) {
+    console.error('peekWebManagedCashier error:', error);
+    return null;
+  }
+}
+
+/** 清除暂存的收银台数据（跳转第三方支付前调用）。 */
+export function clearWebManagedCashier(): void {
+  if (typeof sessionStorage === 'undefined') return;
+  try {
+    sessionStorage.removeItem(CASHIER_PENDING_KEY);
+  } catch (error) {
+    console.error('clearWebManagedCashier error:', error);
+  }
+}
+
 export function openWebManagedCashier(data: OrderAddResponse): void {
   if (typeof document === 'undefined') return;
 

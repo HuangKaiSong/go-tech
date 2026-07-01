@@ -1,18 +1,7 @@
 'use client';
 
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  Separator
-} from '@go-tech-frontend/ui';
-import { ArrowLeft, CheckCircle, Download, Minus, Package, Plus, RefreshCw, Settings } from 'lucide-react';
+import { Badge, Button, Card, CardContent, CardHeader, Separator } from '@go-tech-frontend/ui';
+import { ArrowLeft, CheckCircle, Download, Package, RefreshCw, Settings } from 'lucide-react';
 import type { GetStaticPaths, GetStaticProps } from 'next';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -20,21 +9,19 @@ import Footer from '@/app/components/Footer';
 import Header from '@/app/components/Header';
 import Link from '@/app/components/Link';
 import { OrderStatusEnum } from '@/app/constants/order';
-import { PayTypeEnum, PayTypelabel } from '@/app/constants/payment';
+import {
+  type OrderAddResponse,
+  PayTypeEnum,
+  PayTypelabel,
+  clearWebManagedCashier,
+  openWebManagedCashier,
+  peekWebManagedCashier
+} from '@/app/constants/payment';
 import { useAuth } from '@/contexts/AuthContext';
 
 // 线上支付回跳后轮询配置
 const POLL_INTERVAL = 5000; // 每 5 秒查询一次
 const POLL_MAX_ATTEMPTS = 60; // 最多 60 次（约 5 分钟）
-
-// 增值服務列表
-const valueAddedServices = [
-  { id: 'extra-50-units', name: '額外50個單位', price: 500 },
-  { id: 'extra-100-units', name: '額外100個單位', price: 900 },
-  { id: 'priority-support', name: '優先客服支援', price: 300 },
-  { id: 'data-backup', name: '數據備份服務', price: 200 },
-  { id: 'custom-report', name: '自訂報表功能', price: 400 }
-];
 
 type OrderProps = {
   id: string;
@@ -72,15 +59,30 @@ const getStatusColor = (status: OrderStatusEnum) => {
   }
 };
 
+/** 跳转第三方支付（全托管收银台）。 */
+const goToThirdPartyPay = (data: OrderAddResponse) => {
+  clearWebManagedCashier();
+  openWebManagedCashier(data);
+};
+
+// oxlint-disable-next-line complexity
 const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
   const router = useRouter();
   const { token } = useAuth();
 
   const [order, setOrder] = useState(detail);
   const [isPolling, setIsPolling] = useState(false);
-  const [showAddonsDialog, setShowAddonsDialog] = useState(false);
-  const [selectedServices, setSelectedServices] = useState<Record<string, number>>({});
-  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [pendingCashier, setPendingCashier] = useState<OrderAddResponse | null>(null);
+
+  /** 线上支付下单后跳转到本页：先展示订单详情，短暂停留后再跳转第三方支付页面。 延迟跳转可让用户看到订单详情，并确保详情页已进入浏览历史（从支付页返回时回到详情而非下单页）。 */
+  useEffect(() => {
+    const data = peekWebManagedCashier(_orderId);
+    if (!data) return;
+    setPendingCashier(data);
+    const timer = setTimeout(() => goToThirdPartyPay(data), 1500);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [_orderId]);
 
   /**
    * 线上支付回跳后轮询订单状态。 仅当同时满足以下条件才开启轮询：
@@ -91,6 +93,9 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
    */
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    // 正在等待跳转第三方支付时不轮询
+    if (peekWebManagedCashier(_orderId)) return;
+
     if (!token) return;
 
     const fromKpay = new URLSearchParams(window.location.search).get('from') === 'kpay';
@@ -132,47 +137,6 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
       setIsPolling(false);
     };
   }, [token, _orderId, order?.payType, order?.orderStatus]);
-
-  const toggleService = (serviceId: string) => {
-    setSelectedServices(prev => {
-      if (prev[serviceId]) {
-        const { [serviceId]: _, ...rest } = prev;
-        return rest;
-      }
-      return { ...prev, [serviceId]: 1 };
-    });
-  };
-
-  const updateQuantity = (serviceId: string, delta: number) => {
-    setSelectedServices(prev => {
-      const current = prev[serviceId] || 0;
-      const newQty = Math.max(0, current + delta);
-      if (newQty === 0) {
-        const { [serviceId]: _, ...rest } = prev;
-        return rest;
-      }
-      return { ...prev, [serviceId]: newQty };
-    });
-  };
-
-  const calculateAddonsTotal = () => {
-    return Object.entries(selectedServices).reduce((sum, [id, qty]) => {
-      const service = valueAddedServices.find(s => s.id === id);
-      return sum + (service ? service.price * qty : 0);
-    }, 0);
-  };
-
-  const handleConfirmAddons = () => {
-    setShowAddonsDialog(false);
-    setShowPaymentDialog(true);
-  };
-
-  const handlePaymentSelect = (method: string) => {
-    console.log('購買增值服務:', { method, services: selectedServices });
-    setShowPaymentDialog(false);
-    setSelectedServices({});
-    // 這裡可以添加實際的支付邏輯
-  };
 
   if (!order) {
     return (
@@ -231,6 +195,21 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
       <section className="py-8 bg-background">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto space-y-6">
+            {/* 线上支付：下单成功，即将跳转第三方支付 */}
+            {pendingCashier && (
+              <Card className="border-primary/40 bg-primary/5">
+                <CardContent className="flex items-center justify-between gap-4 py-4">
+                  <div className="flex items-center gap-2 text-sm">
+                    <RefreshCw className="w-4 h-4 animate-spin text-primary" />
+                    <span>訂單已創建，即將跳轉至支付頁面…</span>
+                  </div>
+                  <Button size="sm" onClick={() => goToThirdPartyPay(pendingCashier)}>
+                    立即前往支付
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
             {/* 套餐信息 */}
             <Card>
               <CardHeader className="pb-4">
@@ -368,125 +347,6 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
                 )}
               </div>
             )}
-
-            {/* 購買增值服務對話框 */}
-            <Dialog open={showAddonsDialog} onOpenChange={setShowAddonsDialog}>
-              <DialogContent className="sm:max-w-lg">
-                <DialogHeader>
-                  <DialogTitle>購買增值服務</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 mt-4">
-                  {valueAddedServices.map(service => {
-                    const isSelected = selectedServices[service.id] !== undefined;
-                    const quantity = selectedServices[service.id] || 0;
-
-                    return (
-                      <div
-                        key={service.id}
-                        className={`p-4 rounded-lg border-2 transition-colors ${
-                          isSelected ? 'border-primary bg-primary/5' : 'border-border'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <input
-                              type="checkbox"
-                              checked={isSelected}
-                              onChange={() => toggleService(service.id)}
-                              className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary"
-                            />
-                            <div>
-                              <p className="font-medium">{service.name}</p>
-                              <p className="text-sm text-muted-foreground">${service.price} HKD / 個</p>
-                            </div>
-                          </div>
-
-                          {isSelected && (
-                            <div className="flex items-center gap-2">
-                              <button
-                                onClick={() => updateQuantity(service.id, -1)}
-                                className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-muted transition-colors"
-                              >
-                                <Minus className="w-4 h-4" />
-                              </button>
-                              <span className="w-8 text-center font-medium">{quantity}</span>
-                              <button
-                                onClick={() => updateQuantity(service.id, 1)}
-                                className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-muted transition-colors"
-                              >
-                                <Plus className="w-4 h-4" />
-                              </button>
-                            </div>
-                          )}
-                        </div>
-
-                        {isSelected && quantity > 0 && (
-                          <div className="mt-2 pt-2 border-t text-right text-sm text-muted-foreground">
-                            小計：
-                            <span className="font-medium text-foreground">
-                              ${(service.price * quantity).toLocaleString()} HKD
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-
-                  <Separator />
-
-                  <div className="flex justify-between items-center text-lg font-bold">
-                    <span>總計</span>
-                    <span className="text-primary">${calculateAddonsTotal().toLocaleString()} HKD</span>
-                  </div>
-
-                  <div className="flex gap-3 pt-2">
-                    <Button variant="outline" className="flex-1" onClick={() => setShowAddonsDialog(false)}>
-                      取消
-                    </Button>
-                    <Button className="flex-1" disabled={calculateAddonsTotal() === 0} onClick={handleConfirmAddons}>
-                      確認購買
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
-
-            {/* 支付方式選擇對話框 */}
-            <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
-              <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle>選擇支付方式</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 mt-4">
-                  <p className="text-center text-muted-foreground">
-                    應付金額：
-                    <span className="text-xl font-bold text-primary">
-                      ${calculateAddonsTotal().toLocaleString()} HKD
-                    </span>
-                  </p>
-                  <div className="space-y-3">
-                    <button
-                      onClick={() => handlePaymentSelect('wechat')}
-                      className="w-full p-4 rounded-lg border-2 hover:border-green-500 hover:bg-green-50 transition-colors flex items-center gap-4"
-                    >
-                      <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
-                        <span className="text-white font-bold text-lg">微</span>
-                      </div>
-                      <span className="font-medium">微信支付</span>
-                    </button>
-                    <button
-                      onClick={() => handlePaymentSelect('alipay')}
-                      className="w-full p-4 rounded-lg border-2 hover:border-blue-500 hover:bg-blue-50 transition-colors flex items-center gap-4"
-                    >
-                      <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center">
-                        <span className="text-white font-bold text-lg">支</span>
-                      </div>
-                      <span className="font-medium">支付寶支付</span>
-                    </button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
           </div>
         </div>
       </section>

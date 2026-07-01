@@ -15,7 +15,7 @@ import { selectedMonthsAtom, selectedServicesAtom } from '@/contexts/Order.jotai
 import Footer from '../../components/Footer';
 import Header from '../../components/Header';
 import { type OrderInfoType, OrderItemTypeEnum, OrderTypeEnum } from '../../constants/order';
-import { DAYSPERMONTH, PayTypeEnum, openWebManagedCashier } from '../../constants/payment';
+import { DAYSPERMONTH, PayTypeEnum, stashWebManagedCashier } from '../../constants/payment';
 const PaymentPanel = dynamic(() => import('../../components/payment/Panel'), {
   ssr: false
 });
@@ -402,7 +402,9 @@ const ConfirmOrder = ({
       // 后端返回 OrderAddResponse（含签名等参数），以 GET 表单方式喚起全托管收银台
       toast.success('正在跳转至收银台', { id: toastId });
       setShowPaymentDialog(false);
-      openWebManagedCashier(orderResponse.data);
+      stashWebManagedCashier(orderResponse.data);
+      router.push(`/my-orders/${orderResponse.data.orderId}`);
+      // openWebManagedCashier(orderResponse.data);
     } catch (error) {
       console.log(error);
       toast.error('創建增值服務訂單失敗，請稍後重試', { id: toastId });
