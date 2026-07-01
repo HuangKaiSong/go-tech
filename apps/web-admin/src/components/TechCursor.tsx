@@ -23,7 +23,7 @@ const TechCursor = () => {
   // 动画帧ID
   const animationFrameId = useRef<number | null>(null);
 
-  function handleMouseMove(e) {
+  function handleMouseMove(e: any) {
     mouseX.current = e.clientX;
     mouseY.current = e.clientY;
 

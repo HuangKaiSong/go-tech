@@ -1,7 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import { registerSW } from 'virtual:pwa-register';
-import App from './App.tsx';
-// @ts-expect-error -- index.css is a Vite side-effect import handled at build time, no type declaration
+import App from './App';
 // oxlint-disable-next-line import/no-unassigned-import
 import './index.css';
 

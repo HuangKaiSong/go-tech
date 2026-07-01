@@ -3,7 +3,7 @@ import { Button, Input } from '@go-tech-frontend/ui';
 import { useMutation } from '@tanstack/react-query';
 import { useKeyPress } from 'ahooks';
 import { Eye, EyeOff } from 'lucide-react';
-import { Fragment, type RefObject, useEffect, useRef, useState } from 'react';
+import { type RefObject, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import TechCursor from '@/components/TechCursor';
@@ -38,7 +38,8 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const threeDom = useRef<HTMLCanvasElement>(null);
-  const [effectType, _setEffectType] = useState<AnimateType>(() => weightedRandom(animateType));
+  const effectType = weightedRandom(animateType);
+  // const [effectType, setEffectType] = useState<AnimateType>(() => weightedRandom(animateType));
 
   // 获取来源页面路径
   const from = location.state?.from || '/';
@@ -112,14 +113,14 @@ const Login = () => {
     switch (type) {
       case 'experience':
         return (
-          <Fragment>
+          <>
             <TechCursor />
             <canvas
               ref={threeDom as RefObject<HTMLCanvasElement>}
               className="three-canvas relative inset-0 "
               style={{ pointerEvents: 'none', zIndex: -1 }}
             />
-          </Fragment>
+          </>
         );
       case 'video':
         return <VideoPlayer url="/videos/yhkt_linglong_version1.mp4" />;

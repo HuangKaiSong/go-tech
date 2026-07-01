@@ -114,7 +114,7 @@ const OrderDetailPage = () => {
             </div>
             <div className="flex items-center gap-2">
               <span className="text-muted-foreground">支付方式：</span>
-              <span className="font-medium">{PayTypelabel[orderDetail.payType] || '-'}</span>
+              <span className="font-medium">{PayTypelabel[orderDetail.payType as keyof typeof PayTypelabel] || '-'}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-muted-foreground">支付時間：</span>

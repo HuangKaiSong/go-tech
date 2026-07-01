@@ -275,7 +275,7 @@ const OrdersPage = () => {
               <SelectTrigger className="w-32">
                 <SelectValue placeholder="請選擇" />
               </SelectTrigger>
-              <SelectContent></SelectContent>
+              <SelectContent />
             </Select>
           </div>
           <div className="flex items-center gap-2">
@@ -391,7 +391,8 @@ const OrdersPage = () => {
         }
         onOk={() => setConfirmDialogOpen(false)}
         onCancel={() => setConfirmDialogOpen(false)}
-        footer={_ => (
+        // oxlint-disable-next-line react/no-unstable-nested-components
+        footer={() => (
           <Space>
             <Button
               variant="outline"

@@ -145,7 +145,7 @@ const CreateOrder = () => {
   });
 
   const getServiceUnitPrice = (serviceId: string) => {
-    const currentPlan = plans.find(plan => plan.id === selectedUpgradePlan) as any;
+    const currentPlan = plans.find((plan: any) => plan.id === selectedUpgradePlan) as any;
 
     if (!currentPlan) return 0;
 
@@ -265,7 +265,7 @@ const CreateOrder = () => {
 
   /** 优惠价格 1个月-2个月 -> price 3个月-5个月 -> priceA 6个月-11个月 -> priceB 12个月及以上 -> priceC */
   const discountAmount = useMemo<number>(() => {
-    const plan = plans.find(p => p.id === selectedUpgradePlan);
+    const plan = plans.find((p: any) => p.id === selectedUpgradePlan);
     if (!plan) {
       return 0;
     }
@@ -287,7 +287,7 @@ const CreateOrder = () => {
   }, [month, plans, selectedUpgradePlan]);
 
   const getUpgradePrice = () => {
-    const plan = plans.find(p => p.id === selectedUpgradePlan);
+    const plan = plans.find((p: any) => p.id === selectedUpgradePlan);
     if (!plan) {
       return 0;
     }
@@ -295,7 +295,7 @@ const CreateOrder = () => {
   };
 
   const calculateUpgradeAddonsTotal = () => {
-    const plan = plans.find(p => p.id === selectedUpgradePlan);
+    const plan = plans.find((p: any) => p.id === selectedUpgradePlan);
     if (!plan) return 0;
     return (
       Object.entries(upgradeSelectedServices).reduce((sum, [id, qty]) => {
@@ -394,7 +394,7 @@ const CreateOrder = () => {
 
   const handleFpsPaymentConfirm = async (voucherFile: UploadedFile) => {
     // 设置参数创建订单
-    const currentPlan = plans.find(plan => plan.id === selectedUpgradePlan) as any;
+    const currentPlan = plans.find((plan: any) => plan.id === selectedUpgradePlan) as any;
 
     const orderInfo: any = {
       orderType: OrderTypeEnum.PURCHASE,
@@ -548,7 +548,7 @@ const CreateOrder = () => {
             />
             <div className="text-sm">月</div>
           </div>
-          {plans.map(plan => {
+          {plans.map((plan: any) => {
             return (
               <div
                 key={plan.id}
@@ -598,7 +598,7 @@ const CreateOrder = () => {
                   {valueAddedServices.map(service => {
                     const isSelected = upgradeSelectedServices[service.id] !== undefined;
                     const quantity = upgradeSelectedServices[service.id] || 0;
-                    const currentPlan = plans.find(plan => plan.id === selectedUpgradePlan);
+                    const currentPlan = plans.find((plan: any) => plan.id === selectedUpgradePlan);
 
                     return (
                       <div
@@ -811,7 +811,7 @@ const CreateOrder = () => {
             />
           ) : (
             <div className="grid gap-4 py-4">
-              <Button
+              {/* <Button
                 variant="outline"
                 disabled
                 onClick={() => setSelectedPaymentMethod(PayTypeEnum.WechatPay)}
@@ -832,7 +832,7 @@ const CreateOrder = () => {
                   <span className="text-white text-sm font-bold">支</span>
                 </div>
                 支付寶支付
-              </Button>
+              </Button> */}
               <Button
                 variant="outline"
                 onClick={() => setSelectedPaymentMethod(PayTypeEnum.FPS)}

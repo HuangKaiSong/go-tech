@@ -119,6 +119,7 @@ const EditUserDialog = ({
   setOpen: (open: boolean) => void;
   user: User;
 }) => {
+  // oxlint-disable-next-line react/hook-use-state
   const [userFormData, setUser] = useState<User>(JSON.parse(JSON.stringify(user)));
 
   const mutation = useMutation({
@@ -329,7 +330,7 @@ const SettingsUsersPage = () => {
           setOpen={() => toggleEditModel()}
           user={currentUser.current}
           refetch={query.refetch}
-        ></EditUserDialog>
+        />
       )}
 
       <div className="bg-card rounded-lg border border-border">
@@ -345,11 +346,11 @@ const SettingsUsersPage = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {list.map(user => (
+            {list.map((user: any) => (
               <TableRow key={user.id}>
                 <TableCell className="font-medium">{user.username}</TableCell>
                 <TableCell className="text-muted-foreground">{user.email}</TableCell>
-                <TableCell></TableCell>
+                <TableCell />
                 <TableCell className="text-center flex items-center justify-center gap-1">
                   <Switch
                     checked={user.status === 1}

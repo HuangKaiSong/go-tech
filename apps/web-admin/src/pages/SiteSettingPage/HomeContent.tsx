@@ -46,7 +46,8 @@ const HomeContent = () => {
             width={IFRAME_WIDTH}
             height={IFRAME_HEIGHT}
             frameBorder="0"
-          ></iframe>
+            sandbox=""
+          />
         </div>
       </div>
       <PanlEditor iframeRef={iframeRef} />

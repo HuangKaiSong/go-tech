@@ -218,7 +218,7 @@ const PackageEditPage = () => {
             return [];
           }
 
-          return response.data.map(item => {
+          return response.data.map((item: any) => {
             return {
               id: item.id,
               title: item.title,

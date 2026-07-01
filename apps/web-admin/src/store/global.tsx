@@ -33,6 +33,7 @@ export const GlobalProvider: FC<{ children: ReactNode }> = ({ children }) => {
   return <GlobalContext.Provider value={{ state, dispatch }}>{children}</GlobalContext.Provider>;
 };
 
+// oxlint-disable-next-line react/only-export-components
 export const useGlobalState = () => {
   const context = useContext(GlobalContext);
   if (!context) {
