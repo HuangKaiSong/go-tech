@@ -600,7 +600,7 @@ importers:
         version: 18.3.7(@types/react@18.3.30)
       '@vitejs/plugin-react-swc':
         specifier: catalog:vite-hr
-        version: 4.3.1(vite@8.1.2(@types/node@22.19.19)(esbuild@0.27.2)(jiti@2.7.0)(terser@5.48.0))
+        version: 4.3.1(vite@8.1.2(@types/node@22.19.19)(esbuild@0.27.2)(jiti@1.21.7)(terser@5.48.0))
       autoprefixer:
         specifier: 'catalog:'
         version: 10.4.23(postcss@8.5.15)
@@ -615,7 +615,7 @@ importers:
         version: 6.0.3
       vite:
         specifier: catalog:core
-        version: 8.1.2(@types/node@22.19.19)(esbuild@0.27.2)(jiti@2.7.0)(terser@5.48.0)
+        version: 8.1.2(@types/node@22.19.19)(esbuild@0.27.2)(jiti@1.21.7)(terser@5.48.0)
 
   apps/hr_mobile_manager:
     dependencies:
@@ -784,7 +784,7 @@ importers:
         version: 18.3.7(@types/react@18.3.30)
       '@vitejs/plugin-react-swc':
         specifier: catalog:vite-hr
-        version: 4.3.1(vite@8.1.2(@types/node@22.19.19)(esbuild@0.27.2)(jiti@1.21.7)(terser@5.48.0))
+        version: 4.3.1(vite@8.1.2(@types/node@22.19.19)(esbuild@0.27.2)(jiti@2.7.0)(terser@5.48.0))
       autoprefixer:
         specifier: 'catalog:'
         version: 10.4.23(postcss@8.5.15)
@@ -799,7 +799,7 @@ importers:
         version: 6.0.3
       vite:
         specifier: catalog:core
-        version: 8.1.2(@types/node@22.19.19)(esbuild@0.27.2)(jiti@1.21.7)(terser@5.48.0)
+        version: 8.1.2(@types/node@22.19.19)(esbuild@0.27.2)(jiti@2.7.0)(terser@5.48.0)
 
   apps/web-admin:
     dependencies:
@@ -960,6 +960,9 @@ importers:
       '@go-tech/core-http':
         specifier: workspace:*
         version: link:../../packages/core/http
+      '@go-tech/core-state':
+        specifier: workspace:*
+        version: link:../../packages/core/state
       '@go-tech/hooks':
         specifier: workspace:*
         version: link:../../packages/core/hooks

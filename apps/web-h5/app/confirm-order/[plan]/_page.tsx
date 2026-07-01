@@ -1,7 +1,7 @@
 'use client';
 
 import { Button, Input, Label, Switch, type UploadedFile, toast } from '@go-tech-frontend/ui';
-import { useSessionStorageState } from 'ahooks';
+import { useAtom, useAtomValue } from 'jotai';
 import { FileCheck } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
@@ -11,6 +11,7 @@ import { type PromotionOption, getPromotionDiscount } from '@/app/constants/prom
 import { usePromotions } from '@/app/hooks/usePromotions';
 import servicePlanBg from '@/assets/service-plan-bg.jpg';
 import { useAuth } from '@/contexts/AuthContext';
+import { selectedMonthsAtom, selectedServicesAtom } from '@/contexts/Order.jotai';
 import Footer from '../../components/Footer';
 import Header from '../../components/Header';
 import { type OrderInfoType, OrderItemTypeEnum, OrderTypeEnum } from '../../constants/order';
@@ -181,13 +182,7 @@ const ConfirmOrder = ({
   const selectedPlan = data;
   const [hasMounted, setHasMounted] = useState(false);
 
-  const [selectedServices, setSelectedServices] = useSessionStorageState<Record<string, number>>(
-    'user-selected-services',
-    {
-      defaultValue: () => ({}),
-      listenStorageChange: true
-    }
-  );
+  const [selectedServices, setSelectedServices] = useAtom(selectedServicesAtom);
 
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   // Customer info state
@@ -197,7 +192,7 @@ const ConfirmOrder = ({
   //   phone: '',
   //   company: ''
   // });
-  const [storedMonths] = useSessionStorageState<number>('user-selected-months', { defaultValue: 1 });
+  const storedMonths = useAtomValue(selectedMonthsAtom);
   const [month, setMonth] = useState<number>(1);
   useEffect(() => {
     if (storedMonths) setMonth(storedMonths);

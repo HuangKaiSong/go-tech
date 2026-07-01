@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@go-tech-frontend/ui';
-import { useSessionStorageState } from 'ahooks';
+import { useAtom, useSetAtom } from 'jotai';
 import { Check, Minus, Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -9,6 +9,7 @@ import Footer from '@/app/components/Footer';
 import Header from '@/app/components/Header';
 import valueAddedServices from '@/app/constants/addedServices';
 import servicePlanBg from '@/assets/service-plan-bg.jpg';
+import { selectedMonthsAtom, selectedServicesAtom } from '@/contexts/Order.jotai';
 
 const getIconHref = (value: string) => {
   const normalized = value
@@ -39,20 +40,14 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
   const selectedOption = renewalOptions.find(opt => opt.id === selectedPeriod)!;
   const selectedMonths = selectedOption.id === 'custom' ? customMonths : selectedOption.months;
 
-  const [, setStoredMonths] = useSessionStorageState<number>('user-selected-months', { defaultValue: 1 });
+  const setStoredMonths = useSetAtom(selectedMonthsAtom);
   useEffect(() => {
     setStoredMonths(selectedMonths);
   }, [selectedMonths, setStoredMonths]);
 
   const planTotal = plan.price * selectedMonths;
 
-  const [selectedServices, setSelectedServices] = useSessionStorageState<Record<string, number>>(
-    'user-selected-services',
-    {
-      defaultValue: {},
-      listenStorageChange: true
-    }
-  );
+  const [selectedServices, setSelectedServices] = useAtom(selectedServicesAtom);
   useEffect(() => {
     setHasMounted(true);
   }, []);

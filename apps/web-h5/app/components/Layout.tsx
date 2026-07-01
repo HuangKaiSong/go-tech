@@ -1,6 +1,7 @@
 'use client';
 
 import { Toaster } from '@go-tech-frontend/ui';
+import { JotaiProvider } from '@go-tech/core-state';
 import { useEffect, useState } from 'react';
 import { IframeProvider } from '@/contexts/IframeContext';
 import { WhatsappService } from './CustomerService';
@@ -16,12 +17,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <IframeProvider hasIframe={hasIframe}>
-      <div className="bg-white dark:bg-gray-950 text-black dark:text-white antialiased" data-iframe={hasIframe}>
-        <Toaster theme="system" className="toaster group" position="top-right" richColors />
-        {children}
-        <WhatsappService />
-      </div>
-    </IframeProvider>
+    <JotaiProvider>
+      <IframeProvider hasIframe={hasIframe}>
+        <div className="bg-white dark:bg-gray-950 text-black dark:text-white antialiased" data-iframe={hasIframe}>
+          <Toaster theme="system" className="toaster group" position="top-right" richColors />
+          {children}
+          <WhatsappService />
+        </div>
+      </IframeProvider>
+    </JotaiProvider>
   );
 }
