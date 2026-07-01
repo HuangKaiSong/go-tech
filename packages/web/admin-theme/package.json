@@ -67,8 +67,6 @@
   "devDependencies": {
     "@go-tech/config": "workspace:*",
     "@go-tech/tsconfig": "workspace:*",
-    "@testing-library/jest-dom": "catalog:dev",
-    "@testing-library/react": "catalog:dev",
     "oxlint": "catalog:dev",
     "react": "catalog:core",
     "react-dom": "catalog:core",

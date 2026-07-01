@@ -40,7 +40,7 @@
     "@radix-ui/react-toggle": "catalog:",
     "@radix-ui/react-toggle-group": "catalog:",
     "@radix-ui/react-tooltip": "catalog:",
-    "@tanstack/react-query": "catalog:",
+    "@tanstack/react-query": "catalog:core",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:utils",
     "cmdk": "catalog:",
@@ -70,10 +70,9 @@
     "@types/react-dom": "catalog:react18",
     "@vitejs/plugin-react-swc": "catalog:vite-hr",
     "autoprefixer": "catalog:",
-    "jsdom": "catalog:vite-hr",
     "postcss": "catalog:",
     "tailwindcss": "^3.4.17",
     "typescript": "catalog:",
-    "vite": "catalog:vite-hr"
+    "vite": "catalog:core"
   }
 }

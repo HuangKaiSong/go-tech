@@ -17,7 +17,7 @@
     "@go-tech-frontend/ui": "workspace:*",
     "@go-tech/utils": "workspace:*",
     "@hookform/resolvers": "catalog:",
-    "@tanstack/react-query": "catalog:",
+    "@tanstack/react-query": "catalog:core",
     "ahooks": "catalog:utils",
     "antd": "^6.3.5",
     "class-variance-authority": "catalog:",
