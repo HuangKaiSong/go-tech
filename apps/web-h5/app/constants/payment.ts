@@ -1,13 +1,22 @@
 export enum PayTypeEnum {
   /** FPS */
   FPS = 1,
-  // /** Wechat Pay */
-  // WechatPay = 2,
-  // /** Alipay */
-  // Alipay = 3,
   /** 线上支付（KPay 全托管收银台，聚合微信/支付宝等） */
-  Online = 2
+  Online = 2,
+  /** 微信支付（KPAY_ENABLE=false 时展示） */
+  WechatPay = 3,
+  /** 支付宝（KPAY_ENABLE=false 时展示） */
+  Alipay = 4
 }
+
+/**
+ * KPay 线上支付开关（客户端读取，需 NEXT_PUBLIC_ 前缀），默认 false。
+ * - false：展示并启用 微信支付 / 支付宝（PayTypeEnum.WechatPay / Alipay）
+ * - true： 展示并启用 线上支付（PayTypeEnum.Online，走 KPay 全托管收银台）
+ *
+ * 在各环境 .env 配置：NEXT_PUBLIC_KPAY_ENABLE=true|false
+ */
+export const KPAY_ENABLE = process.env.NEXT_PUBLIC_KPAY_ENABLE === 'true';
 
 export interface OrderAddResponse {
   /**
@@ -45,9 +54,9 @@ export const DAYSPERMONTH = 30;
 
 export const PayTypelabel: Record<PayTypeEnum, string> = {
   [PayTypeEnum.FPS]: 'FPS',
-  // [PayTypeEnum.WechatPay]: '微信',
-  // [PayTypeEnum.Alipay]: '支付宝',
-  [PayTypeEnum.Online]: '线上支付'
+  [PayTypeEnum.Online]: '线上支付',
+  [PayTypeEnum.WechatPay]: '微信',
+  [PayTypeEnum.Alipay]: '支付宝'
 };
 
 /**

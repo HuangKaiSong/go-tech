@@ -4,7 +4,7 @@ import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, type Uploaded
 import { CreditCard } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { type FC, useEffect, useState } from 'react';
-import { PayTypeEnum } from '@/app/constants/payment';
+import { KPAY_ENABLE, PayTypeEnum } from '@/app/constants/payment';
 const Fps = dynamic(() => import('./Fps'), { ssr: false });
 
 type PanelProps = {
@@ -78,18 +78,45 @@ export const Panel: FC<PanelProps> = ({
           />
         ) : (
           <div className="grid gap-4 py-4">
-            <Button
-              variant="outline"
-              loading={onlineLoading}
-              disabled={onlineLoading}
-              onClick={() => handlePaymentSelect(PayTypeEnum.Online)}
-              className="h-14 text-lg justify-start gap-4 hover:bg-blue-50 hover:border-blue-500 hover:text-primary"
-            >
-              <div className="w-8 h-8 bg-linear-to-br from-blue-500 to-green-500 rounded-lg flex items-center justify-center">
-                <CreditCard className="w-5 h-5 text-white" />
-              </div>
-              线上支付
-            </Button>
+            {KPAY_ENABLE ? (
+              <Button
+                variant="outline"
+                loading={onlineLoading}
+                disabled={onlineLoading}
+                onClick={() => handlePaymentSelect(PayTypeEnum.Online)}
+                className="h-14 text-lg justify-start gap-4 hover:bg-blue-50 hover:border-blue-500 hover:text-primary"
+              >
+                <div className="w-8 h-8 bg-linear-to-br from-blue-500 to-green-500 rounded-lg flex items-center justify-center">
+                  <CreditCard className="w-5 h-5 text-white" />
+                </div>
+                線上支付
+              </Button>
+            ) : (
+              <>
+                <Button
+                  variant="outline"
+                  disabled
+                  onClick={() => handlePaymentSelect(PayTypeEnum.WechatPay)}
+                  className="h-14 text-lg justify-start gap-4 hover:bg-green-50 hover:border-green-500 hover:text-primary"
+                >
+                  <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                    <span className="text-white text-sm font-bold">微</span>
+                  </div>
+                  微信支付
+                </Button>
+                <Button
+                  variant="outline"
+                  disabled
+                  onClick={() => handlePaymentSelect(PayTypeEnum.Alipay)}
+                  className="h-14 text-lg justify-start gap-4 hover:bg-blue-50 hover:border-blue-500 hover:text-primary"
+                >
+                  <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                    <span className="text-white text-sm font-bold">支</span>
+                  </div>
+                  支付寶支付
+                </Button>
+              </>
+            )}
             <Button
               variant="outline"
               onClick={() => handlePaymentSelect(PayTypeEnum.FPS)}
