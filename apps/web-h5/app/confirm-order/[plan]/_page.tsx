@@ -1,13 +1,14 @@
 'use client';
 
 import { Button, Input, Label, Switch, type UploadedFile, toast } from '@go-tech-frontend/ui';
+import { Result, Spin } from 'antd';
 import { useAtom, useAtomValue } from 'jotai';
 import { FileCheck } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import valueAddedServices from '@/app/constants/addedServices';
-import { type PromotionOption, getPromotionDiscount } from '@/app/constants/promotion';
+import { type PromotionOption } from '@/app/constants/promotion';
 import { usePromotions } from '@/app/hooks/usePromotions';
 import servicePlanBg from '@/assets/service-plan-bg.jpg';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,155 +17,40 @@ import Footer from '../../components/Footer';
 import Header from '../../components/Header';
 import { type OrderInfoType, OrderItemTypeEnum, OrderTypeEnum } from '../../constants/order';
 import { DAYSPERMONTH, PayTypeEnum, stashWebManagedCashier } from '../../constants/payment';
+
 const PaymentPanel = dynamic(() => import('../../components/payment/Panel'), {
+  loading({ error, isLoading }) {
+    if (isLoading) {
+      return <Spin size="large" />;
+    }
+    if (error) {
+      return <Result status="error" title="组件加载失败" subTitle="请重新操作" />;
+    }
+  },
   ssr: false
 });
-
-interface PromotionPanelProps {
-  applying: boolean;
-  baseAmount: number;
-  code: string;
-  onApply: () => void;
-  onCodeChange: (value: string) => void;
-  onSelect: (id: number | null) => void;
-  promotions: PromotionOption[];
-  selectedPromotionId: number | null;
-}
-
-/** 优惠活动选择 + 优惠码输入（H5 主题样式） */
-const PromotionPanel = ({
-  applying,
-  baseAmount,
-  code,
-  onApply,
-  onCodeChange,
-  onSelect,
-  promotions,
-  selectedPromotionId
-}: PromotionPanelProps) => {
-  return (
-    <div className="bg-white rounded-lg border border-border p-6 mb-6">
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-1 h-6 bg-primary rounded-full" />
-        <h3 className="text-lg font-bold text-gray-700">優惠活動</h3>
-      </div>
-
-      {promotions.length > 0 ? (
-        <div className="space-y-3">
-          {promotions.map(promotion => {
-            const isSelected = selectedPromotionId === promotion.promotionId;
-            const amount = getPromotionDiscount(promotion, baseAmount);
-            return (
-              <label
-                key={promotion.promotionId}
-                className={`flex items-center justify-between p-4 rounded-lg border cursor-pointer transition-colors ${
-                  isSelected ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <input
-                    type="radio"
-                    name="promotion"
-                    checked={isSelected}
-                    onChange={() => onSelect(promotion.promotionId)}
-                    className="w-4 h-4 text-primary focus:ring-primary"
-                  />
-                  <div>
-                    <p className="text-sm font-medium text-gray-700">{promotion.promotionName}</p>
-                    {promotion.promotionDesc && (
-                      <p className="text-xs text-muted-foreground">{promotion.promotionDesc}</p>
-                    )}
-                  </div>
-                </div>
-                <span className="text-sm font-medium text-primary shrink-0">-${amount.toLocaleString()} HKD</span>
-              </label>
-            );
-          })}
-          <label
-            className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${
-              selectedPromotionId === null ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
-            }`}
-          >
-            <input
-              type="radio"
-              name="promotion"
-              checked={selectedPromotionId === null}
-              onChange={() => onSelect(null)}
-              className="w-4 h-4 text-primary focus:ring-primary"
-            />
-            <span className="text-sm text-gray-700">不使用優惠</span>
-          </label>
-        </div>
-      ) : (
-        <p className="text-sm text-muted-foreground">該套餐暫無可用優惠活動</p>
-      )}
-
-      {/* 优惠码 */}
-      <div className="mt-4 flex items-center gap-2">
-        <Input
-          value={code}
-          onChange={e => onCodeChange(e.target.value)}
-          placeholder="輸入優惠碼"
-          className="h-10 flex-1"
-          onKeyDown={e => {
-            if (e.key === 'Enter') {
-              e.preventDefault();
-              onApply();
-            }
-          }}
-        />
-        <Button
-          variant="outline"
-          className="h-10 text-primary border-primary hover:bg-primary/5"
-          disabled={applying}
-          onClick={onApply}
-        >
-          {applying ? '驗證中...' : '使用優惠碼'}
-        </Button>
-      </div>
-    </div>
-  );
-};
-
-interface PriceSummaryProps {
-  durationDiscount: number;
-  originalPrice: number;
-  promotionDiscount: number;
-  totalPrice: number;
-}
-
-/** 費用匯總卡片：原價 / 時長優惠 / 活動優惠 / 總計 */
-const PriceSummary = ({ durationDiscount, originalPrice, promotionDiscount, totalPrice }: PriceSummaryProps) => {
-  return (
-    <div className="bg-white rounded-lg border border-border p-6 mb-8">
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-1 h-6 bg-primary rounded-full" />
-        <div className="flex flex-wrap items-center gap-8">
-          <span className="text-lg font-bold text-gray-700">
-            原價：
-            <span className="line-through">${originalPrice?.toLocaleString()}HKD</span>
-          </span>
-          {durationDiscount > 0 && (
-            <span className="text-lg font-medium text-gray-700">
-              時長優惠：
-              <span className="text-primary">${durationDiscount.toLocaleString()}HKD</span>
-            </span>
-          )}
-          {promotionDiscount > 0 && (
-            <span className="text-lg font-medium text-gray-700">
-              活動優惠：
-              <span className="text-primary">${promotionDiscount.toLocaleString()}HKD</span>
-            </span>
-          )}
-          <span className="text-lg font-bold">
-            總計：
-            <span className="text-2xl text-primary">${totalPrice.toLocaleString()} HKD</span>
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-};
+const PromotionPanel = dynamic(() => import('./PromotionPanel'), {
+  loading({ error, isLoading }) {
+    if (isLoading) {
+      return <Spin size="large" />;
+    }
+    if (error) {
+      return <Result status="error" title="组件加载失败" subTitle="请重新操作" />;
+    }
+  },
+  ssr: false
+});
+const PriceSummary = dynamic(() => import('./PriceSummary'), {
+  loading({ error, isLoading }) {
+    if (isLoading) {
+      return <Spin size="large" />;
+    }
+    if (error) {
+      return <Result status="error" title="组件加载失败" subTitle="请重新操作" />;
+    }
+  },
+  ssr: false
+});
 
 const ConfirmOrder = ({
   data,
