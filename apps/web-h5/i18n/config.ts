@@ -1,8 +1,10 @@
-export const locales = ['en', 'zh'] as const;
+export const locales = ['en', 'hk'] as const;
 export type Locale = (typeof locales)[number];
-export const defaultLocale: Locale = 'en';
+
+const envLocale = process.env.GO_TECH_LANGUAGE;
+export const defaultLocale: Locale = envLocale === 'en' || envLocale === 'hk' ? envLocale : 'hk';
 
 export const localeNames: Record<Locale, string> = {
   en: 'English',
-  zh: '中文'
+  hk: '中文'
 };

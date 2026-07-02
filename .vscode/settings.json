@@ -85,13 +85,12 @@
   },
 
   // i18n-ally
-  "i18n-ally.localesPaths": [ "packages/web/admin-i18n/src/langs" ],
-  "i18n-ally.pathMatcher": "{locale}/{namespace}.json",
+  "i18n-ally.localesPaths": [ "packages/web/admin-i18n/src/langs", "apps/web-h5/locales" ],
   "i18n-ally.namespace": true,
   "i18n-ally.keystyle": "nested",
   "i18n-ally.sourceLanguage": "zh-cn",
   "i18n-ally.displayLanguage": "zh-cn",
-  "i18n-ally.enabledFrameworks": [ "react-i18next" ],
+  "i18n-ally.enabledFrameworks": [ "react-i18next", "next-intl" ],
   "i18n-ally.enabledParsers": [ "ts", "json" ],
   "i18n-ally.editor.preferEditor": true,
   "i18n-ally.extract.targetPickingStrategy": "most-similar",

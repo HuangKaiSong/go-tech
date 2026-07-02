@@ -133,5 +133,19 @@
         ]
       }
     ]
+  },
+  "notFound": {
+    "title": "页面未找到",
+    "description": "抱歉，您访问的页面不存在或已被移动。",
+    "hint": "别担心，这种情况会发生。您可以返回首页或尝试搜索您需要的内容。",
+    "backHome": "返回首页",
+    "goBack": "返回上一页",
+    "refresh": "刷新页面",
+    "quickNav": "常用页面",
+    "buttonComponent": "Button 组件",
+    "formComponent": "Form 组件",
+    "componentList": "组件列表",
+    "contact": "如果问题持续存在，请",
+    "contactUs": "联系我们"
   }
 }

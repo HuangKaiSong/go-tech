@@ -115,7 +115,7 @@ const NotFoundClient = () => {
 
           <a
             className="text-primary hover:text-primary/80 ml-1 inline-flex items-center font-medium transition-colors"
-            href="https://github.com/Ohh-889/skyroc-ui/issues"
+            href="https://api.whatsapp.com/message/MQAWLPIG4YKOL1?autoload=1&app_absent=0"
             rel="noopener noreferrer"
             target="_blank"
           >

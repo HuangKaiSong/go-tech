@@ -22,7 +22,7 @@
       },
       {
         "title": "2. Use of Information",
-        "paragraphs": ["We use the collected information for the following purposes:"],
+        "paragraphs": [ "We use the collected information for the following purposes:" ],
         "items": [
           "To provide, maintain, and improve PMS functionality (e.g., generating invoices, sending rent reminders).",
           "To process your subscription orders and provide technical support.",
@@ -132,5 +132,19 @@
         ]
       }
     ]
+  },
+  "notFound": {
+    "title": "Page Not Found",
+    "description": "Sorry, the page you are looking for does not exist or has been moved.",
+    "hint": "Don't worry, this happens. You can go back to the home page or try searching for what you need.",
+    "backHome": "Back to Home",
+    "goBack": "Go Back",
+    "refresh": "Refresh Page",
+    "quickNav": "Quick Links",
+    "buttonComponent": "Button Component",
+    "formComponent": "Form Component",
+    "componentList": "Component List",
+    "contact": "If the problem persists, please",
+    "contactUs": "Contact Us"
   }
 }
