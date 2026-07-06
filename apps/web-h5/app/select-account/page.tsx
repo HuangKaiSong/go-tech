@@ -1,5 +1,6 @@
 'use client';
 
+import { Badge as CustomBadge } from '@go-tech-frontend/ui';
 import { Button, toast } from '@go-tech/web-ui';
 import { Badge } from 'antd';
 import dayjs from 'dayjs';
@@ -147,11 +148,11 @@ const SelectAccount = () => {
         style={{ backgroundImage: `url(${servicePlanBg.src})` }}
       >
         <div className="container mx-auto px-4 text-center">
-          {fromHeader && (
-            <Badge className="mb-3 bg-white/80 text-primary border border-primary/30 hover:bg-white">
+          {!fromHeader && (
+            <CustomBadge className="mb-3 bg-card/80 text-primary border border-primary/30 hover:bg-card">
               <ShieldCheck className="w-3.5 h-3.5 mr-1" />
               登入成功
-            </Badge>
+            </CustomBadge>
           )}
           <h1 className="text-3xl md:text-4xl font-bold text-primary mb-2">選擇要進入的套餐帳戶</h1>
           <p className="text-sm md:text-base text-muted-foreground">您名下有多個已購買的套餐，請選擇要管理的帳戶。</p>
@@ -180,8 +181,8 @@ const SelectAccount = () => {
                   <button
                     key={acc.tenantId}
                     onClick={() => handleClick(acc)}
-                    className={`group w-full h-full text-left bg-white rounded-2xl border-2 p-6 flex flex-col transition-all border-border hover:border-primary hover:shadow-[0_12px_30px_-12px_hsl(var(--primary)/0.35)] hover:-translate-y-0.5 ${
-                      isActive ? '' : 'bg-white/90'
+                    className={`group w-full h-full text-left bg-card rounded-2xl border-2 p-6 flex flex-col transition-all border-border hover:border-primary hover:shadow-[0_12px_30px_-12px_hsl(var(--primary)/0.35)] hover:-translate-y-0.5 ${
+                      isActive ? '' : 'bg-card/90'
                     }`}
                   >
                     {/* Top: tier + status */}
@@ -260,7 +261,7 @@ const SelectAccount = () => {
             {/* Add new package card */}
             <button
               onClick={() => router.push('/service-plan')}
-              className="text-left bg-white/60 rounded-2xl border-2 border-dashed border-primary/40 p-6 flex flex-col items-center justify-center min-h-[280px] hover:bg-white hover:border-primary transition-all group"
+              className="text-left bg-card/60 rounded-2xl border-2 border-dashed border-primary/40 p-6 flex flex-col items-center justify-center min-h-[280px] hover:bg-card hover:border-primary transition-all group"
             >
               <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
                 <Package className="w-7 h-7 text-primary" />
