@@ -3,7 +3,9 @@ import { fileURLToPath } from 'node:url';
 import { decodeJwt } from 'jose';
 import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
+import { ThemeProvider } from 'next-themes';
 import { cookies } from 'next/headers';
+import Script from 'next/script';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { getBaseUrl } from '@/lib/http';
 import { createSvgSpriteHtml } from '@/plugins/createSvgIcons';
@@ -19,6 +21,10 @@ export const metadata: Metadata = {
     '越多物業,越易管理!GO-TECH租務系統,GO-TECH是一個專為租務管理打造的雲端系統，協助您輕鬆管理物業、追蹤租金收入並簡化溝通流程。',
   icons: [{ rel: 'icon', url: '/favicon.svg' }]
 };
+
+const themeColorScript = `
+
+`;
 
 export default async function RootLayout({
   children
@@ -63,14 +69,21 @@ export default async function RootLayout({
   });
 
   return (
-    <html lang={language}>
+    <html lang={language} suppressHydrationWarning>
+      <head>
+        <Script id="theme-color" strategy="beforeInteractive">
+          {themeColorScript}
+        </Script>
+      </head>
       <body>
         {shouldInitLocale ? <LocaleInitializer locale={language} /> : null}
         <div aria-hidden="true" dangerouslySetInnerHTML={{ __html: svgSpriteHtml }} />
         <NextIntlClientProvider>
-          <AuthProvider _tenants={tenants} initialUser={user} _token={token}>
-            <Layout>{children}</Layout>
-          </AuthProvider>
+          <ThemeProvider attribute="class" enableSystem={false}>
+            <AuthProvider _tenants={tenants} initialUser={user} _token={token}>
+              <Layout>{children}</Layout>
+            </AuthProvider>
+          </ThemeProvider>
         </NextIntlClientProvider>
       </body>
     </html>

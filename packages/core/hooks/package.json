@@ -8,9 +8,16 @@
   "main": "./src/index.ts",
   "module": "./src/index.ts",
   "types": "./src/index.ts",
+  "typesVersions": {
+    "*": {
+      "web": [
+        "./src/web/index.ts"
+      ]
+    }
+  },
   "exports": {
     ".": "./src/index.ts",
-    "./package.json": "./package.json"
+    "./web": "./src/web/index.ts"
   },
   "scripts": {
     "type-check": "tsc --noEmit"

@@ -56,7 +56,8 @@ const SelectTenant = ({ generateCallback }: { generateCallback: (uri: string) =>
           if (!isLoggedIn) {
             router.push('/account/login');
           }
-          setIsOpen(true);
+          router.push('/select-account?from=header')
+          // setIsOpen(true);
         }}
       >
         點擊前往 GO-PMS

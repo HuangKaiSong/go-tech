@@ -22,6 +22,7 @@ const Login = () => {
   const searchParams = useSearchParams();
   const email = searchParams.get('email');
   const type = searchParams.get('type');
+  const redirect = searchParams.get('redirect')
 
   const router = useRouter();
   const { refetchTenants, setToken, setUser } = useAuth();
@@ -77,14 +78,14 @@ const Login = () => {
             setUser(res.data);
             refetchTenants(signResponse.data.token);
             toast.success('登入成功！');
-            router.replace('/');
+            router.replace(redirect || '/select-account');
           });
       }
     } catch (error: Response | any) {
       if (error instanceof Response) {
         const err = await error.json();
         sendToBetterStack('error', error.statusText, { extra: err, body: result.data });
-        toast.error(err.message);
+        toast.error(err.message || '登入失敗');
       }
     } finally {
       setIsLoading(false);

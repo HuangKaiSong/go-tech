@@ -9,6 +9,9 @@ export interface Subscribable<S> {
   /** 获取当前状态快照 */
   getSnapshot: () => S;
 
+  /** 获取服务端渲染期间的状态快照 */
+  getServerSnapshot?: () => S;
+
   /** 订阅状态变化，返回取消订阅函数 */
   subscribe: (listener: () => void) => () => void;
 }
@@ -33,9 +36,15 @@ export function useStore<S>(store: Subscribable<S>): S;
 export function useStore<S, R>(store: Subscribable<S>, selector: (state: S) => R): R;
 
 export function useStore<S, R = S>(store: Subscribable<S>, selector?: (state: S) => R): S | R {
+  const getServerSnapshot = store.getServerSnapshot ?? store.getSnapshot;
+
   if (selector) {
-    return useSyncExternalStore(store.subscribe, () => selector(store.getSnapshot()));
+    return useSyncExternalStore(
+      store.subscribe,
+      () => selector(store.getSnapshot()),
+      () => selector(getServerSnapshot())
+    );
   }
 
-  return useSyncExternalStore(store.subscribe, store.getSnapshot);
+  return useSyncExternalStore(store.subscribe, store.getSnapshot, getServerSnapshot);
 }
