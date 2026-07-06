@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Input, toast } from '@go-tech-frontend/ui';
+import { Button, Input, toast } from '@go-tech/web-ui';
 import Image from 'next/image';
 import { useState } from 'react';
 import Link from '@/app/components/Link';
@@ -22,7 +22,7 @@ const Login = () => {
   const searchParams = useSearchParams();
   const email = searchParams.get('email');
   const type = searchParams.get('type');
-  const redirect = searchParams.get('redirect')
+  const redirect = searchParams.get('redirect');
 
   const router = useRouter();
   const { refetchTenants, setToken, setUser } = useAuth();
@@ -119,15 +119,16 @@ const Login = () => {
         <h1 className="text-2xl font-bold text-center text-foreground mb-8">登入您的帳戶</h1>
 
         <div className="space-y-6">
-          <div>
-            <Input
-              type="text"
-              placeholder="請輸入您的電子郵箱/手機號碼"
-              value={account}
-              onChange={e => setAccount(e.target.value)}
-              className="h-14 text-base border-border"
-            />
-          </div>
+          <Input
+            type="text"
+            placeholder="請輸入您的電子郵箱/手機號碼"
+            value={account}
+            onChange={e => setAccount(e.target.value)}
+            classNames={{
+              root: 'h-14 px-3 border-border',
+              control: 'md:text-sm text-base text-foreground caret-foreground'
+            }}
+          />
 
           <div className="relative">
             <Input
@@ -135,7 +136,10 @@ const Login = () => {
               placeholder="請輸入您的密碼"
               value={password}
               onChange={e => setPassword(e.target.value)}
-              className="h-14 text-base border-border pr-12"
+              classNames={{
+                root: 'h-14 px-3 pr-12 border-border',
+                control: 'md:text-sm text-base text-foreground caret-foreground'
+              }}
             />
             <button
               type="button"

@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@go-tech-frontend/ui';
+import { Button } from '@go-tech/web-ui';
 import { type CSSProperties } from 'react';
 import Slider from 'react-slick';
 import Link from '@/app/components/Link';

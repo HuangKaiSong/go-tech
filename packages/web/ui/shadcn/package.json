@@ -19,10 +19,6 @@
     "ui",
     "ui-library"
   ],
-  "files": [
-    "dist",
-    "README.md"
-  ],
   "type": "module",
   "sideEffects": false,
   "main": "./src/index.ts",

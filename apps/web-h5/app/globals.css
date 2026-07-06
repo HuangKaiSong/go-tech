@@ -1,4 +1,12 @@
-@import '@go-tech-frontend/styles/src/index.css';
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@plugin '@go-tech/tailwind-plugin' {
+  color: 'orange';
+}
+
+@source "../../../packages/web/ui/shadcn/src/**/*.{ts,tsx}";
+@source "../../../packages/ui/src/**/*.{ts,tsx}";
 
 [data-iframe='true'] .restricted-element {
   opacity: 0.6;

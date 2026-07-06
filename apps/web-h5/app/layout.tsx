@@ -1,5 +1,6 @@
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { Sonner, TooltipProvider } from '@go-tech/web-ui';
 import { decodeJwt } from 'jose';
 import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
@@ -80,9 +81,12 @@ export default async function RootLayout({
         <div aria-hidden="true" dangerouslySetInnerHTML={{ __html: svgSpriteHtml }} />
         <NextIntlClientProvider>
           <ThemeProvider attribute="class" enableSystem={false}>
-            <AuthProvider _tenants={tenants} initialUser={user} _token={token}>
-              <Layout>{children}</Layout>
-            </AuthProvider>
+            <TooltipProvider>
+              <AuthProvider _tenants={tenants} initialUser={user} _token={token}>
+                <Layout>{children}</Layout>
+              </AuthProvider>
+              <Sonner className="toaster group" position="top-right" richColors />
+            </TooltipProvider>
           </ThemeProvider>
         </NextIntlClientProvider>
       </body>

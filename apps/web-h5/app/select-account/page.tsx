@@ -1,6 +1,7 @@
 'use client';
 
-import { Badge, Button } from '@go-tech-frontend/ui';
+import { Button, toast } from '@go-tech/web-ui';
+import { Badge } from 'antd';
 import dayjs from 'dayjs';
 import { ArrowRight, Building, Calendar, CheckCircle2, Clock, Package, ShieldCheck, Users } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -34,7 +35,12 @@ const SelectAccount = () => {
 
   // 跳转续费
   const toRenew = (tenant: Tenant) => {
-    router.push(`/renew-order/${tenant.orderId}`);
+    if (tenant && tenant.orderId) {
+      router.push(`/renew-order/${tenant.orderId}`);
+      return;
+    }
+
+    toast.error('当前数据无 orderId 或者 orderId 不合法!');
   };
 
   const generateCallback = (uri: string) => {
@@ -161,93 +167,93 @@ const SelectAccount = () => {
               const statusLabel = isActive ? '使用中' : '已過期';
 
               return (
-                <button
-                  key={acc.tenantId}
-                  onClick={() => handleClick(acc)}
-                  className={`group text-left bg-white rounded-2xl border-2 p-6 flex flex-col transition-all border-border hover:border-primary hover:shadow-[0_12px_30px_-12px_hsl(var(--primary)/0.35)] hover:-translate-y-0.5 ${
-                    isActive ? '' : 'bg-white/90'
-                  }`}
-                >
-                  {/* Top: tier + status */}
-                  <div className="flex items-start justify-between mb-4">
-                    {/* <div
-                      className={`w-12 h-12 rounded-xl flex items-center justify-center border-2 font-bold text-lg ${tierBadgeClass[acc.planTier]}`}
-                    >
-                      {acc.planTier}
-                    </div> */}
-                    <div>
-                      {/* Company */}
-                      <h3 className="text-lg font-bold text-foreground leading-snug mb-1">{acc.company}</h3>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-                        <Package className="w-4 h-4 text-primary" />
-                        <span className="text-foreground font-medium">{acc.tenantName}</span>
-                        <span>·</span>
-                        <span>最多 {acc.unitCount} 個單位</span>
-                      </div>
-                    </div>
-                    <Badge
-                      variant="outline"
-                      className={
-                        isActive
-                          ? 'border-emerald-300 text-emerald-700 bg-emerald-50'
-                          : 'border-border text-muted-foreground bg-muted'
-                      }
-                    >
+                <Badge.Ribbon
+                  classNames={{ indicator: 'top-4!' }}
+                  color={isActive ? '#5ee5b5' : '#737b8c'}
+                  text={
+                    <div className="flex items-center text-sm px-2.5 py-0.5">
                       {isActive ? <CheckCircle2 className="w-3 h-3 mr-1" /> : <Clock className="w-3 h-3 mr-1" />}
                       {statusLabel}
-                    </Badge>
-                  </div>
-
-                  {/* Meta rows */}
-                  <div className="space-y-2 py-3 border-y border-border/60 mb-4">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="flex items-center gap-2 text-muted-foreground">
-                        <Users className="w-4 h-4" /> 成員人數
-                      </span>
-                      <span className="text-foreground font-medium">{acc.userCount} 人</span>
                     </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="flex items-center gap-2 text-muted-foreground">
-                        <Calendar className="w-4 h-4" /> 有效期至
-                      </span>
-                      <span className="text-foreground font-medium">{acc.expireDate}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="flex items-center gap-2 text-muted-foreground">
-                        <Building className="w-4 h-4" /> 我的角色
-                      </span>
-                      <span className="text-foreground font-medium">{acc.myRole}</span>
-                    </div>
-                  </div>
-
-                  {/* Addons */}
-                  {acc.additional && (
-                    <div className="mb-5">
-                      <div className="text-xs text-muted-foreground mb-2">已啟用增值服務</div>
-                      <div className="flex flex-wrap gap-1.5">
-                        {acc.additional.split(',').map((a: any) => (
-                          <span key={a} className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded">
-                            {a}
-                          </span>
-                        ))}
+                  }
+                >
+                  <button
+                    key={acc.tenantId}
+                    onClick={() => handleClick(acc)}
+                    className={`group w-full h-full text-left bg-white rounded-2xl border-2 p-6 flex flex-col transition-all border-border hover:border-primary hover:shadow-[0_12px_30px_-12px_hsl(var(--primary)/0.35)] hover:-translate-y-0.5 ${
+                      isActive ? '' : 'bg-white/90'
+                    }`}
+                  >
+                    {/* Top: tier + status */}
+                    <div className="flex items-start justify-between mb-4">
+                      {/* <div
+                        className={`w-12 h-12 rounded-xl flex items-center justify-center border-2 font-bold text-lg ${tierBadgeClass[acc.planTier]}`}
+                      >
+                        {acc.planTier}
+                      </div> */}
+                      <div>
+                        {/* Company */}
+                        <h3 className="text-lg font-bold text-foreground leading-snug mb-1">{acc.company}</h3>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+                          <Package className="w-4 h-4 text-primary" />
+                          <span className="text-foreground font-medium">{acc.tenantName}</span>
+                          <span>·</span>
+                          <span>最多 {acc.unitCount} 個單位</span>
+                        </div>
                       </div>
                     </div>
-                  )}
 
-                  {/* CTA */}
-                  <div className="mt-auto">
-                    <div
-                      className={`flex items-center justify-between rounded-lg px-4 py-3 transition-colors ${
-                        isActive
-                          ? 'bg-primary/5 group-hover:bg-primary group-hover:text-primary-foreground text-primary'
-                          : 'bg-[#FFF1E8] text-primary group-hover:bg-primary group-hover:text-primary-foreground'
-                      }`}
-                    >
-                      <span className="text-sm font-semibold">{isActive ? '進入此帳戶' : '立即續費'}</span>
-                      <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                    {/* Meta rows */}
+                    <div className="space-y-2 py-3 border-y border-border/60 mb-4">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="flex items-center gap-2 text-muted-foreground">
+                          <Users className="w-4 h-4" /> 成員人數
+                        </span>
+                        <span className="text-foreground font-medium">{acc.userCount} 人</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="flex items-center gap-2 text-muted-foreground">
+                          <Calendar className="w-4 h-4" /> 有效期至
+                        </span>
+                        <span className="text-foreground font-medium">{acc.expireDate}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="flex items-center gap-2 text-muted-foreground">
+                          <Building className="w-4 h-4" /> 我的角色
+                        </span>
+                        <span className="text-foreground font-medium">{acc.myRole}</span>
+                      </div>
                     </div>
-                  </div>
-                </button>
+
+                    {/* Addons */}
+                    {acc.additional && (
+                      <div className="mb-5">
+                        <div className="text-xs text-muted-foreground mb-2">已啟用增值服務</div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {acc.additional.split(',').map((a: any) => (
+                            <span key={a} className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded">
+                              {a}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* CTA */}
+                    <div className="mt-auto">
+                      <div
+                        className={`flex items-center justify-between rounded-lg px-4 py-3 transition-colors ${
+                          isActive
+                            ? 'bg-primary/5 group-hover:bg-primary group-hover:text-primary-foreground text-primary'
+                            : 'bg-[#FFF1E8] text-primary group-hover:bg-primary group-hover:text-primary-foreground'
+                        }`}
+                      >
+                        <span className="text-sm font-semibold">{isActive ? '進入此帳戶' : '立即續費'}</span>
+                        <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                      </div>
+                    </div>
+                  </button>
+                </Badge.Ribbon>
               );
             })}
 

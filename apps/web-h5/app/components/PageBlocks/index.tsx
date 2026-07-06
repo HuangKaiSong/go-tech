@@ -2,7 +2,7 @@
 
 // oxlint-disable
 
-import { Button } from '@go-tech-frontend/ui';
+import { Button } from '@go-tech/web-ui';
 import {
   Building2,
   Calculator,

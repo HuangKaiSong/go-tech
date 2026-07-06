@@ -1,7 +1,7 @@
 'use client';
 
 import { useCountDown } from '@go-tech/hooks';
-import { Button, Input, toast } from '@go-tech-frontend/ui';
+import { Button, Input, toast } from '@go-tech/web-ui';
 import { CircleAlert, X } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -251,7 +251,10 @@ const Register = () => {
                   placeholder="請輸入密碼"
                   value={formData.pwd}
                   onChange={handleChange('pwd')}
-                  className="h-12 text-base border-border flex-1"
+                  classNames={{
+                    root: 'h-14 px-3 pr-12 border-border',
+                    control: 'md:text-sm text-base text-foreground caret-foreground'
+                  }}
                 />
               </div>
               <p className="text-xs text-gray-400 mt-2 ml-5 flex items-center gap-1">
@@ -265,7 +268,10 @@ const Register = () => {
                   placeholder="請再次輸入密碼"
                   value={formData.verifyPwd}
                   onChange={handleChange('verifyPwd')}
-                  className="h-12 text-base border-border flex-1"
+                  classNames={{
+                    root: 'h-14 px-3 pr-12 border-border',
+                    control: 'md:text-sm text-base text-foreground caret-foreground'
+                  }}
                 />
               </div>
               <Button
@@ -285,7 +291,10 @@ const Register = () => {
                   placeholder="請輸入您的電子郵箱"
                   value={formData.account}
                   onChange={handleChange('account')}
-                  className="h-12 text-base border-border flex-1"
+                  classNames={{
+                    root: 'h-14 px-3 pr-12 border-border',
+                    control: 'md:text-sm text-base text-foreground caret-foreground'
+                  }}
                 />
               </div>
 
@@ -296,7 +305,10 @@ const Register = () => {
                   placeholder="請輸入收到的驗證碼"
                   value={formData.verificationCode}
                   onChange={handleChange('verificationCode')}
-                  className="h-12 text-base border-border flex-1"
+                  classNames={{
+                    root: 'h-14 px-3 pr-12 border-border',
+                    control: 'md:text-sm text-base text-foreground caret-foreground'
+                  }}
                 />
                 <Button
                   type="button"

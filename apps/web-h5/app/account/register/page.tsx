@@ -1,7 +1,7 @@
 'use client';
 
-import { Button, Checkbox, Input, toast } from '@go-tech-frontend/ui';
 import { useCountDown } from '@go-tech/hooks';
+import { Button, Checkbox, Input, toast } from '@go-tech/web-ui';
 import { CircleAlert, X } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -355,7 +355,10 @@ const Register = () => {
                     placeholder="請輸入密碼"
                     value={formData.password}
                     onChange={handleChange('password')}
-                    className="h-12 text-base border-border flex-1"
+                    classNames={{
+                      root: 'h-14 px-3 pr-12 border-border',
+                      control: 'md:text-sm text-base text-foreground caret-foreground'
+                    }}
                   />
                 </div>
                 <p className="text-xs text-gray-400 mt-2 ml-5 flex items-center gap-1">
@@ -370,7 +373,10 @@ const Register = () => {
                   placeholder="請再次輸入密碼"
                   value={formData.confirmPassword}
                   onChange={handleChange('confirmPassword')}
-                  className="h-12 text-base border-border flex-1"
+                  classNames={{
+                    root: 'h-14 px-3 pr-12 border-border',
+                    control: 'md:text-sm text-base text-foreground caret-foreground'
+                  }}
                 />
               </div>
               <Button
@@ -390,7 +396,10 @@ const Register = () => {
                   placeholder="請輸入您的姓名"
                   value={formData.name}
                   onChange={handleChange('name')}
-                  className="h-12 text-base border-border flex-1"
+                  classNames={{
+                    root: 'h-14 px-3 pr-12 border-border',
+                    control: 'md:text-sm text-base text-foreground caret-foreground'
+                  }}
                 />
               </div>
 
@@ -403,7 +412,10 @@ const Register = () => {
                     value={formData.email}
                     onChange={handleChange('email')}
                     onBlur={handleEmailBlur}
-                    className="h-12 text-base border-border pr-11"
+                    classNames={{
+                      root: 'h-14 px-3 pr-12 border-border',
+                      control: 'md:text-sm text-base text-foreground caret-foreground'
+                    }}
                   />
                   <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
                     {isEmailAvailable ? (
@@ -456,7 +468,10 @@ const Register = () => {
                   placeholder="請輸入您的聯繫電話"
                   value={formData.phone}
                   onChange={handleChange('phone')}
-                  className="h-12 text-base border-border flex-1"
+                  classNames={{
+                    root: 'h-14 px-3 pr-12 border-border',
+                    control: 'md:text-sm text-base text-foreground caret-foreground'
+                  }}
                 />
               </div>
 
@@ -467,7 +482,10 @@ const Register = () => {
                   placeholder="請輸入您的公司名稱"
                   value={formData.company}
                   onChange={handleChange('company')}
-                  className="h-12 text-base border-border flex-1"
+                  classNames={{
+                    root: 'h-14 px-3 pr-12 border-border',
+                    control: 'md:text-sm text-base text-foreground caret-foreground'
+                  }}
                 />
               </div>
 
@@ -478,7 +496,10 @@ const Register = () => {
                   placeholder="請輸入郵箱收到的驗證碼"
                   value={formData.verificationCode}
                   onChange={handleChange('verificationCode')}
-                  className="h-12 text-base border-border flex-1"
+                  classNames={{
+                    root: 'h-14 px-3 pr-12 border-border',
+                    control: 'md:text-sm text-base text-foreground caret-foreground'
+                  }}
                 />
                 <Button
                   type="button"

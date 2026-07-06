@@ -1,7 +1,7 @@
 'use client';
 
 // import LogoImg from "@/assets/Gotech_Logo.webp";
-import { Button } from '@go-tech-frontend/ui';
+import { Button } from '@go-tech/web-ui';
 import { LogIn, UserPlus, X } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
