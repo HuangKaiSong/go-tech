@@ -18,15 +18,15 @@
     "theme-presets",
     "theme-utilities"
   ],
-  "homepage": "https://github.com/Ohh-889/skyroc-admin/tree/main/packages/web/antdtheme#readme",
+  "homepage": "https://github.com/Ohh-889/go-tech-admin/tree/main/packages/web/antdtheme#readme",
   "bugs": {
-    "url": "https://github.com/Ohh-889/skyroc-admin/issues"
+    "url": "https://github.com/Ohh-889/go-tech-admin/issues"
   },
   "license": "MIT",
   "author": "",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Ohh-889/skyroc-admin.git",
+    "url": "git+https://github.com/Ohh-889/go-tech-admin.git",
     "directory": "packages/web/antdtheme"
   },
   "sideEffects": false,

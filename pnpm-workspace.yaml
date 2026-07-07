@@ -2,185 +2,90 @@ packages:
   - apps/*
   - packages/*
   - packages/core/*
-  - 'packages/shared/*'
-  - 'packages/web/*'
-  - 'packages/web/ui/*'
-  - 'packages/primitives/*'
+  - packages/shared/*
+  - packages/web/*
+  - packages/web/ui/*
+  - packages/primitives/*
   - internal/*
 
-onlyBuiltDependencies:
-  - '@parcel/watcher'
-  - '@swc/core'
-  - esbuild
-  - sharp
-  - unrs-resolver
-
-strictPeerDependencies: false
-ignoreWorkspaceRootCheck: true
-
-overrides:
-  # 确保类型一致性
-  typescript: '^6.0.3'
-
-# ── Shared version catalog ─────────────────────────────────────────────────────
-# In package.json, reference via:
-#   "dep": "catalog:"           → default catalog
-#   "dep": "catalog:react18"    → named catalog
-#
-# Packages with incompatible major versions across apps are kept explicit
-# (tailwind-merge ^2 vs ^3, sonner ^1 vs ^2, tailwindcss ^3 vs ^4,
-#  vite ^5 vs ^7, globals ^15 vs ^16, eslint-plugin-react-hooks ^5 vs ^7).
-
 catalog:
-  # ── Runtime — all 4 apps ────────────────────────────────────────────────────
-  class-variance-authority: '^0.7.1'
-  lucide-react: '^0.562.0'
-  tailwindcss-animate: '^1.0.7'
-
-  # ── Runtime — web-admin + hr-pc + hr-mobile ─────────────────────────────────
-  '@hookform/resolvers': '^3.10.0'
-  '@tanstack/react-query': '^5.83.0'
-  cmdk: '^1.1.1'
-  embla-carousel-react: '^8.6.0'
-  input-otp: '^1.4.2'
-  react-hook-form: '^7.61.1'
-  react-resizable-panels: '^2.1.9'
-  react-router-dom: '^6.30.1'
-  recharts: '^2.15.4'
-  sonner: '^1.7.4'
-
-  # ── Runtime — hr-pc + hr-mobile (Radix UI) ──────────────────────────────────
-  '@radix-ui/react-accordion': '^1.2.11'
-  '@radix-ui/react-alert-dialog': '^1.1.14'
-  '@radix-ui/react-aspect-ratio': '^1.1.7'
-  '@radix-ui/react-avatar': '^1.1.10'
-  '@radix-ui/react-checkbox': '^1.3.2'
-  '@radix-ui/react-collapsible': '^1.1.11'
-  '@radix-ui/react-context-menu': '^2.2.15'
-  '@radix-ui/react-dialog': '^1.1.14'
-  '@radix-ui/react-dropdown-menu': '^2.1.15'
-  '@radix-ui/react-hover-card': '^1.1.14'
-  '@radix-ui/react-label': '^2.1.7'
-  '@radix-ui/react-menubar': '^1.1.15'
-  '@radix-ui/react-navigation-menu': '^1.2.13'
-  '@radix-ui/react-popover': '^1.1.14'
-  '@radix-ui/react-progress': '^1.1.7'
-  '@radix-ui/react-radio-group': '^1.3.7'
-  '@radix-ui/react-scroll-area': '^1.2.9'
-  '@radix-ui/react-select': '^2.2.5'
-  '@radix-ui/react-separator': '^1.1.7'
-  '@radix-ui/react-slider': '^1.3.5'
-  '@radix-ui/react-slot': '^1.2.3'
-  '@radix-ui/react-switch': '^1.2.5'
-  '@radix-ui/react-tabs': '^1.1.12'
-  '@radix-ui/react-toast': '^1.2.14'
-  '@radix-ui/react-toggle': '^1.1.9'
-  '@radix-ui/react-toggle-group': '^1.1.10'
-  '@radix-ui/react-tooltip': '^1.2.7'
-
-  # ── Dev — web-h5 + web-admin ────────────────────────────────────────────────
-  '@tailwindcss/postcss': '^4.1.18'
-  babel-plugin-react-compiler: '1.0.0'
-
-  # ── Dev — web-admin + hr-pc + hr-mobile ─────────────────────────────────────
-  '@tailwindcss/typography': '^0.5.16'
-  autoprefixer: '^10.4.21'
-  postcss: '^8.5.6'
+  '@hookform/resolvers': ^3.10.0
+  '@radix-ui/react-accordion': ^1.2.11
+  '@radix-ui/react-alert-dialog': ^1.1.14
+  '@radix-ui/react-aspect-ratio': ^1.1.7
+  '@radix-ui/react-avatar': ^1.1.10
+  '@radix-ui/react-checkbox': ^1.3.2
+  '@radix-ui/react-collapsible': ^1.1.11
+  '@radix-ui/react-context-menu': ^2.2.15
+  '@radix-ui/react-dialog': ^1.1.14
+  '@radix-ui/react-dropdown-menu': ^2.1.15
+  '@radix-ui/react-hover-card': ^1.1.14
+  '@radix-ui/react-label': ^2.1.7
+  '@radix-ui/react-menubar': ^1.1.15
+  '@radix-ui/react-navigation-menu': ^1.2.13
+  '@radix-ui/react-popover': ^1.1.14
+  '@radix-ui/react-progress': ^1.1.7
+  '@radix-ui/react-radio-group': ^1.3.7
+  '@radix-ui/react-scroll-area': ^1.2.9
+  '@radix-ui/react-select': ^2.2.5
+  '@radix-ui/react-separator': ^1.1.7
+  '@radix-ui/react-slider': ^1.3.5
+  '@radix-ui/react-slot': ^1.2.3
+  '@radix-ui/react-switch': ^1.2.5
+  '@radix-ui/react-tabs': ^1.1.12
+  '@radix-ui/react-toast': ^1.2.14
+  '@radix-ui/react-toggle': ^1.1.9
+  '@radix-ui/react-toggle-group': ^1.1.10
+  '@radix-ui/react-tooltip': ^1.2.7
+  '@tailwindcss/postcss': ^4.1.18
+  '@tailwindcss/typography': ^0.5.16
+  '@tanstack/react-query': ^5.83.0
+  autoprefixer: ^10.4.21
+  babel-plugin-react-compiler: 1.0.0
+  class-variance-authority: ^0.7.1
+  cmdk: ^1.1.1
+  embla-carousel-react: ^8.6.0
+  input-otp: ^1.4.2
+  lucide-react: ^0.562.0
+  postcss: ^8.5.6
+  react-hook-form: ^7.61.1
+  react-resizable-panels: ^2.1.9
+  react-router-dom: ^6.30.1
+  recharts: ^2.15.4
+  sonner: ^1.7.4
+  tailwindcss-animate: ^1.0.7
 
 catalogs:
-  # React 19 stack — web-h5 + web-admin
-  react19:
-    react: '^19.2.3'
-    react-dom: '^19.2.3'
-    '@types/react': '^19.2.7'
-    '@types/react-dom': '^19.2.3'
-
-  # React 18 stack — hr-pc-manager + hr_mobile_manager
-  react18:
-    react: '^18.3.1'
-    react-dom: '^18.3.1'
-    '@types/react': '^18.3.23'
-    '@types/react-dom': '^18.3.7'
-
-  # ==================== 共享工具库 ====================
-  utils:
-    # 通用工具
-    dayjs: ^1.11.19
-    date-fns: ^4.1.0
-    nanoid: ^5.0.9
-    clsx: ^2.1.1
-    colord: ^2.9.3
-    klona: ^2.0.6
-    'crypto-js': ^4.2.0
-    localforage: ^1.10.0
-    'tailwind-merge': ^3.4.0
-    'tailwind-variants': ^3.2.2
-    defu: ^6.1.4
-    ahooks: ^3.9.6
-    zod: ^4.1.13
-
-  # Vite 5 toolchain — hr-pc-manager + hr_mobile_manager
-  # (web-admin uses Vite 7 + different eslint-plugin-react-hooks major)
-  vite-hr:
-    '@vitejs/plugin-react-swc': '^4.3.0'
-
-  # =================== 核心基础依赖 =================
   core:
-    # React 生态核心
+    '@tanstack/react-query': ^5.101.2
+    jotai: ^2.16.0
     react: 19.2.7
     react-dom: 19.2.7
-    'react-error-boundary': 6.0.0
-
-    # TypeScript
-    typescript: '^6.0.3'
+    react-error-boundary: 6.0.0
+    typescript: ^6.0.3
     vite: ^8.0.14
-
-    # 状态管理
-    jotai: ^2.16.0
-    '@tanstack/react-query': '^5.101.2'
-
-  # ==================== 开发工具 ====================
+  css:
+    '@tailwindcss/cli': ^4.1.18
+    '@tailwindcss/postcss': ^4.1.13
+    postcss: ^8.5.6
+    tailwindcss: ^4.1.18
   dev:
-    # 类型定义
-    '@types/node': ^24.10.2
-    '@types/react': ^19.2.7
-    '@types/react-dom': ^19.2.3
-    '@types/babel__core': ^7.20.5
-    '@types/crypto-js': ^4.2.2
-    '@types/nprogress': ^0.2.3
-    '@types/qs': ^6.14.0
-
-    # 构建和打包工具
     '@babel/core': ^7.29.0
     '@babel/template': ^7.28.6
-    tsdown: ^0.18.2
-    tsx: ^4.21.0
-    turbo: ^2.7.1
-    rimraf: ^6.0.1
-
-    # 代码质量工具
-    eslint: ^9.39.2
-    '@soybeanjs/eslint-config': ^1.7.4
-    oxlint: ^1.60.0
-
-    # 测试工具
-    vitest: ^4.0.18
-    '@vitest/coverage-v8': ^4.0.18
-    jsdom: ^28.0.0
-    happy-dom: 20.6.1
     '@playwright/test': ^1.59.1
-    '@testing-library/react': ^16.3.2
+    '@rolldown/plugin-babel': ^0.2.3
+    '@soybeanjs/changelog': ^0.3.24
+    '@soybeanjs/eslint-config': ^1.7.4
     '@testing-library/jest-dom': ^6.9.1
+    '@testing-library/react': ^16.3.2
     '@testing-library/user-event': ^14.6.1
-    msw: ^2.7.0
-
-    # ESLint 插件
-    'eslint-plugin-react': ^7.37.5
-    'eslint-plugin-react-hooks': ^7.0.1
-    'eslint-plugin-react-refresh': ^0.4.24
-    'eslint-plugin-sort': ^4.0.0
-
-    # UnoCSS 相关
+    '@types/babel__core': ^7.20.5
+    '@types/crypto-js': ^4.2.2
+    '@types/node': ^24.10.2
+    '@types/nprogress': ^0.2.3
+    '@types/qs': ^6.14.0
+    '@types/react': ^19.2.7
+    '@types/react-dom': ^19.2.3
     '@unocss/core': ^66.5.10
     '@unocss/eslint-config': ^66.5.10
     '@unocss/preset-icons': ^66.5.10
@@ -189,94 +94,112 @@ catalogs:
     '@unocss/preset-wind3': ^66.5.10
     '@unocss/transformer-directives': ^66.5.10
     '@unocss/transformer-variant-group': ^66.5.10
-
-    # Vite 插件
-    '@rolldown/plugin-babel': ^0.2.3
-    'vite-plugin-inspect': ^12.0.0-beta.2
-    'vite-plugin-remove-console': ^2.2.0
-    'vite-plugin-svg-icons': ^2.0.1
-
-    # 其他开发工具
-    'babel-plugin-react-compiler': ^1.0.0
-    'jotai-babel': ^0.1.0
-    'unplugin-auto-import': ^20.3.0
-    'unplugin-icons': ^22.5.0
-    typed-css-modules:
-      ^0.9.1
-
-      # 包管理工具
+    '@vitest/coverage-v8': ^4.0.18
+    babel-plugin-react-compiler: ^1.0.0
+    boxen: ^8.0.1
     bumpp: ^10.0.3
-    'npm-check-updates': ^17.1.14
-    # 配置和执行工具
     c12: ^2.0.4
     cac: ^6.7.14
     enquirer: ^2.4.1
+    eslint: ^9.39.2
+    eslint-plugin-react: ^7.37.5
+    eslint-plugin-react-hooks: ^7.0.1
+    eslint-plugin-react-refresh: ^0.4.24
+    eslint-plugin-sort: ^4.0.0
     execa: ^9.5.2
-    # 终端美化工具
-    boxen: ^8.0.1
-    'gradient-string': ^3.0.0
+    fast-glob: ^3.3.3
+    gradient-string: ^3.0.0
+    happy-dom: 20.6.1
+    jotai-babel: ^0.1.0
+    jsdom: ^28.0.0
     kolorist: ^1.8.0
-    # 文件处理工具
-    'fast-glob': ^3.3.3
+    msw: ^2.7.0
+    npm-check-updates: ^17.1.14
+    oxlint: ^1.60.0
     picomatch: ^4.0.3
-
-  # ==================== Web 前端专用 ====================
-  web:
-    # React Web 专用
-    '@vitejs/plugin-react': 6.0.2
-    '@tanstack/react-router': ^1.140.0
-    '@tanstack/router-generator': ^1.140.0
-    '@tanstack/router-plugin': ^1.140.0
-
-    # UI 组件库
-    antd: ^6.1.0
-
-    # 样式工具
-    '@unocss/vite': ^66.5.10
-    sass: ^1.96.0
-
-    # 数据可视化
-    echarts: ^6.0.0
-
-    # 滚动库
-    '@better-scroll/core': ^2.5.1
-
-    # SVG 工具
-    '@svgr/core': ^8.1.0
-    '@svgr/plugin-jsx': ^8.1.0
-
-    # 开发者工具
-    'jotai-devtools': ^0.14.0
-    '@tanstack/react-query-devtools': ^5.101.2
-    '@tanstack/react-devtools': ^0.8.4
-    '@tanstack/devtools-vite': ^0.7.0
-    '@tanstack/react-router-devtools': ^1.140.0
-
-    # ==================== UI 组件共享 ====================
-  ui-shared:
-    # Radix UI
-    '@radix-ui/react-scroll-area': 1.2.10
-    '@radix-ui/react-slot': 1.2.3
-    '@radix-ui/react-tooltip': 1.2.7
-    # 动画
-    motion: ^12.23.26
-
-    # 图标
-    '@iconify/react': ^6.0.2
-    '@iconify/json': ^2.2.416
-    '@iconify/types': ^2.0.0
-    '@iconify/utils': ^3.1.0
-
-    # 其他 UI 工具
-    nprogress: ^0.2.0
-
-  # ==================== 国际化 ====================
+    rimraf: ^6.0.1
+    simple-git-hooks: ^2.13.1
+    tsdown: ^0.18.2
+    tsx: ^4.21.0
+    turbo: ^2.7.1
+    typed-css-modules: ^0.9.1
+    unplugin-auto-import: ^20.3.0
+    unplugin-icons: ^22.5.0
+    vite-plugin-inspect: ^12.0.0-beta.2
+    vite-plugin-remove-console: ^2.2.0
+    vite-plugin-svg-icons: ^2.0.1
+    vitest: ^4.0.18
   i18n:
     i18next: 25.7.2
     react-i18next: 16.4.0
+  react18:
+    '@types/react': ^18.3.23
+    '@types/react-dom': ^18.3.7
+    react: ^18.3.1
+    react-dom: ^18.3.1
+  react19:
+    '@types/react': ^19.2.7
+    '@types/react-dom': ^19.2.3
+    react: ^19.2.3
+    react-dom: ^19.2.3
+  ui-shared:
+    '@iconify/json': ^2.2.416
+    '@iconify/react': ^6.0.2
+    '@iconify/types': ^2.0.0
+    '@iconify/utils': ^3.1.0
+    '@radix-ui/react-scroll-area': 1.2.10
+    '@radix-ui/react-slot': 1.2.3
+    '@radix-ui/react-tooltip': 1.2.7
+    motion: ^12.23.26
+    nprogress: ^0.2.0
+  utils:
+    ahooks: ^3.9.6
+    axios: ^1.7.9
+    axios-retry: ^4.5.0
+    clsx: ^2.1.1
+    colord: ^2.9.3
+    crypto-js: ^4.2.0
+    date-fns: ^4.1.0
+    dayjs: ^1.11.19
+    defu: ^6.1.4
+    klona: ^2.0.6
+    localforage: ^1.10.0
+    nanoid: ^5.0.9
+    qs: ^6.14.0
+    tailwind-merge: ^3.4.0
+    tailwind-variants: ^3.2.2
+    zod: ^4.1.13
+  vite-hr:
+    '@vitejs/plugin-react-swc': ^4.3.0
+  web:
+    '@better-scroll/core': ^2.5.1
+    '@svgr/core': ^8.1.0
+    '@svgr/plugin-jsx': ^8.1.0
+    '@tanstack/devtools-vite': ^0.7.0
+    '@tanstack/react-devtools': ^0.8.4
+    '@tanstack/react-query-devtools': ^5.101.2
+    '@tanstack/react-router': ^1.140.0
+    '@tanstack/react-router-devtools': ^1.140.0
+    '@tanstack/router-generator': ^1.140.0
+    '@tanstack/router-plugin': ^1.140.0
+    '@unocss/vite': ^66.5.10
+    '@vitejs/plugin-react': 6.0.2
+    antd: ^6.1.0
+    echarts: ^6.0.0
+    jotai-devtools: ^0.14.0
+    sass: ^1.96.0
 
-  css:
-    tailwindcss: ^4.1.18
-    '@tailwindcss/cli': ^4.1.18
-    '@tailwindcss/postcss': ^4.1.13
-    postcss: ^8.5.6
+ignoreWorkspaceRootCheck: true
+
+onlyBuiltDependencies:
+  - '@parcel/watcher'
+  - '@swc/core'
+  - esbuild
+  - msw
+  - sharp
+  - unrs-resolver
+
+overrides:
+  typescript: ^6.0.3
+
+strictPeerDependencies: false

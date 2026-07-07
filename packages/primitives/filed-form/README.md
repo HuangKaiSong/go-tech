@@ -1,4 +1,4 @@
-# Skyroc Form
+# go-tech Form
 
 [English](./README.md) | 简体中文
 
@@ -20,11 +20,11 @@
 ## 📦 安装
 
 ```bash
-npm install skyroc-form
+npm install go-tech-form
 # 或
-pnpm add skyroc-form
+pnpm add go-tech-form
 # 或
-yarn add skyroc-form
+yarn add go-tech-form
 ```
 
 ## 🚀 快速开始
@@ -32,13 +32,13 @@ yarn add skyroc-form
 ### 基础表单
 
 ```tsx
-import { Form, Field } from 'skyroc-form';
+import { Form, Field } from 'go-tech-form';
 
 function BasicForm() {
   return (
     <Form
       initialValues={{ username: '', email: '' }}
-      onFinish={(values) => {
+      onFinish={values => {
         console.log('表单提交:', values);
       }}
     >
@@ -59,7 +59,7 @@ function BasicForm() {
 ### 带验证的表单
 
 ```tsx
-import { Form, Field, useForm } from 'skyroc-form';
+import { Form, Field, useForm } from 'go-tech-form';
 
 function ValidatedForm() {
   const [form] = useForm();
@@ -68,8 +68,8 @@ function ValidatedForm() {
     <Form
       form={form}
       initialValues={{ email: '', password: '' }}
-      onFinish={(values) => console.log('提交成功:', values)}
-      onFinishFailed={(error) => console.log('验证失败:', error)}
+      onFinish={values => console.log('提交成功:', values)}
+      onFinishFailed={error => console.log('验证失败:', error)}
     >
       <Field
         name="email"
@@ -92,7 +92,9 @@ function ValidatedForm() {
       </Field>
 
       <button type="submit">提交</button>
-      <button type="button" onClick={() => form.resetFields()}>重置</button>
+      <button type="button" onClick={() => form.resetFields()}>
+        重置
+      </button>
     </Form>
   );
 }
@@ -108,19 +110,19 @@ function ValidatedForm() {
 
 **Props:**
 
-| 属性 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `form` | `FormInstance` | - | 外部表单实例 |
-| `initialValues` | `object` | `{}` | 初始表单值 |
-| `onFinish` | `(values) => void` | - | 提交成功回调 |
-| `onFinishFailed` | `(error) => void` | - | 提交失败回调 |
-| `onValuesChange` | `(changed, all) => void` | - | 值变化回调 |
-| `onFieldsChange` | `(changed, all) => void` | - | 字段元数据变化回调 |
-| `schema` | `FormSchema` | - | Schema 验证器（支持 Zod 等） |
-| `validateTrigger` | `string \| string[]` | `'onChange'` | 验证触发事件 |
-| `validateMessages` | `ValidateMessages` | - | 自定义验证消息 |
-| `preserve` | `boolean` | `true` | 卸载时是否保留字段值 |
-| `component` | `ElementType \| false` | `'form'` | 渲染的组件类型 |
+| 属性               | 类型                     | 默认值       | 说明                         |
+| ------------------ | ------------------------ | ------------ | ---------------------------- |
+| `form`             | `FormInstance`           | -            | 外部表单实例                 |
+| `initialValues`    | `object`                 | `{}`         | 初始表单值                   |
+| `onFinish`         | `(values) => void`       | -            | 提交成功回调                 |
+| `onFinishFailed`   | `(error) => void`        | -            | 提交失败回调                 |
+| `onValuesChange`   | `(changed, all) => void` | -            | 值变化回调                   |
+| `onFieldsChange`   | `(changed, all) => void` | -            | 字段元数据变化回调           |
+| `schema`           | `FormSchema`             | -            | Schema 验证器（支持 Zod 等） |
+| `validateTrigger`  | `string \| string[]`     | `'onChange'` | 验证触发事件                 |
+| `validateMessages` | `ValidateMessages`       | -            | 自定义验证消息               |
+| `preserve`         | `boolean`                | `true`       | 卸载时是否保留字段值         |
+| `component`        | `ElementType \| false`   | `'form'`     | 渲染的组件类型               |
 
 **示例:**
 
@@ -154,17 +156,17 @@ const schema = z.object({
 
 **Props:**
 
-| 属性 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `name` | `string` | **必填** | 字段名（支持嵌套路径如 `user.email`） |
-| `rules` | `Rule[]` | - | 验证规则数组 |
-| `initialValue` | `any` | - | 字段初始值 |
-| `trigger` | `string` | `'onChange'` | 触发值更新的事件 |
-| `validateTrigger` | `string \| string[]` | - | 触发验证的事件 |
-| `valuePropName` | `string` | `'value'` | 值属性名 |
-| `getValueFromEvent` | `(...args) => any` | - | 自定义值提取函数 |
-| `normalize` | `(value, prevValue, allValues) => any` | - | 值规范化/转换函数 |
-| `preserve` | `boolean` | `true` | 卸载时是否保留值 |
+| 属性                | 类型                                   | 默认值       | 说明                                  |
+| ------------------- | -------------------------------------- | ------------ | ------------------------------------- |
+| `name`              | `string`                               | **必填**     | 字段名（支持嵌套路径如 `user.email`） |
+| `rules`             | `Rule[]`                               | -            | 验证规则数组                          |
+| `initialValue`      | `any`                                  | -            | 字段初始值                            |
+| `trigger`           | `string`                               | `'onChange'` | 触发值更新的事件                      |
+| `validateTrigger`   | `string \| string[]`                   | -            | 触发验证的事件                        |
+| `valuePropName`     | `string`                               | `'value'`    | 值属性名                              |
+| `getValueFromEvent` | `(...args) => any`                     | -            | 自定义值提取函数                      |
+| `normalize`         | `(value, prevValue, allValues) => any` | -            | 值规范化/转换函数                     |
+| `preserve`          | `boolean`                              | `true`       | 卸载时是否保留值                      |
 
 **示例:**
 
@@ -210,11 +212,11 @@ const schema = z.object({
 
 **Props:**
 
-| 属性 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `name` | `string` | **必填** | 数组字段名 |
-| `initialValue` | `any[]` | - | 数组初始值 |
-| `children` | `(fields, operations) => ReactNode` | **必填** | 渲染函数 |
+| 属性           | 类型                                | 默认值   | 说明       |
+| -------------- | ----------------------------------- | -------- | ---------- |
+| `name`         | `string`                            | **必填** | 数组字段名 |
+| `initialValue` | `any[]`                             | -        | 数组初始值 |
+| `children`     | `(fields, operations) => ReactNode` | **必填** | 渲染函数   |
 
 **Operations:**
 
@@ -278,14 +280,14 @@ const schema = z.object({
 
 **Props:**
 
-| 属性 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `name` | `string` | **必填** | 计算字段名 |
-| `deps` | `string[]` | **必填** | 依赖的字段名数组 |
-| `compute` | `(get, all) => any` | **必填** | 计算函数 |
-| `rules` | `Rule[]` | - | 验证规则数组 |
-| `valuePropName` | `string` | `'value'` | 值属性名 |
-| `preserve` | `boolean` | `true` | 卸载时是否保留值 |
+| 属性            | 类型                | 默认值    | 说明             |
+| --------------- | ------------------- | --------- | ---------------- |
+| `name`          | `string`            | **必填**  | 计算字段名       |
+| `deps`          | `string[]`          | **必填**  | 依赖的字段名数组 |
+| `compute`       | `(get, all) => any` | **必填**  | 计算函数         |
+| `rules`         | `Rule[]`            | -         | 验证规则数组     |
+| `valuePropName` | `string`            | `'value'` | 值属性名         |
+| `preserve`      | `boolean`           | `true`    | 卸载时是否保留值 |
 
 **示例:**
 
@@ -346,17 +348,17 @@ const schema = z.object({
 const [form] = useForm<FormValues>();
 
 // 表单实例方法
-form.getFieldValue('username');           // 获取字段值
-form.getFieldsValue();                    // 获取所有字段值
-form.setFieldValue('username', 'John');   // 设置字段值
+form.getFieldValue('username'); // 获取字段值
+form.getFieldsValue(); // 获取所有字段值
+form.setFieldValue('username', 'John'); // 设置字段值
 form.setFieldsValue({ username: 'John', email: 'john@example.com' });
-form.resetFields();                       // 重置所有字段
-form.resetFields(['username']);           // 重置指定字段
-form.submit();                            // 触发提交
-form.validateFields();                    // 验证所有字段
-form.validateFields(['email']);           // 验证指定字段
-form.getFieldError('email');              // 获取字段错误
-form.getFieldsError();                    // 获取所有字段错误
+form.resetFields(); // 重置所有字段
+form.resetFields(['username']); // 重置指定字段
+form.submit(); // 触发提交
+form.validateFields(); // 验证所有字段
+form.validateFields(['email']); // 验证指定字段
+form.getFieldError('email'); // 获取字段错误
+form.getFieldsError(); // 获取所有字段错误
 ```
 
 #### `useWatch()`
@@ -466,7 +468,7 @@ function UserForm() {
   // 监听用户名变化并记录日志
   useFieldEffect(
     ['firstName', 'lastName'],
-    (get) => {
+    get => {
       const firstName = get('firstName');
       const lastName = get('lastName');
       console.log(`姓名变更为: ${firstName} ${lastName}`);
@@ -528,7 +530,7 @@ const value = useSelector<Values, Result>(
 // 计算购物车总价
 function ShoppingCart() {
   const total = useSelector(
-    (get) => {
+    get => {
       const items = get('items') || [];
       return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
     },
@@ -540,7 +542,7 @@ function ShoppingCart() {
       <List name="items">
         {(fields, { add, remove }) => (
           <>
-            {fields.map((field) => (
+            {fields.map(field => (
               <div key={field.key}>
                 <Field name={`${field.name}.name`}>
                   <input placeholder="商品名称" />
@@ -554,9 +556,7 @@ function ShoppingCart() {
                 <button onClick={() => remove(field.name)}>删除</button>
               </div>
             ))}
-            <button onClick={() => add({ name: '', price: 0, quantity: 1 })}>
-              添加商品
-            </button>
+            <button onClick={() => add({ name: '', price: 0, quantity: 1 })}>添加商品</button>
           </>
         )}
       </List>
@@ -568,7 +568,7 @@ function ShoppingCart() {
 // 使用自定义相等比较（避免对象引用变化导致的重渲染）
 function UserProfile() {
   const userInfo = useSelector(
-    (get) => ({
+    get => ({
       name: get('name'),
       age: get('age'),
       email: get('email')
@@ -648,7 +648,7 @@ const { undo, redo, canUndo, canRedo } = useUndoRedo({ form });
     // 值转换
     {
       type: 'string',
-      transform: (value) => value?.trim(),
+      transform: value => value?.trim(),
       message: '无效的字符串'
     }
   ]}
@@ -675,20 +675,22 @@ form.validateFields({ mode: 'parallelFirst' });
 ```tsx
 import { z } from 'zod';
 
-const schema = z.object({
-  username: z.string().min(3, '用户名至少 3 个字符'),
-  email: z.string().email('邮箱格式不正确'),
-  age: z.number().min(18, '必须年满 18 岁'),
-  password: z.string().min(8, '密码至少 8 位'),
-  confirmPassword: z.string()
-}).refine((data) => data.password === data.confirmPassword, {
-  message: '两次密码不一致',
-  path: ['confirmPassword']
-});
+const schema = z
+  .object({
+    username: z.string().min(3, '用户名至少 3 个字符'),
+    email: z.string().email('邮箱格式不正确'),
+    age: z.number().min(18, '必须年满 18 岁'),
+    password: z.string().min(8, '密码至少 8 位'),
+    confirmPassword: z.string()
+  })
+  .refine(data => data.password === data.confirmPassword, {
+    message: '两次密码不一致',
+    path: ['confirmPassword']
+  });
 
 <Form schema={schema} onFinish={handleSubmit}>
   {/* 字段 */}
-</Form>
+</Form>;
 ```
 
 ## 🔧 高级用法
@@ -729,7 +731,7 @@ function LinkedFields() {
     <Form form={form}>
       <Field
         name="country"
-        onChange={(value) => {
+        onChange={value => {
           // 国家变化时清空城市
           form.setFieldValue('city', undefined);
         }}
@@ -796,7 +798,7 @@ function TypedForm() {
 
   // ✅ 类型安全
   const username = form.getFieldValue('username'); // string
-  const age = form.getFieldValue('profile.age');   // number
+  const age = form.getFieldValue('profile.age'); // number
 
   // ✅ 自动补全
   form.setFieldsValue({
@@ -807,7 +809,7 @@ function TypedForm() {
   return (
     <Form<FormValues>
       form={form}
-      onFinish={(values) => {
+      onFinish={values => {
         // values 已完全类型化
         console.log(values.username); // ✅
         console.log(values.profile.age); // ✅
@@ -846,8 +848,12 @@ function MyForm() {
   return (
     <Form form={form}>
       {/* 字段 */}
-      <button type="button" onClick={handleReset}>重置</button>
-      <button type="button" onClick={handleFill}>填充</button>
+      <button type="button" onClick={handleReset}>
+        重置
+      </button>
+      <button type="button" onClick={handleFill}>
+        填充
+      </button>
     </Form>
   );
 }
@@ -892,7 +898,7 @@ function GoodExample() {
 
 ## 🤝 与 UI 库集成
 
-Skyroc Form 可以与任何 UI 库无缝集成：
+go-tech Form 可以与任何 UI 库无缝集成：
 
 ```tsx
 // 与 Ant Design 集成
@@ -902,8 +908,10 @@ import { Input, Button } from 'antd';
   <Field name="username">
     <Input placeholder="用户名" />
   </Field>
-  <Button type="primary" htmlType="submit">提交</Button>
-</Form>
+  <Button type="primary" htmlType="submit">
+    提交
+  </Button>
+</Form>;
 
 // 与 Material-UI 集成
 import { TextField, Button } from '@mui/material';
@@ -913,7 +921,7 @@ import { TextField, Button } from '@mui/material';
     <TextField label="邮箱" />
   </Field>
   <Button type="submit">提交</Button>
-</Form>
+</Form>;
 ```
 
 ## 📄 License
@@ -922,6 +930,5 @@ MIT License
 
 ## 🔗 相关链接
 
-- [GitHub Repository](https://github.com/Ohh-889/skyroc-ui)
-- [Issue Tracker](https://github.com/Ohh-889/skyroc-ui/issues)
-
+- [GitHub Repository](https://github.com/Ohh-889/go-tech-ui)
+- [Issue Tracker](https://github.com/Ohh-889/go-tech-ui/issues)

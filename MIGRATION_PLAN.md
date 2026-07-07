@@ -1,6 +1,6 @@
 # go-tech-frontend 架构重构计划
 
-> 借鉴 [skyroc-admin](https://github.com/Ohh-889/skyroc-admin) 的「分层 / 跨端 / 可复用」架构，对 `go-tech-frontend` monorepo 进行渐进式重构。
+> 借鉴 [go-tech-admin](https://github.com/Ohh-889/go-tech-admin) 的「分层 / 跨端 / 可复用」架构，对 `go-tech-frontend` monorepo 进行渐进式重构。
 >
 > 本文档为**方案设计**，不含代码改动。请审阅后再决定是否执行，可按阶段分批落地。
 
@@ -8,9 +8,9 @@
 
 ## 1. 背景对比
 
-### skyroc-admin 的核心思想
+### go-tech-admin 的核心思想
 
-skyroc 不是一个 admin 应用，而是一套**分层基础设施**。应用（`apps/*`）只是薄壳，真正的能力沉淀在数十个 workspace 包中，形成清晰的单向依赖：
+go-tech 不是一个 admin 应用，而是一套**分层基础设施**。应用（`apps/*`）只是薄壳，真正的能力沉淀在数十个 workspace 包中，形成清晰的单向依赖：
 
 ```
 Applications (apps/*)            ← 业务薄壳，只写页面与装配
@@ -41,7 +41,7 @@ Core (packages/@core/*)          ← 平台无关内核，禁止依赖 DOM
 
 ### 关键差异（决定不能 1:1 照搬）
 
-1. skyroc 是**纯 Vite + Antd admin**；本仓库是 **Next.js + Vite 混合**、客户端门户 + HR 多端，UI 基于 **Radix + Tailwind + CVA**（非 Antd）。
+1. go-tech 是**纯 Vite + Antd admin**；本仓库是 **Next.js + Vite 混合**、客户端门户 + HR 多端，UI 基于 **Radix + Tailwind + CVA**（非 Antd）。
 2. 因此「Adapter 层（Antd 适配）」「TanStack Router」等不直接适用——本仓库 Next.js 用 App Router，Vite 应用用 react-router-dom v6。
 3. 可借鉴的是**思想与分层方式**，而非具体技术选型。下面的方案据此裁剪。
 
@@ -49,7 +49,7 @@ Core (packages/@core/*)          ← 平台无关内核，禁止依赖 DOM
 
 ## 2. 目标架构
 
-保留现有技术栈（Radix/Tailwind/CVA、Next.js + Vite 双栈、react-router），引入 skyroc 的分层与工程化：
+保留现有技术栈（Radix/Tailwind/CVA、Next.js + Vite 双栈、react-router），引入 go-tech 的分层与工程化：
 
 ```
 apps/                            业务薄壳（页面 + 装配）
@@ -65,7 +65,7 @@ internal/*                       工程配置（不参与运行时）
   tsconfig · oxlint-config · tailwind-config
 ```
 
-### 包命名约定（沿用 skyroc 思路）
+### 包命名约定（沿用 go-tech 思路）
 
 | 前缀                | 范围     | 约束                                       |
 | ------------------- | -------- | ------------------------------------------ |
@@ -88,7 +88,7 @@ internal/*                       工程配置（不参与运行时）
 1. 根目录新增 `turbo.json`，定义 `dev` / `build` / `lint` / `type-check` / `format` pipeline，配置 `dependsOn: ["^build"]` 与产物缓存（`.next`、`dist`、`tsbuildinfo`）。
 2. 根 `package.json` 脚本改为 `turbo run build` 等，保留现有 `--filter` 快捷脚本作为别名。
 3. 新增 `internal/tsconfig`（`@go-tech/config-tsconfig`）集中基础 `tsconfig.base.json`，各 app `extends` 它。
-4. **oxlint + oxfmt 迁移**（对齐 skyroc）：
+4. **oxlint + oxfmt 迁移**（对齐 go-tech）：
    - 根目录加 `.oxlintrc.json` + `.oxfmtrc.json`，迁移现有 ESLint 规则中仍需保留的部分。
    - 渐进策略：先让 oxlint 与现有 ESLint 并存（oxlint 跑全量、ESLint 留 React-specific 规则），验证无误后再移除 ESLint/Prettier。
    - 注意：oxlint 不支持全部 `eslint-plugin-react-hooks` 规则，需评估 `react-hooks` 校验是否保留 ESLint 兜底。
@@ -130,19 +130,19 @@ internal/*                       工程配置（不参与运行时）
 2. 把缺失的 17+ 个组件补全进 `packages/ui`，对有定制的组件用 CVA variant / props 参数化，而非各自 fork。
 3. HR 应用逐个删除本地 `components/ui`，改 `import { Button } from "@go-tech/web-ui"`。
 4. 注意 React 版本差异：`packages/ui` 需同时兼容 React 18（HR）与 19（web）。用 peerDependencies 声明 `react: ">=18"`，避免重复 React 实例。
-5. Tailwind 版本差异（HR v3 / web v4）：把设计令牌抽到 `internal/tailwind-config`（`@go-tech/config-tailwind`），v3/v4 各自的 preset 引用同一份 token 源（颜色、圆角、间距），对齐 skyroc 的 `tailwind-plugin` 思路。
+5. Tailwind 版本差异（HR v3 / web v4）：把设计令牌抽到 `internal/tailwind-config`（`@go-tech/config-tailwind`），v3/v4 各自的 preset 引用同一份 token 源（颜色、圆角、间距），对齐 go-tech 的 `tailwind-plugin` 思路。
 
 **验收**：删除 ~98 个重复文件；HR 应用 UI 由共享包驱动；改一处组件四端生效。
 
 ### 阶段 3 — 共享 service / 状态基础设施（中风险）
 
-**目标**：对齐 skyroc 的 `@go-tech/service`——可复用的请求 + 查询层。
+**目标**：对齐 go-tech 的 `@go-tech/service`——可复用的请求 + 查询层。
 
 1. `packages/core/service`（`@go-tech/core-service`）：在 `core-http` 之上封装 TanStack Query 的 `queryClient` 工厂、统一 `queryKey` 约定、错误/鉴权拦截与跳转 adapter。
 2. 各业务 API 改为「定义一次 service 函数 + 类型」，四端共用。web-admin 现有 React Query 调用迁移到该层。
-3. 状态：保持轻量。skyroc 用 Jotai，本仓库可选——
+3. 状态：保持轻量。go-tech 用 Jotai，本仓库可选——
    - **方案 A（推荐，渐进）**：维持现状（web-h5 Context / web-admin 局部 store），仅统一「鉴权状态」到 `core` 的一个 framework-agnostic store helper。
-   - **方案 B（彻底对齐 skyroc）**：引入 Jotai 作为跨端原子状态层。成本更高，仅在确有跨端共享状态需求时采用。
+   - **方案 B（彻底对齐 go-tech）**：引入 Jotai 作为跨端原子状态层。成本更高，仅在确有跨端共享状态需求时采用。
    - 此处需你拍板，详见第 5 节。
 
 **验收**：新增一个 API 只写一份 service；鉴权/401 处理集中一处。
@@ -151,7 +151,7 @@ internal/*                       工程配置（不参与运行时）
 
 1. 各 app 内残留的工具/类型移入对应 `core`/`web` 包，app 只留页面、路由、装配。
 2. 更新 `AGENTS.md` 反映新分层与依赖规则（含「core 禁止 DOM」约定）。
-3. 可选：仿 skyroc 增加 `PROJECT_STRUCTURE.md` / `PACKAGE_SPLIT_ARCHITECTURE.md` 说明分层边界。
+3. 可选：仿 go-tech 增加 `PROJECT_STRUCTURE.md` / `PACKAGE_SPLIT_ARCHITECTURE.md` 说明分层边界。
 
 ---
 
@@ -171,7 +171,7 @@ internal/*                       工程配置（不参与运行时）
 ## 5. 需要你确认的决策点
 
 1. **命名空间**：是否把 `@go-tech-frontend/*` 收敛为 `@go-tech/*`？（纯改名，影响范围大但机械）
-2. **状态层**：阶段 3 选**方案 A（渐进，不引入 Jotai）**还是**方案 B（引入 Jotai 对齐 skyroc）**？
+2. **状态层**：阶段 3 选**方案 A（渐进，不引入 Jotai）**还是**方案 B（引入 Jotai 对齐 go-tech）**？
 3. **oxlint**：是否完全替换 ESLint/Prettier，还是 oxlint 为主、ESLint 仅保留 react-hooks？
 4. **执行节奏**：先只做阶段 0（地基），还是 0→1→2 一起推进？
 5. **HR 应用 UI 收敛**：是否接受为兼容定制而把组件参数化（可能改变现有 HR 视觉的少量细节）？

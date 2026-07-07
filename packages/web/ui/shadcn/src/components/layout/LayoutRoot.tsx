@@ -1,11 +1,11 @@
 'use client';
 
+import { cn } from '@go-tech/utils';
+import { useControllableState } from '@radix-ui/react-use-controllable-state';
 import type { CSSProperties } from 'react';
 import { useMemo, useState } from 'react';
-import { useControllableState } from '@radix-ui/react-use-controllable-state';
 import { themeSizeRatio } from '../../constants/theme';
 import { useMediaQuery } from '../../hooks/use-media-query';
-import { cn } from '@go-tech/utils';
 import { LayoutContext } from './context';
 import { layoutVariants } from './layout-variants';
 import type { LayoutRootProps } from './types';
@@ -54,8 +54,8 @@ const LayoutRoot = ({
     const sidebarWidthValue = (sidebarWidth * themeSizeRatio[size]) / 16;
     const collapsedSidebarWidthValue = (collapsedSidebarWidth * themeSizeRatio[size]) / 16;
     return {
-      '--skyroc-sidebar-width': `${sidebarWidthValue}rem`,
-      '--skyroc-collapsed-sidebar-width': `${collapsedSidebarWidthValue}rem`
+      '--go-tech-sidebar-width': `${sidebarWidthValue}rem`,
+      '--go-tech-collapsed-sidebar-width': `${collapsedSidebarWidthValue}rem`
     } as CSSProperties;
   }, [sidebarWidth, collapsedSidebarWidth, size]);
 
@@ -81,8 +81,7 @@ const LayoutRoot = ({
         toggleSidebar: () => {
           if (isMobile) {
             setOpenMobile(!openMobile);
-          }
-          else {
+          } else {
             handleOpenChange(!open);
           }
         }

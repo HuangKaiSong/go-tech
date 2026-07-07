@@ -1,5 +1,5 @@
-import type { CSSProperties } from 'react';
 import { cn } from '@go-tech/utils';
+import type { CSSProperties } from 'react';
 import { DialogOverlay, DialogPortal, DialogRoot } from '../dialog';
 import { DrawerContent } from '../drawer';
 import { useLayoutContext } from './context';
@@ -16,23 +16,16 @@ const LayoutMobile = (props: LayoutMobileProps) => {
   const { onOpenMobileChange, openMobile } = useLayoutContext();
 
   return (
-    <DialogRoot
-      open={openMobile}
-      onOpenChange={onOpenMobileChange}
-    >
+    <DialogRoot open={openMobile} onOpenChange={onOpenMobileChange}>
       <DialogPortal>
         <DialogOverlay />
 
         <DrawerContent
           className={mergedCls.root}
           side={side}
-          style={{ '--skyroc-sidebar-width': '18rem' } as CSSProperties}
+          style={{ '--go-tech-sidebar-width': '18rem' } as CSSProperties}
         >
-          <div
-            className={mergedCls.cls}
-            data-mobile="true"
-            data-sidebar="sidebar"
-          >
+          <div className={mergedCls.cls} data-mobile="true" data-sidebar="sidebar">
             {children}
           </div>
         </DrawerContent>

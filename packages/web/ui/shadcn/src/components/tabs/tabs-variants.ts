@@ -72,11 +72,11 @@ export const tabsVariants = tv({
     },
     orientation: {
       horizontal: {
-        indicatorRoot: `h-full w-[var(--skyroc-tabs-indicator-size)] translate-x-[var(--skyroc-tabs-indicator-position)]`,
+        indicatorRoot: `h-full w-[var(--go-tech-tabs-indicator-size)] translate-x-[var(--go-tech-tabs-indicator-position)]`,
         root: `flex-col`
       },
       vertical: {
-        indicatorRoot: `w-full h-[var(--skyroc-tabs-indicator-size)] translate-y-[var(--skyroc-tabs-indicator-position)]`,
+        indicatorRoot: `w-full h-[var(--go-tech-tabs-indicator-size)] translate-y-[var(--go-tech-tabs-indicator-position)]`,
         list: `flex-col`
       }
     },

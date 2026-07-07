@@ -1,7 +1,7 @@
 import { generateCSSVars, generateGlobalStyles } from './generate';
-import type { SkyrocUIPluginOptions } from './types';
+import type { go-techUIPluginOptions } from './types';
 
-export function skyrocUITheme(options: SkyrocUIPluginOptions) {
+export function go-techUITheme(options: go - techUIPluginOptions) {
   const { globals = true, platform = 'web', ...theme } = options;
 
   const isNative = platform === 'native';

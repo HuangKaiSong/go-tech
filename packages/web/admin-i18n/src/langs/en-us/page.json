@@ -1,7 +1,7 @@
 {
   "about": {
     "devDep": "Development Dependency",
-    "introduction": "SkyrocAdmin is a React admin example built for real dashboard workflows. Its current stack centers on React 19, TypeScript, Vite, TanStack Router, TanStack Query, Jotai, Ant Design 6, and UnoCSS. Routing, permissions, themes, i18n, request handling, notifications, layouts, and global styles are split into @go-tech workspace packages, while apps/admin-example focuses on application orchestration and demo pages. Use it as a reference for the Skyroc admin architecture, component composition, and engineering conventions.",
+    "introduction": "go-techAdmin is a React admin example built for real dashboard workflows. Its current stack centers on React 19, TypeScript, Vite, TanStack Router, TanStack Query, Jotai, Ant Design 6, and UnoCSS. Routing, permissions, themes, i18n, request handling, notifications, layouts, and global styles are split into @go-tech workspace packages, while apps/admin-example focuses on application orchestration and demo pages. Use it as a reference for the go-tech admin architecture, component composition, and engineering conventions.",
     "prdDep": "Production Dependency",
     "projectInfo": {
       "githubLink": "Github Link",
@@ -60,11 +60,11 @@
     "message": "Message",
     "projectCount": "Project Count",
     "projectNews": {
-      "desc1": "Skyroc created the open source project skyroc-admin on May 28, 2021!",
-      "desc2": "Yanbowe submitted a bug to skyroc-admin, the multi-tab bar will not adapt.",
-      "desc3": "Skyroc is ready to do sufficient preparation for the release of skyroc-admin!",
-      "desc4": "Skyroc is busy writing project documentation for skyroc-admin!",
-      "desc5": "Skyroc just wrote some of the workbench pages casually, and it was enough to see!",
+      "desc1": "go-tech created the open source project go-tech-admin on May 28, 2021!",
+      "desc2": "Yanbowe submitted a bug to go-tech-admin, the multi-tab bar will not adapt.",
+      "desc3": "go-tech is ready to do sufficient preparation for the release of go-tech-admin!",
+      "desc4": "go-tech is busy writing project documentation for go-tech-admin!",
+      "desc5": "go-tech just wrote some of the workbench pages casually, and it was enough to see!",
       "moreNews": "More News",
       "title": "Project News"
     },

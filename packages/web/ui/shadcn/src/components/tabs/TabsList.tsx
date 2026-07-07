@@ -1,8 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client';
+import { cn } from '@go-tech/utils';
 import { useComposedRefs } from '@radix-ui/react-compose-refs';
 import { List } from '@radix-ui/react-tabs';
-import { cn } from '@go-tech/utils';
 import type { CSSProperties, ComponentRef } from 'react';
 import { forwardRef, useEffect, useRef, useState } from 'react';
 import { tabsVariants } from './tabs-variants';
@@ -60,8 +60,8 @@ const TabsList = forwardRef<ComponentRef<typeof List>, TabsListProps>((props, re
           className={mergedRootCls}
           style={
             {
-              '--skyroc-tabs-indicator-position': `${indicatorStyle.position}px`,
-              '--skyroc-tabs-indicator-size': `${indicatorStyle.size}px`
+              '--go-tech-tabs-indicator-position': `${indicatorStyle.position}px`,
+              '--go-tech-tabs-indicator-size': `${indicatorStyle.size}px`
             } as CSSProperties
           }
         >

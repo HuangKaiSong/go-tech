@@ -52,9 +52,9 @@
         "name": "Azir's Preset",
         "desc": "It is a cold and elegant preset that Azir likes"
       },
-      "skyroc": {
-        "name": "Skyroc Preset",
-        "desc": "Professional theme with vibrant indigo primary color, inspired by Skyroc design"
+      "go-tech": {
+        "name": "go-tech Preset",
+        "desc": "Professional theme with vibrant indigo primary color, inspired by go-tech design"
       },
       "shadcn": {
         "name": "Shadcn Preset",

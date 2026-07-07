@@ -2,7 +2,7 @@
   "name": "@go-tech/web-admin-devtools",
   "version": "0.1.0",
   "type": "module",
-  "description": "Configurable development-only admin devtools panels for Skyroc admin applications.",
+  "description": "Configurable development-only admin devtools panels for go-tech admin applications.",
   "keywords": [
     "admin",
     "devtools",
@@ -10,17 +10,17 @@
     "query",
     "react",
     "router",
-    "skyroc",
+    "go-tech",
     "tanstack"
   ],
   "license": "MIT",
-  "homepage": "https://github.com/Ohh-889/skyroc-admin/tree/master/packages/web/admin-devtools",
+  "homepage": "https://github.com/Ohh-889/go-tech-admin/tree/master/packages/web/admin-devtools",
   "bugs": {
-    "url": "https://github.com/Ohh-889/skyroc-admin/issues"
+    "url": "https://github.com/Ohh-889/go-tech-admin/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Ohh-889/skyroc-admin.git",
+    "url": "https://github.com/Ohh-889/go-tech-admin.git",
     "directory": "packages/web/admin-devtools"
   },
   "author": {

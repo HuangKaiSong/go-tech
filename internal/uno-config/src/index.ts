@@ -145,7 +145,7 @@ export const builtinRadiuses = [0, 0.3, 0.5, 0.75, 1] as const;
  */
 export function presetSoybeanAdmin(): Preset<PresetWind3Theme> {
   return {
-    name: 'unocss-preset-skyroc-admin',
+    name: 'unocss-preset-go-tech-admin',
     preflights: [
       {
         getCSS: () => `

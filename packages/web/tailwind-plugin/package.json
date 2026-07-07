@@ -3,11 +3,11 @@
   "version": "0.0.1",
   "private": false,
   "type": "module",
-  "description": "Tailwind CSS plugin for Skyroc UI — OKLCH theme tokens, feedback colors, sidebar palette, and design-system presets",
+  "description": "Tailwind CSS plugin for go-tech UI — OKLCH theme tokens, feedback colors, sidebar palette, and design-system presets",
   "keywords": [
     "design-system",
     "oklch",
-    "skyroc",
+    "go-tech",
     "tailwind",
     "tailwind-plugin",
     "tailwindcss",

@@ -1,17 +1,17 @@
 {
   "name": "@go-tech/web-admin-vite",
   "version": "0.1.0",
-  "description": "Configurable Vite build helpers and plugin presets for Skyroc admin applications.",
+  "description": "Configurable Vite build helpers and plugin presets for go-tech admin applications.",
   "keywords": [
     "admin",
     "build",
-    "skyroc",
+    "go-tech",
     "vite",
     "web"
   ],
-  "homepage": "https://github.com/Ohh-889/skyroc-admin/tree/master/packages/web/admin-vite",
+  "homepage": "https://github.com/Ohh-889/go-tech-admin/tree/master/packages/web/admin-vite",
   "bugs": {
-    "url": "https://github.com/Ohh-889/skyroc-admin/issues"
+    "url": "https://github.com/Ohh-889/go-tech-admin/issues"
   },
   "license": "MIT",
   "author": {
@@ -21,7 +21,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Ohh-889/skyroc-admin.git",
+    "url": "https://github.com/Ohh-889/go-tech-admin.git",
     "directory": "packages/web/admin-vite"
   },
   "files": [

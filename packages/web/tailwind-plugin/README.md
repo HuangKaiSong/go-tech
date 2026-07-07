@@ -1,6 +1,6 @@
 # @go-tech/tailwind-plugin
 
-> Skyroc UI 的 Tailwind CSS 插件 — 通过 CSS 变量提供主题系统、12 套内置配色、语义化 token、可配置圆角与一组常用 utility，支持 Web / Native 双平台与运行时主题切换
+> go-tech UI 的 Tailwind CSS 插件 — 通过 CSS 变量提供主题系统、12 套内置配色、语义化 token、可配置圆角与一组常用 utility，支持 Web / Native 双平台与运行时主题切换
 
 构建于 [`@go-tech/color`](../../@core/color) 之上，与 [`@go-tech/web-admin-theme`](../admin-theme) 互不依赖：本包负责 Tailwind 端的样式系统，后者负责 React 状态与 Ant Design 集成。
 
@@ -15,7 +15,7 @@
 - **根字号档** — `html.size-xs` ~ `size-2xl` 6 档，整体放缩 rem 体系
 - **极小字号补足** — `text-2xs` / `text-3xs` / `text-4xs` 弥补 Tailwind 默认下限
 - **覆盖友好** — 反馈色 / Sidebar 色独立可覆盖；`color: false` / `globals: false` 支持渐进集成
-- **完整 TypeScript 类型** — `HslColorString` / `ThemeOptions` / `SkyrocUIPluginOptions` 等导出
+- **完整 TypeScript 类型** — `HslColorString` / `ThemeOptions` / `go-techUIPluginOptions` 等导出
 
 ## Installation
 
@@ -31,23 +31,23 @@ pnpm add -D @go-tech/tailwind-plugin tailwindcss
 
 ```js
 // tailwind.config.js
-import { skyrocUIPlugin } from '@go-tech/tailwind-plugin';
+import { go-techUIPlugin } from '@go-tech/tailwind-plugin';
 
 export default {
   content: ['./src/**/*.{js,ts,jsx,tsx}'],
-  plugins: [skyrocUIPlugin()]
+  plugins: [go-techUIPlugin()]
 };
 ```
 
 ### 2. 带选项配置
 
 ```js
-import { skyrocUIPlugin } from '@go-tech/tailwind-plugin';
+import { go-techUIPlugin } from '@go-tech/tailwind-plugin';
 
 export default {
   content: ['./src/**/*.{js,ts,jsx,tsx}'],
   plugins: [
-    skyrocUIPlugin({
+    go-techUIPlugin({
       color: 'blue',     // 12 套内置主题之一
       radius: 0.75,      // 圆角基准（rem）
       platform: 'web',   // 'web' | 'native'
@@ -62,9 +62,7 @@ export default {
 
 ```tsx
 <div className="bg-background text-foreground">
-  <button className="bg-primary text-primary-foreground rounded-md px-4 py-2">
-    主要按钮
-  </button>
+  <button className="bg-primary text-primary-foreground rounded-md px-4 py-2">主要按钮</button>
 
   <div className="bg-card border border-border rounded-lg p-4">
     <p className="text-muted-foreground">次要文字</p>
@@ -88,22 +86,23 @@ document.documentElement.classList.toggle('dark');
 ### 5. 自定义颜色（基于内置主题局部覆盖）
 
 ```ts
-skyrocUIPlugin({
-  color: {
-    base: 'blue',
-    light: { primary: '210 100% 50%' },
-    dark: { primary: '210 100% 60%' }
-  }
-});
+go -
+  techUIPlugin({
+    color: {
+      base: 'blue',
+      light: { primary: '210 100% 50%' },
+      dark: { primary: '210 100% 60%' }
+    }
+  });
 ```
 
 ## Package Structure
 
 ```
 src/
-├── index.ts              skyrocUIPlugin 主入口（plugin.withOptions）
-├── presets.ts            presetSkyrocUI()：flex-* / animate-* utility
-├── themePresets.ts       skyrocUITheme()：base 样式（CSS 变量 + keyframes + html.size-* 字号档）
+├── index.ts              go-techUIPlugin 主入口（plugin.withOptions）
+├── presets.ts            presetgo-techUI()：flex-* / animate-* utility
+├── themePresets.ts       go-techUITheme()：base 样式（CSS 变量 + keyframes + html.size-* 字号档）
 ├── generate.ts           generateCSSVars / generateGlobalStyles + 色板生成
 ├── theme.json            12 套内置颜色主题的亮暗 CSS 变量（详见下方说明）
 └── types.ts              类型定义（HslColorString / ThemeOptions ...）
@@ -111,17 +110,17 @@ src/
 
 ## API 速览
 
-| 导出 | 类型 | 说明 |
-|------|------|------|
-| `skyrocUIPlugin(options?)` | plugin | 主插件，同时完成 `addBase` + `addUtilities` + `theme.extend` |
-| `skyrocUITheme(options)` | function | 返回 `addBase` 输入对象（CSS 变量 + 全局样式 + 字号档 + keyframes）|
-| `presetSkyrocUI()` | function | 返回 `addUtilities` 输入对象（`flex-*` / `i-flex-*` / `animate-*`）|
-| `generateCSSVars(theme, onlyOne?, native?)` | function | 底层 CSS 变量生成器，可在 SSR / 服务端单独使用 |
-| `generateGlobalStyles()` | function | 返回 `*` / `body` / `.lucide` 全局样式片段 |
-| `builtinColors` | const | 12 套内置颜色名数组 |
-| `builtinColorMap` | const | 颜色名 → 主色 hsl 字符串映射 |
-| `builtinRadiuses` | const | 可用圆角枚举 `[0, 0.3, 0.5, 0.75, 1]` |
-| `SkyrocUIPluginOptions` / `ThemeOptions` / `ThemeConfig` / `ThemeColorKey` 等 | type | 完整类型导出 |
+| 导出                                                                           | 类型     | 说明                                                                |
+| ------------------------------------------------------------------------------ | -------- | ------------------------------------------------------------------- |
+| `go-techUIPlugin(options?)`                                                    | plugin   | 主插件，同时完成 `addBase` + `addUtilities` + `theme.extend`        |
+| `go-techUITheme(options)`                                                      | function | 返回 `addBase` 输入对象（CSS 变量 + 全局样式 + 字号档 + keyframes） |
+| `presetgo-techUI()`                                                            | function | 返回 `addUtilities` 输入对象（`flex-*` / `i-flex-*` / `animate-*`） |
+| `generateCSSVars(theme, onlyOne?, native?)`                                    | function | 底层 CSS 变量生成器，可在 SSR / 服务端单独使用                      |
+| `generateGlobalStyles()`                                                       | function | 返回 `*` / `body` / `.lucide` 全局样式片段                          |
+| `builtinColors`                                                                | const    | 12 套内置颜色名数组                                                 |
+| `builtinColorMap`                                                              | const    | 颜色名 → 主色 hsl 字符串映射                                        |
+| `builtinRadiuses`                                                              | const    | 可用圆角枚举 `[0, 0.3, 0.5, 0.75, 1]`                               |
+| `go-techUIPluginOptions` / `ThemeOptions` / `ThemeConfig` / `ThemeColorKey` 等 | type     | 完整类型导出                                                        |
 
 完整 API 文档（含字段说明、token 表格、设计取舍、Web/Native 差异）：见 [`apps/web-kit-docs/content/docs/tailwind-plugin.mdx`](../../../apps/web-kit-docs/content/docs/tailwind-plugin.mdx)。
 

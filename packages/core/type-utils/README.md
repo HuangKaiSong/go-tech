@@ -1,4 +1,4 @@
-# Skyroc Type Utils
+# go-tech Type Utils
 
 [English](./README.md) | 简体中文
 

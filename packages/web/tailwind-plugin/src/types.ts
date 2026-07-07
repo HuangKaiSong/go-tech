@@ -127,12 +127,12 @@ export type ThemeColorKey =
   | Extract<ThemeCSSVarKey, 'destructive' | 'primary' | 'secondary'>
   | Extract<FeedbackColorOfThemeCssVarKey, 'carbon' | 'info' | 'success' | 'warning'>;
 
-export interface SkyrocUIPluginOptions extends ThemeOptions {
-  globals?: boolean;
+export interface go-techUIPluginOptions extends ThemeOptions {
+  globals ?: boolean;
   /**
    * 目标平台，native 模式下颜色变量输出为 hex，支持 opacity modifier
    *
    * @default 'web'
    */
-  platform?: 'native' | 'web';
+  platform ?: 'native' | 'web';
 }

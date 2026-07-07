@@ -13,7 +13,7 @@ export function setupAdminHtmlPlugin(options: SetupAdminHtmlPluginOptions): Plug
 
   return {
     apply: 'build',
-    name: 'skyroc:admin-html',
+    name: 'go-tech:admin-html',
     transformIndexHtml(html) {
       return html.replace('<head>', `<head>\n    <meta name="${metaName}" content="${buildTime}">`);
     }

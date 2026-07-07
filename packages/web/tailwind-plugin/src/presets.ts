@@ -1,4 +1,4 @@
-export function presetSkyrocUI() {
+export function presetgo-techUI() {
   return {
     '.animate-accordion-down': {
       animation: 'shadcn-down 0.2s ease-out'

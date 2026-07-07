@@ -3,27 +3,27 @@
   "version": "2.5.0",
   "private": false,
   "type": "module",
-  "description": "React admin layout materials for Skyroc - slot-based AdminLayout and multi-style PageTab components",
+  "description": "React admin layout materials for go-tech - slot-based AdminLayout and multi-style PageTab components",
   "keywords": [
     "admin-layout",
     "layout",
     "materials",
     "page-tabs",
     "react",
-    "skyroc",
+    "go-tech",
     "soybean-admin",
     "tabs",
     "typescript",
     "ui"
   ],
   "license": "MIT",
-  "homepage": "https://github.com/Ohh-889/skyroc-admin/tree/master/packages/web/materials",
+  "homepage": "https://github.com/Ohh-889/go-tech-admin/tree/master/packages/web/materials",
   "bugs": {
-    "url": "https://github.com/Ohh-889/skyroc-admin/issues"
+    "url": "https://github.com/Ohh-889/go-tech-admin/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Ohh-889/skyroc-admin.git",
+    "url": "https://github.com/Ohh-889/go-tech-admin.git",
     "directory": "packages/web/materials"
   },
   "author": {

@@ -137,7 +137,7 @@ export interface AdminViteApplicationOptions<E extends AdminViteEnv = AdminViteE
 }
 
 export interface AdminViteUserConfig<E extends AdminViteEnv = AdminViteEnv> {
-  /** Skyroc admin application preset options. */
+  /** go-tech admin application preset options. */
   application?: AdminViteApplicationOptions<E>;
 
   /** Raw Vite config merged after the admin preset. */

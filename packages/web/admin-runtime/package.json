@@ -10,17 +10,17 @@
     "iconify",
     "nprogress",
     "runtime",
-    "skyroc",
+    "go-tech",
     "web"
   ],
   "license": "MIT",
-  "homepage": "https://github.com/Ohh-889/skyroc-admin/tree/master/packages/web/admin-runtime",
+  "homepage": "https://github.com/Ohh-889/go-tech-admin/tree/master/packages/web/admin-runtime",
   "bugs": {
-    "url": "https://github.com/Ohh-889/skyroc-admin/issues"
+    "url": "https://github.com/Ohh-889/go-tech-admin/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Ohh-889/skyroc-admin.git",
+    "url": "https://github.com/Ohh-889/go-tech-admin.git",
     "directory": "packages/web/admin-runtime"
   },
   "author": {

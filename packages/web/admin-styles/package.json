@@ -3,24 +3,24 @@
   "version": "0.1.0",
   "private": false,
   "type": "module",
-  "description": "Shared global CSS assets for Skyroc admin web applications.",
+  "description": "Shared global CSS assets for go-tech admin web applications.",
   "keywords": [
     "admin",
     "css",
     "global-styles",
     "nprogress",
     "reset",
-    "skyroc",
+    "go-tech",
     "web"
   ],
   "license": "MIT",
-  "homepage": "https://github.com/Ohh-889/skyroc-admin/tree/master/packages/web/admin-styles",
+  "homepage": "https://github.com/Ohh-889/go-tech-admin/tree/master/packages/web/admin-styles",
   "bugs": {
-    "url": "https://github.com/Ohh-889/skyroc-admin/issues"
+    "url": "https://github.com/Ohh-889/go-tech-admin/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Ohh-889/skyroc-admin.git",
+    "url": "https://github.com/Ohh-889/go-tech-admin.git",
     "directory": "packages/web/admin-styles"
   },
   "author": {

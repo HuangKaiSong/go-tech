@@ -1,7 +1,7 @@
 {
   "about": {
     "devDep": "开发依赖",
-    "introduction": "SkyrocAdmin 是一个面向真实后台业务的 React 管理端示例，当前技术栈以 React 19、TypeScript、Vite、TanStack Router、TanStack Query、Jotai、Ant Design 6 和 UnoCSS 为核心。项目将路由、权限、主题、国际化、请求、通知、布局和全局样式拆分到 @go-tech 工作区包，由 apps/admin-example 负责应用编排和示例页面。它适合作为 Skyroc 管理端架构、组件组合和工程化约定的参考实现。",
+    "introduction": "go-techAdmin 是一个面向真实后台业务的 React 管理端示例，当前技术栈以 React 19、TypeScript、Vite、TanStack Router、TanStack Query、Jotai、Ant Design 6 和 UnoCSS 为核心。项目将路由、权限、主题、国际化、请求、通知、布局和全局样式拆分到 @go-tech 工作区包，由 apps/admin-example 负责应用编排和示例页面。它适合作为 go-tech 管理端架构、组件组合和工程化约定的参考实现。",
     "prdDep": "生产依赖",
     "projectInfo": {
       "githubLink": "Github 地址",
@@ -60,11 +60,11 @@
     "message": "消息",
     "projectCount": "项目数",
     "projectNews": {
-      "desc1": "Skyroc 在2021年5月28日创建了开源项目 skyroc-admin!",
-      "desc2": "Yanbowe 向 skyroc-admin 提交了一个bug，多标签栏不会自适应。",
-      "desc3": "Skyroc 准备为 skyroc-admin 的发布做充分的准备工作!",
-      "desc4": "Skyroc 正在忙于为skyroc-admin写项目说明文档！",
-      "desc5": "Skyroc 刚才把工作台页面随便写了一些，凑合能看了！",
+      "desc1": "go-tech 在2021年5月28日创建了开源项目 go-tech-admin!",
+      "desc2": "Yanbowe 向 go-tech-admin 提交了一个bug，多标签栏不会自适应。",
+      "desc3": "go-tech 准备为 go-tech-admin 的发布做充分的准备工作!",
+      "desc4": "go-tech 正在忙于为go-tech-admin写项目说明文档！",
+      "desc5": "go-tech 刚才把工作台页面随便写了一些，凑合能看了！",
       "moreNews": "更多动态",
       "title": "项目动态"
     },

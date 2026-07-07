@@ -30,10 +30,10 @@ export interface AdminJotaiDevtoolsTriggerOffset {
 }
 
 type JotaiDevtoolsTriggerOffsetStyle = CSSProperties & {
-  '--skyroc-jotai-devtools-trigger-bottom'?: string;
-  '--skyroc-jotai-devtools-trigger-left'?: string;
-  '--skyroc-jotai-devtools-trigger-right'?: string;
-  '--skyroc-jotai-devtools-trigger-top'?: string;
+  '--go-tech-jotai-devtools-trigger-bottom'?: string;
+  '--go-tech-jotai-devtools-trigger-left'?: string;
+  '--go-tech-jotai-devtools-trigger-right'?: string;
+  '--go-tech-jotai-devtools-trigger-top'?: string;
 };
 
 export interface AdminJotaiDevtoolsConfig {
@@ -152,10 +152,10 @@ const JotaiDevtools = (props: JotaiDevtoolsProps) => {
 
   return (
     <>
-      {showTimeline ? <JotaiAtomsDevtools name={jotaiConfig.name ?? 'skyroc-admin'} store={store} /> : null}
+      {showTimeline ? <JotaiAtomsDevtools name={jotaiConfig.name ?? 'go-tech-admin'} store={store} /> : null}
       {showPanel ? (
         <span
-          className="skyroc-admin-jotai-devtools"
+          className="go-tech-admin-jotai-devtools"
           data-position={jotaiConfig.position ?? 'bottom-left'}
           style={triggerOffsetStyle}
         >
@@ -188,10 +188,10 @@ function createJotaiDevtoolsTriggerOffsetStyle(
   const { bottom, left, right, top } = offset;
 
   return {
-    '--skyroc-jotai-devtools-trigger-bottom': formatCssSize(bottom),
-    '--skyroc-jotai-devtools-trigger-left': formatCssSize(left),
-    '--skyroc-jotai-devtools-trigger-right': formatCssSize(right),
-    '--skyroc-jotai-devtools-trigger-top': formatCssSize(top)
+    '--go-tech-jotai-devtools-trigger-bottom': formatCssSize(bottom),
+    '--go-tech-jotai-devtools-trigger-left': formatCssSize(left),
+    '--go-tech-jotai-devtools-trigger-right': formatCssSize(right),
+    '--go-tech-jotai-devtools-trigger-top': formatCssSize(top)
   } satisfies JotaiDevtoolsTriggerOffsetStyle;
 }
 
@@ -241,9 +241,7 @@ const AdminDevtools = (props: AdminDevtoolsProps) => {
 
   return (
     <Suspense fallback={null}>
-      {plugins.length > 0 ? (
-        <TanStackDevtools config={tanStackConfig} plugins={plugins} />
-      ) : null}
+      {plugins.length > 0 ? <TanStackDevtools config={tanStackConfig} plugins={plugins} /> : null}
 
       <JotaiDevtools config={config.jotai} store={store} theme={config.theme} />
     </Suspense>

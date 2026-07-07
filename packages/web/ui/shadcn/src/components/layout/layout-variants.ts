@@ -6,17 +6,17 @@ export const layoutVariants = tv({
   slots: {
     root: 'group relative flex w-full min-h-full data-[side=right]:flex-row-reverse',
     sidebarRoot: 'hidden md:block',
-    sidebarWrapper: `absolute inset-y-0 z-10 hidden h-full w-[var(--skyroc-sidebar-width)] transition-[left,right,width,opacity] duration-200 ease-linear md:flex`,
+    sidebarWrapper: `absolute inset-y-0 z-10 hidden h-full w-[var(--go-tech-sidebar-width)] transition-[left,right,width,opacity] duration-200 ease-linear md:flex`,
     sidebar: [
       `flex flex-col size-full bg-sidebar-background`,
       `group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-border group-data-[variant=floating]:border-solid group-data-[variant=floating]:shadow`
     ],
     sidebarGapHandler: [
-      `relative h-full w-[var(--skyroc-sidebar-width)] bg-transparent transition-width duration-200 ease-linear`,
+      `relative h-full w-[var(--go-tech-sidebar-width)] bg-transparent transition-width duration-200 ease-linear`,
       `group-data-[collapsible=offcanvas]:w-0`,
       `group-data-[side=right]:rotate-180`
     ],
-    mobileRoot: 'w-[var(--skyroc-sidebar-width)] bg-sidebar-background p-0 [&>button]:hidden',
+    mobileRoot: 'w-[var(--go-tech-sidebar-width)] bg-sidebar-background p-0 [&>button]:hidden',
     mobileOverlay: [
       `fixed inset-0 z-50 bg-black/80`,
       `data-[state=open]:animate-in data-[state=open]:fade-in-0`,
@@ -24,8 +24,8 @@ export const layoutVariants = tv({
     ],
     mobile: 'flex flex-col size-full',
     rail: [
-      'absolute inset-y-0 z-20 hidden w-[var(--skyroc-layout-spacing)] -translate-x-1/2 transition-all ease-linear sm:flex',
-      `after:absolute after:inset-y-0 after:left-1/2 after:content-[''] after:w-[calc(var(--skyroc-layout-spacing)/8)] hover:after:bg-sidebar-border`
+      'absolute inset-y-0 z-20 hidden w-[var(--go-tech-layout-spacing)] -translate-x-1/2 transition-all ease-linear sm:flex',
+      `after:absolute after:inset-y-0 after:left-1/2 after:content-[''] after:w-[calc(var(--go-tech-layout-spacing)/8)] hover:after:bg-sidebar-border`
     ],
     trigger: '',
     main: 'relative flex flex-1 flex-col items-stretch min-h-full bg-background',
@@ -36,47 +36,47 @@ export const layoutVariants = tv({
   variants: {
     size: {
       'xs': {
-        root: 'text-2xs [--skyroc-layout-spacing:0.75rem]'
+        root: 'text-2xs [--go-tech-layout-spacing:0.75rem]'
       },
       'sm': {
-        root: 'text-xs [--skyroc-layout-spacing:0.875rem]'
+        root: 'text-xs [--go-tech-layout-spacing:0.875rem]'
       },
       'md': {
-        root: 'text-sm [--skyroc-layout-spacing:1rem]'
+        root: 'text-sm [--go-tech-layout-spacing:1rem]'
       },
       'lg': {
-        root: 'text-base [--skyroc-layout-spacing:1.25rem]'
+        root: 'text-base [--go-tech-layout-spacing:1.25rem]'
       },
       'xl': {
-        root: 'text-lg [--skyroc-layout-spacing:1.5rem]'
+        root: 'text-lg [--go-tech-layout-spacing:1.5rem]'
       },
       '2xl': {
-        root: 'text-xl [--skyroc-layout-spacing:1.75rem]'
+        root: 'text-xl [--go-tech-layout-spacing:1.75rem]'
       }
     },
     variant: {
       sidebar: {
-        sidebarGapHandler: 'group-data-[collapsible=icon]:w-[var(--skyroc-collapsed-sidebar-width)]',
-        sidebarWrapper: `group-data-[collapsible=icon]:w-[var(--skyroc-collapsed-sidebar-width)] group-data-[side=left]:border-r group-data-[side=right]:border-l`
+        sidebarGapHandler: 'group-data-[collapsible=icon]:w-[var(--go-tech-collapsed-sidebar-width)]',
+        sidebarWrapper: `group-data-[collapsible=icon]:w-[var(--go-tech-collapsed-sidebar-width)] group-data-[side=left]:border-r group-data-[side=right]:border-l`
       },
       floating: {
-        sidebarGapHandler: `w-[calc(var(--skyroc-sidebar-width)+var(--skyroc-layout-spacing))] group-data-[collapsible=icon]:w-[calc(var(--skyroc-collapsed-sidebar-width)+var(--skyroc-layout-spacing))]`,
-        sidebarWrapper: `p-[calc(var(--skyroc-layout-spacing)/2)] w-[calc(var(--skyroc-sidebar-width)+var(--skyroc-layout-spacing))] group-data-[collapsible=icon]:w-[calc(var(--skyroc-collapsed-sidebar-width)+var(--skyroc-layout-spacing))]`
+        sidebarGapHandler: `w-[calc(var(--go-tech-sidebar-width)+var(--go-tech-layout-spacing))] group-data-[collapsible=icon]:w-[calc(var(--go-tech-collapsed-sidebar-width)+var(--go-tech-layout-spacing))]`,
+        sidebarWrapper: `p-[calc(var(--go-tech-layout-spacing)/2)] w-[calc(var(--go-tech-sidebar-width)+var(--go-tech-layout-spacing))] group-data-[collapsible=icon]:w-[calc(var(--go-tech-collapsed-sidebar-width)+var(--go-tech-layout-spacing))]`
       },
       inset: {
         root: 'bg-sidebar-background',
-        sidebarGapHandler: `w-[calc(var(--skyroc-sidebar-width)+var(--skyroc-layout-spacing))] group-data-[collapsible=icon]:w-[calc(var(--skyroc-collapsed-sidebar-width)+var(--skyroc-layout-spacing))]`,
-        sidebarWrapper: `p-[calc(var(--skyroc-layout-spacing)/2)] w-[calc(var(--skyroc-sidebar-width)+var(--skyroc-layout-spacing))] group-data-[collapsible=icon]:w-[calc(var(--skyroc-collapsed-sidebar-width)+var(--skyroc-layout-spacing))]`,
-        main: `md:m-[calc(var(--skyroc-layout-spacing)/2)] md:ml-0 md:rounded-xl md:shadow`
+        sidebarGapHandler: `w-[calc(var(--go-tech-sidebar-width)+var(--go-tech-layout-spacing))] group-data-[collapsible=icon]:w-[calc(var(--go-tech-collapsed-sidebar-width)+var(--go-tech-layout-spacing))]`,
+        sidebarWrapper: `p-[calc(var(--go-tech-layout-spacing)/2)] w-[calc(var(--go-tech-sidebar-width)+var(--go-tech-layout-spacing))] group-data-[collapsible=icon]:w-[calc(var(--go-tech-collapsed-sidebar-width)+var(--go-tech-layout-spacing))]`,
+        main: `md:m-[calc(var(--go-tech-layout-spacing)/2)] md:ml-0 md:rounded-xl md:shadow`
       }
     },
     side: {
       left: {
-        sidebarWrapper: 'left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--skyroc-sidebar-width)*-1)]',
-        rail: 'cursor-w-resize group-data-[state=collapsed]:cursor-e-resize -right-[var(--skyroc-layout-spacing)]'
+        sidebarWrapper: 'left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--go-tech-sidebar-width)*-1)]',
+        rail: 'cursor-w-resize group-data-[state=collapsed]:cursor-e-resize -right-[var(--go-tech-layout-spacing)]'
       },
       right: {
-        sidebarWrapper: 'right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--skyroc-sidebar-width)*-1)]',
+        sidebarWrapper: 'right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--go-tech-sidebar-width)*-1)]',
         rail: 'cursor-e-resize group-data-[state=collapsed]:cursor-w-resize left-0'
       }
     },
@@ -93,14 +93,14 @@ export const layoutVariants = tv({
       side: 'left',
       collapsible: 'offcanvas',
       class: {
-        rail: '-right-[calc(var(--skyroc-layout-spacing)/2)]'
+        rail: '-right-[calc(var(--go-tech-layout-spacing)/2)]'
       }
     },
     {
       side: 'right',
       collapsible: 'offcanvas',
       class: {
-        rail: '-left-[calc(var(--skyroc-layout-spacing)/2)]'
+        rail: '-left-[calc(var(--go-tech-layout-spacing)/2)]'
       }
     },
     {
@@ -124,7 +124,7 @@ export const layoutVariants = tv({
       variant: 'floating',
       collapsible: 'offcanvas',
       class: {
-        rail: 'group-data-[state=collapsed]:right-[calc(var(--skyroc-layout-spacing)/2)]'
+        rail: 'group-data-[state=collapsed]:right-[calc(var(--go-tech-layout-spacing)/2)]'
       }
     },
     {
@@ -132,14 +132,14 @@ export const layoutVariants = tv({
       variant: 'floating',
       collapsible: 'offcanvas',
       class: {
-        rail: 'group-data-[state=collapsed]:left-[calc(var(--skyroc-layout-spacing)/2)]'
+        rail: 'group-data-[state=collapsed]:left-[calc(var(--go-tech-layout-spacing)/2)]'
       }
     },
     {
       variant: 'inset',
       collapsible: 'offcanvas',
       class: {
-        main: 'md:group-data-[state=collapsed]:ml-[calc(var(--skyroc-layout-spacing)/2)]'
+        main: 'md:group-data-[state=collapsed]:ml-[calc(var(--go-tech-layout-spacing)/2)]'
       }
     }
   ],

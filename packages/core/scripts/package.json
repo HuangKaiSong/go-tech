@@ -1,0 +1,53 @@
+{
+  "name": "@go-tech/scripts",
+  "version": "2.5.0",
+  "type": "module",
+  "keywords": [
+    "changelog",
+    "cli",
+    "git-commit",
+    "release",
+    "template",
+    "tooling"
+  ],
+  "files": [
+    "dist",
+    "README.md",
+    "templates"
+  ],
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "bin": {
+    "sa": "./bin.ts"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "clean": "rimraf dist",
+    "dev": "tsdown --watch",
+    "lint": "oxlint --fix --ignore-pattern 'templates/**'",
+    "typecheck": "tsc --noEmit --skipLibCheck"
+  },
+  "dependencies": {
+    "@soybeanjs/changelog": "catalog:dev",
+    "@tanstack/router-generator": "catalog:web",
+    "bumpp": "catalog:dev",
+    "c12": "catalog:dev",
+    "cac": "catalog:dev",
+    "enquirer": "catalog:dev",
+    "execa": "catalog:dev",
+    "kolorist": "catalog:dev",
+    "npm-check-updates": "catalog:dev",
+    "picomatch": "catalog:dev"
+  },
+  "devDependencies": {
+    "@go-tech/tsconfig": "workspace:*",
+    "oxlint": "catalog:dev",
+    "rimraf": "catalog:dev",
+    "tsdown": "catalog:dev",
+    "tsx": "catalog:dev",
+    "typescript": "catalog:core"
+  }
+}

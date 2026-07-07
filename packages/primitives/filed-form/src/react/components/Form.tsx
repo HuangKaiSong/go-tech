@@ -255,10 +255,10 @@ const Form = <Values = any, As extends ElementType = 'form'>(props: FormProps<Va
   );
 };
 
-Form.displayName = 'SkyrocForm';
+Form.displayName = 'go-techForm';
 
-const SkyrocForm = forwardRef(Form) as <Values = any, As extends ElementType = 'form'>(
+const go-techForm = forwardRef(Form) as <Values = any, As extends ElementType = 'form'>(
   props: FormProps<Values, As> & { ref?: Ref<As> }
 ) => React.ReactElement;
 
-export default SkyrocForm;
+export default go-techForm;

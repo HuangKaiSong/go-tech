@@ -67,7 +67,7 @@ export const defaultThemeSettings: Theme.ThemeSetting = {
   },
   watermark: {
     visible: false,
-    text: 'SkyrocAdmin',
+    text: 'go-techAdmin',
     enableCustomText: true,
     enableUserName: false,
     enableTime: false,

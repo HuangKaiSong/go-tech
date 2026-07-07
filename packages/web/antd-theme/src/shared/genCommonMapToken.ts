@@ -3,9 +3,9 @@ import type { SeedToken } from 'antd/es/theme/internal';
 import type { RadiusMapToken } from './genRadiusMapToken';
 import { genRadiusMapToken } from './genRadiusMapToken';
 
-export type SkyrocCommonMapToken = CommonMapToken & RadiusMapToken;
+export type go-techCommonMapToken = CommonMapToken & RadiusMapToken;
 
-export default function genCommonMapToken(token: SeedToken): SkyrocCommonMapToken {
+export default function genCommonMapToken(token: SeedToken): go-techCommonMapToken {
   const { borderRadius, lineWidth, motionBase, motionUnit } = token;
 
   return {

@@ -3,24 +3,24 @@
   "version": "0.1.0",
   "private": false,
   "type": "module",
-  "description": "Reusable React admin layout shell for Skyroc admin applications.",
+  "description": "Reusable React admin layout shell for go-tech admin applications.",
   "keywords": [
     "admin",
     "admin-layout",
     "antd",
     "layout",
     "react",
-    "skyroc",
+    "go-tech",
     "tabs"
   ],
   "license": "MIT",
-  "homepage": "https://github.com/Ohh-889/skyroc-admin/tree/master/packages/web/admin-layouts",
+  "homepage": "https://github.com/Ohh-889/go-tech-admin/tree/master/packages/web/admin-layouts",
   "bugs": {
-    "url": "https://github.com/Ohh-889/skyroc-admin/issues"
+    "url": "https://github.com/Ohh-889/go-tech-admin/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Ohh-889/skyroc-admin.git",
+    "url": "https://github.com/Ohh-889/go-tech-admin.git",
     "directory": "packages/web/admin-layouts"
   },
   "author": {
