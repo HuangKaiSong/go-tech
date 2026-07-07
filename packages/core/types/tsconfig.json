@@ -1,11 +1,13 @@
 {
-  "$schema": "https://json.schemastore.org/tsconfig",
-  "extends": "@go-tech/tsconfig/library.json",
+  "extends": "@go-tech/tsconfig/base.json",
   "compilerOptions": {
-    "noEmit": true,
-    "declaration": false,
-    "declarationMap": false,
-    "emitDeclarationOnly": false
+    "composite": true,
+    "rootDir": "./src",
+    "declaration": true,
+    "declarationMap": true,
+    "outDir": "./dist",
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
   },
-  "include": ["src"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/__tests__"]
 }

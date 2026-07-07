@@ -3,9 +3,9 @@ import type { SeedToken } from 'antd/es/theme/internal';
 import type { RadiusMapToken } from './genRadiusMapToken';
 import { genRadiusMapToken } from './genRadiusMapToken';
 
-export type go-techCommonMapToken = CommonMapToken & RadiusMapToken;
+export type goTechCommonMapToken = CommonMapToken & RadiusMapToken;
 
-export default function genCommonMapToken(token: SeedToken): go-techCommonMapToken {
+export default function genCommonMapToken(token: SeedToken): goTechCommonMapToken {
   const { borderRadius, lineWidth, motionBase, motionUnit } = token;
 
   return {

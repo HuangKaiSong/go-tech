@@ -75,7 +75,7 @@ export type FormProps<Values = any, As extends ElementType = 'form'> =
  *     </Field>
  *     <button type="submit">Submit</button>
  *   </Form>;
- *   ```
+ *   ```;
  *
  * @example
  *   ```tsx
@@ -100,7 +100,7 @@ export type FormProps<Values = any, As extends ElementType = 'form'> =
  *     </Field>
  *     <button type="submit">Submit</button>
  *   </Form>;
- *   ```
+ *   ```;
  *
  * @example
  *   ```tsx
@@ -127,7 +127,7 @@ export type FormProps<Values = any, As extends ElementType = 'form'> =
  *       </List>
  *     </div>
  *   </Form>;
- *   ```
+ *   ```;
  */
 // eslint-disable-next-line prettier/prettier
 const Form = <Values = any, As extends ElementType = 'form'>(props: FormProps<Values, As>, ref: Ref<As>) => {
@@ -255,10 +255,10 @@ const Form = <Values = any, As extends ElementType = 'form'>(props: FormProps<Va
   );
 };
 
-Form.displayName = 'go-techForm';
+Form.displayName = 'GoTechForm';
 
-const go-techForm = forwardRef(Form) as <Values = any, As extends ElementType = 'form'>(
+const GoTechForm = forwardRef(Form) as <Values = any, As extends ElementType = 'form'>(
   props: FormProps<Values, As> & { ref?: Ref<As> }
 ) => React.ReactElement;
 
-export default go-techForm;
+export default GoTechForm;
