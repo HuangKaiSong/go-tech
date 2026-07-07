@@ -18,11 +18,16 @@
 }
 
 #dayNightSwitch .onOff * {
-  transition: all 0.4s ease;
+  transition:
+    transform 0.4s ease,
+    background-color 0.4s ease,
+    opacity 0.4s ease,
+    border-color 0.4s ease;
 }
 
 #dayNightSwitch .onOff.daySwitch {
-  border: 2px solid #52a6bf;
+  /* border: 2px solid #52a6bf; */
+  border: none;
 }
 
 #dayNightSwitch .onOff.daySwitch .sky {
@@ -39,7 +44,12 @@
 #dayNightSwitch .onOff.daySwitch .sunMoon {
   background: #ffdf61;
   border: 2px solid #d9b31c;
-  left: calc(100% - 23px);
+  /* left: calc(100% - 23px); */
+  transform: translateX(40px);
+}
+
+#dayNightSwitch .onOff.daySwitch .star {
+  animation: none;
 }
 
 #dayNightSwitch .onOff.daySwitch .sunMoon .crater {
@@ -62,6 +72,8 @@
   position: absolute;
   left: 3px;
   top: 2.5px;
+  transform: translateX(0);
+  will-change: transform;
 }
 
 #dayNightSwitch .onOff .sunMoon .crater {

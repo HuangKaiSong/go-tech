@@ -14,6 +14,7 @@
     "@go-tech-frontend/styles": "workspace:*",
     "@go-tech-frontend/ui": "workspace:*",
     "@go-tech/web-ui": "workspace:*",
+    "@go-tech/color": "workspace:*",
     "@go-tech/core-state": "workspace:*",
     "@go-tech/hooks": "workspace:*",
     "@go-tech/core-http": "workspace:*",

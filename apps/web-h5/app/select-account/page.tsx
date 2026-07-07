@@ -5,11 +5,13 @@ import { Button, toast } from '@go-tech/web-ui';
 import { Badge } from 'antd';
 import dayjs from 'dayjs';
 import { ArrowRight, Building, Calendar, CheckCircle2, Clock, Package, ShieldCheck, Users } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 import servicePlanBg from '@/assets/service-plan-bg.jpg';
 import { useAuth } from '@/contexts/AuthContext';
 import ThemeSchemaToggler from '../components/ThemeSchemaToggler';
+import { accountGridGradient } from './account-grid-theme';
 
 const resolveAction = (value: unknown) => {
   if (typeof value !== 'string') return null;
@@ -26,7 +28,10 @@ const SelectAccount = () => {
   const from = searchParams.get('from');
   const fromHeader = from && from === 'header';
   const { refetchTenants, tenants, token } = useAuth();
+  const { resolvedTheme } = useTheme();
   const router = useRouter();
+
+  const accountGridBackground = resolvedTheme === 'dark' ? accountGridGradient.dark : accountGridGradient.light;
   const pm2Window = useRef<Window | null>(null);
 
   function cleanup() {
@@ -160,7 +165,7 @@ const SelectAccount = () => {
       </section>
 
       {/* Account grid */}
-      <section className="flex-1 py-12 bg-linear-to-b from-[#FFF8F5] via-[#FFF5F0] to-[#FFEEE5]">
+      <section className="flex-1 py-12" style={{ backgroundImage: accountGridBackground }}>
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {tenants.map(acc => {
