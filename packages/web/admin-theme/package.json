@@ -18,17 +18,6 @@
     "theme-presets",
     "theme-utilities"
   ],
-  "homepage": "https://github.com/Ohh-889/go-tech-admin/tree/main/packages/web/antdtheme#readme",
-  "bugs": {
-    "url": "https://github.com/Ohh-889/go-tech-admin/issues"
-  },
-  "license": "MIT",
-  "author": "",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Ohh-889/go-tech-admin.git",
-    "directory": "packages/web/antdtheme"
-  },
   "sideEffects": false,
   "types": "./src/index.ts",
   "typesVersions": {
@@ -40,6 +29,7 @@
   },
   "exports": {
     ".": "./src/index.ts",
+    "./vars": "./src/vars.ts",
     "./types": "./src/types/theme.d.ts"
   },
   "scripts": {

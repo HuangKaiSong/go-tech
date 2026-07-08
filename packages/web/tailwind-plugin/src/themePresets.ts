@@ -1,7 +1,7 @@
 import { generateCSSVars, generateGlobalStyles } from './generate';
-import type { go-techUIPluginOptions } from './types';
+import type { UIPluginOptions } from './types';
 
-export function go-techUITheme(options: go - techUIPluginOptions) {
+export function UITheme(options: UIPluginOptions) {
   const { globals = true, platform = 'web', ...theme } = options;
 
   const isNative = platform === 'native';

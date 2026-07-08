@@ -21,7 +21,7 @@ const OPTIONS = Object.values(ThemeMode).map(item => {
 const ThemeSchemaSegmented = () => {
   const { setThemeScheme, themeScheme } = useTheme();
 
-  return <Segmented className="bg-layout" options={OPTIONS} value={themeScheme} onChange={setThemeScheme} />;
+  return <Segmented options={OPTIONS} value={themeScheme} onChange={setThemeScheme} />;
 };
 
 export default ThemeSchemaSegmented;

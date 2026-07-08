@@ -43,6 +43,8 @@ export function getAntdTheme(colors: Theme.ThemeColor, darkMode: boolean, settin
       }
     },
     token: {
+      // 使用预设的颜色
+      ...defaultPresetColors,
       colorBgContainer: containerBgColor,
       colorError: error,
       colorInfo: info,
@@ -52,8 +54,6 @@ export function getAntdTheme(colors: Theme.ThemeColor, darkMode: boolean, settin
       borderRadius: themeRadius,
       colorSuccess: success,
       colorWarning: warning,
-      // 使用预设的颜色
-      ...defaultPresetColors
     }
   };
 

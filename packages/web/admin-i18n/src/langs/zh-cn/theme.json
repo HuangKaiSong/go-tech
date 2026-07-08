@@ -166,7 +166,7 @@
   "configOperation": {
     "copyConfig": "复制配置",
     "copyFailedMsg": "复制失败",
-    "copySuccessMsg": "复制成功，请替换 src/theme/settings.ts 中的变量 themeSettings",
+    "copySuccessMsg": "复制成功，请替换 @go-tech/admin-theme/src/config/default.ts 中的变量 defaultThemeSettings",
     "resetConfig": "重置配置",
     "resetSuccessMsg": "重置成功"
   }

@@ -1,4 +1,4 @@
-export function presetgo-techUI() {
+export function presetUI() {
   return {
     '.animate-accordion-down': {
       animation: 'shadcn-down 0.2s ease-out'

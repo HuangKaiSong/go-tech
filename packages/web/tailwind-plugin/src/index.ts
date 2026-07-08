@@ -1,12 +1,12 @@
 import plugin, { type Config, type PluginCreator } from 'tailwindcss/plugin';
 import { generateCSSVars } from './generate';
-import { presetgo-techUI } from './presets';
+import { presetUI } from './presets';
 import themes from './theme.json';
-import { go-techUITheme } from './themePresets';
-import type { go-techUIPluginOptions, ThemeColorKey, ThemeConfig, ThemeConfigColor, ThemeOptions } from './types';
+import { UITheme } from './themePresets';
+import type { ThemeColorKey, ThemeConfig, ThemeConfigColor, ThemeOptions, UIPluginOptions } from './types';
 
-type go-techUIPlugin = {
-  (options?: go-techUIPluginOptions): { config ?: Partial<Config>; handler: PluginCreator };
+type UIPluginType = {
+  (options?: UIPluginOptions): { config?: Partial<Config>; handler: PluginCreator };
   __isOptionsFunction: true;
 };
 
@@ -32,93 +32,93 @@ export const builtinRadiuses = [0, 0.3, 0.5, 0.75, 1] as const;
  * @param options - The options for the preset.
  * @param globals - Whether to generate global variables, like *.border-color, body.color, body.background.
  */
-export const go-techUIPlugin: go - techUIPlugin = plugin.withOptions(
-  (options: go-techUIPluginOptions = {}) =>
-({ addBase, addUtilities }) => {
-  addUtilities(presetgo - techUI());
+export const UIPlugin: UIPluginType = plugin.withOptions(
+  (options: UIPluginOptions = {}) =>
+    ({ addBase, addUtilities }) => {
+      addUtilities(presetUI());
 
-  addBase(go - techUITheme(options));
-},
-  (options: go-techUIPluginOptions = { }) => {
-  const r = typeof options.radius === 'number' ? options.radius : 0.5;
-  const isNative = options.platform === 'native';
+      addBase(UITheme(options));
+    },
+  (options: UIPluginOptions = {}) => {
+    const r = typeof options.radius === 'number' ? options.radius : 0.5;
+    const isNative = options.platform === 'native';
 
-  /** Web: hsl(var(--xxx))，native: var(--xxx) */
-  function c(name: string) {
-    return isNative ? `var(--${name})` : `hsl(var(--${name}))`;
-  }
+    /** Web: hsl(var(--xxx))，native: var(--xxx) */
+    function c(name: string) {
+      return isNative ? `var(--${name})` : `hsl(var(--${name}))`;
+    }
 
-  function colorScale(name: string) {
+    function colorScale(name: string) {
+      return {
+        50: c(`${name}-50`),
+        100: c(`${name}-100`),
+        200: c(`${name}-200`),
+        300: c(`${name}-300`),
+        400: c(`${name}-400`),
+        500: c(`${name}-500`),
+        600: c(`${name}-600`),
+        700: c(`${name}-700`),
+        800: c(`${name}-800`),
+        900: c(`${name}-900`),
+        950: c(`${name}-950`),
+        DEFAULT: c(name),
+        foreground: c(`${name}-foreground`)
+      };
+    }
+
     return {
-      50: c(`${name}-50`),
-      100: c(`${name}-100`),
-      200: c(`${name}-200`),
-      300: c(`${name}-300`),
-      400: c(`${name}-400`),
-      500: c(`${name}-500`),
-      600: c(`${name}-600`),
-      700: c(`${name}-700`),
-      800: c(`${name}-800`),
-      900: c(`${name}-900`),
-      950: c(`${name}-950`),
-      DEFAULT: c(name),
-      foreground: c(`${name}-foreground`)
-    };
-  }
-
-  return {
-    theme: {
-      extend: {
-        borderRadius: {
-          lg: toRem(r),
-          md: toRem(r - 0.125),
-          sm: toRem(r - 0.25),
-          xl: toRem(r + 0.25)
-        },
-        colors: {
-          accent: c('accent'),
-          'accent-foreground': c('accent-foreground'),
-          background: c('background'),
-          border: c('border'),
-          carbon: colorScale('carbon'),
-          card: c('card'),
-          'card-foreground': c('card-foreground'),
-          destructive: colorScale('destructive'),
-          foreground: c('foreground'),
-          info: colorScale('info'),
-          input: c('input'),
-          muted: c('muted'),
-          'muted-foreground': c('muted-foreground'),
-          popover: c('popover'),
-          'popover-foreground': c('popover-foreground'),
-          primary: colorScale('primary'),
-          ring: c('ring'),
-          secondary: c('secondary'),
-          'secondary-foreground': c('secondary-foreground'),
-          'sidebar-accent': c('sidebar-accent'),
-          'sidebar-accent-foreground': c('sidebar-accent-foreground'),
-          'sidebar-background': c('sidebar-background'),
-          'sidebar-border': c('sidebar-border'),
-          'sidebar-foreground': c('sidebar-foreground'),
-          'sidebar-primary': c('sidebar-primary'),
-          'sidebar-primary-foreground': c('sidebar-primary-foreground'),
-          'sidebar-ring': c('sidebar-ring'),
-          success: colorScale('success'),
-          warning: colorScale('warning')
-        },
-        fontSize: {
-          '2xs': ['0.625rem', 'calc(0.75 / 0.625)'],
-          '3xs': ['0.5rem', 'calc(0.625 / 0.5)'],
-          '4xs': ['0.375rem', 'calc(0.5 / 0.375)']
+      theme: {
+        extend: {
+          borderRadius: {
+            lg: toRem(r),
+            md: toRem(r - 0.125),
+            sm: toRem(r - 0.25),
+            xl: toRem(r + 0.25)
+          },
+          colors: {
+            accent: c('accent'),
+            'accent-foreground': c('accent-foreground'),
+            background: c('background'),
+            border: c('border'),
+            carbon: colorScale('carbon'),
+            card: c('card'),
+            'card-foreground': c('card-foreground'),
+            destructive: colorScale('destructive'),
+            foreground: c('foreground'),
+            info: colorScale('info'),
+            input: c('input'),
+            muted: c('muted'),
+            'muted-foreground': c('muted-foreground'),
+            popover: c('popover'),
+            'popover-foreground': c('popover-foreground'),
+            primary: colorScale('primary'),
+            ring: c('ring'),
+            secondary: c('secondary'),
+            'secondary-foreground': c('secondary-foreground'),
+            'sidebar-accent': c('sidebar-accent'),
+            'sidebar-accent-foreground': c('sidebar-accent-foreground'),
+            'sidebar-background': c('sidebar-background'),
+            'sidebar-border': c('sidebar-border'),
+            'sidebar-foreground': c('sidebar-foreground'),
+            'sidebar-primary': c('sidebar-primary'),
+            'sidebar-primary-foreground': c('sidebar-primary-foreground'),
+            'sidebar-ring': c('sidebar-ring'),
+            success: colorScale('success'),
+            warning: colorScale('warning')
+          },
+          fontSize: {
+            '2xs': ['0.625rem', 'calc(0.75 / 0.625)'],
+            '3xs': ['0.5rem', 'calc(0.625 / 0.5)'],
+            '4xs': ['0.375rem', 'calc(0.5 / 0.375)']
+          }
         }
       }
-    }
-  };
-}
+    };
+  }
 );
 
-export { generateCSSVars, presetgo-techUI, go - techUITheme };
+export { generateCSSVars, presetUI, UITheme };
 
 export type { ThemeColorKey, ThemeConfig, ThemeConfigColor, ThemeOptions };
 
-export default go - techUIPlugin;
+export default UIPlugin;

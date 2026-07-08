@@ -47,7 +47,7 @@ import { go-techUIPlugin } from '@go-tech/tailwind-plugin';
 export default {
   content: ['./src/**/*.{js,ts,jsx,tsx}'],
   plugins: [
-    go-techUIPlugin({
+    UIPlugin({
       color: 'blue',     // 12 套内置主题之一
       radius: 0.75,      // 圆角基准（rem）
       platform: 'web',   // 'web' | 'native'
@@ -86,8 +86,7 @@ document.documentElement.classList.toggle('dark');
 ### 5. 自定义颜色（基于内置主题局部覆盖）
 
 ```ts
-go -
-  techUIPlugin({
+UIPlugin({
     color: {
       base: 'blue',
       light: { primary: '210 100% 50%' },

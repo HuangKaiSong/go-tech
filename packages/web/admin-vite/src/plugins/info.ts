@@ -28,7 +28,7 @@ export interface SetupAdminProjectInfoOptions {
   message?: string;
 }
 
-const DEFAULT_MESSAGE = `您好! 欢迎使用 go-tech-admin 开源项目\n我们为您精心准备了精美的保姆级文档\nhttps://admin-docs.go-tech.me/`;
+const DEFAULT_MESSAGE = `您好! 欢迎使用 go-tech-admin 开源项目\n我们为您精心准备了精美的保姆级文档\nhttp://192.168.0.202:5555/`;
 
 const DEFAULT_BOXEN_OPTIONS: SetupAdminProjectInfoBoxenOptions = {
   borderColor: '#646cff',

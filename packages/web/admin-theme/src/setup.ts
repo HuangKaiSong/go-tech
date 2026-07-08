@@ -39,6 +39,7 @@ interface SetupThemeOptions {
   storagePrefix?: string;
 }
 
+// oxlint-disable-next-line no-underscore-dangle
 let _storage: ThemeStorage | null = null;
 
 export function getInternalStorage(): ThemeStorage | null {
