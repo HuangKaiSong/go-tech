@@ -4,6 +4,7 @@ import type { HookAPI as ModalHookAPI } from 'antd/es/modal/useModal';
 import type { ArgsProps, NotificationInstance } from 'antd/es/notification/interface';
 
 /** 私有 UI 实例状态 —— 由 AntdProvider 内部的 ContextHolder 自动初始化 */
+// oxlint-disable-next-line no-underscore-dangle
 const _ui = {
   message: null as MessageInstance | null,
   modal: null as ModalHookAPI | null,
@@ -60,7 +61,7 @@ function getNotification(): NotificationInstance {
  * @returns 通知实例
  */
 export function showNotification(config: ArgsProps) {
-  return getNotification().open(config);
+  return getNotification().open({ ...config, title: config.title || config.message });
 }
 
 /**
@@ -79,7 +80,7 @@ export function destroyNotification(key?: React.Key) {
  * @returns 通知实例
  */
 export function showSuccessNotification(config: ArgsProps) {
-  return getNotification().success(config);
+  return getNotification().success({ ...config, title: config.title || config.message });
 }
 
 /**
@@ -89,7 +90,7 @@ export function showSuccessNotification(config: ArgsProps) {
  * @returns 通知实例
  */
 export function showErrorNotification(config: ArgsProps) {
-  return getNotification().error(config);
+  return getNotification().error({ ...config, title: config.title || config.message });
 }
 
 /**

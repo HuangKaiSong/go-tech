@@ -194,10 +194,14 @@ ignoreWorkspaceRootCheck: true
 onlyBuiltDependencies:
   - '@parcel/watcher'
   - '@swc/core'
+  - core-js
+  - es5-ext
   - esbuild
   - msw
   - sharp
+  - typeit
   - unrs-resolver
+  - workerd
 
 overrides:
   typescript: ^6.0.3
