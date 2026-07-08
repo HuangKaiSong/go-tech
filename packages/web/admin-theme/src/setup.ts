@@ -2,6 +2,7 @@ import { createStorage } from '@go-tech/utils';
 import { defaultThemeSettings } from './config/default';
 import { themeSettingsAtom } from './hooks';
 import { mergeThemeSettings } from './utils/settings';
+import { writeThemeTokensToGlobal } from './utils/tokens';
 
 const DEFAULT_THEME_STORAGE_PREFIX = 'SR_';
 
@@ -75,6 +76,7 @@ export function setupTheme(options: SetupThemeOptions = {}) {
   // 开发环境：直接使用默认配置
   if (!isProd) {
     themeSettingsAtom.init = defaultThemeSettings;
+    writeThemeTokensToGlobal(defaultThemeSettings.tokens);
     return;
   }
 
@@ -94,6 +96,7 @@ export function setupTheme(options: SetupThemeOptions = {}) {
   }
 
   themeSettingsAtom.init = settings;
+  writeThemeTokensToGlobal(settings.tokens);
 }
 
 function createDefaultStorage(storagePrefix: string) {

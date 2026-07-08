@@ -69,10 +69,14 @@ export type {
 // Utils
 export {
   clearAuxiliaryColorModes,
+  createTailwindThemeTokens,
+  createUnoThemeTokens,
   getDefaultThemeSettings,
   getThemeColors,
+  getTokenCSSVars,
   isDarkModeClass,
   mergeThemeSettings,
   toggleAuxiliaryColorModes,
-  toggleCssDarkMode
+  toggleCssDarkMode,
+  writeThemeTokensToGlobal
 } from './utils';

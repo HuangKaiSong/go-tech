@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useTheme } from '../hooks/use-theme';
 import { getInternalStorage } from '../setup';
-import { toggleAuxiliaryColorModes, toggleCssDarkMode } from '../utils';
+import { toggleAuxiliaryColorModes, toggleCssDarkMode, writeThemeTokensToGlobal } from '../utils';
 
 const STORAGE_KEYS = {
   darkMode: 'darkMode',
@@ -38,6 +38,11 @@ const ThemeEffect = () => {
   useEffect(() => {
     toggleAuxiliaryColorModes(grayscaleMode, colourWeaknessMode);
   }, [grayscaleMode, colourWeaknessMode]);
+
+  // Watch theme tokens change, update global CSS variables
+  useEffect(() => {
+    writeThemeTokensToGlobal(settings.tokens);
+  }, [settings.tokens]);
 
   // Watch theme colors change, update storage theme color
   useEffect(() => {

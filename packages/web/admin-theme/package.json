@@ -29,7 +29,6 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./vars": "./src/vars.ts",
     "./types": "./src/types/theme.d.ts"
   },
   "scripts": {
