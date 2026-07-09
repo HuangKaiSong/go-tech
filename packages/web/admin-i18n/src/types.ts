@@ -1,4 +1,4 @@
-import type { InitOptions, Resource } from 'i18next';
+import type { InitOptions, Resource, ResourceLanguage } from 'i18next';
 
 /** Supported language code. */
 export type LangType = 'en-US' | 'zh-CN' | 'zh-HK';
@@ -40,6 +40,8 @@ export interface LocaleSetupOptions<TLang extends string = LangType> {
   fallbackLocale?: TLang;
   /** Extra i18next init options. */
   i18nextOptions?: Omit<InitOptions, 'fallbackLng' | 'lng' | 'resources'>;
+  /** 项目级文案加载器,在框架文案之后合并(可覆盖框架文案,支持 import() 按语言懒加载)。 */
+  loadAppMessages?: (lang: TLang) => ResourceLanguage | Promise<ResourceLanguage>;
   /** Language options exposed to shared hooks. */
   localeOptions?: LangOption<TLang>[];
   /** Whether missing translation keys should be logged. */

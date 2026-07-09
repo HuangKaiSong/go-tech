@@ -15,6 +15,7 @@ export type { UseLangReturn } from './hooks/use-lang';
 
 // Runtime
 export { $t, getCurrentLang, i18n, loadLocaleMessages, reactI18nextInstance, setLng, setupI18n } from './i18n';
+export type { ResourceLanguage } from './i18n';
 
 // Types
 export type { LangConfig, LangOption, LangType, LocaleChangeHandler, LocaleSetupOptions, LocaleStorage } from './types';

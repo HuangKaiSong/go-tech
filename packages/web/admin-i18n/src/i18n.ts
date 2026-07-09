@@ -1,5 +1,5 @@
 import { setAtomValue } from '@go-tech/core-state';
-import i18next from 'i18next';
+import i18next, { type ResourceLanguage as ResourceLanguageInital } from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
 import { fallbackLangAtom, langAtom, localeOptionsAtom } from './atoms/lang';
@@ -14,8 +14,11 @@ export const reactI18nextInstance = i18n;
 
 export const $t = i18n.t;
 
+export type ResourceLanguage = ResourceLanguageInital;
+
 interface RuntimeConfig {
   fallbackLocale: LangType;
+  loadAppMessages?: (lang: LangType) => ResourceLanguage | Promise<ResourceLanguage>;
   localeOptions: LangOption[];
   onLocaleChange?: LocaleChangeHandler<LangType>;
   storage?: LocaleStorage<LangType>;
@@ -35,6 +38,7 @@ function configureRuntime(options: LocaleSetupOptions<LangType>) {
   runtimeConfig.localeOptions = options.localeOptions ?? runtimeConfig.localeOptions;
   runtimeConfig.storage = options.storage ?? runtimeConfig.storage;
   runtimeConfig.onLocaleChange = options.onLocaleChange ?? runtimeConfig.onLocaleChange;
+  runtimeConfig.loadAppMessages = options.loadAppMessages ?? runtimeConfig.loadAppMessages;
 
   setAtomValue(fallbackLangAtom, runtimeConfig.fallbackLocale);
   setAtomValue(localeOptionsAtom, runtimeConfig.localeOptions);
@@ -100,6 +104,12 @@ export async function loadLocaleMessages(lang: LangType) {
   i18n.addResourceBundle(locale, 'translation', messages, true, true);
 
   saveLocale(locale);
+
+  const appMessages = await runtimeConfig.loadAppMessages?.(locale)
+
+  if (appMessages) {
+    i18n.addResourceBundle(locale, 'translation', appMessages, true, true);
+  }
 
   await i18n.changeLanguage(locale);
   setAtomValue(langAtom, locale);
