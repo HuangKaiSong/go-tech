@@ -1,0 +1,13 @@
+{
+  "collapse": "摺疊選單",
+  "expand": "展開選單",
+  "fullscreen": "全螢幕",
+  "fullscreenExit": "退出全螢幕",
+  "lang": "切換語言",
+  "notification": "通知",
+  "pin": "固定",
+  "reload": "重新整理頁面",
+  "themeConfig": "主題配置",
+  "themeSchema": "主題模式",
+  "unpin": "取消固定"
+}

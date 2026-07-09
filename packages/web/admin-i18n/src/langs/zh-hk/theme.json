@@ -1,0 +1,173 @@
+{
+  "themeDrawerTitle": "主題配置",
+  "tabs": {
+    "appearance": "外觀",
+    "layout": "佈局",
+    "general": "通用",
+    "preset": "預設方案"
+  },
+  "appearance": {
+    "themeSchema": {
+      "title": "主題模式",
+      "light": "淺色模式",
+      "dark": "深色模式",
+      "auto": "跟隨系統"
+    },
+    "isOnlyExpandCurrentParentMenu": "僅展開當前父選單",
+    "grayscale": "灰色模式",
+    "colourWeakness": "色弱模式",
+    "themeColor": {
+      "title": "主題顏色",
+      "primary": "主色",
+      "info": "資訊色",
+      "success": "成功色",
+      "warning": "警告色",
+      "error": "錯誤色",
+      "followPrimary": "跟隨主色"
+    },
+    "themeBase": {
+      "title": "基礎配置",
+      "radius": "圓角",
+      "textSize": "字體大小"
+    },
+    "recommendColor": "應用推薦演算法的顏色",
+    "recommendColorDesc": "推薦顏色的演算法參照",
+    "preset": {
+      "title": "主題預設方案",
+      "apply": "應用",
+      "applySuccess": "預設方案應用成功",
+      "default": {
+        "name": "默認方案",
+        "desc": "Soybean 默認主題預設方案"
+      },
+      "dark": {
+        "name": "深色方案",
+        "desc": "適用於夜間使用的深色主題預設方案"
+      },
+      "compact": {
+        "name": "緊湊型",
+        "desc": "適用於小螢幕的緊湊佈局預設方案"
+      },
+      "azir": {
+        "name": "Azir的方案",
+        "desc": "是 Azir 比較喜歡的莫蘭迪色系冷淡風"
+      },
+      "go-tech": {
+        "name": "go-tech方案",
+        "desc": "專業主題配色，靈感來自 go-tech 設計，充滿活力的靛藍主色"
+      },
+      "shadcn": {
+        "name": "Shadcn方案",
+        "desc": "現代優雅的主題，靈感來自 shadcn/ui 設計系統，採用中性色調"
+      }
+    }
+  },
+  "layout": {
+    "layoutMode": {
+      "title": "佈局模式",
+      "vertical": "左側選單模式",
+      "vertical-mix": "左側選單混合模式",
+      "vertical-hybrid-header-first": "左側混合-頂部優先",
+      "horizontal": "頂部選單模式",
+      "top-hybrid-sidebar-first": "頂部混合-側邊優先",
+      "top-hybrid-header-first": "頂部混合-頂部優先",
+      "vertical_detail": "左側選單佈局，選單在左，內容在右。",
+      "vertical-mix_detail": "左側雙選單佈局，一級選單在左側深色區域，二級選單在左側淺色區域。",
+      "vertical-hybrid-header-first_detail": "左側混合佈局，一級選單在頂部，二級選單在左側深色區域，三級選單在左側淺色區域。",
+      "horizontal_detail": "頂部選單佈局，選單在頂部，內容在下方。",
+      "top-hybrid-sidebar-first_detail": "頂部混合佈局，一級選單在左側，二級選單在頂部。",
+      "top-hybrid-header-first_detail": "頂部混合佈局，一級選單在頂部，二級選單在左側。"
+    },
+    "tab": {
+      "title": "標籤欄設定",
+      "visible": "顯示標籤欄",
+      "cache": "標籤欄資訊緩存",
+      "cacheTip": "一鍵開啟/關閉全局 keepalive",
+      "height": "標籤欄高度",
+      "mode": {
+        "title": "標籤欄風格",
+        "slider": "滑塊風格",
+        "chrome": "Chrome 風格",
+        "button": "按鈕風格"
+      },
+      "closeByMiddleClick": "滑鼠中鍵關閉標籤頁",
+      "closeByMiddleClickTip": "啟用後可以使用滑鼠中鍵點擊標籤頁進行關閉"
+    },
+    "header": {
+      "title": "頁首設定",
+      "height": "頁首高度",
+      "breadcrumb": {
+        "visible": "顯示麵包屑",
+        "showIcon": "顯示麵包屑圖示"
+      }
+    },
+    "sider": {
+      "title": "側邊欄設定",
+      "inverted": "深色側邊欄",
+      "width": "側邊欄寬度",
+      "collapsedWidth": "側邊欄摺疊寬度",
+      "mixWidth": "混合佈局側邊欄寬度",
+      "mixCollapsedWidth": "混合佈局側邊欄摺疊寬度",
+      "mixChildMenuWidth": "混合佈局子選單寬度",
+      "autoSelectFirstMenu": "自動選擇第一個子選單",
+      "autoSelectFirstMenuTip": "點擊一級選單時，自動選擇並導航到第一個子選單的最深層級"
+    },
+    "footer": {
+      "title": "頁尾設定",
+      "visible": "顯示頁尾",
+      "fixed": "固定頁尾",
+      "height": "頁尾高度",
+      "right": "頁尾居右"
+    },
+    "content": {
+      "title": "內容區域設定",
+      "scrollMode": {
+        "title": "滾動模式",
+        "tip": "主體滾動僅 main 部分滾動，外層滾動可攜帶頁首頁尾一起滾動",
+        "wrapper": "外層滾動",
+        "content": "主體滾動"
+      },
+      "page": {
+        "animate": "頁面切換動畫",
+        "mode": {
+          "title": "頁面切換動畫類型",
+          "fade-slide": "滑動",
+          "fade": "淡入淡出",
+          "fade-bottom": "底部消退",
+          "fade-scale": "縮放消退",
+          "zoom-fade": "漸變",
+          "zoom-out": "閃現",
+          "none": "無"
+        }
+      },
+      "fixedHeaderAndTab": "固定頁首和標籤欄"
+    }
+  },
+  "general": {
+    "title": "通用設定",
+    "watermark": {
+      "title": "水印設定",
+      "visible": "顯示全螢幕水印",
+      "text": "自訂水印文本",
+      "enableUserName": "啟用用戶名水印",
+      "enableCustomText": "啟用自訂水印文本",
+      "enableTime": "顯示當前時間",
+      "timeFormat": "時間格式"
+    },
+    "multilingual": {
+      "title": "多語言設定",
+      "visible": "顯示多語言按鈕"
+    },
+    "globalSearch": {
+      "title": "全局搜尋設定",
+      "visible": "顯示全局搜尋按鈕"
+    }
+  },
+  "configOperation": {
+    "copyConfig": "複製配置",
+    "copyFailedMsg": "複製失敗",
+    "copySuccessMsg": "複製成功，請替換 @go-tech/admin-theme/src/config/default.ts 中的變量 defaultThemeSettings",
+    "resetConfig": "重設配置",
+    "resetSuccessMsg": "重設成功"
+  }
+}

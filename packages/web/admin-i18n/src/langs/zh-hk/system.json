@@ -1,0 +1,9 @@
+{
+  "errorReason": "錯誤原因",
+  "reload": "重新渲染頁面",
+  "title": "管理系統",
+  "updateCancel": "稍後再說",
+  "updateConfirm": "立即重新整理",
+  "updateContent": "檢測到系統有新版本發佈，是否立即重新整理頁面？",
+  "updateTitle": "系統版本更新通知"
+}

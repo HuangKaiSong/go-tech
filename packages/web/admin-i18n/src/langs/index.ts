@@ -22,6 +22,17 @@ import zhCNRequest from './zh-cn/request.json';
 import zhCNRoute from './zh-cn/route.json';
 import zhCNSystem from './zh-cn/system.json';
 import zhCNTheme from './zh-cn/theme.json';
+import zhHKCommon from './zh-hk/common.json';
+import zhHKDatatable from './zh-hk/datatable.json';
+import zhHKDropdown from './zh-hk/dropdown.json';
+import zhHKForm from './zh-hk/form.json';
+import zhHKIcon from './zh-hk/icon.json';
+import zhHKNotification from './zh-hk/notification.json';
+import zhHKPage from './zh-hk/page.json';
+import zhHKRequest from './zh-hk/request.json';
+import zhHKRoute from './zh-hk/route.json';
+import zhHKSystem from './zh-hk/system.json';
+import zhHKTheme from './zh-hk/theme.json';
 
 import type { LangType } from '../types';
 
@@ -53,11 +64,26 @@ const zhCN = {
   theme: zhCNTheme
 } satisfies ResourceLanguage;
 
+const zhHK = {
+  common: zhHKCommon,
+  datatable: zhHKDatatable,
+  dropdown: zhHKDropdown,
+  form: zhHKForm,
+  icon: zhHKIcon,
+  notification: zhHKNotification,
+  page: zhHKPage,
+  request: zhHKRequest,
+  route: zhHKRoute,
+  system: zhHKSystem,
+  theme: zhHKTheme
+} satisfies ResourceLanguage;
+
 export type AdminLocaleMessages = typeof zhCN;
 
 export const localeResources: Record<LangType, ResourceLanguage> = {
   'en-US': enUS,
-  'zh-CN': zhCN
+  'zh-CN': zhCN,
+  'zh-HK': zhHK
 };
 
 export default localeResources;

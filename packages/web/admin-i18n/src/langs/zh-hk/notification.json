@@ -1,0 +1,13 @@
+{
+  "all": "全部",
+  "browser": "瀏覽器通知",
+  "clearAll": "清空全部",
+  "clearConfirm": "確定清空所有通知嗎？",
+  "doNotDisturb": "勿擾模式",
+  "empty": "暫無通知",
+  "markAllRead": "全部已讀",
+  "message": "訊息",
+  "sound": "通知聲音",
+  "system": "系統",
+  "title": "通知中心"
+}

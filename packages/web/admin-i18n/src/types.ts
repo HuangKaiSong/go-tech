@@ -1,7 +1,7 @@
 import type { InitOptions, Resource } from 'i18next';
 
 /** Supported language code. */
-export type LangType = 'en-US' | 'zh-CN';
+export type LangType = 'en-US' | 'zh-CN' | 'zh-HK';
 
 /** Display option for a language switcher. */
 export interface LangOption<TLang extends string = LangType> {

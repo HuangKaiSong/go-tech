@@ -11,6 +11,11 @@ type ThemeMessages = AdminLocaleMessages['theme'];
 
 declare global {
   namespace I18n {
+    /** Register the languages shipped by this package (merged into core LangRegistry). */
+    interface LangRegistry {
+      'zh-HK': true;
+    }
+
     interface LocaleMessages {
       notification: Notification;
     }

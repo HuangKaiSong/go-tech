@@ -1,0 +1,8 @@
+{
+  "logout": "請求失敗後登出用戶",
+  "logoutMsg": "用戶狀態失效，請重新登入",
+  "logoutWithModal": "請求失敗後彈出模態框再登出用戶",
+  "logoutWithModalMsg": "用戶狀態失效，請重新登入",
+  "refreshToken": "請求的token已過期，刷新token",
+  "tokenExpired": "token已過期"
+}

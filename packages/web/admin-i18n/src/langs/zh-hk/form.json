@@ -1,0 +1,27 @@
+{
+  "code": {
+    "invalid": "驗證碼格式不正確",
+    "required": "請輸入驗證碼"
+  },
+  "confirmPwd": {
+    "invalid": "兩次輸入密碼不一致",
+    "required": "請輸入確認密碼"
+  },
+  "email": {
+    "invalid": "電郵格式不正確",
+    "required": "請輸入電郵"
+  },
+  "phone": {
+    "invalid": "手機號碼格式不正確",
+    "required": "請輸入手機號碼"
+  },
+  "pwd": {
+    "invalid": "密碼格式不正確，6-18位字元，包含字母、數字、下劃線",
+    "required": "請輸入密碼"
+  },
+  "required": "不能為空",
+  "userName": {
+    "invalid": "用戶名格式不正確",
+    "required": "請輸入用戶名"
+  }
+}

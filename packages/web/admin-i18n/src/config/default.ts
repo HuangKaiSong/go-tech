@@ -6,6 +6,7 @@ export const defaultLangConfig: LangConfig = {
   fallbackLang: 'en-US',
   langOptions: [
     { key: 'zh-CN', label: '中文' },
+    { key: 'zh-HK', label: '繁體中文' },
     { key: 'en-US', label: 'English' }
   ]
 };
