@@ -227,6 +227,16 @@ class MenuGenerator {
     quickReferenceMenuMap.set(normalizedPath, data);
 
     if (staticData.menu?.hide) {
+      // 同上:隐藏菜单的子路由也要注册到 quickReferenceMenuMap(tab/面包屑/守卫依赖该映射)
+      this.generateStaticChildMenus({
+        depth,
+        normalizedPath,
+        parentKeys,
+        quickReferenceMenuMap,
+        route,
+        userInfo
+      });
+
       return null;
     }
 
@@ -329,6 +339,12 @@ class MenuGenerator {
     quickReferenceMenuMap.set(path, data);
 
     if (route.menu?.hide) {
+      // 隐藏菜单不渲染,但其子路由仍需注册到 quickReferenceMenuMap,
+      // 否则动态路由模式下守卫(hasAuthorizedRoutePath)会将这些页面判定为无权限(403)
+      route.children?.forEach(child => {
+        this.transformBackendRouteToMenu(child, quickReferenceMenuMap, userInfo, [...parentKeys, path], depth + 1);
+      });
+
       return null;
     }
 

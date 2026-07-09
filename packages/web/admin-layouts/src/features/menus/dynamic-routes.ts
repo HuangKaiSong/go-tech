@@ -53,12 +53,12 @@ function isBackendRoute(route: Api.Route.BackendRoute | null): route is Api.Rout
   return route !== null;
 }
 
+function normalizeBackendPath(path: string) {
+  return normalizePath(path.replaceAll(/:([A-Za-z0-9_]+)/g, '$$$1'));
+}
+
 export function createBackendRouteNormalizer(routeTree: AnyRoute) {
   const availableRoutePaths = collectAvailableRoutePaths(routeTree);
-
-  function normalizeBackendPath(path: string) {
-    return normalizePath(path.replaceAll(/:([A-Za-z0-9_]+)/g, '$$$1'));
-  }
 
   function toRoutePath(path: string) {
     return normalizeBackendPath(path) as Router.RoutePath;
@@ -135,9 +135,17 @@ export function normalizeBackendRouteResponse(
 
 export function createAdminDynamicRouteLoader(options: CreateAdminDynamicRouteLoaderOptions) {
   const { loadBackendRoutes, routeTree } = options;
-  const normalizeBackendRoutes = createBackendRouteNormalizer(routeTree);
+
+  /**
+   * 延迟创建 normalizer:routeTree 中各路由的 fullPath 由 route.init() 在 createRouter() 阶段才赋值。
+   * 该 loader 通常在模块顶层创建(早于 createRouter),若此时立即收集 fullPath,得到的可用路由集合为空,
+   * 会导致所有后端路由被过滤、动态菜单为空、路由守卫全部跳转 403。
+   */
+  let normalizeBackendRoutes: ReturnType<typeof createBackendRouteNormalizer> | null = null;
 
   return async function loadAdminDynamicRoutes() {
+    normalizeBackendRoutes ??= createBackendRouteNormalizer(routeTree);
+
     const routeData = await loadBackendRoutes();
 
     return normalizeBackendRoutes(routeData);
