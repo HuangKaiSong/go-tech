@@ -156,9 +156,14 @@ function createStaticRouterStore(routeState: RouterStateSnapshot): StaticRouterS
 }
 
 function createSnapshotRouter(router: AnyRouter, routeState: RouterStateSnapshot) {
-  const snapshotRouter = Object.assign(Object.create(Object.getPrototypeOf(router)), router) as AnyRouter;
+  type SnapshotRouter = AnyRouter & {
+    __store: StaticRouterStore;
+  };
 
-  snapshotRouter.__store = createStaticRouterStore(routeState) as unknown as AnyRouter['__store'];
+  const snapshotRouter = Object.assign(Object.create(Object.getPrototypeOf(router)), router) as SnapshotRouter;
+
+  // oxlint-disable-next-line no-underscore-dangle
+  snapshotRouter.__store = createStaticRouterStore(routeState);
   snapshotRouter.latestLocation = routeState.location;
 
   return snapshotRouter;

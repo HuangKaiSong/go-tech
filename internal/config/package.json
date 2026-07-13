@@ -15,6 +15,10 @@
   "type": "module",
   "sideEffects": false,
   "exports": {
+    "./vitest": {
+      "types": "./src/vitest/index.ts",
+      "default": "./dist/vitest/index.js"
+    },
     "./oxlint/base.json": "./oxlint/base.json",
     "./oxlint/next.json": "./oxlint/next.json",
     "./oxlint/react.json": "./oxlint/react.json",

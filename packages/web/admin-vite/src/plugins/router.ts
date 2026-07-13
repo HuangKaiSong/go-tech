@@ -2,7 +2,7 @@ import { tanstackRouter } from '@tanstack/router-plugin/vite';
 
 type TanStackRouterOptions = NonNullable<Parameters<typeof tanstackRouter>[0]>;
 
-export interface SetupAdminRouterPluginOptions extends Partial<TanStackRouterOptions> {}
+export type SetupAdminRouterPluginOptions = Partial<TanStackRouterOptions>;
 
 export function setupAdminRouterPlugins(options: SetupAdminRouterPluginOptions = {}) {
   return [
