@@ -7,13 +7,15 @@ import { useAdminMenus } from '../../../state/menus/use-admin-menus';
 
 const itemRender: BreadcrumbProps['itemRender'] = (currentRoute, _, items) => {
   const isLast = currentRoute?.path === items[items.length - 1]?.path;
+  // 分组节点(type: 'group')不提供 path,渲染成不可点击的纯文本
+  const clickable = Boolean(currentRoute?.path) && !isLast;
 
-  return isLast ? (
-    <div className="flex-y-center text-base-text">{currentRoute.title}</div>
-  ) : (
+  return clickable ? (
     <Link className="inline-flex! items-center whitespace-nowrap hover:text-base-text!" to={currentRoute.path}>
       {currentRoute.title}
     </Link>
+  ) : (
+    <div className="flex-y-center text-base-text">{currentRoute.title}</div>
   );
 };
 
@@ -38,6 +40,9 @@ const AdminBreadcrumb = () => {
 
       if (!menuInfo) return null;
 
+      // 分组节点(type: 'group')不可点击,不提供导航 path
+      const isGroup = menuInfo.menu?.type === 'group';
+
       return {
         title: (
           <>
@@ -51,7 +56,7 @@ const AdminBreadcrumb = () => {
             </span>
           </>
         ),
-        path: menuInfo?.path
+        path: isGroup ? undefined : menuInfo?.path
       };
     })
     .filter(Boolean) as BreadcrumbProps['items'];

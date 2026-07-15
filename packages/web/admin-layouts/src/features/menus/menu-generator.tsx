@@ -208,10 +208,15 @@ class MenuGenerator {
     }
 
     const normalizedPath = normalizePath(route.fullPath) as Router.RoutePath;
+    // 无路径的路由组(如 (personnel)、(daily))会继承父级 layout 的 fullPath(通常是 '/'),
+    // 若直接用 fullPath 作为菜单 key,多个同级分组会得到相同的 '/',触发 React
+    // "Encountered two children with the same key, `/`" 警告,并导致二级菜单联动错乱。
+    // 分组节点(type: 'group')只是分组标题、并非导航目标,因此用唯一的 route.id 作为 key。
+    const menuKey = (staticData.menu?.type === 'group' ? route.id : normalizedPath) as Router.RoutePath;
     const data: Menu.QuickReferenceMenu = {
       id: route.id,
       i18nKey: staticData.i18nKey,
-      key: normalizedPath,
+      key: menuKey,
       href: staticData.href,
       keepAlive: staticData.keepAlive,
       menu: staticData.menu,
@@ -224,13 +229,13 @@ class MenuGenerator {
       depth
     };
 
-    quickReferenceMenuMap.set(normalizedPath, data);
+    quickReferenceMenuMap.set(menuKey, data);
 
     if (staticData.menu?.hide) {
       // 同上:隐藏菜单的子路由也要注册到 quickReferenceMenuMap(tab/面包屑/守卫依赖该映射)
       this.generateStaticChildMenus({
         depth,
-        normalizedPath,
+        normalizedPath: menuKey,
         parentKeys,
         quickReferenceMenuMap,
         route,
@@ -249,7 +254,7 @@ class MenuGenerator {
       href: staticData.href,
       i18nKey: staticData.i18nKey,
       icon,
-      key: normalizedPath,
+      key: menuKey,
       localIcon,
       order,
       path: normalizedPath,
@@ -260,7 +265,7 @@ class MenuGenerator {
 
     const childMenus = this.generateStaticChildMenus({
       depth,
-      normalizedPath,
+      normalizedPath: menuKey,
       parentKeys,
       quickReferenceMenuMap,
       route,
