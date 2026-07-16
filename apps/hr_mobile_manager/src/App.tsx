@@ -14,7 +14,13 @@ import NotFound from './pages/NotFound';
 import Notifications from './pages/Notifications';
 import Profile from './pages/Profile';
 import Salary from './pages/Salary';
-import Training from './pages/Training';
+import {
+  TrainingCategoryPage,
+  TrainingDetailPage,
+  TrainingLayout,
+  TrainingLearningPage,
+  TrainingListPage
+} from './pages/training';
 
 const queryClient = new QueryClient();
 
@@ -34,7 +40,12 @@ const App = () => (
             <Route path="/kpi" element={<KPI />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/training" element={<Training />} />
+            <Route path="/training" element={<TrainingLayout />}>
+              <Route index element={<TrainingListPage />} />
+              <Route path=":categoryId" element={<TrainingCategoryPage />} />
+              <Route path=":categoryId/:courseId" element={<TrainingDetailPage />} />
+              <Route path=":categoryId/:courseId/:moduleIndex" element={<TrainingLearningPage />} />
+            </Route>
             <Route path="/contacts" element={<Contacts />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

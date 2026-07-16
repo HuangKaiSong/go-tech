@@ -41,6 +41,7 @@
     "@radix-ui/react-toggle-group": "catalog:",
     "@radix-ui/react-tooltip": "catalog:",
     "@tanstack/react-query": "catalog:core",
+    "@videojs/react": "10.0.0-beta.25",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:utils",
     "cmdk": "catalog:",

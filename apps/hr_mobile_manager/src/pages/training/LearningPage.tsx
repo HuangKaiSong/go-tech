@@ -2,7 +2,6 @@ import {
   AlertCircle,
   ArrowLeft,
   Award,
-  BookOpen,
   Bookmark,
   BookmarkCheck,
   CheckCircle2,
@@ -12,36 +11,25 @@ import {
   Clock,
   FileText,
   Lightbulb,
-  Maximize,
   MessageSquare,
-  PlayCircle,
-  SkipForward,
-  ThumbsUp,
-  Volume2,
-  VolumeX
+  ThumbsUp
 } from 'lucide-react';
 import { useState } from 'react';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import MobileLayout from '@/components/MobileLayout';
-
-interface LearningPageProps {
-  courseTitle: string;
-  moduleDuration: string;
-  moduleIndex: number;
-  moduleName: string;
-  onBack: () => void;
-  onComplete: () => void;
-  totalModules: number;
-}
+import VideoPlayer from '@/components/player';
+import { useTraining } from './TrainingProvider';
 
 // Simulated learning content per module
 const learningContent = {
+  // 課程影片：videoUrl / poster 為佔位欄位，後續接入後端真實地址
+  video: {
+    title: '課程影片',
+    duration: '8:32',
+    videoUrl: 'https://stream.mux.com/BV3YZtogl89mg9VcNBhhnHm02Y34zI1nlMuMQfAbl3dM/highest.mp4',
+    poster: ''
+  },
   sections: [
-    {
-      type: 'video' as const,
-      title: '課程影片',
-      thumbnailText: '📹 點擊播放課程影片',
-      duration: '8:32'
-    },
     {
       type: 'text' as const,
       title: '課程重點',
@@ -81,27 +69,40 @@ const learningContent = {
   ]
 };
 
-const LearningPage = ({
-  courseTitle,
-  moduleDuration,
-  moduleIndex,
-  moduleName,
-  onBack,
-  onComplete,
-  totalModules
-}: LearningPageProps) => {
+// ===== LEARNING VIEW（模塊學習：影片 + 隨堂測驗 + 完成）=====
+const LearningPage = () => {
+  const navigate = useNavigate();
+  const { categoryId, courseId, moduleIndex: moduleIndexParam } = useParams();
+  const { completeModule, getCourse } = useTraining();
+
+  const course = getCourse(categoryId, courseId);
+  const moduleIndex = Number(moduleIndexParam);
+  const learningModule = course?.modules[moduleIndex];
+
   const [currentStep, setCurrentStep] = useState(0); // 0=content, 1=quiz, 2=completed
-  const [videoPlaying, setVideoPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [expandedSection, setExpandedSection] = useState<number | null>(0);
   const [quizAnswers, setQuizAnswers] = useState<(number | null)[]>(learningContent.quiz.map(() => null));
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [note, setNote] = useState('');
   const [showNotes, setShowNotes] = useState(false);
-  const [videoProgress, setVideoProgress] = useState(0);
 
-  // const contentProgress = currentStep === 0 ? 33 : currentStep === 1 ? 66 : 100;
+  // 參數無效（課程/模塊不存在）時回退到課程詳情或培訓中心
+  if (!course || !learningModule || Number.isNaN(moduleIndex)) {
+    return <Navigate to={categoryId && courseId ? `/training/${categoryId}/${courseId}` : '/training'} replace />;
+  }
+
+  const courseTitle = course.title;
+  const moduleName = learningModule.name;
+  const moduleDuration = learningModule.duration;
+  const totalModules = course.modules.length;
+
+  const backToDetail = () => navigate(`/training/${categoryId}/${courseId}`);
+
+  const handleComplete = () => {
+    completeModule(categoryId as string, courseId as string, moduleIndex);
+    backToDetail();
+  };
 
   const handleQuizSubmit = () => {
     setQuizSubmitted(true);
@@ -119,7 +120,7 @@ const LearningPage = ({
       <div className="px-5 pt-4 pb-6">
         {/* Top bar */}
         <div className="flex items-center justify-between mb-4">
-          <button onClick={onBack} className="flex items-center gap-1 text-sm text-primary">
+          <button onClick={backToDetail} className="flex items-center gap-1 text-sm text-primary">
             <ArrowLeft className="w-5 h-5" /> 返回課程
           </button>
           <div className="flex items-center gap-2">
@@ -190,72 +191,10 @@ const LearningPage = ({
         {currentStep === 0 && (
           <div className="space-y-4">
             {/* Video player area */}
-            <div className="bg-foreground/95 rounded-2xl overflow-hidden relative">
-              <div className="aspect-video flex items-center justify-center relative">
-                {!videoPlaying ? (
-                  <button
-                    onClick={() => {
-                      setVideoPlaying(true);
-                      setVideoProgress(0);
-                    }}
-                    className="flex flex-col items-center gap-3"
-                  >
-                    <div className="w-16 h-16 bg-primary/90 rounded-full flex items-center justify-center shadow-lg">
-                      <PlayCircle className="w-9 h-9 text-primary-foreground" />
-                    </div>
-                    <span className="text-primary-foreground/80 text-sm">點擊播放課程影片</span>
-                  </button>
-                ) : (
-                  <div className="w-full h-full flex flex-col">
-                    <div className="flex-1 flex items-center justify-center">
-                      <div className="text-center">
-                        <BookOpen className="w-12 h-12 text-primary-foreground/60 mx-auto mb-2" />
-                        <p className="text-primary-foreground/70 text-sm">影片播放中...</p>
-                        <p className="text-primary-foreground/40 text-xs mt-1">
-                          {learningContent.sections[0].duration}
-                        </p>
-                      </div>
-                    </div>
-                    {/* Video controls */}
-                    <div className="px-4 pb-3">
-                      <div
-                        className="h-1 bg-primary-foreground/20 rounded-full mb-2 cursor-pointer"
-                        onClick={() => setVideoProgress(Math.min(100, videoProgress + 25))}
-                      >
-                        <div
-                          className="h-full bg-primary rounded-full transition-all"
-                          style={{ width: `${videoProgress}%` }}
-                        />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <button onClick={() => setVideoPlaying(false)} className="text-primary-foreground/70">
-                            <PlayCircle className="w-5 h-5" />
-                          </button>
-                          <button onClick={() => setIsMuted(!isMuted)} className="text-primary-foreground/70">
-                            {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-                          </button>
-                          <span className="text-xs text-primary-foreground/50">
-                            0:00 / {learningContent.sections[0].duration}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <button className="text-primary-foreground/70">
-                            <SkipForward className="w-5 h-5" />
-                          </button>
-                          <button className="text-primary-foreground/70">
-                            <Maximize className="w-5 h-5" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+            <VideoPlayer src={learningContent.video.videoUrl} poster={learningContent.video.poster} />
 
             {/* Expandable content sections */}
-            {learningContent.sections.slice(1).map((section, idx) => (
+            {learningContent.sections.map((section, idx) => (
               <div key={idx} className="bg-card rounded-2xl border border-border overflow-hidden">
                 <button
                   onClick={() => setExpandedSection(expandedSection === idx ? null : idx)}
@@ -453,7 +392,7 @@ const LearningPage = ({
             </div>
 
             <button
-              onClick={onComplete}
+              onClick={handleComplete}
               className="w-full bg-primary text-primary-foreground font-semibold text-sm py-3.5 rounded-xl active:scale-[0.98] transition-transform"
             >
               完成並返回課程
