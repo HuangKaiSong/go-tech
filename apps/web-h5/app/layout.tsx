@@ -10,10 +10,8 @@ import Script from 'next/script';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { getBaseUrl } from '@/lib/http';
 import { createSvgSpriteHtml } from '@/plugins/createSvgIcons';
-import Gtranslate from './components/Gtranslate';
 // oxlint-disable import/no-unassigned-import
 import './globals.css';
-// import GoogleTranslate from './components/GoogleTranslate';
 import Layout from './components/Layout';
 import LocaleInitializer from './components/LocaleInitializer';
 
@@ -79,8 +77,6 @@ export default async function RootLayout({
         </Script>
       </head>
       <body>
-        {/* <GoogleTranslate /> */}
-        <Gtranslate />
         {shouldInitLocale ? <LocaleInitializer locale={language} /> : null}
         <div aria-hidden="true" dangerouslySetInnerHTML={{ __html: svgSpriteHtml }} />
         <NextIntlClientProvider>
