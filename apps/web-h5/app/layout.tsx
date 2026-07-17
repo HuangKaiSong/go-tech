@@ -29,14 +29,6 @@ const themeColorScript = `
 
 `;
 
-const demoTranslate = `
-window.gtranslateSettings = {"default_language":"zh-TW","languages":["zh-TW","en","zh-CN"],"wrapper_selector":".gtranslate_wrapper"}
-`;
-
-// const translateScript = `function googleTranslateElementInit() {
-//     new google.translate.TranslateElement({pageLanguage: 'zh-HK'}, 'google_translate_element');
-//   }`;
-
 export default async function RootLayout({
   children
 }: Readonly<{
