@@ -10,10 +10,12 @@ import Script from 'next/script';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { getBaseUrl } from '@/lib/http';
 import { createSvgSpriteHtml } from '@/plugins/createSvgIcons';
-import Layout from './components/Layout';
-import LocaleInitializer from './components/LocaleInitializer';
+import Gtranslate from './components/Gtranslate';
 // oxlint-disable import/no-unassigned-import
 import './globals.css';
+// import GoogleTranslate from './components/GoogleTranslate';
+import Layout from './components/Layout';
+import LocaleInitializer from './components/LocaleInitializer';
 
 export const metadata: Metadata = {
   title: 'GO-TECH租務系統',
@@ -26,6 +28,14 @@ export const metadata: Metadata = {
 const themeColorScript = `
 
 `;
+
+const demoTranslate = `
+window.gtranslateSettings = {"default_language":"zh-TW","languages":["zh-TW","en","zh-CN"],"wrapper_selector":".gtranslate_wrapper"}
+`;
+
+// const translateScript = `function googleTranslateElementInit() {
+//     new google.translate.TranslateElement({pageLanguage: 'zh-HK'}, 'google_translate_element');
+//   }`;
 
 export default async function RootLayout({
   children
@@ -70,13 +80,15 @@ export default async function RootLayout({
   });
 
   return (
-    <html lang={language} suppressHydrationWarning>
+    <html lang={language}>
       <head>
         <Script id="theme-color" strategy="beforeInteractive">
           {themeColorScript}
         </Script>
       </head>
       <body>
+        {/* <GoogleTranslate /> */}
+        <Gtranslate />
         {shouldInitLocale ? <LocaleInitializer locale={language} /> : null}
         <div aria-hidden="true" dangerouslySetInnerHTML={{ __html: svgSpriteHtml }} />
         <NextIntlClientProvider>
