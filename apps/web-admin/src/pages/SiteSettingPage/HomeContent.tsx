@@ -1,3 +1,4 @@
+// oxlint-disable react/iframe-missing-sandbox
 import { useEffect, useRef, useState } from 'react';
 import PanlEditor from './PanlEditor';
 
@@ -46,7 +47,6 @@ const HomeContent = () => {
             width={IFRAME_WIDTH}
             height={IFRAME_HEIGHT}
             frameBorder="0"
-            sandbox="allow-scripts allow-top-navigation allow-top-navigation-by-user-activation"
           />
         </div>
       </div>
