@@ -46,7 +46,7 @@ const HomeContent = () => {
             width={IFRAME_WIDTH}
             height={IFRAME_HEIGHT}
             frameBorder="0"
-            sandbox=""
+            sandbox="allow-scripts allow-top-navigation allow-top-navigation-by-user-activation"
           />
         </div>
       </div>

@@ -13,7 +13,7 @@ const CoreAdvantages = () => {
           width="100%"
           height="100%"
           frameBorder="0"
-          sandbox=""
+          sandbox="allow-scripts allow-top-navigation allow-top-navigation-by-user-activation"
         />
       </div>
       <PanlEditor iframeRef={iframeRef} />
