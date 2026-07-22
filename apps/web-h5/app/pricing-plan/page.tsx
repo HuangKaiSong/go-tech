@@ -4,6 +4,7 @@ import { Button } from '@go-tech-frontend/ui';
 import { Check, Minus } from 'lucide-react';
 import Footer from '@/app/components/Footer';
 import Header from '@/app/components/Header';
+import { DynamicText } from '../components/DynamicI18nText';
 import { type PricingPlanData } from './layout';
 
 const getIconHref = (value: string) => {
@@ -22,8 +23,12 @@ const PricingPlan = ({ pricingData }: { pricingData: PricingPlanData }) => {
       {/* Hero Section */}
       <section className="py-16 bg-background">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-6xl font-bold text-primary mb-4">計劃適合你的商業</h1>
-          <p className="text-muted-foreground text-3xl mt-6">所有定價計劃均涵蓋租務系統基本功能，並且還有增長空間</p>
+          <h1 className="text-6xl font-bold text-primary mb-4">
+            <DynamicText text="計劃適合你的商業" />
+          </h1>
+          <p className="text-muted-foreground text-3xl mt-6">
+            <DynamicText text="所有定價計劃均涵蓋租務系統基本功能，並且還有增長空間" />
+          </p>
         </div>
       </section>
 
@@ -35,30 +40,38 @@ const PricingPlan = ({ pricingData }: { pricingData: PricingPlanData }) => {
               {/* Header Row */}
               <div className="grid grid-cols-5 bg-muted/30">
                 <div className="border-r border-primary/40 grid grid-rows-7 text-center items-center">
-                  <div className="row-span-4 py-4 text-3xl font-bold text-foreground self-end">月費</div>
+                  <div className="row-span-4 py-4 text-3xl font-bold text-foreground self-end">
+                    <DynamicText text="月費" />
+                  </div>
                   <div className="h-full flex items-center justify-center text-muted-foreground mt-1 border-y border-primary/40">
-                    支援單位數目
+                    <DynamicText text="支援單位數目" />
                   </div>
                   <div className="h-full flex items-center justify-center text-muted-foreground border-b border-primary/40">
-                    另購外新增單位
+                    <DynamicText text="另購外新增單位" />
                   </div>
                 </div>
                 <div className="p-4 border-r border-primary/40 grid grid-rows-7 text-center items-center">
-                  <div className="row-span-3 text-3xl font-bold text-foreground">功能</div>
+                  <div className="row-span-3 text-3xl font-bold text-foreground">
+                    <DynamicText text="功能" />
+                  </div>
                 </div>
                 {pricingData.plans.map(plan => (
                   <div
                     key={plan.id}
                     className="p-4 border-r border-primary/40 last:border-r-0 grid grid-rows-7 text-center items-center"
                   >
-                    <div className="row-span-3 text-3xl font-bold mb-1">{plan.name}</div>
+                    <div className="row-span-3 text-3xl font-bold mb-1">
+                      <DynamicText text={plan.name} />
+                    </div>
                     <div className="text-3xl font-bold text-primary">{plan.price}</div>
                     <div className="h-full flex items-center justify-center text-muted-foreground mt-2">
                       {plan.units}
                     </div>
-                    <div className="h-full flex items-center justify-center text-muted-foreground">{plan.extra}</div>
+                    <div className="h-full flex items-center justify-center text-muted-foreground">
+                      <DynamicText text={plan.extra} />
+                    </div>
                     <Button size="sm" className="mt-3 ">
-                      購買{plan.name}
+                      <DynamicText text={`購買${plan.name}`} />
                     </Button>
                   </div>
                 ))}
@@ -85,7 +98,7 @@ const PricingPlan = ({ pricingData }: { pricingData: PricingPlanData }) => {
                               <div className="absolute w-14 top-0 left-0 bg-primary-foreground bottom-0 font-medium text-primary border-r border-primary/40">
                                 <div className="w-full h-full flex items-center justify-center">
                                   <span style={{ writingMode: 'vertical-rl' }} className="tracking-widest">
-                                    {category.name}
+                                    <DynamicText text={category.name} />
                                   </span>
                                 </div>
                               </div>
@@ -96,11 +109,15 @@ const PricingPlan = ({ pricingData }: { pricingData: PricingPlanData }) => {
                                   <use href={getIconHref(feature.icon)} xlinkHref={getIconHref(feature.icon)} />
                                 </svg>
                               )}
-                              <div>{feature.name}</div>
+                              <div>
+                                <DynamicText text={feature.name} />
+                              </div>
                             </div>
                           </div>
                           <div className="p-3 border-r border-primary/40 text-center">
-                            <span className="text-muted-foreground">{feature.type}</span>
+                            <span className="text-muted-foreground">
+                              <DynamicText text={feature.type} />
+                            </span>
                           </div>
                           {feature.plans.map((available, pIndex) => (
                             <div
@@ -131,12 +148,14 @@ const PricingPlan = ({ pricingData }: { pricingData: PricingPlanData }) => {
                         className="w-14 font-medium text-primary tracking-widest border-r border-primary/40"
                         style={{ writingMode: 'vertical-rl' }}
                       >
-                        <div className="p-3">{addon.name}</div>
+                        <div className="p-3">
+                          <DynamicText text={addon.name} />
+                        </div>
                       </div>
                       <div className={`flex-1 h-full grid grid-rows-${addonLength} divide-y divide-primary/40`}>
                         {addon.features.map((f, i) => (
                           <div key={i} className="w-full h-full text-muted-foreground flex justify-center items-center">
-                            {f}
+                            <DynamicText text={f} />
                           </div>
                         ))}
                       </div>

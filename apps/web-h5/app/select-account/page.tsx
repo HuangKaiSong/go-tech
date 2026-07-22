@@ -5,6 +5,7 @@ import { Button, toast } from '@go-tech/web-ui';
 import { Badge } from 'antd';
 import dayjs from 'dayjs';
 import { ArrowRight, Building, Calendar, CheckCircle2, Clock, Package, ShieldCheck, Users } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useTheme } from 'next-themes';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef } from 'react';
@@ -24,6 +25,7 @@ const resolveAction = (value: unknown) => {
 };
 
 const SelectAccount = () => {
+  const t = useTranslations('Account');
   const searchParams = useSearchParams();
   const from = searchParams.get('from');
   const fromHeader = from && from === 'header';
@@ -46,7 +48,7 @@ const SelectAccount = () => {
       return;
     }
 
-    toast.error('当前数据无 orderId 或者 orderId 不合法!');
+    toast.error(t('noOrderId'));
   };
 
   const generateCallback = (uri: string) => {
@@ -156,11 +158,11 @@ const SelectAccount = () => {
           {!fromHeader && (
             <CustomBadge className="mb-3 bg-card/80 text-primary border border-primary/30 hover:bg-card">
               <ShieldCheck className="w-3.5 h-3.5 mr-1" />
-              登入成功
+              {t('signInSuccess')}
             </CustomBadge>
           )}
-          <h1 className="text-3xl md:text-4xl font-bold text-primary mb-2">選擇要進入的套餐帳戶</h1>
-          <p className="text-sm md:text-base text-muted-foreground">您名下有多個已購買的套餐，請選擇要管理的帳戶。</p>
+          <h1 className="text-3xl md:text-4xl font-bold text-primary mb-2">{t('selectAccountTitle')}</h1>
+          <p className="text-sm md:text-base text-muted-foreground">{t('selectAccountDesc')}</p>
         </div>
       </section>
 
@@ -170,7 +172,7 @@ const SelectAccount = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {tenants.map(acc => {
               const isActive = dayjs(acc.expireDate).isAfter(dayjs());
-              const statusLabel = isActive ? '使用中' : '已過期';
+              const statusLabel = isActive ? t('inUse') : t('expired');
 
               return (
                 <Badge.Ribbon
@@ -204,7 +206,7 @@ const SelectAccount = () => {
                           <Package className="w-4 h-4 text-primary" />
                           <span className="text-foreground font-medium">{acc.tenantName}</span>
                           <span>·</span>
-                          <span>最多 {acc.unitCount} 個單位</span>
+                          <span>{t('maxUnits', { count: acc.unitCount })}</span>
                         </div>
                       </div>
                     </div>
@@ -213,19 +215,21 @@ const SelectAccount = () => {
                     <div className="space-y-2 py-3 border-y border-border/60 mb-4">
                       <div className="flex items-center justify-between text-sm">
                         <span className="flex items-center gap-2 text-muted-foreground">
-                          <Users className="w-4 h-4" /> 成員人數
+                          <Users className="w-4 h-4" /> {t('memberCount')}
                         </span>
-                        <span className="text-foreground font-medium">{acc.userCount} 人</span>
+                        <span className="text-foreground font-medium">
+                          {t('peopleValue', { count: acc.userCount })}
+                        </span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span className="flex items-center gap-2 text-muted-foreground">
-                          <Calendar className="w-4 h-4" /> 有效期至
+                          <Calendar className="w-4 h-4" /> {t('validUntil')}
                         </span>
                         <span className="text-foreground font-medium">{acc.expireDate}</span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span className="flex items-center gap-2 text-muted-foreground">
-                          <Building className="w-4 h-4" /> 我的角色
+                          <Building className="w-4 h-4" /> {t('myRole')}
                         </span>
                         <span className="text-foreground font-medium">{acc.myRole}</span>
                       </div>
@@ -234,7 +238,7 @@ const SelectAccount = () => {
                     {/* Addons */}
                     {acc.additional && (
                       <div className="mb-5">
-                        <div className="text-xs text-muted-foreground mb-2">已啟用增值服務</div>
+                        <div className="text-xs text-muted-foreground mb-2">{t('enabledAddons')}</div>
                         <div className="flex flex-wrap gap-1.5">
                           {acc.additional.split(',').map((a: any) => (
                             <span key={a} className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded">
@@ -254,7 +258,7 @@ const SelectAccount = () => {
                             : 'bg-[#FFF1E8] text-primary group-hover:bg-primary group-hover:text-primary-foreground'
                         }`}
                       >
-                        <span className="text-sm font-semibold">{isActive ? '進入此帳戶' : '立即續費'}</span>
+                        <span className="text-sm font-semibold">{isActive ? t('enterAccount') : t('renewNow')}</span>
                         <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                       </div>
                     </div>
@@ -271,14 +275,14 @@ const SelectAccount = () => {
               <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
                 <Package className="w-7 h-7 text-primary" />
               </div>
-              <div className="text-base font-bold text-foreground mb-1">購買新套餐</div>
-              <div className="text-xs text-muted-foreground text-center">為新的公司或業務開通一個全新的管理帳戶</div>
+              <div className="text-base font-bold text-foreground mb-1">{t('buyNewPlan')}</div>
+              <div className="text-xs text-muted-foreground text-center">{t('buyNewPlanDesc')}</div>
             </button>
           </div>
 
           {/* Footer actions */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-10 pt-6 border-t border-border/60">
-            <p className="text-sm text-muted-foreground">想要查看所有訂單詳情或續期？前往「我的訂單」頁面。</p>
+            <p className="text-sm text-muted-foreground">{t('ordersHint')}</p>
             <div className="flex gap-3">
               <ThemeSchemaToggler />
               <Button
@@ -286,9 +290,9 @@ const SelectAccount = () => {
                 className="border-primary text-primary hover:bg-primary/5"
                 onClick={() => router.push('/my-orders')}
               >
-                查看我的訂單
+                {t('viewMyOrders')}
               </Button>
-              <Button onClick={() => router.push('/')}>返回首頁</Button>
+              <Button onClick={() => router.push('/')}>{t('backHome')}</Button>
             </div>
           </div>
         </div>

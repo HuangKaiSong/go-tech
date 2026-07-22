@@ -15,6 +15,7 @@ import {
 } from '@go-tech-frontend/ui';
 import { useAsyncEffect } from 'ahooks';
 import { ArrowUpCircle, Eye, Package, RefreshCw, Settings, ShoppingCart } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
@@ -49,6 +50,7 @@ const getStatusColor = (status: OrderStatusEnum) => {
 const MyOrders = () => {
   const { token } = useAuth();
   const router = useRouter();
+  const t = useTranslations('Order');
 
   const [orderList, setOrderList] = useState<OrderItemInfoType[]>([]);
   const [showAddonsDialog, setShowAddonsDialog] = useState(false);
@@ -73,7 +75,7 @@ const MyOrders = () => {
     if (!selectOrder) {
       return;
     }
-    const toastId = toast.loading('正在提交支付憑證...');
+    const toastId = toast.loading(t('toast.submittingEvidence'));
     try {
       const res = await fetch('/go-tech/platform/packageOrder/payEvidence', {
         method: 'POST',
@@ -89,7 +91,7 @@ const MyOrders = () => {
       }).then(r => r.json());
 
       if (res.code === 200) {
-        toast.success('支付憑證已提交，我們將在確認後為您更新订单', { id: toastId });
+        toast.success(t('toast.evidenceSubmitted'), { id: toastId });
         setShowPaymentDialog(false);
         router.push(`/my-orders/${selectOrder.id}`);
       } else {
@@ -97,7 +99,7 @@ const MyOrders = () => {
       }
     } catch (error) {
       console.log(error);
-      toast.error('提交失敗，請稍後重試', { id: toastId });
+      toast.error(t('toast.submitFailed'), { id: toastId });
     }
   };
 
@@ -134,7 +136,7 @@ const MyOrders = () => {
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center gap-3 mb-2">
             <Package className="w-10 h-10 text-primary" />
-            <h1 className="text-4xl md:text-5xl font-bold text-primary">我的訂單</h1>
+            <h1 className="text-4xl md:text-5xl font-bold text-primary">{t('title')}</h1>
           </div>
           <p className="text-lg text-primary/80">My Orders</p>
         </div>
@@ -148,10 +150,10 @@ const MyOrders = () => {
               <Card className="text-center py-12">
                 <CardContent>
                   <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">暫無訂單</h3>
-                  <p className="text-muted-foreground mb-6">您還沒有任何訂單記錄</p>
+                  <h3 className="text-xl font-semibold mb-2">{t('list.emptyTitle')}</h3>
+                  <p className="text-muted-foreground mb-6">{t('list.emptyDesc')}</p>
                   <Link href="/service-plan">
-                    <Button>查看服務計劃</Button>
+                    <Button>{t('viewPlans')}</Button>
                   </Link>
                 </CardContent>
               </Card>
@@ -167,14 +169,18 @@ const MyOrders = () => {
                           <Badge className={getStatusColor(order.orderStatus)}>{order.orderStatusName}</Badge>
                         </div>
                         <p className="text-sm text-muted-foreground">
-                          最多可創建{order.platformPackageDto?.unitCount}個單位
+                          {t('maxUnit', {
+                            count: order.platformPackageDto?.unitCount
+                          })}
                         </p>
                       </div>
                       <div className="text-right">
                         <div className="text-2xl font-bold text-primary">
                           {order.finalAmount} <span className="text-base">HKD</span>
                         </div>
-                        <p className="text-xs text-muted-foreground">訂單編號：{order.orderNo}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {t('column.orderNo')}：{order.orderNo}
+                        </p>
                       </div>
                     </div>
                   </CardHeader>
@@ -183,19 +189,19 @@ const MyOrders = () => {
                     <div className="grid md:grid-cols-2 gap-6">
                       {/* 訂單資訊 */}
                       <div className="space-y-3">
-                        <h4 className="font-medium text-foreground border-b border-foreground/30 pb-2">訂單資訊</h4>
+                        <h4 className="font-medium text-foreground border-b border-foreground/30 pb-2">{t('info')}</h4>
                         <div className="space-y-2 text-sm">
                           <div className="flex justify-between">
-                            <span className="text-muted-foreground">下單日期</span>
+                            <span className="text-muted-foreground">{t('column.createTime')}</span>
                             <span>{order.createTime}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-muted-foreground">到期日期</span>
+                            <span className="text-muted-foreground">{t('column.expireDate')}</span>
                             <span>{order.expireDate || '-'}</span>
                           </div>
                           {order.orderItems?.filter((item: any) => item.itemType !== 1)?.length > 0 && (
                             <div className="pt-2 border-t border-foreground/30">
-                              <span className="text-muted-foreground">增值服務：</span>
+                              <span className="text-muted-foreground">{t('addons')}</span>
                               {order.orderItems
                                 ?.filter((item: any) => item.itemType !== 1)
                                 ?.map((addon: any) => (
@@ -214,7 +220,7 @@ const MyOrders = () => {
                       {/* 包含功能 */}
                       <div>
                         <h4 className="font-medium text-foreground border-b border-foreground/30 pb-2 mb-3">
-                          包含功能
+                          {t('features')}
                         </h4>
                         <div className="grid grid-cols-2 gap-2">
                           {order.platformPackageDto?.packageItemList?.map((feature: any) => {
@@ -243,7 +249,7 @@ const MyOrders = () => {
                       <Link href={`/my-orders/${order.id}`}>
                         <Button variant="outline" size="sm" className="gap-2">
                           <Eye className="w-4 h-4" />
-                          查看詳情
+                          {t('viewDetail')}
                         </Button>
                       </Link>
                       {order.orderStatus === OrderStatusEnum.REJECT && (
@@ -257,7 +263,7 @@ const MyOrders = () => {
                           }}
                         >
                           <RefreshCw className="w-4 h-4" />
-                          重新上傳支付憑證
+                          {t('reuploadPayment')}
                         </Button>
                       )}
                       {order.isEffective && (
@@ -274,7 +280,7 @@ const MyOrders = () => {
                                 }}
                               >
                                 <ShoppingCart className="w-4 h-4" />
-                                購買增值服務
+                                {t('buyAddon')}
                               </Button>
                               <Button
                                 variant="outline"
@@ -283,10 +289,10 @@ const MyOrders = () => {
                                 onClick={() => openUpgradeDialog(order.id)}
                               >
                                 <ArrowUpCircle className="w-4 h-4" />
-                                套餐升級
+                                {t('upgrade')}
                               </Button>
                               <Link href={`/renew-order/${order.id}`}>
-                                <Button size="sm">續費</Button>
+                                <Button size="sm">{t('renew')}</Button>
                               </Link>
                             </>
                           )}
@@ -306,13 +312,13 @@ const MyOrders = () => {
             {/* 購買新套餐 */}
             <div className="flex items-center justify-between p-6 bg-muted/30 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 mt-8 border border-gray-300">
               <div>
-                <h3 className="font-medium text-lg">需要更多功能？</h3>
-                <p className="text-sm text-muted-foreground">探索其他套餐方案，找到最適合您的選擇</p>
+                <h3 className="font-medium text-lg">{t('needMoreFeatures')}</h3>
+                <p className="text-sm text-muted-foreground">{t('needMoreFeaturesDesc')}</p>
               </div>
               <Link href="/service-plan">
                 <Button className="gap-2">
                   <Package className="w-4 h-4" />
-                  購買新套餐
+                  {t('buyNewPackage')}
                 </Button>
               </Link>
             </div>
@@ -335,7 +341,7 @@ const MyOrders = () => {
         <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
-              <DialogTitle className="text-center text-xl">重新上傳支付憑證</DialogTitle>
+              <DialogTitle className="text-center text-xl">{t('dialog.reuploadPayment')}</DialogTitle>
             </DialogHeader>
             <Fps
               price={selectOrder.finalAmount}

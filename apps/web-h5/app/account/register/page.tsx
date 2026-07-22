@@ -4,6 +4,7 @@ import { useCountDown } from '@go-tech/hooks';
 import { Button, Checkbox, Input, toast } from '@go-tech/web-ui';
 import { CircleAlert, X } from 'lucide-react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import z from 'zod';
@@ -11,33 +12,6 @@ import Link from '@/app/components/Link';
 // import Logo from "@/assets/Gotech_Logo.webp";
 import authBgImg from '@/assets/background.webp';
 import { sendToBetterStack } from '@/lib/betterstack-logger';
-
-const verificationCodeSchema = z.object({
-  email: z.string().min(1, '请输入邮箱').email({ message: '请输入正确的邮箱' }).trim()
-});
-
-const signupSchema = verificationCodeSchema.extend({
-  name: z.string({ message: '请输入用户名' }).min(2, '请输入用户名').max(50).trim(),
-  phone: z.string({ message: '請輸入電話' }).min(1, '請輸入電話').min(7, '電話至少需要7個字符').trim(),
-  company: z.string({ message: '请输入公司名称' }).min(2).max(50).trim(),
-  verificationCode: z.string({ message: '请输入验证码' }).min(1, '请输入验证码').length(6).trim()
-});
-
-const signupSchema2 = signupSchema
-  .extend({
-    password: z
-      .string()
-      .min(6, '密码至少需要6位字符')
-      .regex(/^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).+$/, '密码需至少包含一个字母、一个数字和一个特殊字符')
-      .trim(),
-    confirmPassword: z.string().trim()
-  })
-  .refine(data => data.password === data.confirmPassword, {
-    message: '密码不一致',
-    path: ['confirmPassword']
-  });
-
-const EXISTING_EMAIL_MESSAGE = '該郵箱已被註冊，請直接登入或使用忘記密碼。';
 
 const parseEmailExists = (result: any) => {
   if (typeof result?.data === 'boolean') return !result.data;
@@ -53,6 +27,31 @@ const parseEmailExists = (result: any) => {
 
 const Register = () => {
   const router = useRouter();
+  const t = useTranslations('Account');
+  const existingEmailMessage = t('emailExists');
+
+  const verificationCodeSchema = z.object({
+    email: z.string().min(1, t('vEmailRequired')).email({ message: t('vEmailInvalid') }).trim()
+  });
+  const signupSchema = verificationCodeSchema.extend({
+    name: z.string({ message: t('vNameRequired') }).min(2, t('vNameRequired')).max(50).trim(),
+    phone: z.string({ message: t('vPhoneRequired') }).min(1, t('vPhoneRequired')).min(7, t('vPhoneMin')).trim(),
+    company: z.string({ message: t('vCompanyRequired') }).min(2).max(50).trim(),
+    verificationCode: z.string({ message: t('vCodeRequired') }).min(1, t('vCodeRequired')).length(6).trim()
+  });
+  const signupSchema2 = signupSchema
+    .extend({
+      password: z
+        .string()
+        .min(6, t('vPasswordMin'))
+        .regex(/^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).+$/, t('passwordRule'))
+        .trim(),
+      confirmPassword: z.string().trim()
+    })
+    .refine(data => data.password === data.confirmPassword, {
+      message: t('vPasswordMismatch'),
+      path: ['confirmPassword']
+    });
 
   const [targetDate, setTargetDate] = useState<number>();
 
@@ -120,7 +119,7 @@ const Register = () => {
 
       setEmailExists(exists);
       if (exists) {
-        toast.error(EXISTING_EMAIL_MESSAGE);
+        toast.error(existingEmailMessage);
       }
       return exists;
     } catch (err) {
@@ -155,7 +154,7 @@ const Register = () => {
     }
 
     if (emailExists) {
-      toast.error(EXISTING_EMAIL_MESSAGE);
+      toast.error(existingEmailMessage);
       return;
     }
 
@@ -198,7 +197,7 @@ const Register = () => {
 
     const exists = await checkEmailExists(result.data.email);
     if (exists) {
-      toast.error(EXISTING_EMAIL_MESSAGE);
+      toast.error(existingEmailMessage);
       return;
     }
 
@@ -458,7 +457,7 @@ const Register = () => {
               </div>
               {emailChecking && <p className="text-xs text-gray-400 ml-5 -mt-2">正在驗證郵箱...</p>}
               {!emailChecking && emailExists && (
-                <p className="text-xs text-destructive ml-5 -mt-2">{EXISTING_EMAIL_MESSAGE}</p>
+                <p className="text-xs text-destructive ml-5 -mt-2">{existingEmailMessage}</p>
               )}
 
               <div className="flex items-center gap-2">

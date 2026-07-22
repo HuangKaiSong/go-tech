@@ -4,6 +4,8 @@ import { Button, Dialog, DialogContent, Input, Textarea, toast } from '@go-tech-
 import { useState } from 'react';
 import Footer from '@/app/components/Footer';
 import Header from '@/app/components/Header';
+import { DynamicText } from '../components/DynamicI18nText';
+import { useBatchTranslation } from '../hooks/useBatchTranslation';
 
 const Page = () => {
   const [formData, setFormData] = useState({
@@ -69,18 +71,20 @@ const Page = () => {
       <main className="flex-1 pt-32 pb-16 bg-linear-to-b from-primary/10 to-background">
         <div className="container mx-auto px-4">
           <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8 md:p-12">
-            <h1 className="text-3xl md:text-4xl font-bold text-primary text-center mb-10">聯繫我們</h1>
+            <h1 className="text-3xl md:text-4xl font-bold text-primary text-center mb-10">
+              <DynamicText text="聯繫我們" />
+            </h1>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label className="block text-lg font-medium text-gray-700 mb-2">
-                  姓名 <span className="text-primary">*</span>
+                  <DynamicText text="姓名" /> <span className="text-primary">*</span>
                 </label>
                 <Input
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder="請輸入您的姓名"
+                  placeholder={useBatchTranslation('請輸入您的姓名')}
                   required
                   className="h-12 border-gray-300"
                 />
@@ -88,14 +92,14 @@ const Page = () => {
 
               <div>
                 <label className="block text-lg font-medium text-gray-700 mb-2">
-                  電子郵箱 <span className="text-primary">*</span>
+                  <DynamicText text="電子郵箱" /> <span className="text-primary">*</span>
                 </label>
                 <Input
                   name="email"
                   type="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="請輸入您的電子郵箱"
+                  placeholder={useBatchTranslation('請輸入您的電子郵箱')}
                   required
                   className="h-12 border-gray-300"
                 />
@@ -103,14 +107,14 @@ const Page = () => {
 
               <div>
                 <label className="block text-lg font-medium text-gray-700 mb-2">
-                  聯繫電話 <span className="text-primary">*</span>
+                  <DynamicText text="聯繫電話" /> <span className="text-primary">*</span>
                 </label>
                 <Input
                   name="phone"
                   type="tel"
                   value={formData.phone}
                   onChange={handleChange}
-                  placeholder="請輸入您的聯繫電話"
+                  placeholder={useBatchTranslation('請輸入您的聯繫電話')}
                   required
                   className="h-12 border-gray-300"
                 />
@@ -118,13 +122,13 @@ const Page = () => {
 
               <div>
                 <label className="block text-lg font-medium text-gray-700 mb-2">
-                  您想說的 <span className="text-primary">*</span>
+                  <DynamicText text="您想說的" /> <span className="text-primary">*</span>
                 </label>
                 <Textarea
                   name="message"
                   value={formData.message}
                   onChange={handleChange}
-                  placeholder="請輸入您想對我們說的"
+                  placeholder={useBatchTranslation('請輸入您想對我們說的')}
                   required
                   className="min-h-30 border-gray-300 resize-none"
                 />
@@ -132,7 +136,7 @@ const Page = () => {
 
               <div className="pt-4">
                 <Button type="submit" className="w-full max-w-xs mx-auto block h-12 text-lg" loading={pending}>
-                  發送
+                  <DynamicText text="發送" />
                 </Button>
               </div>
             </form>

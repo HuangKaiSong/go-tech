@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import type { CSSProperties, ReactNode } from 'react';
 import Link from '@/app/components/Link';
+import { DynamicText } from '../DynamicI18nText';
 import Hero, { type HeroBlock } from './Hero';
 
 type BlockBase = {
@@ -131,8 +132,12 @@ export const PageBlocks = ({ blocks, hasIframe }: { blocks: PageBlock[]; hasIfra
         <section key={block.id} className="py-16 md:py-24 flex-1">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
-              <h2 className={`text-3xl font-bold text-foreground mb-4 ${cursorClass(hasIframe)}`}>{block.title}</h2>
-              <p className={`text-muted-foreground mb-12 ${cursorClass(hasIframe)}`}>{block.subtitle}</p>
+              <h2 className={`text-3xl font-bold text-foreground mb-4 ${cursorClass(hasIframe)}`}>
+                <DynamicText text={block.title} />
+              </h2>
+              <p className={`text-muted-foreground mb-12 ${cursorClass(hasIframe)}`}>
+                <DynamicText text={block.subtitle} />
+              </p>
 
               <div className={`grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-10 ${cursorClass(hasIframe)}`}>
                 {block.items.map((feature, index) => {
@@ -145,7 +150,9 @@ export const PageBlocks = ({ blocks, hasIframe }: { blocks: PageBlock[]; hasIfra
                       >
                         <Icon className="w-24 h-24" style={{ color: '#F5734A' }} strokeWidth={1.5} />
                       </div>
-                      <span className="text-lg font-bold text-foreground">{feature.label}</span>
+                      <span className="text-lg font-bold text-foreground">
+                        <DynamicText text={feature.label} />
+                      </span>
                     </div>
                   );
                 })}
@@ -167,7 +174,7 @@ export const PageBlocks = ({ blocks, hasIframe }: { blocks: PageBlock[]; hasIfra
               data-block-role="text"
               className={`text-base text-foreground ${getAlignClass(block.align)} ${cursorClass(hasIframe)}`}
             >
-              {block.text}
+              <DynamicText text={block.text} />
             </p>
           </div>
         </section>
@@ -188,7 +195,7 @@ export const PageBlocks = ({ blocks, hasIframe }: { blocks: PageBlock[]; hasIfra
                 className={cursorClass(hasIframe)}
                 style={block.buttonStyle}
               >
-                {block.text}
+                <DynamicText text={block.text} />
               </Button>
             </Link>
           </div>

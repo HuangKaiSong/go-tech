@@ -3,6 +3,7 @@
 import { Button, Card, CardContent, CardHeader } from '@go-tech-frontend/ui';
 import { Settings } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { DynamicText } from '../components/DynamicI18nText';
 
 type ExtendedPackages = Packages & {
   newFeatures: { icon?: any; label: string }[];
@@ -52,9 +53,13 @@ export default function Page({ packages }: { packages: ExtendedPackages[] }) {
                 <CardHeader className="text-center pb-4 pt-8">
                   <div className="flex items-center justify-center gap-2 mb-2">
                     <Settings className="w-6 h-6 text-primary" />
-                    <h3 className="text-2xl font-bold text-foreground">{plan.packageName}</h3>
+                    <h3 className="text-2xl font-bold text-foreground">
+                      <DynamicText text={plan.packageName} />
+                    </h3>
                   </div>
-                  <p className="text-sm text-muted-foreground">最多可創建{plan.unitCount}個單位</p>
+                  <p className="text-sm text-muted-foreground">
+                    <DynamicText text={`最多可創建${plan.unitCount}個單位`} />
+                  </p>
                 </CardHeader>
 
                 <CardContent className="text-center">
@@ -65,19 +70,27 @@ export default function Page({ packages }: { packages: ExtendedPackages[] }) {
                         <span className="text-lg text-primary ml-1">HKD</span>
                       </>
                     ) : (
-                      <span className="text-3xl font-bold text-primary">敬請期待</span>
+                      <span className="text-3xl font-bold text-primary">
+                        <DynamicText text="敬請期待" />
+                      </span>
                     )}
                   </div>
 
                   <Button className={`w-full mb-6 ${buttonColors[index]}`} onClick={() => handleSelectPlan(plan)}>
-                    選擇{plan.packageName}
+                    <DynamicText text={`選擇${plan.packageName}`} />
                   </Button>
 
                   <div
                     className={`text-center mb-4 py-2 px-3 rounded-md min-h-13 flex flex-col justify-center ${featureRowColors[index]}`}
                   >
-                    <span className="text-sm font-medium text-foreground">包含功能</span>
-                    {plan.upgradeNote && <p className="text-xs text-primary/80 mt-1">{plan.upgradeNote}</p>}
+                    <span className="text-sm font-medium text-foreground">
+                      <DynamicText text="包含功能" />
+                    </span>
+                    {plan.upgradeNote && (
+                      <p className="text-xs text-primary/80 mt-1">
+                        <DynamicText text={plan.upgradeNote} />
+                      </p>
+                    )}
                   </div>
 
                   <div className="text-left">
@@ -92,14 +105,16 @@ export default function Page({ packages }: { packages: ExtendedPackages[] }) {
                           </svg>
                         )}
                         {/* <feature.icon className="w-4 h-4 text-primary" /> */}
-                        <span className="text-sm text-muted-foreground">{feature.menuTitle}</span>
+                        <span className="text-sm text-muted-foreground">
+                          <DynamicText text={feature.menuTitle} />
+                        </span>
                       </div>
                     ))}
 
                     {plan.newFeatures?.length > 0 && (
                       <>
                         <div className="pt-2 pb-1 px-2 text-xs text-primary font-medium text-center">
-                          以下為新增功能：
+                          <DynamicText text="以下為新增功能：" />
                         </div>
                         {plan.newFeatures?.map((feature, fIndex) => (
                           <div
@@ -111,7 +126,9 @@ export default function Page({ packages }: { packages: ExtendedPackages[] }) {
                                 <use href={getIconHref(feature.icon)} xlinkHref={getIconHref(feature.icon)} />
                               </svg>
                             )}
-                            <span className="text-sm text-muted-foreground">{feature.label}</span>
+                            <span className="text-sm text-muted-foreground">
+                              <DynamicText text={feature.label} />
+                            </span>
                           </div>
                         ))}
                       </>

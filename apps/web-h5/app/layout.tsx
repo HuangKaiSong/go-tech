@@ -33,11 +33,11 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const cookiesStore = await cookies();
-  const supportedLocales = ['hk', 'en'] as const;
+  const supportedLocales = ['zh-hk', 'en-us', 'zh-cn'] as const;
   type SupportedLocale = (typeof supportedLocales)[number];
   const isSupportedLocale = (value: string | undefined): value is SupportedLocale =>
     supportedLocales.includes(value as SupportedLocale);
-  const defaultLocale = isSupportedLocale(process.env.GO_TECH_LANGUAGE) ? process.env.GO_TECH_LANGUAGE : 'hk';
+  const defaultLocale = isSupportedLocale(process.env.GO_TECH_LANGUAGE) ? process.env.GO_TECH_LANGUAGE : 'zh-hk';
   const cookieLocale = cookiesStore.get('GO_TECH_LANGUAGE')?.value;
   const language = isSupportedLocale(cookieLocale) ? cookieLocale : defaultLocale;
   const shouldInitLocale = !isSupportedLocale(cookieLocale);
@@ -70,7 +70,7 @@ export default async function RootLayout({
   });
 
   return (
-    <html lang={language}>
+    <html lang={language} suppressHydrationWarning>
       <head>
         <Script id="theme-color" strategy="beforeInteractive">
           {themeColorScript}

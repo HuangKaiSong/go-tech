@@ -1,5 +1,6 @@
 import { Button, FileUpload, Label, type UploadedFile, toast } from '@go-tech-frontend/ui';
 import { Banknote, Check, Copy, Upload } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -56,6 +57,7 @@ export default function Fps({
   handleFpsPaymentConfirm: (voucherFile: UploadedFile) => void;
   price: number;
 }) {
+  const t = useTranslations('Payment');
   const { token } = useAuth();
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
 
@@ -160,7 +162,7 @@ export default function Fps({
     <div className="space-y-6 py-4">
       {/* Payment Amount */}
       <div className="text-center p-4 bg-primary/5 rounded-lg">
-        <p className="text-sm text-muted-foreground mb-1">應付金額</p>
+        <p className="text-sm text-muted-foreground mb-1">{t('Amount Payable')}</p>
         <p className="text-3xl font-bold text-primary">${price.toLocaleString()} HKD</p>
       </div>
 
@@ -168,11 +170,11 @@ export default function Fps({
       <div className="space-y-3">
         <h4 className="font-medium text-foreground flex items-center gap-2">
           <Banknote className="w-4 h-4 text-primary" />
-          收款賬戶信息
+          {t('FPS.Account Info')}
         </h4>
         <div className="bg-muted/30 rounded-lg p-4 space-y-3">
           <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">賬戶名稱</span>
+            <span className="text-sm text-muted-foreground">{t('FPS.Account Name')}</span>
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">{fpsAccountInfo.accountName}</span>
               <Button
@@ -190,11 +192,11 @@ export default function Fps({
             </div>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">銀行名稱</span>
+            <span className="text-sm text-muted-foreground">{t('FPS.Bank Name')}</span>
             <span className="text-sm font-medium">{fpsAccountInfo.bankName}</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">銀行賬號</span>
+            <span className="text-sm text-muted-foreground">{t('FPS.Bank account')}</span>
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">{fpsAccountInfo.accountNumber}</span>
               <Button
@@ -226,7 +228,7 @@ export default function Fps({
             </div>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">FPS 手機號碼</span>
+            <span className="text-sm text-muted-foreground">{t('FPS.Phone')}</span>
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">{fpsAccountInfo.fpsPhone}</span>
               <Button
@@ -250,7 +252,7 @@ export default function Fps({
       <div className="space-y-3">
         <Label className="font-medium flex items-center gap-2">
           <Upload className="w-4 h-4 text-primary" />
-          上傳支付憑證
+          {t('FPS.Upload certify')}
         </Label>
         <FileUpload
           headers={headers}
@@ -263,10 +265,10 @@ export default function Fps({
       {/* Action Buttons */}
       <div className="flex gap-3">
         <Button variant="outline" onClick={cancelPayment} className="flex-1">
-          返回
+          {t('return')}
         </Button>
         <Button onClick={confirmPayment} className="flex-1" disabled={!uploadedFile}>
-          確認提交
+          {t('confirm')}
         </Button>
       </div>
     </div>

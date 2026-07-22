@@ -1,3 +1,5 @@
+import { DynamicText } from '@/app/components/DynamicI18nText';
+
 interface PriceSummaryProps {
   durationDiscount: number;
   originalPrice: number;
@@ -13,23 +15,23 @@ export const PriceSummary = ({ durationDiscount, originalPrice, promotionDiscoun
         <div className="w-1 h-6 bg-primary rounded-full" />
         <div className="flex flex-wrap items-center gap-8">
           <span className="text-lg font-bold text-gray-700">
-            原價：
+            <DynamicText text="原價：" />
             <span className="line-through">${originalPrice?.toLocaleString()}HKD</span>
           </span>
           {durationDiscount > 0 && (
             <span className="text-lg font-medium text-gray-700">
-              時長優惠：
+              <DynamicText text="時長優惠：" />
               <span className="text-primary">${durationDiscount.toLocaleString()}HKD</span>
             </span>
           )}
           {promotionDiscount > 0 && (
             <span className="text-lg font-medium text-gray-700">
-              活動優惠：
+              <DynamicText text="活動優惠：" />
               <span className="text-primary">${promotionDiscount.toLocaleString()}HKD</span>
             </span>
           )}
           <span className="text-lg font-bold">
-            總計：
+            <DynamicText text="總計：" />
             <span className="text-2xl text-primary">${totalPrice.toLocaleString()} HKD</span>
           </span>
         </div>

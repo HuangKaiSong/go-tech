@@ -11,6 +11,7 @@ import advantage6 from '@/assets/advantage-6.jpg';
 import advantageIntro from '@/assets/advantage-intro.jpg';
 import coreOffice from '@/assets/core-office.jpg';
 import { defaultCoreAdvantages } from '../components/blockDefaults';
+import { DynamicText } from '../components/DynamicI18nText';
 import HeroSection from '../components/HeroSection';
 import { loadPageBlocks } from '../lib/pageBlocks';
 
@@ -88,20 +89,30 @@ export default async function Page() {
       {/* System Introduction Section */}
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-primary mb-16">租賃管理系統介紹</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-primary mb-16">
+            <DynamicText text="租賃管理系統介紹" />
+          </h2>
 
           <div className={`grid md:grid-cols-2 gap-12 items-start ${hasIframe ? 'cursor-editor' : ''}`}>
             {/* Left Column */}
             <div>
-              <h3 className="text-2xl font-bold text-foreground mb-4">租賃管理系統</h3>
-              <p className="text-muted-foreground mb-6">一個專為業主、物業管理公司和新客設計的創新收租平台。</p>
-              <p className="text-primary font-medium mb-8">「簡化租賃管理流程，提升效率」</p>
+              <h3 className="text-2xl font-bold text-foreground mb-4">
+                <DynamicText text="租賃管理系統" />
+              </h3>
+              <p className="text-muted-foreground mb-6">
+                <DynamicText text="一個專為業主、物業管理公司和新客設計的創新收租平台。" />
+              </p>
+              <p className="text-primary font-medium mb-8">
+                <DynamicText text="「簡化租賃管理流程，提升效率」" />
+              </p>
 
               <div className="rounded-lg overflow-hidden mb-6">
                 <Image src={coreOffice} alt="Modern office" className="w-full h-64 object-cover" />
               </div>
 
-              <p className="text-primary">選擇租賃管理系統，將為您的租務管理帶來全新的體驗和更高的效率。</p>
+              <p className="text-primary">
+                <DynamicText text="選擇租賃管理系統，將為您的租務管理帶來全新的體驗和更高的效率。" />
+              </p>
             </div>
 
             {/* Right Column - Feature Cards */}
@@ -112,9 +123,11 @@ export default async function Page() {
                     <Settings className="w-6 h-6 text-primary" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-foreground mb-2">核心功能</h4>
+                    <h4 className="font-bold text-foreground mb-2">
+                      <DynamicText text="核心功能" />
+                    </h4>
                     <p className="text-sm text-muted-foreground">
-                      除可按需要設定收租與維修管理外，系統亦提供數據管理、租約管理、財務管理、維修維護、通知提醒等常用工具，支援日常營運的一站式管理。
+                      <DynamicText text="除可按需要設定收租與維修管理外，系統亦提供數據管理、租約管理、財務管理、維修維護、通知提醒等常用工具，支援日常營運的一站式管理。" />
                     </p>
                   </div>
                 </div>
@@ -126,9 +139,11 @@ export default async function Page() {
                     <TrendingUp className="w-6 h-6 text-primary" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-foreground mb-2">提升效率</h4>
+                    <h4 className="font-bold text-foreground mb-2">
+                      <DynamicText text="提升效率" />
+                    </h4>
                     <p className="text-sm text-muted-foreground">
-                      透過標準化流程與統一資料管理，協助快速統計與查核，減少手工記錄與重複輸入，令對賬、跟進與報表整理更省時、更準確。
+                      <DynamicText text="透過標準化流程與統一資料管理，協助快速統計與查核，減少手工記錄與重複輸入，令對賬、跟進與報表整理更省時、更準確。" />
                     </p>
                   </div>
                 </div>
@@ -140,9 +155,11 @@ export default async function Page() {
                     <Shield className="w-6 h-6 text-primary" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-foreground mb-2">全面服務</h4>
+                    <h4 className="font-bold text-foreground mb-2">
+                      <DynamicText text="全面服務" />
+                    </h4>
                     <p className="text-sm text-muted-foreground">
-                      提供多維度報表與管理視圖，提升透明度與可追溯性；並可按管理需要設定定期檢視與跟進安排，方便持續優化租務與物業表現。
+                      <DynamicText text="提供多維度報表與管理視圖，提升透明度與可追溯性；並可按管理需要設定定期檢視與跟進安排，方便持續優化租務與物業表現。" />
                     </p>
                   </div>
                 </div>
@@ -155,7 +172,9 @@ export default async function Page() {
       {/* Advantages Introduction Section */}
       <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-primary mb-16">優勢介紹</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-primary mb-16">
+            <DynamicText text="優勢介紹" />
+          </h2>
 
           <div className={`grid md:grid-cols-2 gap-12 items-center ${hasIframe ? 'cursor-editor' : ''}`}>
             {/* Left - Image */}
@@ -165,18 +184,22 @@ export default async function Page() {
 
             {/* Right - Content */}
             <div>
-              <h3 className="text-2xl font-bold text-foreground mb-6">租務管理系統的優勢</h3>
+              <h3 className="text-2xl font-bold text-foreground mb-6">
+                <DynamicText text="租務管理系統的優勢" />
+              </h3>
               <p className="text-muted-foreground mb-8">
-                租務管理系統在現代租賃市場中具有顯著的優勢，它和您物的傳統的書面管理系統：
+                <DynamicText text="租務管理系統在現代租賃市場中具有顯著的優勢，它和您物的傳統的書面管理系統：" />
               </p>
 
               <div className="space-y-8">
                 <div className="flex gap-4">
                   <span className="text-primary font-bold text-xl">01</span>
                   <div>
-                    <h4 className="font-bold text-foreground mb-2">精準出租定價</h4>
+                    <h4 className="font-bold text-foreground mb-2">
+                      <DynamicText text="精準出租定價" />
+                    </h4>
                     <p className="text-sm text-muted-foreground">
-                      結合周邊配套（如交通、學校、商圈）與歷史租賃表現等資料作參考，協助制定更合理的租金策略，提升出租成功率與回報表現。
+                      <DynamicText text="結合周邊配套（如交通、學校、商圈）與歷史租賃表現等資料作參考，協助制定更合理的租金策略，提升出租成功率與回報表現。" />
                     </p>
                   </div>
                 </div>
@@ -184,9 +207,11 @@ export default async function Page() {
                 <div className="flex gap-4">
                   <span className="text-primary font-bold text-xl">02</span>
                   <div>
-                    <h4 className="font-bold text-foreground mb-2">靈活擴展</h4>
+                    <h4 className="font-bold text-foreground mb-2">
+                      <DynamicText text="靈活擴展" />
+                    </h4>
                     <p className="text-sm text-muted-foreground">
-                      不論管理單一物業或多個物業組合，皆可用同一套管理架構統一處理；有助於規劃租務安排與回報目標，支援不同成長階段的需要。
+                      <DynamicText text="不論管理單一物業或多個物業組合，皆可用同一套管理架構統一處理；有助於規劃租務安排與回報目標，支援不同成長階段的需要。" />
                     </p>
                   </div>
                 </div>
@@ -194,9 +219,11 @@ export default async function Page() {
                 <div className="flex gap-4">
                   <span className="text-primary font-bold text-xl">03</span>
                   <div>
-                    <h4 className="font-bold text-foreground mb-2">多功能整合</h4>
+                    <h4 className="font-bold text-foreground mb-2">
+                      <DynamicText text="多功能整合" />
+                    </h4>
                     <p className="text-sm text-muted-foreground">
-                      將招租、租約、收租、維修、財務與文件等工作集中管理，減少人手記錄與跨平台往返；同時保留完整紀錄，讓跟進更有條理、管理更專業。
+                      <DynamicText text="將招租、租約、收租、維修、財務與文件等工作集中管理，減少人手記錄與跨平台往返；同時保留完整紀錄，讓跟進更有條理、管理更專業。" />
                     </p>
                   </div>
                 </div>
@@ -209,7 +236,9 @@ export default async function Page() {
       {/* Our Advantages Grid Section */}
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-primary mb-16">我們的優勢</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-primary mb-16">
+            <DynamicText text="我們的優勢" />
+          </h2>
 
           <div className={`grid md:grid-cols-2 lg:grid-cols-3 gap-10 ${hasIframe ? 'cursor-editor' : ''}`}>
             {advantages.map((advantage, index) => (
@@ -225,9 +254,15 @@ export default async function Page() {
                   />
                 </div>
                 <div className="p-6">
-                  <h3 className="font-bold text-lg text-foreground mb-3">{advantage.title}</h3>
-                  <p className="text-sm text-muted-foreground mb-3">{advantage.description}</p>
-                  <p className="text-sm text-muted-foreground">{advantage.subDescription}</p>
+                  <h3 className="font-bold text-lg text-foreground mb-3">
+                    <DynamicText text={advantage.title} />
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    <DynamicText text={advantage.description} />
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    <DynamicText text={advantage.subDescription} />
+                  </p>
                 </div>
               </div>
             ))}

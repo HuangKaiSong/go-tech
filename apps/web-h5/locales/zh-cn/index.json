@@ -1,0 +1,282 @@
+{
+  "HomePage": {
+    "title": "你好世界!"
+  },
+  "Common": {
+    "login": "登录",
+    "logout": "登出",
+    "setting": "设定",
+    "learnMore": "了解更多",
+    "stayTuned": "敬請期待",
+    "pricingScheme": "查看完整的定價方案",
+    "freeTrial": "立即開始14天免費試用"
+  },
+  "StatsSection": {
+    "semibold": "揮別租務公司的煩惱",
+    "title": "GOTECH租務系統",
+    "relaxedSemibold": "Gotech是一個專為租務管理打造的雲端系統，協助您輕鬆管理物業、追蹤租金收入並簡化溝通流程。",
+    "relaxedOffers": "簡省90%~95%的管理費用",
+    "relaxedGoal": "租務行業,最低收費",
+    "relaxedStep": "完成簽約只需 5 個步驟",
+    "relaxedContact": "立即聯絡"
+  },
+  "SigningSteps": {
+    "1": "填寫表格",
+    "2": "專人聯絡",
+    "3": "開設帳戶",
+    "4": "完成付款",
+    "5": "開始使用系統",
+    "title": "完成登約只需 5 個步驟"
+  },
+  "Privacy_Policy": {
+    "title": "私隐政策",
+    "foreword": "本声明适用于 GO TECHS 的网站、租务管理系统（PMS）及相关服务（统称「本服务」）。",
+    "languageVersion": "本声明的中文及英文版本如有任何不一致，概以中文版本为准；任何英文版本仅供参考。",
+    "sections": [
+      {
+        "title": "1. 资料收集",
+        "items": [
+          "账户资料：阁下注册或联络我们时提供的个人资料（如姓名、电话、电邮地址、公司名称）。",
+          "系统数据：阁下在使用 PMS 系统时输入的业务数据（如租客姓名、身份证号码、租约详情、物业地址等）。"
+        ]
+      },
+      {
+        "title": "2. 资料用途",
+        "items": [
+          "提供、维护及改善 PMS 系统的功能。",
+          "处理阁下的订阅订单及提供技术支援。",
+          "向阁下发送系统通知（如维护公告）及产品更新资讯。"
+        ]
+      },
+      {
+        "title": "3. 租客数据处理",
+        "paragraphs": [
+          "对于阁下输入系统的「租客数据」，GO TECHS 仅作为资料处理者（Data Processor）。",
+          "阁下作为资料控制者（Data Controller），有责任确保在收集租客资料前已获得租客同意。",
+          "我们不会将阁下的租客数据用于 GO TECHS 的市场推广，亦不会向第三方出售。"
+        ]
+      },
+      {
+        "title": "4. 资料披露及第三方服务",
+        "paragraphs": [
+          "除非为满足阁下需要的服务，我们不会将资料向第三方披露；但在以下情况除外："
+        ],
+        "items": [
+          "服务供应商：我们可能需将资料传送至受信任的第三方基础设施供应商（如云端伺服器托管、SMS 短讯发送商、支付网关），仅作维持系统运作之用。",
+          "法律要求：如受法律、法庭命令或政府机关要求，我们可能需要披露相关资料。"
+        ]
+      },
+      {
+        "title": "5. Cookies 及追踪技术",
+        "paragraphs": [
+          "本系统使用 Cookies 及类似技术来识别阁下的登入状态及保存系统设定。",
+          "如阁下关闭 Cookies，将无法正常登入及使用本系统。"
+        ]
+      },
+      {
+        "title": "6. 资料保安",
+        "paragraphs": [
+          "我们会采取符合行业标准的加密技术（如 SSL/TLS）来传输及存储阁下的资料。",
+          "只有需要执行特定工作（如客户服务或系统维护）的员工才会获得授权存取相关资料。"
+        ]
+      },
+      {
+        "title": "7. 阁下的权利",
+        "paragraphs": [
+          "阁下可随时登入系统查阅、更正或汇出阁下的资料。",
+          "如需删除账户，请通过网站上的电邮地址联络我们。"
+        ]
+      }
+    ]
+  },
+  "Terms_of_Use": {
+    "title": "服务条款",
+    "foreword": "",
+    "languageVersion": "",
+    "sections": [
+      {
+        "title": "1. 介绍及接受使用条款",
+        "paragraphs": [
+          "GO-TECHS 利用本网页及云端平台提供物业管理系统（PMS）、租务解决方案及相关服务。当 阁下注册、登入或使用本系统时，表示 阁下已阅读、理解并同意接受和遵守以下的使用条款。GO-TECHS 有权随时更新以下条款而不作另行通知。用户应定期查阅最新条款。如 阁下不同意下列任何条款，请立即停止使用本系统。"
+        ]
+      },
+      {
+        "title": "2. 账户注册及安全",
+        "paragraphs": [
+          "为使用本系统， 阁下可能需要注册账户。 阁下同意提供真实、准确及完整的资料。 阁下有责任妥善保管登入账户及密码的安全。对于因 阁下未能保管好账户资讯而导致的任何损失（包括数据泄露、被恶意删除或未经授权的交易），GO-TECHS 概不负责。如 阁下怀疑账户被盗用，必须立即通知我们。"
+        ]
+      },
+      {
+        "title": "3. 数据拥有权及私隐",
+        "paragraphs": [
+          "阁下保留在 GO-TECHS 系统中输入或上载的所有租务数据、租客资料、合约及文件（「用户数据」）的完全所有权。GO-TECHS 不会声称拥有 阁下的用户数据。然而， 阁下同意授予 GO-TECHS 全球性、免版税的许可权，以存取、复制及使用这些数据，但仅限于为 阁下提供服务、进行系统维护、数据备份及改进系统功能之目的。"
+        ]
+      },
+      {
+        "title": "4. 费用及付款",
+        "paragraphs": [
+          "GO-TECHS 服务为收费订阅制。除非另有书面协议，所有已支付的费用（包括月费、年费或设定费）均不设退款。若 阁下未能按时缴付费用，我们有权在发出通知后暂停或终止 阁下的账户存取权限，直至欠款付清为止。"
+        ]
+      },
+      {
+        "title": "5. 限制使用权利",
+        "paragraphs": [
+          "本系统由 GO-TECHS 管理。除非特别声明，系统内所有源代码、数据库结构、介面设计及资料的版权皆为 GO-TECHS 所拥有。未经我们事先书面许可，任何人不得将本系统上的任何内容或功能以任何方式进行复制、逆向工程（Reverse Engineering）、经销、翻印、或以「镜像法」载入其他服务器上作商业目的使用。用户仅获授权在订阅期内，为管理其物业租务之内部营运目的而使用本系统。"
+        ]
+      },
+      {
+        "title": "6. 知识产权及商标",
+        "paragraphs": [
+          "在此系统及网站中使用的一切商标及标记（包括 GO-TECHS 标志及名称）乃属 GO-TECHS 拥有。本条款亦没有允许（暗示、放弃、禁止翻供）用户在未经 GO-TECHS 书面授权的情况下使用这些商标和标记。"
+        ]
+      },
+      {
+        "title": "7. 终止服务及数据保留",
+        "paragraphs": [
+          "如 阁下决定终止订阅， 阁下有责任在合约结束前自行汇出所有资料。服务终止后，GO-TECHS 有权在合约结束 [30] 天后永久删除 阁下的所有账户数据及备份，且不承担任何恢复数据的责任。"
+        ]
+      },
+      {
+        "title": "8. 赔偿",
+        "paragraphs": [
+          "如果由于 阁下使用 GO-TECHS 租务系统（包括但不限于输入的租客资料违法、合约数据错误或滥用系统功能）而导致 GO-TECHS 蒙受损失，这些损失包括第三者的索偿及赔偿责任、数据毁坏、亏损、支出（包括合理的律师费用及代价）， 阁下同意维护 GO-TECHS 的利益并全额赔偿 GO-TECHS 的损失。"
+        ]
+      },
+      {
+        "title": "9. 责任范围及免责声明",
+        "paragraphs": [
+          "本系统提供的服务是基于「现况」及「现有」的基础提供。GO-TECHS 致力提供稳定的租务管理服务，但并无责任确保本系统的计算结果（如租金、管理费、税项计算）及法律文件范本绝对准确无误。用户须自行核实系统输出的数据及合约的法律效力。",
+          "在任何情况下，GO-TECHS 及其供应商都无须为任何直接的、间接的、特殊的、偶然发生的或必然导致的损失负责。这包括但不限于：因使用或无法使用本 PMS 系统导致的租金收益损失、商业机会损失、数据遗失或业务中断。"
+        ]
+      },
+      {
+        "title": "10. 法律管辖及语言",
+        "paragraphs": [
+          "本条款受香港特别行政区法律管辖并按其诠释。与此条款有关的任何争议， 阁下同意服从香港法院的专有管辖权。本条款的中文及英文版本如有任何不一致，概以中文版本为准。"
+        ]
+      }
+    ]
+  },
+  "notFound": {
+    "title": "页面未找到",
+    "description": "抱歉，您访问的页面不存在或已被移动。",
+    "hint": "别担心，这种情况会发生。您可以返回首页或尝试搜索您需要的内容。",
+    "backHome": "返回首页",
+    "goBack": "返回上一页",
+    "refresh": "刷新页面",
+    "quickNav": "常用页面",
+    "buttonComponent": "Button 组件",
+    "formComponent": "Form 组件",
+    "componentList": "组件列表",
+    "contact": "如果问题持续存在，请",
+    "contactUs": "联系我们"
+  },
+  "Nav": {
+    "gotoPms": "点击前往 GO-PMS",
+    "selectTenant": "选择租户",
+    "coreAdvantages": "核心优势!",
+    "systemFeatures": "查看系统功能",
+    "servicePlan": "服务计划",
+    "targetAudience": "适合人群",
+    "contact": "联系我们",
+    "callUs": "致电我们",
+    "mailToUs": "邮件联系",
+    "myOrders": "我的订单",
+    "goNow": "立即前往",
+    "clickToTrial": "点击立即开始试用",
+    "freeTrial": "免费试用"
+  },
+  "Footer": {
+    "business": "公司业务",
+    "rentalManagement": "租赁管理",
+    "rentCollection": "收租管理",
+    "audience": "服务对象",
+    "pmsSubscribers": "PMS系统订阅者",
+    "aboutUs": "关于我们",
+    "servicePlan": "服务计划",
+    "contact": "联系我们",
+    "tryNow": "立即试用",
+    "copyright": "版权所有：GO-TECHS 2024@",
+    "refundPolicy": "退款政策",
+    "termsOfUse": "服务条款",
+    "privacyPolicy": "私隐政策"
+  },
+  "Account": {
+    "loginTitle": "登入您的账户",
+    "accountPlaceholder": "请输入您的电子邮箱/手机号码",
+    "passwordPlaceholder": "请输入您的密码",
+    "login": "登入",
+    "loggingIn": "登入中...",
+    "forgotPassword": "忘记密码?",
+    "registerNew": "注册新账户",
+    "loginSuccess": "登入成功！",
+    "loginFailed": "登入失败",
+    "termsOfService": "服务条款",
+    "privacyPolicy": "私隐政策",
+    "registerTitle": "注册新账户",
+    "namePlaceholder": "请输入您的姓名",
+    "emailPlaceholder": "请输入您的电子邮箱",
+    "phonePlaceholder": "请输入您的联系电话",
+    "companyPlaceholder": "请输入您的公司名称",
+    "passwordInput": "请输入密码",
+    "confirmPasswordInput": "请再次输入密码",
+    "passwordRule": "密码需至少包含一个字母、一个数字和一个特殊字符",
+    "verificationCode": "验证码",
+    "codeInputRegister": "请输入邮箱收到的验证码",
+    "verifyingEmail": "正在验证邮箱...",
+    "emailExists": "该邮箱已被注册，请直接登入或使用忘记密码。",
+    "agreePrefix": "我已阅读并同意",
+    "termsBracket": "《服务条款》",
+    "and": "及",
+    "privacyBracket": "《私隐政策》",
+    "register": "注册",
+    "processing": "处理中...",
+    "next": "下一步",
+    "haveAccount": "已有账户？",
+    "loginNow": "立即登入",
+    "registerSuccessLoading": "注册成功, 正在为您跳转登录页面...",
+    "jumpSuccess": "跳转成功, 请登入",
+    "codeSent": "验证码已发送至您的邮箱",
+    "codeSendFailed": "验证码发送失败，请稍后再试",
+    "sendCode": "发送验证码",
+    "sending": "发送中...",
+    "resendIn": "{seconds}s 后重发",
+    "resetTitle": "重置您的密码",
+    "confirmReset": "确认重置",
+    "codeInputForget": "请输入收到的验证码",
+    "resetSuccessLoading": "重置密码成功, 正在为您跳转登录页面...",
+    "inviteTitle": "接受邀请",
+    "inviteDesc": "您已被邀请加入 Go Techs 系统",
+    "inviteEmailLabel": "邀请邮箱：",
+    "or": "或",
+    "haveAccountAccept": "已有账户，登录接受",
+    "signInSuccess": "登入成功",
+    "selectAccountTitle": "选择要进入的套餐账户",
+    "selectAccountDesc": "您名下有多个已购买的套餐，请选择要管理的账户。",
+    "inUse": "使用中",
+    "expired": "已过期",
+    "maxUnits": "最多 {count} 个单位",
+    "memberCount": "成员人数",
+    "peopleValue": "{count} 人",
+    "validUntil": "有效期至",
+    "myRole": "我的角色",
+    "enabledAddons": "已启用增值服务",
+    "enterAccount": "进入此账户",
+    "renewNow": "立即续费",
+    "buyNewPlan": "购买新套餐",
+    "buyNewPlanDesc": "为新的公司或业务开通一个全新的管理账户",
+    "ordersHint": "想要查看所有订单详情或续期？前往「我的订单」页面。",
+    "viewMyOrders": "查看我的订单",
+    "backHome": "返回首页",
+    "noOrderId": "当前数据无 orderId 或者 orderId 不合法!",
+    "vEmailRequired": "请输入邮箱",
+    "vEmailInvalid": "请输入正确的邮箱",
+    "vNameRequired": "请输入用户名",
+    "vPhoneRequired": "请输入电话",
+    "vPhoneMin": "电话至少需要7个字符",
+    "vCompanyRequired": "请输入公司名称",
+    "vCodeRequired": "请输入验证码",
+    "vPasswordMin": "密码至少需要6位字符",
+    "vPasswordMismatch": "密码不一致"
+  }
+}

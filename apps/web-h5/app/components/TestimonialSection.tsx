@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import homeOffice from '@/assets/home-office.jpg';
 import { useIframeContext } from '@/contexts/IframeContext';
+import { DynamicText } from './DynamicI18nText';
 
 let defaultContent = {
   title: '更標準，更高效的管理方式',
@@ -36,14 +37,14 @@ const TestimonialSection = ({ initialBlocks = [] }: { initialBlocks: any[] }) =>
               data-block-id="home-testimonial"
               data-block-role="title"
             >
-              {defaultContent.title}
+              <DynamicText text={defaultContent.title} />
             </h3>
             <p
               className="text-muted-foreground mb-4 leading-relaxed"
               data-block-id="home-testimonial"
               data-block-role="description"
             >
-              {defaultContent.description}
+              <DynamicText text={defaultContent.description} />
             </p>
 
             <div
@@ -52,7 +53,9 @@ const TestimonialSection = ({ initialBlocks = [] }: { initialBlocks: any[] }) =>
               data-block-role="items"
             >
               {defaultContent.items.map(item => (
-                <div key={item}>- {item}</div>
+                <div key={item}>
+                  - <DynamicText text={item} />
+                </div>
               ))}
             </div>
           </div>

@@ -2,6 +2,7 @@ import Footer from '@/app/components/Footer';
 import Header from '@/app/components/Header';
 import servicePlanBg from '@/assets/service-plan-bg.jpg';
 import { getBaseUrl } from '@/lib/http';
+import { DynamicText } from '../components/DynamicI18nText';
 import PricingCard from './_renderPackage';
 
 type ExtendedPackages = Packages & {
@@ -74,7 +75,9 @@ const ServicePlan = async () => {
       {/* Hero Section */}
       <section className="relative pt-32 pb-16 bg-cover bg-center" style={{ backgroundImage: `url(${servicePlanBg})` }}>
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-primary mb-2">服務計劃</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-primary mb-2">
+            <DynamicText text="服務計劃" />
+          </h1>
           <p className="text-lg text-primary/80">Service plan</p>
         </div>
       </section>

@@ -8,6 +8,8 @@ import Link from '@/app/components/Link';
 import 'slick-carousel/slick/slick-theme.css';
 // oxlint-disable-next-line import/no-unassigned-import
 import 'slick-carousel/slick/slick.css';
+import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
+import { DynamicText } from '../DynamicI18nText';
 
 type BlockBase = {
   id: string;
@@ -37,6 +39,8 @@ function RenderBlock({ block, hasIframe: _hasIframe, seq }: { block: HeroBlock; 
     paddingTop: '8rem',
     paddingBottom: '8rem'
   };
+  const blockTitle = useBatchTranslation(block.title);
+  const titleSecondary = useBatchTranslation(block.titleSecondary);
 
   return (
     <section className="relative flex-1" style={sectionStyle}>
@@ -57,7 +61,7 @@ function RenderBlock({ block, hasIframe: _hasIframe, seq }: { block: HeroBlock; 
             data-block-role="title"
             className="text-4xl md:text-5xl font-bold text-white mb-4 whitespace-pre-line"
             style={block.titleStyle}
-            dangerouslySetInnerHTML={{ __html: block.title }}
+            dangerouslySetInnerHTML={{ __html: blockTitle }}
           />
           <h2
             data-block-id={block.id}
@@ -65,10 +69,10 @@ function RenderBlock({ block, hasIframe: _hasIframe, seq }: { block: HeroBlock; 
             data-block-role="titleSecondary"
             className="text-4xl md:text-5xl font-bold text-white mb-6"
             style={block.titleSecondaryStyle}
-            dangerouslySetInnerHTML={{ __html: block.titleSecondary }}
+            dangerouslySetInnerHTML={{ __html: titleSecondary }}
           />
           <p data-block-id={block.id} data-block-seq={seq} data-block-role="subtitle" style={block.subtitleStyle}>
-            {block.subtitle}
+            <DynamicText text={block.subtitle} />
           </p>
           {block.buttonText && block.buttonLink ? (
             <Link href={block.buttonLink}>
@@ -80,7 +84,7 @@ function RenderBlock({ block, hasIframe: _hasIframe, seq }: { block: HeroBlock; 
                 size="lg"
                 style={block.buttonStyle}
               >
-                {block.buttonText}
+                <DynamicText text={block.buttonText} />
               </Button>
             </Link>
           ) : null}

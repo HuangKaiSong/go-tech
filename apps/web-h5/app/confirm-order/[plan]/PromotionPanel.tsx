@@ -1,5 +1,7 @@
 import { Button, Input } from '@go-tech-frontend/ui';
+import { DynamicText } from '@/app/components/DynamicI18nText';
 import { type PromotionOption, getPromotionDiscount } from '@/app/constants/promotion';
+import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 
 interface PromotionPanelProps {
   applying: boolean;
@@ -27,7 +29,9 @@ export const PromotionPanel = ({
     <div className="bg-white rounded-lg border border-border p-6 mb-6">
       <div className="flex items-center gap-3 mb-4">
         <div className="w-1 h-6 bg-primary rounded-full" />
-        <h3 className="text-lg font-bold text-gray-700">優惠活動</h3>
+        <h3 className="text-lg font-bold text-gray-700">
+          <DynamicText text="優惠活動" />
+        </h3>
       </div>
 
       {promotions.length > 0 ? (
@@ -51,9 +55,13 @@ export const PromotionPanel = ({
                     className="w-4 h-4 text-primary focus:ring-primary"
                   />
                   <div>
-                    <p className="text-sm font-medium text-gray-700">{promotion.promotionName}</p>
+                    <p className="text-sm font-medium text-gray-700">
+                      <DynamicText text={promotion.promotionName} />
+                    </p>
                     {promotion.promotionDesc && (
-                      <p className="text-xs text-muted-foreground">{promotion.promotionDesc}</p>
+                      <p className="text-xs text-muted-foreground">
+                        <DynamicText text={promotion.promotionDesc} />
+                      </p>
                     )}
                   </div>
                 </div>
@@ -73,11 +81,15 @@ export const PromotionPanel = ({
               onChange={() => onSelect(null)}
               className="w-4 h-4 text-primary focus:ring-primary"
             />
-            <span className="text-sm text-gray-700">不使用優惠</span>
+            <span className="text-sm text-gray-700">
+              <DynamicText text="不使用優惠" />
+            </span>
           </label>
         </div>
       ) : (
-        <p className="text-sm text-muted-foreground">該套餐暫無可用優惠活動</p>
+        <p className="text-sm text-muted-foreground">
+          <DynamicText text="該套餐暫無可用優惠活動" />
+        </p>
       )}
 
       {/* 优惠码 */}
@@ -85,7 +97,7 @@ export const PromotionPanel = ({
         <Input
           value={code}
           onChange={e => onCodeChange(e.target.value)}
-          placeholder="輸入優惠碼"
+          placeholder={useBatchTranslation('輸入優惠碼')}
           className="h-10 flex-1"
           onKeyDown={e => {
             if (e.key === 'Enter') {
@@ -100,7 +112,7 @@ export const PromotionPanel = ({
           disabled={applying}
           onClick={onApply}
         >
-          {applying ? '驗證中...' : '使用優惠碼'}
+          {applying ? <DynamicText text="驗證中..." /> : <DynamicText text="使用優惠碼" />}
         </Button>
       </div>
     </div>

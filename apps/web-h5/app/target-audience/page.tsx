@@ -4,6 +4,7 @@ import { audiences } from '@/app/components/blockDefaults';
 import Footer from '@/app/components/Footer';
 import Header from '@/app/components/Header';
 import { defaultTargetAudience } from '../components/blockDefaults';
+import { DynamicText } from '../components/DynamicI18nText';
 import HeroSection from '../components/HeroSection';
 import { loadPageBlocks } from '../lib/pageBlocks';
 
@@ -111,7 +112,9 @@ const TargetAudience = async () => {
                 className="bg-background rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 <div className="bg-primary py-3 px-4">
-                  <h3 className="text-primary-foreground font-semibold text-center">{audience.title}</h3>
+                  <h3 className="text-primary-foreground font-semibold text-center">
+                    <DynamicText text={audience.title} />
+                  </h3>
                 </div>
                 <div className="h-48 overflow-hidden relative">
                   <Image
@@ -123,7 +126,9 @@ const TargetAudience = async () => {
                   />
                 </div>
                 <div className="p-6">
-                  <p className="text-muted-foreground text-sm leading-relaxed">✓ {audience.description}</p>
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    ✓ <DynamicText text={audience.description} />
+                  </p>
                   <div className="flex justify-center mt-6">
                     <ChevronDown className="w-6 h-6 text-primary animate-bounce" />
                   </div>
@@ -144,11 +149,17 @@ const TargetAudience = async () => {
                   <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
                     <span className="text-primary-foreground font-bold">{feature.number}</span>
                   </div>
-                  <h3 className="text-lg md:text-xl font-bold text-primary">{feature.title}</h3>
+                  <h3 className="text-lg md:text-xl font-bold text-primary">
+                    <DynamicText text={feature.title} />
+                  </h3>
                 </div>
                 <div className="pl-14 space-y-3">
-                  <p className="text-muted-foreground text-sm leading-relaxed">{feature.description}</p>
-                  <p className="text-muted-foreground text-sm leading-relaxed">{feature.subDescription}</p>
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    <DynamicText text={feature.description} />
+                  </p>
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    <DynamicText text={feature.subDescription} />
+                  </p>
                 </div>
               </div>
             ))}
@@ -165,19 +176,29 @@ const TargetAudience = async () => {
             >
               <thead>
                 <tr>
-                  <th className="p-4 text-left font-semibold text-foreground bg-muted">管理環節</th>
-                  <th className="p-4 text-left font-semibold text-primary-foreground bg-primary">沒有系統的傳統方式</th>
+                  <th className="p-4 text-left font-semibold text-foreground bg-muted">
+                    <DynamicText text="管理環節" />
+                  </th>
+                  <th className="p-4 text-left font-semibold text-primary-foreground bg-primary">
+                    <DynamicText text="沒有系統的傳統方式" />
+                  </th>
                   <th className="p-4 text-left font-semibold text-primary-foreground bg-primary/80">
-                    使用物業管理系統
+                    <DynamicText text="使用物業管理系統" />
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {comparisonData.map((row, index) => (
                   <tr key={index} className="border-t border-border">
-                    <td className="p-4 font-medium text-foreground bg-muted">{row.category}</td>
-                    <td className="p-4 text-sm text-muted-foreground">{row.traditional}</td>
-                    <td className="p-4 text-sm text-muted-foreground bg-primary/5">{row.system}</td>
+                    <td className="p-4 font-medium text-foreground bg-muted">
+                      <DynamicText text={row.category} />
+                    </td>
+                    <td className="p-4 text-sm text-muted-foreground">
+                      <DynamicText text={row.traditional} />
+                    </td>
+                    <td className="p-4 text-sm text-muted-foreground bg-primary/5">
+                      <DynamicText text={row.system} />
+                    </td>
                   </tr>
                 ))}
               </tbody>

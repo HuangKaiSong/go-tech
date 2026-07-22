@@ -5,6 +5,7 @@ import { Button } from '@go-tech/web-ui';
 import { LogIn, UserPlus, X } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import Link from '@/app/components/Link';
 import authBackground from '@/assets/auth-background.jpg';
 // import { useState } from "react";
@@ -20,6 +21,7 @@ const Logo = () => (
 );
 
 const AcceptInvite = () => {
+  const t = useTranslations('Account');
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -73,10 +75,11 @@ const AcceptInvite = () => {
         {step === 'choose' && (
           <div className="space-y-6">
             <div className="text-center">
-              <h1 className="text-2xl font-bold text-foreground mb-2">接受邀請</h1>
-              <p className="text-sm text-muted-foreground">您已被邀請加入 Go Techs 系統</p>
+              <h1 className="text-2xl font-bold text-foreground mb-2">{t('inviteTitle')}</h1>
+              <p className="text-sm text-muted-foreground">{t('inviteDesc')}</p>
               <p className="text-sm text-muted-foreground mt-1">
-                邀請郵箱：<span className="font-medium text-foreground">{email}</span>
+                {t('inviteEmailLabel')}
+                <span className="font-medium text-foreground">{email}</span>
               </p>
             </div>
 
@@ -88,11 +91,11 @@ const AcceptInvite = () => {
                 className="w-full h-14 text-lg font-semibold"
               >
                 <UserPlus className="w-5 h-5 mr-2" />
-                註冊新帳戶
+                {t('registerNew')}
               </Button>
               <div className="relative flex items-center justify-center">
                 <div className="border-t border-border flex-1" />
-                <span className="px-3 text-sm text-muted-foreground bg-background">或</span>
+                <span className="px-3 text-sm text-muted-foreground bg-background">{t('or')}</span>
                 <div className="border-t border-border flex-1" />
               </div>
               <Button
@@ -103,7 +106,7 @@ const AcceptInvite = () => {
                 className="w-full h-14 text-lg font-semibold"
               >
                 <LogIn className="w-5 h-5 mr-2" />
-                已有帳戶，登錄接受
+                {t('haveAccountAccept')}
               </Button>
             </div>
           </div>

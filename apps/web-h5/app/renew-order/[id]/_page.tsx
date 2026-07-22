@@ -19,6 +19,7 @@ import { ArrowLeft, CheckCircle, Clock, CreditCard, Package, RefreshCw, Settings
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
+import { DynamicText } from '@/app/components/DynamicI18nText';
 import Footer from '@/app/components/Footer';
 import Header from '@/app/components/Header';
 import Link from '@/app/components/Link';
@@ -64,7 +65,9 @@ const RenewPromotionCard = ({
   return (
     <Card>
       <CardHeader>
-        <h2 className="text-lg font-bold">優惠活動</h2>
+        <h2 className="text-lg font-bold">
+          <DynamicText text="優惠活動" />
+        </h2>
       </CardHeader>
       <CardContent>
         {promotions.length > 0 ? (
@@ -87,9 +90,13 @@ const RenewPromotionCard = ({
                   <div className="flex items-center gap-3">
                     <RadioGroupItem value={String(promotion.promotionId)} id={`promo-${promotion.promotionId}`} />
                     <Label htmlFor={`promo-${promotion.promotionId}`} className="cursor-pointer">
-                      <span className="font-medium">{promotion.promotionName}</span>
+                      <span className="font-medium">
+                        <DynamicText text={promotion.promotionName} />
+                      </span>
                       {promotion.promotionDesc && (
-                        <span className="block text-xs text-muted-foreground">{promotion.promotionDesc}</span>
+                        <span className="block text-xs text-muted-foreground">
+                          <DynamicText text={promotion.promotionDesc} />
+                        </span>
                       )}
                     </Label>
                   </div>
@@ -105,12 +112,14 @@ const RenewPromotionCard = ({
             >
               <RadioGroupItem value="none" id="promo-none" />
               <Label htmlFor="promo-none" className="cursor-pointer">
-                不使用優惠
+                <DynamicText text="不使用優惠" />
               </Label>
             </div>
           </RadioGroup>
         ) : (
-          <p className="text-sm text-muted-foreground">該套餐暫無可用優惠活動</p>
+          <p className="text-sm text-muted-foreground">
+            <DynamicText text="該套餐暫無可用優惠活動" />
+          </p>
         )}
 
         {/* 优惠码 */}
@@ -128,7 +137,7 @@ const RenewPromotionCard = ({
             }}
           />
           <Button variant="outline" className="h-10" disabled={applying} onClick={onApply}>
-            {applying ? '驗證中...' : '使用優惠碼'}
+            {applying ? <DynamicText text="驗證中..." /> : <DynamicText text="使用優惠碼" />}
           </Button>
         </div>
       </CardContent>
@@ -160,10 +169,16 @@ const RenewOrder = ({
         <section className="pt-32 pb-16">
           <div className="container mx-auto px-4 text-center">
             <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h1 className="text-2xl font-bold mb-4">找不到訂單</h1>
-            <p className="text-muted-foreground mb-6">該訂單不存在或已被刪除</p>
+            <h1 className="text-2xl font-bold mb-4">
+              <DynamicText text="找不到訂單" />
+            </h1>
+            <p className="text-muted-foreground mb-6">
+              <DynamicText text="該訂單不存在或已被刪除" />
+            </p>
             <Link href="/my-orders">
-              <Button>返回我的訂單</Button>
+              <Button>
+                <DynamicText text="返回我的訂單" />
+              </Button>
             </Link>
           </div>
         </section>
@@ -367,13 +382,18 @@ const RenewOrder = ({
             className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
-            返回
+            <DynamicText text="返回" />
           </button>
           <div className="flex items-center gap-3">
             <RefreshCw className="w-10 h-10 text-primary" />
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-primary">續費套餐</h1>
-              <p className="text-muted-foreground">訂單編號：{order.id}</p>
+              <h1 className="text-3xl md:text-4xl font-bold text-primary">
+                <DynamicText text="續費套餐" />
+              </h1>
+              <p className="text-muted-foreground">
+                <DynamicText text="訂單編號：" />
+                {order.id}
+              </p>
             </div>
           </div>
         </div>
@@ -394,17 +414,22 @@ const RenewOrder = ({
                     <div>
                       <h2 className="text-xl font-bold">{order.packageName}</h2>
                       <p className="text-sm text-muted-foreground">
-                        最多可創建{order.platformPackageDto?.unitCount}個單位
+                        <DynamicText text={`最多可創建${order.platformPackageDto?.unitCount}個單位`} />
                       </p>
                     </div>
                   </div>
-                  <Badge className="bg-green-500/10 text-green-600 border-green-200">使用中</Badge>
+                  <Badge className="bg-green-500/10 text-green-600 border-green-200">
+                    <DynamicText text="使用中" />
+                  </Badge>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
                   <Clock className="w-4 h-4" />
-                  <span>當前到期日：{order.expireDate}</span>
+                  <span>
+                    <DynamicText text="當前到期日：" />
+                    {order.expireDate}
+                  </span>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                   {order.platformPackageDto?.packageItemList?.map((feature: any) => {
@@ -416,7 +441,9 @@ const RenewOrder = ({
                             <use href={`#icon-${feature.menuIcon}`} xlinkHref={`#icon-${feature.menuIcon}`} />
                           </svg>
                         )}
-                        <span className="text-xs">{feature.menuTitle}</span>
+                        <span className="text-xs">
+                          <DynamicText text={feature.menuTitle} />
+                        </span>
                       </div>
                     );
                   })}
@@ -428,7 +455,9 @@ const RenewOrder = ({
             {addService.length > 0 && (
               <Card>
                 <CardHeader>
-                  <h2 className="text-lg font-bold">增值服務</h2>
+                  <h2 className="text-lg font-bold">
+                    <DynamicText text="增值服務" />
+                  </h2>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
@@ -438,10 +467,14 @@ const RenewOrder = ({
                           key={service.itemCode}
                           className="flex items-center justify-between py-3 border-b border-border last:border-0"
                         >
-                          <span className="text-sm text-gray-700">{service.itemName}</span>
+                          <span className="text-sm text-gray-700">
+                            <DynamicText text={service.itemName as string} />
+                          </span>
                           <div className="flex items-center gap-8">
                             <span className="text-sm font-medium">${service.amount}</span>
-                            <span className="text-sm text-muted-foreground">數量 {service.count}</span>
+                            <span className="text-sm text-muted-foreground">
+                              <DynamicText text="數量" /> {service.count}
+                            </span>
                           </div>
                         </div>
                       );
@@ -454,7 +487,9 @@ const RenewOrder = ({
             {/* 續費選項 */}
             <Card>
               <CardHeader>
-                <h2 className="text-lg font-bold">選擇續費時長</h2>
+                <h2 className="text-lg font-bold">
+                  <DynamicText text="選擇續費時長" />
+                </h2>
               </CardHeader>
               <CardContent>
                 <RadioGroup value={selectedPeriod} onValueChange={setSelectedPeriod} className="space-y-3">
@@ -477,7 +512,9 @@ const RenewOrder = ({
                         <div className="flex items-center gap-3">
                           <RadioGroupItem value={option.id} id={option.id} />
                           <Label htmlFor={option.id} className="cursor-pointer">
-                            <span className="font-medium">{option.label}</span>
+                            <span className="font-medium">
+                              <DynamicText text={option.label} />
+                            </span>
                             {option.id === 'custom' && (
                               <span className="ml-2 inline-flex items-center gap-2">
                                 <Input
@@ -492,12 +529,14 @@ const RenewOrder = ({
                                     setSelectedPeriod('custom');
                                   }}
                                 />
-                                <span className="text-sm">个月</span>
+                                <span className="text-sm">
+                                  <DynamicText text="个月" />
+                                </span>
                               </span>
                             )}
                             {option.discount > 0 && (
                               <Badge variant="secondary" className="ml-2 bg-red-100 text-red-600">
-                                省 {option.discount * 100}%
+                                <DynamicText text={`省${option.discount * 100}%`} />
                               </Badge>
                             )}
                           </Label>
@@ -532,12 +571,15 @@ const RenewOrder = ({
             {/* 價格明細 */}
             <Card>
               <CardHeader>
-                <h2 className="text-lg font-bold">價格明細</h2>
+                <h2 className="text-lg font-bold">
+                  <DynamicText text="價格明細" />
+                </h2>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between items-center">
                   <span>
-                    {order.packageName} × {months}月
+                    {order.packageName} × {months}
+                    <DynamicText text="月" />
                   </span>
                   <span>${originalPrice.toLocaleString()}</span>
                 </div>
@@ -545,7 +587,7 @@ const RenewOrder = ({
                   addService.map((addon: any) => (
                     <div key={addon.id} className="flex justify-between items-center pl-4">
                       <span className="text-sm">
-                        {addon.itemName} × {addon.count}
+                        <DynamicText text={addon.itemName} /> × {addon.count}
                       </span>
                       <span className="text-sm">${addon.price * months}</span>
                     </div>
@@ -553,14 +595,18 @@ const RenewOrder = ({
 
                 {discountAmount > 0 && (
                   <div className="flex justify-between items-center text-green-600">
-                    <span>時長優惠</span>
+                    <span>
+                      <DynamicText text="時長優惠" />
+                    </span>
                     <span>-${discountAmount.toLocaleString()}</span>
                   </div>
                 )}
 
                 {promotionDiscount > 0 && (
                   <div className="flex justify-between items-center text-green-600">
-                    <span>活動優惠</span>
+                    <span>
+                      <DynamicText text="活動優惠" />
+                    </span>
                     <span>-${promotionDiscount.toLocaleString()}</span>
                   </div>
                 )}
@@ -568,14 +614,16 @@ const RenewOrder = ({
                 <Separator />
 
                 <div className="flex justify-between items-center text-lg font-bold">
-                  <span>應付金額</span>
+                  <span>
+                    <DynamicText text="應付金額" />
+                  </span>
                   <span className="text-primary">${finalPrice.toLocaleString()}</span>
                 </div>
 
                 <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
                   <CheckCircle className="w-4 h-4 text-green-500" />
                   <span>
-                    預計續費後新到期日：
+                    <DynamicText text="預計續費後新到期日：" />
                     {newExpiry?.toISOString()?.split('T')?.[0]}
                   </span>
                 </div>
@@ -585,11 +633,11 @@ const RenewOrder = ({
             {/* 操作按鈕 */}
             <div className="flex flex-col sm:flex-row gap-4 justify-end">
               <Button variant="outline" onClick={() => router.back()}>
-                取消
+                <DynamicText text="取消" />
               </Button>
               <Button className="gap-2" onClick={handleConfirmPayment}>
                 <CreditCard className="w-4 h-4" />
-                確認續費
+                <DynamicText text="確認續費" />
               </Button>
             </div>
 
@@ -597,13 +645,17 @@ const RenewOrder = ({
             <Separator className="my-4" />
             <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border border-gray-300">
               <div>
-                <h3 className="font-medium">需要更多功能？</h3>
-                <p className="text-sm text-muted-foreground">探索其他套餐方案，找到最適合您的選擇</p>
+                <h3 className="font-medium">
+                  <DynamicText text="需要更多功能？" />
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  <DynamicText text="探索其他套餐方案，找到最適合您的選擇" />
+                </p>
               </div>
               <Link href="/service-plan">
                 <Button variant="outline" className="gap-2">
                   <Package className="w-4 h-4" />
-                  購買新套餐
+                  <DynamicText text="購買新套餐" />
                 </Button>
               </Link>
             </div>

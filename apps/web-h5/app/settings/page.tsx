@@ -20,6 +20,8 @@ import { useState } from 'react';
 import Footer from '@/app/components/Footer';
 import Header from '@/app/components/Header';
 import { useAuth } from '@/contexts/AuthContext';
+import { DynamicText } from '../components/DynamicI18nText';
+import { useBatchTranslation } from '../hooks/useBatchTranslation';
 
 const Settings = ({ token, user }: any) => {
   const { setUser } = useAuth();
@@ -183,10 +185,14 @@ const Settings = ({ token, user }: any) => {
             className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
-            返回
+            <DynamicText text="返回" />
           </button>
-          <h1 className="text-3xl md:text-4xl font-bold text-primary">帳戶設定</h1>
-          <p className="text-muted-foreground mt-2">管理您的個人資料與安全設定</p>
+          <h1 className="text-3xl md:text-4xl font-bold text-primary">
+            <DynamicText text="帳戶設定" />
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            <DynamicText text="管理您的個人資料與安全設定" />
+          </p>
         </div>
       </section>
 
@@ -198,11 +204,11 @@ const Settings = ({ token, user }: any) => {
               <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="profile" className="gap-2">
                   <User className="w-4 h-4" />
-                  個人資料
+                  <DynamicText text="個人資料" />
                 </TabsTrigger>
                 <TabsTrigger value="password" className="gap-2">
                   <Lock className="w-4 h-4" />
-                  修改密碼
+                  <DynamicText text="修改密碼" />
                 </TabsTrigger>
               </TabsList>
 
@@ -212,7 +218,7 @@ const Settings = ({ token, user }: any) => {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <User className="w-5 h-5 text-primary" />
-                      個人資料
+                      <DynamicText text="個人資料" />
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -220,11 +226,11 @@ const Settings = ({ token, user }: any) => {
                       <div className="space-y-2">
                         <label className="text-sm font-medium flex items-center gap-1">
                           <span className="text-destructive">*</span>
-                          姓名
+                          <DynamicText text="姓名" />
                         </label>
                         <Input
                           type="text"
-                          placeholder="請輸入您的姓名"
+                          placeholder={useBatchTranslation('請輸入您的姓名')}
                           value={profileData.custName}
                           onChange={handleProfileChange('custName')}
                           className="h-12"
@@ -234,11 +240,11 @@ const Settings = ({ token, user }: any) => {
                       <div className="space-y-2">
                         <label className="text-sm font-medium flex items-center gap-1">
                           <span className="text-destructive">*</span>
-                          電子郵箱
+                          <DynamicText text="電子郵箱" />
                         </label>
                         <Input
                           type="email"
-                          placeholder="請輸入您的電子郵箱"
+                          placeholder={useBatchTranslation('請輸入您的電子郵箱')}
                           value={profileData.email}
                           onChange={handleProfileChange('email')}
                           className="h-12"
@@ -248,11 +254,11 @@ const Settings = ({ token, user }: any) => {
                       <div className="space-y-2">
                         <label className="text-sm font-medium flex items-center gap-1">
                           <span className="text-destructive">*</span>
-                          聯繫電話
+                          <DynamicText text="聯繫電話" />
                         </label>
                         <Input
                           type="tel"
-                          placeholder="請輸入您的聯繫電話"
+                          placeholder={useBatchTranslation('請輸入您的聯繫電話')}
                           value={profileData.phone}
                           onChange={handleProfileChange('phone')}
                           className="h-12"
@@ -260,10 +266,12 @@ const Settings = ({ token, user }: any) => {
                       </div>
 
                       <div className="space-y-2">
-                        <label className="text-sm font-medium">公司名稱</label>
+                        <label className="text-sm font-medium">
+                          <DynamicText text="公司名稱" />
+                        </label>
                         <Input
                           type="text"
-                          placeholder="請輸入您的公司名稱"
+                          placeholder={useBatchTranslation('請輸入您的公司名稱')}
                           value={profileData.companyName}
                           onChange={handleProfileChange('companyName')}
                           className="h-12"
@@ -273,7 +281,7 @@ const Settings = ({ token, user }: any) => {
                       <Separator className="my-6" />
 
                       <Button type="submit" disabled={isProfileLoading} className="w-full h-12 text-base font-semibold">
-                        {isProfileLoading ? '保存中...' : '保存修改'}
+                        {isProfileLoading ? <DynamicText text="保存中..." /> : <DynamicText text="保存修改" />}
                       </Button>
                     </form>
                   </CardContent>
@@ -286,7 +294,7 @@ const Settings = ({ token, user }: any) => {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Lock className="w-5 h-5 text-primary" />
-                      修改密碼
+                      <DynamicText text="修改密碼" />
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -294,12 +302,12 @@ const Settings = ({ token, user }: any) => {
                       <div className="space-y-2">
                         <label className="text-sm font-medium flex items-center gap-1">
                           <span className="text-destructive">*</span>
-                          當前密碼
+                          <DynamicText text="當前密碼" />
                         </label>
                         <div className="relative">
                           <Input
                             type={showCurrentPassword ? 'text' : 'password'}
-                            placeholder="請輸入當前密碼"
+                            placeholder={useBatchTranslation('請輸入當前密碼')}
                             value={passwordData.currentPassword}
                             onChange={handlePasswordChange('currentPassword')}
                             className="h-12 pr-12"
@@ -317,12 +325,12 @@ const Settings = ({ token, user }: any) => {
                       <div className="space-y-2">
                         <label className="text-sm font-medium flex items-center gap-1">
                           <span className="text-destructive">*</span>
-                          新密碼
+                          <DynamicText text="新密碼" />
                         </label>
                         <div className="relative">
                           <Input
                             type={showNewPassword ? 'text' : 'password'}
-                            placeholder="請輸入新密碼（至少6個字符）"
+                            placeholder={useBatchTranslation('請輸入新密碼（至少6個字符）')}
                             value={passwordData.newPassword}
                             onChange={handlePasswordChange('newPassword')}
                             className="h-12 pr-12"
@@ -340,12 +348,12 @@ const Settings = ({ token, user }: any) => {
                       <div className="space-y-2">
                         <label className="text-sm font-medium flex items-center gap-1">
                           <span className="text-destructive">*</span>
-                          確認新密碼
+                          <DynamicText text="確認新密碼" />
                         </label>
                         <div className="relative">
                           <Input
                             type={showConfirmPassword ? 'text' : 'password'}
-                            placeholder="請再次輸入新密碼"
+                            placeholder={useBatchTranslation('請再次輸入新密碼')}
                             value={passwordData.confirmPassword}
                             onChange={handlePasswordChange('confirmPassword')}
                             className="h-12 pr-12"
@@ -361,10 +369,16 @@ const Settings = ({ token, user }: any) => {
                       </div>
 
                       <div className="bg-muted/50 rounded-lg p-4 text-sm text-muted-foreground">
-                        <p className="font-medium mb-2">密碼要求：</p>
+                        <p className="font-medium mb-2">
+                          <DynamicText text="密碼要求：" />
+                        </p>
                         <ul className="list-disc list-inside space-y-1">
-                          <li>至少6個字符</li>
-                          <li>建議包含大小寫字母和數字</li>
+                          <li>
+                            <DynamicText text="至少6個字符" />
+                          </li>
+                          <li>
+                            <DynamicText text="建議包含大小寫字母和數字" />
+                          </li>
                         </ul>
                       </div>
 
@@ -375,7 +389,7 @@ const Settings = ({ token, user }: any) => {
                         disabled={isPasswordLoading}
                         className="w-full h-12 text-base font-semibold"
                       >
-                        {isPasswordLoading ? '修改中...' : '確認修改密碼'}
+                        {isPasswordLoading ? <DynamicText text="修改中..." /> : <DynamicText text="確認修改密碼" />}
                       </Button>
                     </form>
                   </CardContent>

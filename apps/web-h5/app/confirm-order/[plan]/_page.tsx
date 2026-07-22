@@ -7,8 +7,10 @@ import { FileCheck } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
+import { DynamicText } from '@/app/components/DynamicI18nText';
 import valueAddedServices from '@/app/constants/addedServices';
 import { type PromotionOption } from '@/app/constants/promotion';
+import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 import { usePromotions } from '@/app/hooks/usePromotions';
 import servicePlanBg from '@/assets/service-plan-bg.jpg';
 import { useAuth } from '@/contexts/AuthContext';
@@ -307,7 +309,9 @@ const ConfirmOrder = ({
       {/* Hero Section */}
       <section className="relative pt-32 pb-16 bg-cover bg-center" style={{ backgroundImage: `url(${servicePlanBg})` }}>
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-primary mb-2">套餐確認</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-primary mb-2">
+            <DynamicText text="套餐確認" />
+          </h1>
         </div>
       </section>
 
@@ -316,13 +320,15 @@ const ConfirmOrder = ({
         <div className="container mx-auto px-4 max-w-5xl">
           {/* Notice */}
           <p className="text-center text-sm text-muted-foreground mb-6">
-            ! 為確保您的發票有效，請提供與貴公司營業登記相符的公司名稱，如需修改請點擊修改按鈕
+            <DynamicText text="! 為確保您的發票有效，請提供與貴公司營業登記相符的公司名稱，如需修改請點擊修改按鈕" />
           </p>
 
           <div className="bg-white rounded-lg border border-border p-6 mb-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-1 h-6 bg-primary rounded-full" />
-              <h2 className="text-lg font-bold text-gray-700">時長</h2>
+              <h2 className="text-lg font-bold text-gray-700">
+                <DynamicText text="時長" />
+              </h2>
             </div>
 
             <div className="flex flex-row items-center gap-2">
@@ -333,7 +339,9 @@ const ConfirmOrder = ({
                 onChange={e => setMonth(Number(e.target.value))}
                 className="h-9"
               />
-              <div className="text-lg">月</div>
+              <div className="text-lg">
+                <DynamicText text="月" />
+              </div>
             </div>
           </div>
 
@@ -343,7 +351,9 @@ const ConfirmOrder = ({
               <div className="flex items-center gap-3">
                 <div className="w-1 h-8 bg-primary rounded-full mt-1" />
                 <div>
-                  <h2 className="text-xl font-bold text-gray-700">{selectedPlan?.packageName}</h2>
+                  <h2 className="text-xl font-bold text-gray-700">
+                    <DynamicText text={selectedPlan?.packageName as string} />{' '}
+                  </h2>
                 </div>
               </div>
               <div className="text-right">
@@ -354,12 +364,18 @@ const ConfirmOrder = ({
 
             <div className="mb-4">
               <div className="flex gap-4 mb-4">
-                <span className="text-sm font-medium text-muted-foreground min-w-15">套餐内容</span>
-                <span className="text-sm text-gray-700">最多可創建{selectedPlan?.unitCount}個單位</span>
+                <span className="text-sm font-medium text-muted-foreground min-w-15">
+                  <DynamicText text="套餐内容" />
+                </span>
+                <span className="text-sm text-gray-700">
+                  <DynamicText text={`最多可創建${selectedPlan?.unitCount}個單位`} />
+                </span>
               </div>
 
               <div className="flex gap-4">
-                <span className="text-sm font-medium text-muted-foreground min-w-15">包含功能</span>
+                <span className="text-sm font-medium text-muted-foreground min-w-15">
+                  <DynamicText text="包含功能" />
+                </span>
                 <div className="flex flex-wrap gap-2">
                   {selectedPlan?.packageItemList?.map((feature, index) => (
                     <div
@@ -372,7 +388,9 @@ const ConfirmOrder = ({
                           <use href={`#icon-${feature.menuIcon}`} xlinkHref={`#icon-${feature.menuIcon}`} />
                         </svg>
                       )}
-                      <span>{feature.menuTitle}</span>
+                      <span>
+                        <DynamicText text={feature.menuTitle} />
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -385,7 +403,9 @@ const ConfirmOrder = ({
             <div className="bg-white rounded-lg border border-border p-6 mb-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-1 h-6 bg-primary rounded-full" />
-                <h3 className="text-lg font-bold text-gray-700">增值服務</h3>
+                <h3 className="text-lg font-bold text-gray-700">
+                  <DynamicText text="增值服務" />
+                </h3>
               </div>
 
               <div className="space-y-3">
@@ -400,10 +420,14 @@ const ConfirmOrder = ({
                       key={serviceId}
                       className="flex items-center justify-between py-3 border-b border-border last:border-0"
                     >
-                      <span className="text-sm text-gray-700">{service.name}</span>
+                      <span className="text-sm text-gray-700">
+                        <DynamicText text={service.name} />
+                      </span>
                       <div className="flex items-center gap-8">
                         <span className="text-sm font-medium">${subTotalPrice}</span>
-                        <span className="text-sm text-muted-foreground">數量 {quantity}</span>
+                        <span className="text-sm text-muted-foreground">
+                          <DynamicText text="數量" /> {quantity}
+                        </span>
                       </div>
                     </div>
                   );
@@ -435,22 +459,29 @@ const ConfirmOrder = ({
           <div className="bg-white rounded-lg border border-border p-6 mb-8">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-1 h-6 bg-primary rounded-full" />
-              <h2 className="text-lg font-bold text-foreground">發票信息</h2>
+              <h2 className="text-lg font-bold text-foreground">
+                <DynamicText text="發票信息" />
+              </h2>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <FileCheck className="w-5 h-5 text-primary" />
-                <span className="text-sm text-foreground">是否需要開具發票？</span>
+                <span className="text-sm text-foreground">
+                  <DynamicText text="是否需要開具發票？" />
+                </span>
               </div>
               <Switch checked={needInvoice} onCheckedChange={setNeedInvoice} />
             </div>
             {needInvoice && (
               <div className="mt-4 space-y-1">
-                <Label className="text-sm text-muted-foreground">發票抬頭（公司或個人名稱）</Label>
+                <Label className="text-sm text-muted-foreground">
+                  <DynamicText text="發票抬頭（公司或個人名稱）" />
+                </Label>
                 <Input
                   value={invoiceName}
                   onChange={e => setInvoiceName(e.target.value)}
-                  placeholder="請輸入公司或個人名稱"
+                  // oxlint-disable-next-line react-hooks/rules-of-hooks
+                  placeholder={useBatchTranslation('請輸入公司或個人名稱')}
                   className="h-9"
                 />
               </div>
@@ -464,10 +495,10 @@ const ConfirmOrder = ({
               onClick={handleGoBack}
               className="min-w-45 h-12 text-primary border-primary hover:bg-primary/5"
             >
-              上一步
+              <DynamicText text="上一步" />
             </Button>
             <Button onClick={handleConfirmPayment} className="min-w-45 h-12">
-              確認支付
+              <DynamicText text="確認支付" />
             </Button>
           </div>
         </div>

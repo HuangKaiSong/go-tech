@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { audiences } from '@/app/components/blockDefaults';
 import Link from '@/app/components/Link';
 import { useIframeContext } from '@/contexts/IframeContext';
+import { DynamicText } from './DynamicI18nText';
 
 const TargetAudienceSection = ({ initialBlocks }: { initialBlocks?: any[] }) => {
   const { hasIframe } = useIframeContext();
@@ -22,7 +23,7 @@ const TargetAudienceSection = ({ initialBlocks }: { initialBlocks?: any[] }) => 
           <h2 className="text-2xl font-bold text-foreground">適合人群/Target Audience</h2>
           <Link href="/target-audience">
             <Button variant="default" size="sm">
-              查看更多
+              <DynamicText text="查看更多" />
             </Button>
           </Link>
         </div>
@@ -64,7 +65,7 @@ const TargetAudienceSection = ({ initialBlocks }: { initialBlocks?: any[] }) => 
                       data-block-role="title"
                       data-block-seq={audience.sort}
                     >
-                      {audience.title}
+                      <DynamicText text={audience.title} />
                     </h4>
                     <p
                       className="text-muted-foreground leading-relaxed"
@@ -72,7 +73,7 @@ const TargetAudienceSection = ({ initialBlocks }: { initialBlocks?: any[] }) => 
                       data-block-role="description"
                       data-block-seq={audience.sort}
                     >
-                      {audience.description}
+                      <DynamicText text={audience.description} />
                     </p>
                   </div>
                 </div>

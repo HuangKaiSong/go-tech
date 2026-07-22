@@ -1,0 +1,1873 @@
+{
+  "f8c881db6597c2b1a180cf3db900be827ebc533d": {
+    "source": "租務管理系統，一站式解決方案！",
+    "translations": {
+      "zh-cn": "租务管理系统，一站式解决方案！",
+      "en-us": "Rental Management System: A One-Stop Solution!",
+      "zh-hk": "租務管理系統，一站式解決方案！"
+    },
+    "updatedAt": 1784687401565
+  },
+  "570df785d3058cf5ed786ba527dde16ffce4376c": {
+    "source": "簡化流程，提高效率，讓您的租務管理更輕鬆！\n隨時隨地掌握租務動態，安心管理，省心生活。",
+    "translations": {
+      "zh-cn": "简化流程，提高效率，让您的租务管理更轻松！\n随时随地掌握租务动态，安心管理，省心生活。",
+      "en-us": "Streamline processes, boost efficiency, and make your rental management easier!\nStay on top of your rental properties anytime, anywhere—manage with confidence and enjoy peace of mind.",
+      "zh-hk": "簡化流程，提高效率，讓您的租務管理更輕鬆！\n隨時隨地掌握租務動態，安心管理，省心生活。"
+    },
+    "updatedAt": 1784687401565
+  },
+  "e92be382fcf032f7ea4809f5cc8d876b65661742": {
+    "source": "所有功能",
+    "translations": {
+      "en-us": "All Features"
+    },
+    "updatedAt": 1784606792305
+  },
+  "5054e1aa9eee34d6fd77709f7530ac0a7e8292dc": {
+    "source": "更全面更完善的功能，能夠更快捷方便管理你的物業。",
+    "translations": {
+      "en-us": "With more comprehensive and robust features, you can manage your property more quickly and conveniently."
+    },
+    "updatedAt": 1784606792305
+  },
+  "0bc12a02c308820bee4dd76b1619786b60a7d909": {
+    "source": "人事管理",
+    "translations": {
+      "en-us": "Human Resources Management",
+      "zh-cn": "人事管理",
+      "zh-hk": "人事管理"
+    },
+    "updatedAt": 1784629141646
+  },
+  "15a3ea956ef13edff6854cce5e21d2ac7944393d": {
+    "source": "場地管理",
+    "translations": {
+      "en-us": "Facility Management",
+      "zh-cn": "场地管理",
+      "zh-hk": "場地管理"
+    },
+    "updatedAt": 1784629141646
+  },
+  "e50b280b18094a82906469d26f3c6caee2a58706": {
+    "source": "租約管理",
+    "translations": {
+      "en-us": "Lease Management",
+      "zh-cn": "租约管理",
+      "zh-hk": "租約管理"
+    },
+    "updatedAt": 1784629141646
+  },
+  "b480f02609ac03637de6b7ee29bcf2b99724d71b": {
+    "source": "價格管理",
+    "translations": {
+      "en-us": "Pricing Management",
+      "zh-cn": "价格管理",
+      "zh-hk": "價格管理"
+    },
+    "updatedAt": 1784629141646
+  },
+  "86514ae0d6842691293a07dbb4c62f539daaf387": {
+    "source": "代理管理",
+    "translations": {
+      "en-us": "Agent Management",
+      "zh-cn": "代理管理",
+      "zh-hk": "代理管理"
+    },
+    "updatedAt": 1784629141646
+  },
+  "0e976b916adb5199d776f3bd631167e6e4b95946": {
+    "source": "單位管理",
+    "translations": {
+      "en-us": "Unit Management"
+    },
+    "updatedAt": 1784606792305
+  },
+  "c8b539f469e5b08d40bce0cffd8724b81b4301f8": {
+    "source": "營鋪模組",
+    "translations": {
+      "en-us": "Camp Module"
+    },
+    "updatedAt": 1784606792305
+  },
+  "05c6fe69ec9b7b937370edc6e71bd0b45bfeb00e": {
+    "source": "租金管理",
+    "translations": {
+      "en-us": "Rent Management"
+    },
+    "updatedAt": 1784606792305
+  },
+  "a4a5965b19f45795dad037ca6c136f69059a94e9": {
+    "source": "會計功能",
+    "translations": {
+      "en-us": "Accounting Functions",
+      "zh-cn": "会计功能",
+      "zh-hk": "會計功能"
+    },
+    "updatedAt": 1784629141646
+  },
+  "450056db2f2217aced7a959e33edfeb93e5e9a1b": {
+    "source": "收租發票",
+    "translations": {
+      "en-us": "Rent Receipt",
+      "zh-cn": "收租发票",
+      "zh-hk": "收租發票"
+    },
+    "updatedAt": 1784629141646
+  },
+  "0ed661c776410176f5f6ce45dcafa60a1aa082f4": {
+    "source": "快速續約功能",
+    "translations": {
+      "en-us": "Quick Renewal Feature"
+    },
+    "updatedAt": 1784606792305
+  },
+  "b024f5fa9a85736fe15f88089300ecd0484d471a": {
+    "source": "線上簽約功能",
+    "translations": {
+      "en-us": "Online Contract Signing Feature"
+    },
+    "updatedAt": 1784606792305
+  },
+  "9e58b62c13acda73da50a2544ca40e50859c9b62": {
+    "source": "低至：",
+    "translations": {
+      "en-us": "Starting at:",
+      "zh-cn": "低至：",
+      "zh-hk": "低至："
+    },
+    "updatedAt": 1784687401565
+  },
+  "c65e04438869ff99abfdbd84b47ba26d7f482e51": {
+    "source": "每年收費,年費收費",
+    "translations": {
+      "en-us": "Annual Fees, Annual Subscription Fees",
+      "zh-cn": "每年收费,年费收费",
+      "zh-hk": "每年收費,年費收費"
+    },
+    "updatedAt": 1784687401565
+  },
+  "92f2971c70b3ad0cdf5e2e0089c7c0e187a5ff44": {
+    "source": "普通版",
+    "translations": {
+      "en-us": "Standard Edition",
+      "zh-cn": "普通版",
+      "zh-hk": "普通版"
+    },
+    "updatedAt": 1784629141646
+  },
+  "9ec64fa7c72a2c87708e34c9a0b79b5e600bc968": {
+    "source": "升級版",
+    "translations": {
+      "en-us": "Upgraded Version",
+      "zh-cn": "升级版!",
+      "zh-hk": "升級版"
+    },
+    "updatedAt": 1784629141646
+  },
+  "cdcd6ea9f7d93e78160f03b79e29a6498ae4c9eb": {
+    "source": "豪華版",
+    "translations": {
+      "en-us": "Deluxe Edition",
+      "zh-cn": "豪华版",
+      "zh-hk": "豪華版"
+    },
+    "updatedAt": 1784629141646
+  },
+  "c0c78a429097b61cee65d0c7aa310f0e8429979b": {
+    "source": "了解更多",
+    "translations": {
+      "en-us": "Learn More",
+      "zh-cn": "了解更多",
+      "zh-hk": "瞭解更多"
+    },
+    "updatedAt": 1784687401565
+  },
+  "fec7e3cdce905681783d8d5cd01bb24291727a63": {
+    "source": "查看完整的定價方案",
+    "translations": {
+      "en-us": "View the full pricing plans",
+      "zh-cn": "查看完整的定价方案",
+      "zh-hk": "查看完整的定價方案~"
+    },
+    "updatedAt": 1784702491301
+  },
+  "b776d8ed5b0c155080a6f10003e76e19549d2964": {
+    "source": "立即開始14天免費試用",
+    "translations": {
+      "en-us": "Start Your 14-Day Free Trial Now",
+      "zh-cn": "立即开始14天免费试用",
+      "zh-hk": "立即開始14天免費試用"
+    },
+    "updatedAt": 1784687401565
+  },
+  "120b8697439af15f4f1bbad6120c6c83ae47c797": {
+    "source": "查看更多",
+    "translations": {
+      "en-us": "See More",
+      "zh-cn": "查看更多",
+      "zh-hk": "查看更多"
+    },
+    "updatedAt": 1784687401565
+  },
+  "ab807b11fbf9eab89adea115cf2c0f6cc6fb915c": {
+    "source": "擁有出租物業的個人業主",
+    "translations": {
+      "en-us": "Individual property owners with rental properties",
+      "zh-cn": "拥有出租物业的个人业主",
+      "zh-hk": "擁有出租物業的個人業主"
+    },
+    "updatedAt": 1784687401565
+  },
+  "a4e3ac21eaa6919ded957f2ce8c4c525e1262cf3": {
+    "source": "擁有多元物業組合的投資型業主",
+    "translations": {
+      "en-us": "Investor-owners with a diversified property portfolio",
+      "zh-cn": "拥有多元物业组合的投资型业主",
+      "zh-hk": "擁有多元物業組合的投資型業主"
+    },
+    "updatedAt": 1784687401565
+  },
+  "a8b3ce10391ff01c579d8f88d1bb6296aad2a153": {
+    "source": "地產物管集團",
+    "translations": {
+      "en-us": "Real Estate and Property Management Group",
+      "zh-cn": "地产物管集团",
+      "zh-hk": "地產物管集團"
+    },
+    "updatedAt": 1784687401565
+  },
+  "4e53c6eabeed8e91f92dccf9af6aa7b89fe52a0c": {
+    "source": "管理一至數個出租單位，需要處理租戶溝通、租金收取和維修訴求。",
+    "translations": {
+      "en-us": "Managing one or more rental units involves handling tenant communications, rent collection, and maintenance requests.",
+      "zh-cn": "管理一至数个出租单位，需要处理租户沟通、租金收取和维修诉求。",
+      "zh-hk": "管理一至數個出租單位，需要處理租户溝通、租金收取和維修訴求。"
+    },
+    "updatedAt": 1784687401565
+  },
+  "c0c05496ee461b2994fbc97c19c02c979d8aeaab": {
+    "source": "管理多個物業（住宅、商業或混合用途），需要追蹤不同物業的收入、支出和租賃狀況。",
+    "translations": {
+      "en-us": "Managing multiple properties (residential, commercial, or mixed-use) requires tracking the income, expenses, and leasing status of each property.",
+      "zh-cn": "管理多个物业（住宅、商业或混合用途），需要追踪不同物业的收入、支出和租赁状况。",
+      "zh-hk": "管理多個物業（住宅、商業或混合用途），需要追蹤不同物業的收入、支出和租賃狀況。"
+    },
+    "updatedAt": 1784687401565
+  },
+  "c2118186d1f4e2603031bec8f4110a9dfbd573bf": {
+    "source": "專為物業集團設計的智能管理平臺，打通從決策到服務的全鏈條，讓數據驅動運營、系統賦能團隊，實現降本增效與品質提升的一體化管理。",
+    "translations": {
+      "en-us": "A smart management platform designed specifically for property management groups that integrates the entire chain from decision-making to service delivery, enabling data-driven operations and empowering teams through the system to achieve integrated management that reduces costs, improves efficiency, and enhances quality.",
+      "zh-cn": "专为物业集团设计的智能管理平台，打通从决策到服务的全链条，让数据驱动运营、系统赋能团队，实现降本增效与品质提升的一体化管理。",
+      "zh-hk": "專為物業集團設計的智能管理平台，打通從決策到服務的全鏈條，讓數據驅動運營、系統賦能團隊，實現降本增效與品質提升的一體化管理。"
+    },
+    "updatedAt": 1784687401565
+  },
+  "b839224e8728f60a9bebc15db40c0b4fa68f9145": {
+    "source": "更標準，更高效的管理方式",
+    "translations": {
+      "en-us": "A more standardized and efficient management approach",
+      "zh-cn": "更标准，更高效的管理方式",
+      "zh-hk": "更標準，更高效的管理方式"
+    },
+    "updatedAt": 1784687401565
+  },
+  "8d7e6ef62a0fc27ee2c481c3b452e25dbe27bcb7": {
+    "source": "業務流程更規範、更專業，讓租務管理有章可循、執行一致。",
+    "translations": {
+      "en-us": "More standardized and professional business processes ensure that rental management follows established guidelines and is carried out consistently.",
+      "zh-cn": "业务流程更规范、更专业，让租务管理有章可循、执行一致。",
+      "zh-hk": "業務流程更規範、更專業，讓租務管理有章可循、執行一致。"
+    },
+    "updatedAt": 1784687401565
+  },
+  "600e81ac9459eaac89d096f1a41a40f9fc65a4c0": {
+    "source": "資訊集中與同步：所有物業、租約、收租、維修與文件資料統一管理，減少四處翻查與重複輸入。",
+    "translations": {
+      "en-us": "Centralized Information and Synchronization: Centralized management of all property, lease, rent collection, maintenance, and document information reduces the need to search through multiple sources and eliminates duplicate data entry.",
+      "zh-cn": "资讯集中与同步：所有物业、租约、收租、维修与文件资料统一管理，减少四处翻查与重复输入。",
+      "zh-hk": "資訊集中與同步：所有物業、租約、收租、維修與文件資料統一管理，減少四處翻查與重複輸入。"
+    },
+    "updatedAt": 1784687401565
+  },
+  "b2c605eab65abd54c150d6fc6c05ebff17e4c1a7": {
+    "source": "多終端使用：支援電腦與手機等多裝置操作，隨時查看與跟進。",
+    "translations": {
+      "en-us": "Multi-device access: Supports use on multiple devices, such as computers and smartphones, so you can view and follow up on tasks at any time.",
+      "zh-cn": "多终端使用：支援电脑与手机等多装置操作，随时查看与跟进。",
+      "zh-hk": "多終端使用：支援電腦與手機等多裝置操作，隨時查看與跟進。"
+    },
+    "updatedAt": 1784687401565
+  },
+  "0b42cb8812f4e73d0379fa41e889d5431dc073f7": {
+    "source": "節省人力成本：以清晰流程與集中管理減少人手投入，提升整體處理效率，讓租務管理更便捷、更高效。",
+    "translations": {
+      "en-us": "Reduce Labor Costs: By streamlining processes and centralizing management, we reduce the need for staff, improve overall processing efficiency, and make rental management more convenient and efficient.",
+      "zh-cn": "节省人力成本：以清晰流程与集中管理减少人手投入，提升整体处理效率，让租务管理更便捷、更高效。",
+      "zh-hk": "節省人力成本：以清晰流程與集中管理減少人手投入，提升整體處理效率，讓租務管理更便捷、更高效。"
+    },
+    "updatedAt": 1784687401565
+  },
+  "27017b42ab4dde2cc707a61bb59b5c05bcb32e35": {
+    "source": "專注 分間單位、套房、簡樸房 租務系統。",
+    "translations": {
+      "en-us": "Specializing in rental management systems for sublets, studio apartments, and basic accommodations.",
+      "zh-cn": "专注 分间单位、套房、简朴房 租务系统。",
+      "zh-hk": "專注 分間單位、套房、簡樸房 租務系統。"
+    },
+    "updatedAt": 1784687401565
+  },
+  "e5508192f3b52a75269be7a2c59f2b25d50c1c3a": {
+    "source": "完成登約只需 5 個步驟",
+    "translations": {
+      "zh-cn": "完成登约只需 5 个步骤",
+      "zh-hk": "完成登約只需 5 個步驟"
+    },
+    "updatedAt": 1784687401565
+  },
+  "d39314ef9a3e58ce87cabcc3732fd6b9618077e9": {
+    "source": "填寫表格",
+    "translations": {
+      "zh-cn": "填写表格",
+      "zh-hk": "填寫表格"
+    },
+    "updatedAt": 1784687401565
+  },
+  "5a2dfa5371c3d85fff315118b6b31cee2f86e18f": {
+    "source": "專人聯絡",
+    "translations": {
+      "zh-cn": "专人联络",
+      "zh-hk": "專人聯絡"
+    },
+    "updatedAt": 1784687401565
+  },
+  "4a9659ce0c8e37c7802112c440d14b62dd18e99b": {
+    "source": "開設帳戶",
+    "translations": {
+      "zh-cn": "开设帐户",
+      "zh-hk": "開設帳户"
+    },
+    "updatedAt": 1784687401565
+  },
+  "d070a76a97ef7492068a689324839d287023838e": {
+    "source": "完成付款",
+    "translations": {
+      "zh-cn": "完成付款",
+      "zh-hk": "完成付款"
+    },
+    "updatedAt": 1784687401565
+  },
+  "e85602184e329a27bad8e354e79993d6efb35c11": {
+    "source": "開始使用系統",
+    "translations": {
+      "zh-cn": "开始使用系统",
+      "zh-hk": "開始使用系統"
+    },
+    "updatedAt": 1784687401565
+  },
+  "20b88f52f10760e3849d795143f5e2258c87c8f2": {
+    "source": "越多物業，\n越易管理！",
+    "translations": {
+      "zh-cn": "越多物业，\n越易管理！",
+      "zh-hk": "越多物業，\n越易管理！"
+    },
+    "updatedAt": 1784687401565
+  },
+  "c7c2fa21687de33b6a2b1d012a2d1a683afcc4a7": {
+    "source": "GO-TECH租務系統",
+    "translations": {
+      "zh-cn": "GO-TECH租务系统",
+      "zh-hk": "GO-TECH租務系統"
+    },
+    "updatedAt": 1784687401565
+  },
+  "7dc30076646c7eb425a83b84c83e4c9fb7d03bf9": {
+    "source": "Target audience",
+    "translations": {
+      "zh-cn": "Target audience"
+    },
+    "updatedAt": 1784607893379
+  },
+  "7e9c90bc9683e811de347b245ca44342d2c4ec09": {
+    "source": "適合人群",
+    "translations": {
+      "zh-cn": "适合人群"
+    },
+    "updatedAt": 1784607893379
+  },
+  "7c840cb583103454fb0802ce369e1ba489567c63": {
+    "source": "節省時間和精力，徹底解放業主",
+    "translations": {
+      "zh-cn": "节省时间和精力，彻底解放业主"
+    },
+    "updatedAt": 1784607981874
+  },
+  "30cc6b72403ea20e9c08ef4a856f596c3de8374a": {
+    "source": "優化租務管理，提升出租效率",
+    "translations": {
+      "zh-cn": "优化租务管理，提升出租效率"
+    },
+    "updatedAt": 1784607981874
+  },
+  "1af150ba430b138f7aceed564b98395085824912": {
+    "source": "保障財務清晰，避免收益損失",
+    "translations": {
+      "zh-cn": "保障财务清晰，避免收益损失"
+    },
+    "updatedAt": 1784607981874
+  },
+  "eadc623725ca00e40800171aa3b0293760350248": {
+    "source": "簡化維修溝通，保持物業價值",
+    "translations": {
+      "zh-cn": "简化维修沟通，保持物业价值"
+    },
+    "updatedAt": 1784607981874
+  },
+  "70d20eed96503248922f28f1d91e812c784d56b5": {
+    "source": "降低風險，管理更合規",
+    "translations": {
+      "zh-cn": "降低风险，管理更合规"
+    },
+    "updatedAt": 1784607981874
+  },
+  "fec41d10943f6ad9461d9fe889e79ac0ab965082": {
+    "source": "一站式處理日常事務：賬單通知、收租跟進、維修安排、投訴與紀錄集中管理，減少重複溝通與分散操作。",
+    "translations": {
+      "zh-cn": "一站式处理日常事务：账单通知、收租跟进、维修安排、投诉与纪录集中管理，减少重复沟通与分散操作。"
+    },
+    "updatedAt": 1784607995384
+  },
+  "508d185683ca1d6592d0f15c0b3647c7ce4c0c93": {
+    "source": "狀況一目了然：快速掌握各物業入住、空置與租約狀態，便於統一部署與跟進。",
+    "translations": {
+      "zh-cn": "状况一目了然：快速掌握各物业入住、空置与租约状态，便于统一部署与跟进。"
+    },
+    "updatedAt": 1784607995384
+  },
+  "395211b7f6caa10f719015ac9128b0ce9ff43a93": {
+    "source": "收支有據可查：租金、按金、管理費等明細統一記錄，對賬更快捷。",
+    "translations": {
+      "zh-cn": "收支有据可查：租金、按金、管理费等明细统一记录，对账更快捷。"
+    },
+    "updatedAt": 1784607995384
+  },
+  "02a9a9f53dc8c8a6839d1bf582640408ed2629f5": {
+    "source": "維修流程更順暢：維修事項、相片與跟進紀錄集中整理，方便業主、租戶與師傅溝通。",
+    "translations": {
+      "zh-cn": "维修流程更顺畅：维修事项、相片与跟进纪录集中整理，方便业主、租户与师傅沟通。"
+    },
+    "updatedAt": 1784607995384
+  },
+  "75cd4fa4b616ac0230d09dc47741be8b8fb2ac8a": {
+    "source": "文件集中管理：合約、身份文件、收據等統一保存，查找方便、降低遺失風險。",
+    "translations": {
+      "zh-cn": "文件集中管理：合约、身份文件、收据等统一保存，查找方便、降低遗失风险。"
+    },
+    "updatedAt": 1784607995384
+  },
+  "a81a5965d1ada599b6e2577c5acdc81af994ff25": {
+    "source": "簡單易用：報表與資料隨時查看，手機／電腦皆可操作，讓忙碌業主亦能輕鬆管理出租事務。",
+    "translations": {
+      "zh-cn": "简单易用：报表与资料随时查看，手机／电脑皆可操作，让忙碌业主亦能轻松管理出租事务。"
+    },
+    "updatedAt": 1784608009248
+  },
+  "08c61f8ead464b92129e5b628e120ffda2568e3f": {
+    "source": "提升決策質素：以清晰數據支持租金、續約與招租安排，縮短空置期、提升出租表現",
+    "translations": {
+      "zh-cn": "提升决策质素：以清晰数据支持租金、续约与招租安排，缩短空置期、提升出租表现"
+    },
+    "updatedAt": 1784608009248
+  },
+  "9f498665d77e6bbd1559daacfafd2cb9f158468a": {
+    "source": "分類清晰：財務資料結構化呈現，帳目更透明，減少遺漏與爭議。",
+    "translations": {
+      "zh-cn": "分类清晰：财务资料结构化呈现，帐目更透明，减少遗漏与争议。"
+    },
+    "updatedAt": 1784608009248
+  },
+  "28446331d2eeb0b4891260bb25e2d419c2a5ea1b": {
+    "source": "進度可追蹤：每宗個案的處理狀態清晰可見，提升服務效率與住戶體驗。",
+    "translations": {
+      "zh-cn": "进度可追踪：每宗个案的处理状态清晰可见，提升服务效率与住户体验。"
+    },
+    "updatedAt": 1784608009248
+  },
+  "8319947782d8f444c3299cd3fece0f7a02939a6e": {
+    "source": "重要事項有系統記錄：到期／續約／檢查等關鍵節點可統一管理，提升合規與管治水平。",
+    "translations": {
+      "zh-cn": "重要事项有系统记录：到期／续约／检查等关键节点可统一管理，提升合规与管治水平。"
+    },
+    "updatedAt": 1784608009248
+  },
+  "362ad4ecd89af8b0942448a70179da979c31d327": {
+    "source": "管理環節",
+    "translations": {
+      "zh-cn": "管理环节"
+    },
+    "updatedAt": 1784608026795
+  },
+  "c8c5c273ff4a67f59359a80f8959e9ed9b25fafd": {
+    "source": "沒有系統的傳統方式",
+    "translations": {
+      "zh-cn": "没有系统的传统方式"
+    },
+    "updatedAt": 1784608037608
+  },
+  "f92c5992499960ce23a91a6da06ef3d493d7d575": {
+    "source": "使用物業管理系統",
+    "translations": {
+      "zh-cn": "使用物业管理系统"
+    },
+    "updatedAt": 1784608050368
+  },
+  "2ee65fcdb8e64f0cc2d339f9674e4994c880f091": {
+    "source": "招租",
+    "translations": {
+      "zh-cn": "招租"
+    },
+    "updatedAt": 1784608085300
+  },
+  "c12338aea281edfcaf87cf95586d845f54872616": {
+    "source": "收租",
+    "translations": {
+      "zh-cn": "收租"
+    },
+    "updatedAt": 1784608085300
+  },
+  "16b237b1fdc95b0809b9b9fef2247e1d8432c87d": {
+    "source": "維修",
+    "translations": {
+      "zh-cn": "维修"
+    },
+    "updatedAt": 1784608085300
+  },
+  "5c1d94169e56fff300dc5a87a65d4f31c806fd7b": {
+    "source": "財務",
+    "translations": {
+      "zh-cn": "财务"
+    },
+    "updatedAt": 1784608085300
+  },
+  "49deaf7da20d32769eef4723a5ec2e03ac246eef": {
+    "source": "文件",
+    "translations": {
+      "zh-cn": "文件"
+    },
+    "updatedAt": 1784608085300
+  },
+  "be0250a66adc5db55988146519a1ec441216c8aa": {
+    "source": "風險",
+    "translations": {
+      "zh-cn": "风险"
+    },
+    "updatedAt": 1784608085300
+  },
+  "1897ebd44a6fb8ec20b1f18ac63be1a66825de4a": {
+    "source": "分散在不同平台發佈與回覆，資料難統一、易遺漏。",
+    "translations": {
+      "zh-cn": "分散在不同平台发布与回复，资料难统一、易遗漏。"
+    },
+    "updatedAt": 1784608092616
+  },
+  "be20dcd4c69ca6309962d6917cf4e170ac7ce835": {
+    "source": "逐一通知、手動對賬，追租費時且容易出錯。",
+    "translations": {
+      "zh-cn": "逐一通知、手动对账，追租费时且容易出错。"
+    },
+    "updatedAt": 1784608092616
+  },
+  "879f3eddd1b0b0e0732d1adf622b228e1b45af12": {
+    "source": "以訊息往來為主，照片／報價／進度分散，難追蹤。",
+    "translations": {
+      "zh-cn": "以讯息往来为主，照片／报价／进度分散，难追踪。"
+    },
+    "updatedAt": 1784608092616
+  },
+  "22c67bd6f9be1732a4bce534d7264e38d74bf16b": {
+    "source": "依賴 Excel / 手寫紀錄，分類不一，難即時掌握收支。",
+    "translations": {
+      "zh-cn": "依赖 Excel / 手写纪录，分类不一，难即时掌握收支。"
+    },
+    "updatedAt": 1784608092616
+  },
+  "fc26712812bf183b675a4b6350515cda1bae4026": {
+    "source": "紙本／散落保存，查找困難，存在遺失風險。",
+    "translations": {
+      "zh-cn": "纸本／散落保存，查找困难，存在遗失风险。"
+    },
+    "updatedAt": 1784608092616
+  },
+  "81754cfd52f7458c1b5aa6726320b4ccbf2a997a": {
+    "source": "到期事項靠人手記錄，容易漏跟進。",
+    "translations": {
+      "zh-cn": "到期事项靠人手记录，容易漏跟进。"
+    },
+    "updatedAt": 1784608092616
+  },
+  "259032d1d13a5ca6d02470212495d4162c521da3": {
+    "source": "多平台招租資訊集中管理，線索與進度清晰可跟進。",
+    "translations": {
+      "zh-cn": "多平台招租资讯集中管理，线索与进度清晰可跟进。"
+    },
+    "updatedAt": 1784608105425
+  },
+  "c96434896a44cd6f8dbfd38b974cd534760e70f7": {
+    "source": "租金狀態統一記錄，支援提醒與對賬管理，收租更有序。",
+    "translations": {
+      "zh-cn": "租金状态统一记录，支援提醒与对账管理，收租更有序。"
+    },
+    "updatedAt": 1784608105425
+  },
+  "c08d570fc1c6dd1edee582a83d0a4e10f11f4e36": {
+    "source": "維修個案集中建檔，支援上傳相片與紀錄，進度清楚可查。",
+    "translations": {
+      "zh-cn": "维修个案集中建档，支援上传相片与纪录，进度清楚可查。"
+    },
+    "updatedAt": 1784608105425
+  },
+  "c3c24ebba2cb5e7ec0257f5b04d8999fcba0c5aa": {
+    "source": "收支分類與明細集中整理，報表更清晰，便於核算。",
+    "translations": {
+      "zh-cn": "收支分类与明细集中整理，报表更清晰，便于核算。"
+    },
+    "updatedAt": 1784608105425
+  },
+  "538f79a59ca48972395042def8f8c055ee957490": {
+    "source": "合約與文件集中電子化管理，檢索更快、保存更穩妥。",
+    "translations": {
+      "zh-cn": "合约与文件集中电子化管理，检索更快、保存更稳妥。"
+    },
+    "updatedAt": 1784608105425
+  },
+  "2ef297b9e872f82ae364c3c87bc668ab7df03b58": {
+    "source": "關鍵日期與事項可統一管理並設提醒，降低遺漏風險。",
+    "translations": {
+      "zh-cn": "关键日期与事项可统一管理并设提醒，降低遗漏风险。"
+    },
+    "updatedAt": 1784608105425
+  },
+  "11d024154013c0ca47dfaeca33ecdeb6a5b9fcb6": {
+    "source": "返回",
+    "translations": {
+      "zh-cn": "返回"
+    },
+    "updatedAt": 1784608417022
+  },
+  "73a5eb4680cb95b8143dfe9450bbfd6a314d0a6c": {
+    "source": "帳戶設定",
+    "translations": {
+      "zh-cn": "帐户设定"
+    },
+    "updatedAt": 1784608417022
+  },
+  "1fa773a206ac9dc0403cb11140f418ff6f105a01": {
+    "source": "管理您的個人資料與安全設定",
+    "translations": {
+      "zh-cn": "管理您的个人资料与安全设定"
+    },
+    "updatedAt": 1784608417022
+  },
+  "8746c2986cb84dab44691b305897832c57e1531e": {
+    "source": "個人資料",
+    "translations": {
+      "zh-cn": "个人资料"
+    },
+    "updatedAt": 1784608417022
+  },
+  "1a5188e71dd7e3023df3ae604285cf8095d5b0c7": {
+    "source": "修改密碼",
+    "translations": {
+      "zh-cn": "修改密码"
+    },
+    "updatedAt": 1784608417022
+  },
+  "be4c2616b1776acc18a64fcfbca5d2c6da68c1d6": {
+    "source": "姓名",
+    "translations": {
+      "zh-cn": "姓名"
+    },
+    "updatedAt": 1784608417022
+  },
+  "03b0f8e22d0f01e4020a7397447cae0a963e94cc": {
+    "source": "電子郵箱",
+    "translations": {
+      "zh-cn": "电子邮箱"
+    },
+    "updatedAt": 1784608417022
+  },
+  "79d47a399413ed279ef7096cf88b42bbd6844819": {
+    "source": "聯繫電話",
+    "translations": {
+      "zh-cn": "联系电话"
+    },
+    "updatedAt": 1784608417022
+  },
+  "dda0689b62f374a9d8f38f370b0de6db6652e6ab": {
+    "source": "公司名稱",
+    "translations": {
+      "zh-cn": "公司名称"
+    },
+    "updatedAt": 1784608417022
+  },
+  "60b4ae9082a3da6aede05b9a2bd3ab2146d62858": {
+    "source": "保存修改",
+    "translations": {
+      "zh-cn": "保存修改"
+    },
+    "updatedAt": 1784608417022
+  },
+  "4ab1f2cb88507c86e97fcfd0a2b610c345d7af96": {
+    "source": "當前密碼",
+    "translations": {
+      "zh-cn": "当前密码"
+    },
+    "updatedAt": 1784608422625
+  },
+  "af9f142a95214a51211cae391ff7fdbcd1871f1b": {
+    "source": "新密碼",
+    "translations": {
+      "zh-cn": "新密码"
+    },
+    "updatedAt": 1784608422625
+  },
+  "0dc2ef131f79363759bbd08ddbef8712319aee19": {
+    "source": "確認新密碼",
+    "translations": {
+      "zh-cn": "确认新密码"
+    },
+    "updatedAt": 1784608422625
+  },
+  "f30b5570683f69361a1967cf88a2593b649e6874": {
+    "source": "密碼要求：",
+    "translations": {
+      "zh-cn": "密码要求："
+    },
+    "updatedAt": 1784608422625
+  },
+  "d64205fa5014b7ff281cfe9db2e71caf7a8a2278": {
+    "source": "至少6個字符",
+    "translations": {
+      "zh-cn": "至少6个字符"
+    },
+    "updatedAt": 1784608422625
+  },
+  "2631e230466cf49d6d6be18a8fce37ef77ca8b16": {
+    "source": "建議包含大小寫字母和數字",
+    "translations": {
+      "zh-cn": "建议包含大小写字母和数字"
+    },
+    "updatedAt": 1784608422625
+  },
+  "e5037dae2d1fe11511b25fa90c9b06f4a52e98f6": {
+    "source": "確認修改密碼",
+    "translations": {
+      "zh-cn": "确认修改密码"
+    },
+    "updatedAt": 1784608422625
+  },
+  "77756a26423be559731a954cb149c0fb437fc817": {
+    "source": "請輸入您的姓名",
+    "translations": {
+      "zh-cn": "请输入您的姓名"
+    },
+    "updatedAt": 1784608478578
+  },
+  "b665addf4bb8c737cc91c6f4996b4d8a1f6e72fc": {
+    "source": "請輸入您的電子郵箱",
+    "translations": {
+      "zh-cn": "请输入您的电子邮箱"
+    },
+    "updatedAt": 1784608521505
+  },
+  "17c1c0ddc10a3945050597e2164913d161a65398": {
+    "source": "請輸入您的聯繫電話",
+    "translations": {
+      "zh-cn": "请输入您的联系电话"
+    },
+    "updatedAt": 1784608539764
+  },
+  "768ecc99ba6f54a8970482e199f11dd34119b834": {
+    "source": "請輸入您的公司名稱",
+    "translations": {
+      "zh-cn": "请输入您的公司名称"
+    },
+    "updatedAt": 1784608539764
+  },
+  "e3bb6b4e81780f019dd962df3d0892b9fe3fbe16": {
+    "source": "請輸入當前密碼",
+    "translations": {
+      "zh-cn": "请输入当前密码"
+    },
+    "updatedAt": 1784608551284
+  },
+  "70183b2f1ec8d136fddb9818480596c5532e6eab": {
+    "source": "請輸入新密碼（至少6個字符）",
+    "translations": {
+      "zh-cn": "请输入新密码（至少6个字符）"
+    },
+    "updatedAt": 1784608560436
+  },
+  "7846966d9626e1153eed8a1f9f1e973bd0966ed7": {
+    "source": "請再次輸入新密碼",
+    "translations": {
+      "zh-cn": "请再次输入新密码"
+    },
+    "updatedAt": 1784608577931
+  },
+  "4d4d1074599a426a8e978f70cf5f3750716d567d": {
+    "source": "服務計劃",
+    "translations": {
+      "zh-cn": "服务计划"
+    },
+    "updatedAt": 1784608617340
+  },
+  "069d40895921a0db81ca68db1bb39b891743be77": {
+    "source": "最多可創建{plan.unitCount}個單位",
+    "translations": {
+      "zh-cn": "最多可创建{plan.unitCount}个单位"
+    },
+    "updatedAt": 1784608962880
+  },
+  "0f1dc9d1647410c9a7a6a8366b1cfb00e2c64707": {
+    "source": "最多可創建25個單位",
+    "translations": {
+      "zh-cn": "最多可创建25个单位"
+    },
+    "updatedAt": 1784608964753
+  },
+  "5bb31b335344cd7db865dec0c5f61ebedba70a16": {
+    "source": "最多可創建100個單位",
+    "translations": {
+      "zh-cn": "最多可创建100个单位"
+    },
+    "updatedAt": 1784608964753
+  },
+  "75546966a2ef93717dd604b6873aab69298a6df8": {
+    "source": "最多可創建400個單位",
+    "translations": {
+      "zh-cn": "最多可创建400个单位"
+    },
+    "updatedAt": 1784608964753
+  },
+  "36f6b071b3ae393204f538f34f6e06607f99b5f2": {
+    "source": "選擇普通版",
+    "translations": {
+      "zh-cn": "选择普通版"
+    },
+    "updatedAt": 1784608995241
+  },
+  "9c141cee56924f0b0f24a227f0018fde4daacf36": {
+    "source": "選擇升級版",
+    "translations": {
+      "zh-cn": "选择升级版"
+    },
+    "updatedAt": 1784608995241
+  },
+  "af8925cd7be107af8cab64310aa506fc0a590f6e": {
+    "source": "選擇豪華版",
+    "translations": {
+      "zh-cn": "选择豪华版"
+    },
+    "updatedAt": 1784608995241
+  },
+  "406ccfe2e54932f6a0d483cc8f38aba768adb747": {
+    "source": "包含功能",
+    "translations": {
+      "zh-cn": "包含功能"
+    },
+    "updatedAt": 1784609013517
+  },
+  "226f13bfe6d5bdfad7135db53132b6cb25033cb4": {
+    "source": "(加$2200從普通版升級，增加75個單位)",
+    "translations": {
+      "zh-cn": "(加$2200从普通版升级，增加75个单位)"
+    },
+    "updatedAt": 1784609028024
+  },
+  "aa7f5ff5a88a582f28a6088553b3db3a48cea3c1": {
+    "source": "(加$8800從升級版升級，增加300個單位)",
+    "translations": {
+      "zh-cn": "(加$8800从升级版升级，增加300个单位)"
+    },
+    "updatedAt": 1784609028024
+  },
+  "a48db4213c4ac3bd1407c11d2fbbe1c088376a03": {
+    "source": "目錄管理",
+    "translations": {
+      "zh-cn": "目录管理",
+      "zh-hk": "目錄管理"
+    },
+    "updatedAt": 1784629141646
+  },
+  "55d15f004478e5afc61b093aef6d531ab6e9c3b7": {
+    "source": "角色列表",
+    "translations": {
+      "zh-cn": "角色列表",
+      "zh-hk": "角色列表"
+    },
+    "updatedAt": 1784629141646
+  },
+  "e27c7cb1845c69282843e40aa0c7d06a8245375f": {
+    "source": "選項設定",
+    "translations": {
+      "zh-cn": "选项设定",
+      "zh-hk": "選項設定"
+    },
+    "updatedAt": 1784629141646
+  },
+  "b18b4faf3e1d72cb270e8fb552b3a39c65a247af": {
+    "source": "使用者列表",
+    "translations": {
+      "zh-cn": "使用者列表",
+      "zh-hk": "使用者列表"
+    },
+    "updatedAt": 1784629141646
+  },
+  "5f95ab02fa0b89e2b71e99715463340447ffc519": {
+    "source": "部門列表",
+    "translations": {
+      "zh-cn": "部门列表",
+      "zh-hk": "部門列表"
+    },
+    "updatedAt": 1784629141646
+  },
+  "411fbe9788dc0b00aab9a1d4a12b5976fc4e0442": {
+    "source": "合同簽批",
+    "translations": {
+      "zh-cn": "合同签批",
+      "zh-hk": "合同簽批"
+    },
+    "updatedAt": 1784629141646
+  },
+  "0bf85845ca0fd232bc204b2736a90293285291d8": {
+    "source": "標准價格列表",
+    "translations": {
+      "zh-cn": "标准价格列表",
+      "zh-hk": "標准價格列表"
+    },
+    "updatedAt": 1784629141646
+  },
+  "44608c7d52f1f18a081909d85d568de0f27093c7": {
+    "source": "系統文件設定",
+    "translations": {
+      "zh-cn": "系统文件设定",
+      "zh-hk": "系統文件設定"
+    },
+    "updatedAt": 1784629141646
+  },
+  "af7d7a9971803cd405324f8d40a70f9b7846aa92": {
+    "source": "場地列表",
+    "translations": {
+      "zh-cn": "场地列表",
+      "zh-hk": "場地列表"
+    },
+    "updatedAt": 1784629141646
+  },
+  "018759232e2b20d6a0c6c573519e4c4c8c9bc14b": {
+    "source": "管理層",
+    "translations": {
+      "zh-cn": "管理层",
+      "zh-hk": "管理層"
+    },
+    "updatedAt": 1784629141646
+  },
+  "a42e9d32e68e9a0ff7a0b8e011ed424111bf2da5": {
+    "source": "代理列表",
+    "translations": {
+      "zh-cn": "代理列表",
+      "zh-hk": "代理列表"
+    },
+    "updatedAt": 1784629141646
+  },
+  "f0f60380465c58ad61a13c2ffb621487edfe6041": {
+    "source": "客戶列表",
+    "translations": {
+      "zh-cn": "客户列表",
+      "zh-hk": "客户列表"
+    },
+    "updatedAt": 1784629141646
+  },
+  "3c7115eb866de4173c1423de69725c1649a827b1": {
+    "source": "合同列表",
+    "translations": {
+      "zh-cn": "合同列表",
+      "zh-hk": "合同列表"
+    },
+    "updatedAt": 1784629141646
+  },
+  "f5dd69336a3b624a3bb315721feae67dd0032ea9": {
+    "source": "租務部",
+    "translations": {
+      "zh-cn": "租务部",
+      "zh-hk": "租務部"
+    },
+    "updatedAt": 1784629141646
+  },
+  "a9458c2a22e8cd96de4ab63799310716bfcca7ba": {
+    "source": "單位列表",
+    "translations": {
+      "zh-cn": "单位列表",
+      "zh-hk": "單位列表"
+    },
+    "updatedAt": 1784629141646
+  },
+  "3c82c0cb0394bf91bad9a5b8977ee4e3f0dc8e02": {
+    "source": "水電列表",
+    "translations": {
+      "zh-cn": "水电列表",
+      "zh-hk": "水電列表"
+    },
+    "updatedAt": 1784629141646
+  },
+  "eb9e107434869a0e0ecf0403bb19c0ae28bb510e": {
+    "source": "跟進列表",
+    "translations": {
+      "zh-cn": "跟进列表",
+      "zh-hk": "跟進列表"
+    },
+    "updatedAt": 1784629141646
+  },
+  "1c16b9d2a8030f1ae31416bd9dea8996f66be860": {
+    "source": "日程",
+    "translations": {
+      "zh-cn": "日程",
+      "zh-hk": "日程"
+    },
+    "updatedAt": 1784629141646
+  },
+  "0e9028cd68e09a8781802429ff897c0f73af72a9": {
+    "source": "场務部",
+    "translations": {
+      "zh-cn": "场务部",
+      "zh-hk": "场務部"
+    },
+    "updatedAt": 1784629141646
+  },
+  "dd52e02d3ba471cc2b2e208306ad402b4e56dac9": {
+    "source": "費用單列表",
+    "translations": {
+      "zh-cn": "费用单列表",
+      "zh-hk": "費用單列表"
+    },
+    "updatedAt": 1784629141646
+  },
+  "46f6363ec09879b3c347fe74c07c9441f5fdba77": {
+    "source": "租單工具",
+    "translations": {
+      "zh-cn": "租单工具",
+      "zh-hk": "租單工具"
+    },
+    "updatedAt": 1784629141646
+  },
+  "170502694a5a5ba0e4866bfe1957b62935b8168c": {
+    "source": "支票列表",
+    "translations": {
+      "zh-cn": "支票列表",
+      "zh-hk": "支票列表"
+    },
+    "updatedAt": 1784629141646
+  },
+  "692304743e8f73297f595cd72f309dde11bd3265": {
+    "source": "發票列表",
+    "translations": {
+      "zh-cn": "发票列表",
+      "zh-hk": "發票列表"
+    },
+    "updatedAt": 1784629141646
+  },
+  "8c9630de6a5a6d1812da99095ad40b6770f0351a": {
+    "source": "按金管理",
+    "translations": {
+      "zh-cn": "按金管理",
+      "zh-hk": "按金管理"
+    },
+    "updatedAt": 1784629141646
+  },
+  "bf271a5fb3066defba33c7189aafcb1cf792fb6a": {
+    "source": "帳目列表",
+    "translations": {
+      "zh-cn": "帐目列表",
+      "zh-hk": "帳目列表"
+    },
+    "updatedAt": 1784629141646
+  },
+  "1654ab43b557ede8cb89629de448f7f6668dbb7c": {
+    "source": "會計部",
+    "translations": {
+      "zh-cn": "会计部",
+      "zh-hk": "會計部"
+    },
+    "updatedAt": 1784629141646
+  },
+  "874c6e2acdca917eb0c29a7e0c415f2e0f732503": {
+    "source": "客服列表",
+    "translations": {
+      "zh-cn": "客服列表",
+      "zh-hk": "客服列表"
+    },
+    "updatedAt": 1784629141646
+  },
+  "d9ec8d91e5956f553454b85308272e8a7c3e2f2d": {
+    "source": "以下為新增功能：",
+    "translations": {
+      "zh-cn": "以下为新增功能："
+    },
+    "updatedAt": 1784609081978
+  },
+  "266534e91a1c5be551460caace54557392e7985d": {
+    "source": "客戶端圖片管理",
+    "translations": {
+      "zh-cn": "客户端图片管理",
+      "zh-hk": "客户端圖片管理"
+    },
+    "updatedAt": 1784629141646
+  },
+  "c5c00da9a20808246f748f55ab57c277f42e478e": {
+    "source": "客户端消息管理",
+    "translations": {
+      "zh-cn": "客户端消息管理",
+      "zh-hk": "客户端消息管理"
+    },
+    "updatedAt": 1784629141646
+  },
+  "5992d242ddaa1415c1c8a3f5d5e929bd8e1bea30": {
+    "source": "選擇套餐",
+    "translations": {
+      "zh-cn": "选择套餐"
+    },
+    "updatedAt": 1784609143051
+  },
+  "d9b59879f3b83656682a13244a4690ff63728156": {
+    "source": "月",
+    "translations": {
+      "zh-cn": "月"
+    },
+    "updatedAt": 1784609272397
+  },
+  "5360b1590c2fb0628d340b1a06dbf93549de8daa": {
+    "source": "套餐内容",
+    "translations": {
+      "zh-cn": "套餐内容"
+    },
+    "updatedAt": 1784609288296
+  },
+  "250ac847ae069a4219a5e72205922f9d938de4db": {
+    "source": "開通月份",
+    "translations": {
+      "zh-cn": "开通月份"
+    },
+    "updatedAt": 1784609364375
+  },
+  "05af56547f80dd038906afa4c5f4dc692f1ae897": {
+    "source": "自定義",
+    "translations": {
+      "zh-cn": "自定义"
+    },
+    "updatedAt": 1784609387946
+  },
+  "5a69b3a44dee7d92312cf1acb77239f3ba58be0d": {
+    "source": "1 個月",
+    "translations": {
+      "zh-cn": "1 个月"
+    },
+    "updatedAt": 1784609396563
+  },
+  "dcae24526c11eaa058c67efcb701f602d48b6b98": {
+    "source": "2 個月",
+    "translations": {
+      "zh-cn": "2 个月"
+    },
+    "updatedAt": 1784609396563
+  },
+  "bb132b8934157f684a3919f3c013f4074e2aaaed": {
+    "source": "3 個月",
+    "translations": {
+      "zh-cn": "3 个月"
+    },
+    "updatedAt": 1784609396563
+  },
+  "e3b72e36a8b6ef492183825ec256cd79d927a04c": {
+    "source": "6 個月",
+    "translations": {
+      "zh-cn": "6 个月"
+    },
+    "updatedAt": 1784609396563
+  },
+  "b2f48b251c20af0292d03bb224bbaa5ed8ada906": {
+    "source": "套餐小計：",
+    "translations": {
+      "zh-cn": "套餐小计："
+    },
+    "updatedAt": 1784609443947
+  },
+  "b9fad2290fdce702ff71f0a16c9bc23df2900fd4": {
+    "source": "增值服務",
+    "translations": {
+      "zh-cn": "增值服务"
+    },
+    "updatedAt": 1784609454406
+  },
+  "d6e5de1933b45d80e6280be8cae5cec750c3a211": {
+    "source": "需要",
+    "translations": {
+      "zh-cn": "需要"
+    },
+    "updatedAt": 1784609473034
+  },
+  "6a7cd2d9358cdf9f89be6ca9ab730320b603ddfd": {
+    "source": "不需要",
+    "translations": {
+      "zh-cn": "不需要"
+    },
+    "updatedAt": 1784609480264
+  },
+  "f51b61995d6223562cc719cff29304c0946b3c91": {
+    "source": "請選擇增值服務",
+    "translations": {
+      "zh-cn": "请选择增值服务"
+    },
+    "updatedAt": 1784609493852
+  },
+  "ee119a50a6c70aaa904a730087e82e8c24ce5544": {
+    "source": "（可多選，依套餐開通月份計算 1 個月）",
+    "translations": {
+      "zh-cn": "（可多选，依套餐开通月份计算 1 个月）"
+    },
+    "updatedAt": 1784609511008
+  },
+  "9ea2aec177cd72b480cffa4ef848467d732bc99b": {
+    "source": "增值服務總計：",
+    "translations": {
+      "zh-cn": "增值服务总计："
+    },
+    "updatedAt": 1784609615473
+  },
+  "6b833feeb5edefcdfbf6b867e3df3483c3c3d4c3": {
+    "source": "升級營鋪 Module",
+    "translations": {
+      "zh-cn": "升级营铺 Module"
+    },
+    "updatedAt": 1784609634060
+  },
+  "21e233d77c57c69819c037fe41a7d566b809f062": {
+    "source": "升級場地 Module",
+    "translations": {
+      "zh-cn": "升级场地 Module"
+    },
+    "updatedAt": 1784609634060
+  },
+  "e434fd9867de37b244527d793b4d966fbfc51fb1": {
+    "source": "升級會計 Module",
+    "translations": {
+      "zh-cn": "升级会计 Module"
+    },
+    "updatedAt": 1784609634060
+  },
+  "7c434dbcaaf18e533d63f24ebc26a8132ddd5712": {
+    "source": "升級客服 Module (場務)",
+    "translations": {
+      "zh-cn": "升级客服 Module (场务)"
+    },
+    "updatedAt": 1784609634060
+  },
+  "b96afc7ecdc3e81f8de38e069c770bde0fb3af8b": {
+    "source": "增加單位數量",
+    "translations": {
+      "zh-cn": "增加单位数量"
+    },
+    "updatedAt": 1784609634060
+  },
+  "75ef1241c0f464bf9fd1326b791c85b71f51f987": {
+    "source": "上一步",
+    "translations": {
+      "zh-cn": "上一步"
+    },
+    "updatedAt": 1784609687911
+  },
+  "ea0ef2ae72458b15c1ee59c36a57cdd34127e973": {
+    "source": "下一步",
+    "translations": {
+      "zh-cn": "下一步"
+    },
+    "updatedAt": 1784609695391
+  },
+  "5c9b7d7a7110b631c95f22b17d75f122187ad868": {
+    "source": "套餐確認",
+    "translations": {
+      "zh-cn": "套餐确认"
+    },
+    "updatedAt": 1784609765657
+  },
+  "6a1ae29197607167bed81e20faee40440cc51e4c": {
+    "source": "! 為確保您的發票有效，請提供與貴公司營業登記相符的公司名稱，如需修改請點擊修改按鈕",
+    "translations": {
+      "zh-cn": "! 为确保您的发票有效，请提供与贵公司营业登记相符的公司名称，如需修改请点击修改按钮"
+    },
+    "updatedAt": 1784609790659
+  },
+  "f9cf84c3040a40333c7cbf0e0ffc1b9f0ced2033": {
+    "source": "時長",
+    "translations": {
+      "zh-cn": "时长"
+    },
+    "updatedAt": 1784609857273
+  },
+  "26abec4cdb99cc3d21e1d9ab7a9fa5ebae1a5084": {
+    "source": "發票信息",
+    "translations": {
+      "zh-cn": "发票信息"
+    },
+    "updatedAt": 1784610022710
+  },
+  "dd295b94dea40454303faaa0244c2cb5eff4ddc8": {
+    "source": "是否需要開具發票？",
+    "translations": {
+      "zh-cn": "是否需要开具发票？"
+    },
+    "updatedAt": 1784610033278
+  },
+  "a8be41de751fd1169463966fb7602e62adf20c5e": {
+    "source": "發票抬頭（公司或個人名稱）",
+    "translations": {
+      "zh-cn": "发票抬头（公司或个人名称）"
+    },
+    "updatedAt": 1784610042713
+  },
+  "5e9fefcfd18d1a83d6e676f3dca82e44e141caca": {
+    "source": "請輸入公司或個人名稱",
+    "translations": {
+      "zh-cn": "请输入公司或个人名称"
+    },
+    "updatedAt": 1784610055533
+  },
+  "8340ccbfaf683f8ac8528fcfab47bd7820681dcd": {
+    "source": "確認支付",
+    "translations": {
+      "zh-cn": "确认支付"
+    },
+    "updatedAt": 1784610095919
+  },
+  "ff37c6b015ab1816d598e01bda17e2d836745eec": {
+    "source": "優惠活動",
+    "translations": {
+      "zh-cn": "优惠活动"
+    },
+    "updatedAt": 1784610122863
+  },
+  "d4965af7df5b4633f58139b10b5eed759edbf7f8": {
+    "source": "該套餐暫無可用優惠活動",
+    "translations": {
+      "zh-cn": "该套餐暂无可用优惠活动"
+    },
+    "updatedAt": 1784612992541
+  },
+  "15337a245e323662c60de2054fb483e9cb226d44": {
+    "source": "輸入優惠碼",
+    "translations": {
+      "zh-cn": "输入优惠码"
+    },
+    "updatedAt": 1784613010518
+  },
+  "d41883f878fc502d452212405157f1772590ac59": {
+    "source": "使用優惠碼",
+    "translations": {
+      "zh-cn": "使用优惠码"
+    },
+    "updatedAt": 1784613023302
+  },
+  "6ba77ec30f6434086e3766315efdc82a226b1edb": {
+    "source": "原價：",
+    "translations": {
+      "zh-cn": "原价："
+    },
+    "updatedAt": 1784613055468
+  },
+  "63c528ec0dd9c6096febd10d50931b00acc697c7": {
+    "source": "總計：",
+    "translations": {
+      "zh-cn": "总计："
+    },
+    "updatedAt": 1784613082689
+  },
+  "97af7939825375bdbad4bee82e61297a043b29d8": {
+    "source": "GO - PMS",
+    "translations": {
+      "zh-cn": "GO - PMS"
+    },
+    "updatedAt": 1784625700055
+  },
+  "0dd8485b8a3559c5bbe776aea4e13502ffa9e943": {
+    "source": "租賃管理系統介紹",
+    "translations": {
+      "zh-cn": "租赁管理系统介绍"
+    },
+    "updatedAt": 1784625733078
+  },
+  "e95af6adc574e7c149694081653dfc0787e5a605": {
+    "source": "租賃管理系統",
+    "translations": {
+      "zh-cn": "租赁管理系统"
+    },
+    "updatedAt": 1784625745654
+  },
+  "0d9742d6c0c78b1c175db5584dee35ade3a0fb79": {
+    "source": "一個專為業主、物業管理公司和新客設計的創新收租平台。",
+    "translations": {
+      "zh-cn": "一个专为业主、物业管理公司和新客设计的创新收租平台。"
+    },
+    "updatedAt": 1784625754881
+  },
+  "c995153278e8ead339b01c276aaa1f0716c4b5b7": {
+    "source": "「簡化租賃管理流程，提升效率」",
+    "translations": {
+      "zh-cn": "「简化租赁管理流程，提升效率」"
+    },
+    "updatedAt": 1784625763500
+  },
+  "f2703be076bf172e3c2a7e8898ff8d3dc22b2ad7": {
+    "source": "選擇租賃管理系統，將為您的租務管理帶來全新的體驗和更高的效率。",
+    "translations": {
+      "zh-cn": "选择租赁管理系统，将为您的租务管理带来全新的体验和更高的效率。"
+    },
+    "updatedAt": 1784625773138
+  },
+  "a2190142413ae4996b8d625941db5c1db76da0b8": {
+    "source": "核心功能",
+    "translations": {
+      "zh-cn": "核心功能"
+    },
+    "updatedAt": 1784625782578
+  },
+  "827c303e10ece3289c321fedf076bc6b6fc1f422": {
+    "source": "除可按需要設定收租與維修管理外，系統亦提供數據管理、租約管理、財務管理、維修維護、通知提醒等常用工具，支援日常營運的一站式管理。",
+    "translations": {
+      "zh-cn": "除可按需要设定收租与维修管理外，系统亦提供数据管理、租约管理、财务管理、维修维护、通知提醒等常用工具，支援日常营运的一站式管理。"
+    },
+    "updatedAt": 1784625790244
+  },
+  "4b5a3d61950c9fc031fb389b679a46f32e14a716": {
+    "source": "提升效率",
+    "translations": {
+      "zh-cn": "提升效率"
+    },
+    "updatedAt": 1784625798591
+  },
+  "b5ef1207c36f2ca2865d0714354983cc9e028f27": {
+    "source": "透過標準化流程與統一資料管理，協助快速統計與查核，減少手工記錄與重複輸入，令對賬、跟進與報表整理更省時、更準確。",
+    "translations": {
+      "zh-cn": "透过标准化流程与统一资料管理，协助快速统计与查核，减少手工记录与重复输入，令对账、跟进与报表整理更省时、更准确。"
+    },
+    "updatedAt": 1784625806724
+  },
+  "8454028cbcc78e7b6c32ed219f4e0457593d3ac4": {
+    "source": "全面服務",
+    "translations": {
+      "zh-cn": "全面服务"
+    },
+    "updatedAt": 1784625816364
+  },
+  "499c32a759125f8a14f6a49faa4e62233fcab750": {
+    "source": "提供多維度報表與管理視圖，提升透明度與可追溯性；並可按管理需要設定定期檢視與跟進安排，方便持續優化租務與物業表現。",
+    "translations": {
+      "zh-cn": "提供多维度报表与管理视图，提升透明度与可追溯性；并可按管理需要设定定期检视与跟进安排，方便持续优化租务与物业表现。"
+    },
+    "updatedAt": 1784625825516
+  },
+  "69f0fcade07b8ee93102da8442636f6fd2eb6f84": {
+    "source": "優勢介紹",
+    "translations": {
+      "zh-cn": "优势介绍"
+    },
+    "updatedAt": 1784625834574
+  },
+  "13089a06344ac03490260bed60c91907a21a92b7": {
+    "source": "租務管理系統的優勢",
+    "translations": {
+      "zh-cn": "租务管理系统的优势"
+    },
+    "updatedAt": 1784625855004
+  },
+  "96d1911239506c10064696261e996f9a31b3537c": {
+    "source": "租務管理系統在現代租賃市場中具有顯著的優勢，它和您物的傳統的書面管理系統：",
+    "translations": {
+      "zh-cn": "租务管理系统在现代租赁市场中具有显著的优势，它和您物的传统的书面管理系统："
+    },
+    "updatedAt": 1784625861216
+  },
+  "6bb387e60255de704e506218a2a497ca2ab398d8": {
+    "source": "精準出租定價",
+    "translations": {
+      "zh-cn": "精准出租定价"
+    },
+    "updatedAt": 1784625870348
+  },
+  "7b7afd9cc1e577d0624b65acff40db7a0bc53eb5": {
+    "source": "結合周邊配套（如交通、學校、商圈）與歷史租賃表現等資料作參考，協助制定更合理的租金策略，提升出租成功率與回報表現。",
+    "translations": {
+      "zh-cn": "结合周边配套（如交通、学校、商圈）与历史租赁表现等资料作参考，协助制定更合理的租金策略，提升出租成功率与回报表现。"
+    },
+    "updatedAt": 1784625879125
+  },
+  "15b8dcf893616fd0dc062bc74bec03214a72268b": {
+    "source": "靈活擴展",
+    "translations": {
+      "zh-cn": "灵活扩展"
+    },
+    "updatedAt": 1784625887262
+  },
+  "c435eda69a3a2e26806320bb9f9fd17eed968879": {
+    "source": "不論管理單一物業或多個物業組合，皆可用同一套管理架構統一處理；有助於規劃租務安排與回報目標，支援不同成長階段的需要。",
+    "translations": {
+      "zh-cn": "不论管理单一物业或多个物业组合，皆可用同一套管理架构统一处理；有助于规划租务安排与回报目标，支援不同成长阶段的需要。"
+    },
+    "updatedAt": 1784625893221
+  },
+  "c6a13ed1ea25a31e731a0caff924cbb572421ffb": {
+    "source": "多功能整合",
+    "translations": {
+      "zh-cn": "多功能整合"
+    },
+    "updatedAt": 1784625903916
+  },
+  "f2443d05eba690453009d3c69e7d171d0da9a33b": {
+    "source": "將招租、租約、收租、維修、財務與文件等工作集中管理，減少人手記錄與跨平台往返；同時保留完整紀錄，讓跟進更有條理、管理更專業。",
+    "translations": {
+      "zh-cn": "将招租、租约、收租、维修、财务与文件等工作集中管理，减少人手记录与跨平台往返；同时保留完整纪录，让跟进更有条理、管理更专业。"
+    },
+    "updatedAt": 1784625918039
+  },
+  "42eec995dde5777fc2aed137f840a876ba9f3375": {
+    "source": "我們的優勢",
+    "translations": {
+      "zh-cn": "我们的优势"
+    },
+    "updatedAt": 1784625938319
+  },
+  "7a8629de728661adffcf720c8660a37180fd5d52": {
+    "source": "多樣化的租賃服務",
+    "translations": {
+      "zh-cn": "多样化的租赁服务"
+    },
+    "updatedAt": 1784625951564
+  },
+  "0fea9113dc6f576487f9c56e4e7d93d2ee5cd72b": {
+    "source": "提高管理效率",
+    "translations": {
+      "zh-cn": "提高管理效率"
+    },
+    "updatedAt": 1784625951564
+  },
+  "2755daa0abc5d1c0c9b26021467d80dd51b83927": {
+    "source": "加強財務透明度",
+    "translations": {
+      "zh-cn": "加强财务透明度"
+    },
+    "updatedAt": 1784625951564
+  },
+  "20bb077c72e44af54499320df01dc830d3cc9006": {
+    "source": "極簡學習曲線",
+    "translations": {
+      "zh-cn": "极简学习曲线"
+    },
+    "updatedAt": 1784625951564
+  },
+  "39709365021c2f9f5ca9dd0d2cb2b22e1cce9a89": {
+    "source": "數據分析與決策支持",
+    "translations": {
+      "zh-cn": "数据分析与决策支持"
+    },
+    "updatedAt": 1784625951564
+  },
+  "84b056669c2a91414e1e8f9479ab184e9362014b": {
+    "source": "優質客服協助中",
+    "translations": {
+      "zh-cn": "优质客服协助中"
+    },
+    "updatedAt": 1784625951564
+  },
+  "fdbe90cf49ab94d899857b9b2e1c32829a1605a1": {
+    "source": "無論您是管理住宅、商業大廈還是工廠地產、單位、車位、倉庫、儲物位、廣告位、天台等等，我們的系統都能滿足您的需求。",
+    "translations": {
+      "zh-cn": "无论您是管理住宅、商业大厦还是工厂地产、单位、车位、仓库、储物位、广告位、天台等等，我们的系统都能满足您的需求。"
+    },
+    "updatedAt": 1784625963756
+  },
+  "67de8362e6cbae5bc8274c41f58ac32ba7dc5ca1": {
+    "source": "自動收租、自動產生賬單和催繳功能，已成為最廣泛使用的租賃管理工具。",
+    "translations": {
+      "zh-cn": "自动收租、自动产生账单和催缴功能，已成为最广泛使用的租赁管理工具。"
+    },
+    "updatedAt": 1784625963756
+  },
+  "d88d8f611f66f46fef509dcb46bc57490031badf": {
+    "source": "精確而全面數據：包括巧帳計計劃表，幫助投資者進行細緻入微的投資和財務分析。",
+    "translations": {
+      "zh-cn": "精确而全面数据：包括巧帐计计划表，帮助投资者进行细致入微的投资和财务分析。"
+    },
+    "updatedAt": 1784625963756
+  },
+  "8adb51290dcd735284695361b2bbcbb539b6bd03": {
+    "source": "無需專業：無論的在地即可操作，讓你簡單上手。",
+    "translations": {
+      "zh-cn": "无需专业：无论的在地即可操作，让你简单上手。"
+    },
+    "updatedAt": 1784625963756
+  },
+  "330c1fcb7de07b940e21ce626d05c937f70a3191": {
+    "source": "市場趨勢分析：理解未來工商、住宅等產業發展趨勢及策略制定。",
+    "translations": {
+      "zh-cn": "市场趋势分析：理解未来工商、住宅等产业发展趋势及策略制定。"
+    },
+    "updatedAt": 1784625963756
+  },
+  "16e59d3428af4b108950bb783af723d27e6c8083": {
+    "source": "我們的人工智能,包含了可靠的系統功能來支持, 優質客服團隊，讓您用戶通用更多的輔助工具。",
+    "translations": {
+      "zh-cn": "我们的人工智能,包含了可靠的系统功能来支持, 优质客服团队，让您用户通用更多的辅助工具。"
+    },
+    "updatedAt": 1784625963756
+  },
+  "6fa3ae2741dd1aeb817e9e224914d7f4014d853d": {
+    "source": "從房產登記、租戶管理到自動化帳單計算的所有需求，我們的方案在完整租賃管理解決方案中無縫銜接。",
+    "translations": {
+      "zh-cn": "从房产登记、租户管理到自动化帐单计算的所有需求，我们的方案在完整租赁管理解决方案中无缝衔接。"
+    },
+    "updatedAt": 1784625976375
+  },
+  "785516d4086d00d5198f8161de333ade7f695518": {
+    "source": "管理多處物業: 只需按幾個鍵，節省大量工時。它能幫業主簡化收租和催繳過程。",
+    "translations": {
+      "zh-cn": "管理多处物业: 只需按几个键，节省大量工时。它能帮业主简化收租和催缴过程。"
+    },
+    "updatedAt": 1784625976375
+  },
+  "42f19dddef9cba119920cfc012eed2c7af1e91cf": {
+    "source": "精確分析物業表現：內設的報告標準功能，讓分析更加簡潔。",
+    "translations": {
+      "zh-cn": "精确分析物业表现：内设的报告标准功能，让分析更加简洁。"
+    },
+    "updatedAt": 1784625976375
+  },
+  "b193e4c1be9c4e04db358a759977422cc3efe365": {
+    "source": "客戶服務：隨時享受到快速的技術支持,以及業界洞察分析趨勢。",
+    "translations": {
+      "zh-cn": "客户服务：随时享受到快速的技术支持,以及业界洞察分析趋势。"
+    },
+    "updatedAt": 1784625976375
+  },
+  "a0f1852b0d58d09a18269d909c317db01aa3e0df": {
+    "source": "數據分析表：內有平台的數據展示到詳細的數據報告，協助用戶做出最明智的決策。",
+    "translations": {
+      "zh-cn": "数据分析表：内有平台的数据展示到详细的数据报告，协助用户做出最明智的决策。"
+    },
+    "updatedAt": 1784625976375
+  },
+  "cc11af0b7ba498048153f3647201ce291f62f567": {
+    "source": "無論您有什麼問題，我們的API團隊會在24小時回覆內，並積極提供解決方案。",
+    "translations": {
+      "zh-cn": "无论您有什么问题，我们的API团队会在24小时回复内，并积极提供解决方案。"
+    },
+    "updatedAt": 1784625976375
+  },
+  "c3c5a74b05257d384517ef976ed17cf86a28ff81": {
+    "source": "計劃適合你的商業",
+    "translations": {
+      "zh-cn": "计划适合你的商业!",
+      "zh-hk": "計劃適合你的商業"
+    },
+    "updatedAt": 1784626257201
+  },
+  "fda851a1e8b584455e5ec8c05952d23892d5289a": {
+    "source": "所有定價計劃均涵蓋租務系統基本功能，並且還有增長空間",
+    "translations": {
+      "zh-cn": "所有定价计划均涵盖租务系统基本功能，并且还有增长空间",
+      "zh-hk": "所有定價計劃均涵蓋租務系統基本功能，並且還有增長空間"
+    },
+    "updatedAt": 1784629141646
+  },
+  "68a9484cf3e6e0b5e909185cfa97eea85139e61d": {
+    "source": "月費",
+    "translations": {
+      "zh-cn": "月费",
+      "zh-hk": "月費"
+    },
+    "updatedAt": 1784629141646
+  },
+  "fb356d668876d2bcd065cd6afa809dd41c6a98fd": {
+    "source": "支援單位數目",
+    "translations": {
+      "zh-cn": "支援单位数目",
+      "zh-hk": "支援單位數目"
+    },
+    "updatedAt": 1784629141646
+  },
+  "d5a4417a81b25909dbed4ed3a61d12d54f10cb96": {
+    "source": "另購外新增單位",
+    "translations": {
+      "zh-cn": "另购外新增单位",
+      "zh-hk": "另購外新增單位"
+    },
+    "updatedAt": 1784629141646
+  },
+  "4e1ff3eb775957c295e7dc31e1b3ca70eda907a6": {
+    "source": "功能",
+    "translations": {
+      "zh-cn": "功能",
+      "zh-hk": "功能"
+    },
+    "updatedAt": 1784629141646
+  },
+  "028779560bb648265ba74ee262630f6f534c9039": {
+    "source": "購買普通版",
+    "translations": {
+      "zh-cn": "购买普通版",
+      "zh-hk": "購買普通版"
+    },
+    "updatedAt": 1784629141646
+  },
+  "59d3009d3df48b86b7cd4cf7e128c32bd7456852": {
+    "source": "購買升級版",
+    "translations": {
+      "zh-cn": "购买升级版",
+      "zh-hk": "購買升級版"
+    },
+    "updatedAt": 1784629141646
+  },
+  "57a231cbee30360af289133f322b0921dc8e74df": {
+    "source": "購買豪華版",
+    "translations": {
+      "zh-cn": "购买豪华版",
+      "zh-hk": "購買豪華版"
+    },
+    "updatedAt": 1784629141646
+  },
+  "9ecc4ea4aa06e7adf959f155385af23431bfcf7a": {
+    "source": "無",
+    "translations": {
+      "zh-cn": "无",
+      "zh-hk": "無"
+    },
+    "updatedAt": 1784629141646
+  },
+  "9f5d7705439e137e22c32c2710620a6d4f976f92": {
+    "source": "feature.name",
+    "translations": {
+      "zh-cn": "feature.name"
+    },
+    "updatedAt": 1784626413710
+  },
+  "4f50e966a1b637abd95cbca3c5d6b71bf95f0f06": {
+    "source": "問盤列表",
+    "translations": {
+      "zh-cn": "问盘列表",
+      "zh-hk": "問盤列表"
+    },
+    "updatedAt": 1784629141646
+  },
+  "618f28a71625901a43e318f34982946d6ad36045": {
+    "source": "營銷列表",
+    "translations": {
+      "zh-cn": "营销列表",
+      "zh-hk": "營銷列表"
+    },
+    "updatedAt": 1784629141646
+  },
+  "af274cd3bf4d1505cdbb7a69c998a4f8225ee987": {
+    "source": "升級營舖模組",
+    "translations": {
+      "zh-cn": "升级营铺模组",
+      "zh-hk": "升級營舖模組"
+    },
+    "updatedAt": 1784629141646
+  },
+  "3ba87ea91c1b0a09977339fe2f9c80d9d75d6af6": {
+    "source": "升級場地管理",
+    "translations": {
+      "zh-cn": "升级场地管理",
+      "zh-hk": "升級場地管理"
+    },
+    "updatedAt": 1784629141646
+  },
+  "9d3e69b1c41e266017ef308c9d64b7b853e93d95": {
+    "source": "升級會計",
+    "translations": {
+      "zh-cn": "升级会计",
+      "zh-hk": "升級會計"
+    },
+    "updatedAt": 1784629141646
+  },
+  "b8649fa6bedb20aefc9a80d01ff1dc5ec5f97879": {
+    "source": "客服",
+    "translations": {
+      "zh-cn": "客服",
+      "zh-hk": "客服"
+    },
+    "updatedAt": 1784629141646
+  },
+  "f8cbba04d9e0108165dd9b19b1bde86e0d09680b": {
+    "source": "商舖列表",
+    "translations": {
+      "zh-cn": "商铺列表",
+      "zh-hk": "商舖列表"
+    },
+    "updatedAt": 1784629141646
+  },
+  "8ee6b267e7fc2fe7a521172db6f308c213ca9d06": {
+    "source": "手機版",
+    "translations": {
+      "zh-cn": "手机版",
+      "zh-hk": "手機版"
+    },
+    "updatedAt": 1784629141646
+  },
+  "be32e37030f8a9be49be6d2d6c7e235d7434f1c2": {
+    "source": "列印跟進單",
+    "translations": {
+      "zh-cn": "列印跟进单",
+      "zh-hk": "列印跟進單"
+    },
+    "updatedAt": 1784629141646
+  },
+  "2143444fbfe89994395f8caf636b768f2d840b26": {
+    "source": "租客portal",
+    "translations": {
+      "zh-cn": "租客portal",
+      "zh-hk": "租客portal"
+    },
+    "updatedAt": 1784629141646
+  },
+  "2801af429e126c6101a35065e67ec0ffcf31f7e9": {
+    "source": "基本功能",
+    "translations": {
+      "zh-cn": "基本功能",
+      "zh-hk": "基本功能"
+    },
+    "updatedAt": 1784629141646
+  },
+  "ea503a0fe21b76e07fc89e0bf9239216b5613544": {
+    "source": "升級營鋪模組",
+    "translations": {
+      "zh-cn": "升级营铺模组",
+      "zh-hk": "升級營鋪模組"
+    },
+    "updatedAt": 1784629141646
+  },
+  "1d2732ec97f0ea49ad955ab41eefe0b3586d9529": {
+    "source": "單位以及租金管理",
+    "translations": {
+      "zh-cn": "单位以及租金管理",
+      "zh-hk": "單位以及租金管理"
+    },
+    "updatedAt": 1784629141646
+  },
+  "9ac82031df5ec2ed71285580721c2975bad85803": {
+    "source": "升級客戶管理",
+    "translations": {
+      "zh-cn": "升级客户管理",
+      "zh-hk": "升級客户管理"
+    },
+    "updatedAt": 1784629141646
+  }
+}

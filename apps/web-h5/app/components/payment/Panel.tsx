@@ -5,6 +5,7 @@ import { CreditCard } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { type FC, useEffect, useState } from 'react';
 import { KPAY_ENABLE, PayTypeEnum } from '@/app/constants/payment';
+import { DynamicText } from '../DynamicI18nText';
 const Fps = dynamic(() => import('./Fps'), { ssr: false });
 
 type PanelProps = {
@@ -66,7 +67,11 @@ export const Panel: FC<PanelProps> = ({
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="text-center text-xl">
-            {selectedPaymentMethod === PayTypeEnum.FPS ? 'FPS 轉數快支付' : '選擇支付方式'}
+            {selectedPaymentMethod === PayTypeEnum.FPS ? (
+              <DynamicText text="FPS 轉數快支付" />
+            ) : (
+              <DynamicText text="選擇支付方式" />
+            )}
           </DialogTitle>
         </DialogHeader>
 
@@ -89,7 +94,7 @@ export const Panel: FC<PanelProps> = ({
                 <div className="w-8 h-8 bg-linear-to-br from-blue-500 to-green-500 rounded-lg flex items-center justify-center">
                   <CreditCard className="w-5 h-5 text-white" />
                 </div>
-                線上支付
+                <DynamicText text="線上支付" />
               </Button>
             ) : (
               <>
@@ -102,7 +107,7 @@ export const Panel: FC<PanelProps> = ({
                   <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
                     <span className="text-white text-sm font-bold">微</span>
                   </div>
-                  微信支付
+                  <DynamicText text="微信支付" />
                 </Button>
                 <Button
                   variant="outline"
@@ -113,7 +118,7 @@ export const Panel: FC<PanelProps> = ({
                   <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
                     <span className="text-white text-sm font-bold">支</span>
                   </div>
-                  支付寶支付
+                  <DynamicText text="支付寶支付" />
                 </Button>
               </>
             )}
@@ -125,7 +130,7 @@ export const Panel: FC<PanelProps> = ({
               <div className="w-8 h-8 bg-linear-to-br from-orange-400 to-orange-600 rounded-lg flex items-center justify-center">
                 <span className="text-white text-xs font-bold">FPS</span>
               </div>
-              FPS 轉數快
+              <DynamicText text="FPS 轉數快" />
             </Button>
           </div>
         )}

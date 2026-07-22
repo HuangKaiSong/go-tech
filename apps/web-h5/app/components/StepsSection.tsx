@@ -1,4 +1,5 @@
 import { BarChart3, ClipboardCheck, CreditCard, FileText, Users } from 'lucide-react';
+import { DynamicText } from './DynamicI18nText';
 
 const steps = [
   {
@@ -32,7 +33,9 @@ const StepsSection = () => {
   return (
     <section className="py-16 bg-background">
       <div className="container mx-auto px-4">
-        <h2 className="text-2xl font-bold text-center text-foreground mb-12">完成登約只需 5 個步驟</h2>
+        <h2 className="text-2xl font-bold text-center text-foreground mb-12">
+          <DynamicText text="完成登約只需 5 個步驟" />
+        </h2>
 
         <div className="flex flex-wrap justify-center gap-8 md:gap-4">
           {steps.map((item, index) => (
@@ -41,7 +44,9 @@ const StepsSection = () => {
                 <item.icon className="w-10 h-10 text-primary" />
               </div>
               <span className="text-xs font-semibold text-primary mb-2">{item.step}</span>
-              <span className="text-sm font-medium text-foreground">{item.title}</span>
+              <span className="text-sm font-medium text-foreground">
+                <DynamicText text={item.title} />
+              </span>
             </div>
           ))}
         </div>

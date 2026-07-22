@@ -5,6 +5,7 @@ import { useAtom, useSetAtom } from 'jotai';
 import { Check, Minus, Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { DynamicText } from '@/app/components/DynamicI18nText';
 import Footer from '@/app/components/Footer';
 import Header from '@/app/components/Header';
 import valueAddedServices from '@/app/constants/addedServices';
@@ -99,7 +100,9 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
       {/* Hero Section */}
       <section className="relative pt-32 pb-16 bg-cover bg-center" style={{ backgroundImage: `url(${servicePlanBg})` }}>
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-primary mb-2">選擇套餐</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-primary mb-2">
+            <DynamicText text="選擇套餐" />
+          </h1>
         </div>
       </section>
 
@@ -112,23 +115,33 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
               <div className="flex items-center gap-3">
                 <div className="w-1 h-8 bg-primary rounded-full mt-1" />
                 <div>
-                  <h2 className="text-xl font-bold text-gray-700">{plan.packageName}</h2>
+                  <h2 className="text-xl font-bold text-gray-700">
+                    <DynamicText text={plan.packageName} />
+                  </h2>
                 </div>
               </div>
               <div className="text-right">
                 <span className="text-2xl font-bold text-primary">${plan.price.toLocaleString()}</span>
-                <span className="text-lg text-primary ml-1">HKD / 月</span>
+                <span className="text-lg text-primary ml-1">
+                  HKD / <DynamicText text="月" />
+                </span>
               </div>
             </div>
 
             <div className="mb-4">
               <div className="flex gap-4 mb-4">
-                <span className="text-sm font-medium text-muted-foreground min-w-15">套餐内容</span>
-                <span className="text-sm text-gray-700">最多可創建{plan.unitCount}個單位</span>
+                <span className="text-sm font-medium text-muted-foreground min-w-15">
+                  <DynamicText text="套餐内容" />
+                </span>
+                <span className="text-sm text-gray-700">
+                  <DynamicText text={`最多可創建${plan.unitCount}個單位`} />
+                </span>
               </div>
 
               <div className="flex gap-4 mb-4">
-                <span className="text-sm font-medium text-muted-foreground min-w-15">包含功能</span>
+                <span className="text-sm font-medium text-muted-foreground min-w-15">
+                  <DynamicText text="包含功能" />
+                </span>
                 <div className="flex flex-wrap gap-2">
                   {plan.packageItemList.map((feature, index) => (
                     <div
@@ -141,14 +154,18 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
                           <use href={getIconHref(feature.menuIcon)} xlinkHref={getIconHref(feature.menuIcon)} />
                         </svg>
                       )}
-                      <span>{feature.menuTitle}</span>
+                      <span>
+                        <DynamicText text={feature.menuTitle} />
+                      </span>
                     </div>
                   ))}
                 </div>
               </div>
 
               <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-border/60">
-                <span className="text-sm font-medium text-muted-foreground min-w-[60px]">開通月份</span>
+                <span className="text-sm font-medium text-muted-foreground min-w-[60px]">
+                  <DynamicText text="開通月份" />
+                </span>
                 <div className="flex flex-wrap gap-2 flex-1">
                   {renewalOptions.map(option => {
                     const isActive = selectedPeriod === option.id;
@@ -163,7 +180,11 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
                             : 'border-border text-foreground bg-white hover:border-primary/50'
                         }`}
                       >
-                        {option.id === 'custom' ? '自定義' : `${option.months} 個月`}
+                        {option.id === 'custom' ? (
+                          <DynamicText text="自定義" />
+                        ) : (
+                          <DynamicText text={`${option.months} 個月`} />
+                        )}
                       </button>
                     );
                   })}
@@ -176,12 +197,16 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
                         onChange={e => setCustomMonths(Math.max(1, Number(e.target.value)))}
                         className="w-20 px-2 py-1.5 rounded-md border-2 border-primary text-sm font-bold text-primary text-center focus:outline-none"
                       />
-                      <span className="text-sm font-bold text-primary">個月</span>
+                      <span className="text-sm font-bold text-primary">
+                        <DynamicText text="個月" />
+                      </span>
                     </div>
                   )}
                 </div>
                 <div className="text-right">
-                  <span className="text-xs text-muted-foreground">套餐小計：</span>
+                  <span className="text-xs text-muted-foreground">
+                    <DynamicText text="套餐小計：" />
+                  </span>
                   <span className="text-base font-bold text-primary">${planTotal.toLocaleString()}</span>
                   <span className="text-xs text-primary ml-1">HKD</span>
                 </div>
@@ -194,7 +219,9 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
             <div className="flex justify-between items-center mb-4">
               <div className="flex items-center gap-3">
                 <div className="w-1 h-6 bg-primary rounded-full" />
-                <h3 className="text-lg font-bold text-gray-700">增值服務</h3>
+                <h3 className="text-lg font-bold text-gray-700">
+                  <DynamicText text="增值服務" />
+                </h3>
               </div>
 
               <div className="flex border border-border rounded-full overflow-hidden">
@@ -204,7 +231,7 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
                     needAddons ? 'bg-primary text-white' : 'bg-white text-muted-foreground hover:bg-muted'
                   }`}
                 >
-                  需要
+                  <DynamicText text="需要" />
                 </button>
                 <button
                   onClick={() => setNeedAddons(false)}
@@ -212,7 +239,7 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
                     !needAddons ? 'bg-primary text-white' : 'bg-white text-muted-foreground hover:bg-muted'
                   }`}
                 >
-                  不需要
+                  <DynamicText text="不需要" />
                 </button>
               </div>
             </div>
@@ -222,11 +249,15 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
               <div className="mt-6">
                 <div className="flex flex-row justify-between">
                   <div className="text-sm text-primary mb-4">
-                    請選擇增值服務{' '}
-                    <span className="text-primary">（可多選，依套餐開通月份計算 {selectedMonths} 個月）</span>
+                    <DynamicText text="請選擇增值服務" />{' '}
+                    <span className="text-primary">
+                      <DynamicText text={`（可多選，依套餐開通月份計算 ${selectedMonths} 個月）`} />
+                    </span>
                   </div>
                   <div className="text-right">
-                    <span className="text-xs text-muted-foreground">增值服務總計：</span>
+                    <span className="text-xs text-muted-foreground">
+                      <DynamicText text="增值服務總計：" />
+                    </span>
                     <span className="text-base font-bold text-primary">${addonsGrandTotal.toLocaleString()}</span>
                     <span className="text-xs text-primary ml-1">HKD</span>
                   </div>
@@ -258,12 +289,14 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
                           >
                             {isSelected && <Check className="w-3 h-3 text-white" />}
                           </button>
-                          <span className="text-sm text-gray-700">{service.name}</span>
+                          <span className="text-sm text-gray-700">
+                            <DynamicText text={service.name} />
+                          </span>
                         </div>
 
                         <div className="flex items-center gap-4">
                           <span className="text-sm font-medium text-primary">
-                            +{servicePriceMap[service.id] ?? 0} HKD Each / 月
+                            +{servicePriceMap[service.id] ?? 0} HKD Each / <DynamicText text="月" />
                           </span>
 
                           {isSelected && (
@@ -284,7 +317,9 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
                                 </button>
                               </div>
                               <div className="text-right min-w-[120px]">
-                                <span className="text-xs text-muted-foreground">小計：</span>
+                                <span className="text-xs text-muted-foreground">
+                                  <DynamicText text="小計：" />
+                                </span>
                                 <span className="text-base font-bold text-primary">${svcTotal.toLocaleString()}</span>
                                 <span className="text-xs text-primary ml-1">HKD</span>
                               </div>
@@ -306,10 +341,10 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
               onClick={handleGoBack}
               className="min-w-45 h-12 text-primary border-primary hover:bg-primary/5"
             >
-              上一步
+              <DynamicText text="上一步" />
             </Button>
             <Button onClick={handleNext} className="min-w-45 h-12">
-              下一步
+              <DynamicText text="下一步" />
             </Button>
           </div>
         </div>

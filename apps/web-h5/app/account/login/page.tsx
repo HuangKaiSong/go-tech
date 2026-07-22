@@ -6,6 +6,7 @@ import { useState } from 'react';
 import Link from '@/app/components/Link';
 
 import { Eye, EyeOff, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useRouter, useSearchParams } from 'next/navigation';
 import z from 'zod';
 // import Logo from "@/assets/Gotech_Logo.webp";
@@ -24,6 +25,7 @@ const Login = () => {
   const type = searchParams.get('type');
   const redirect = searchParams.get('redirect');
 
+  const t = useTranslations('Account');
   const router = useRouter();
   const { refetchTenants, setToken, setUser } = useAuth();
   const [account, setAccount] = useState(email || '');
@@ -77,7 +79,7 @@ const Login = () => {
             setToken(signResponse.data.token);
             setUser(res.data);
             refetchTenants(signResponse.data.token);
-            toast.success('登入成功！');
+            toast.success(t('loginSuccess'));
             router.replace(redirect || '/select-account');
           });
       }
@@ -85,7 +87,7 @@ const Login = () => {
       if (error instanceof Response) {
         const err = await error.json();
         sendToBetterStack('error', error.statusText, { extra: err, body: result.data });
-        toast.error(err.message || '登入失敗');
+        toast.error(err.message || t('loginFailed'));
       }
     } finally {
       setIsLoading(false);
@@ -116,12 +118,12 @@ const Login = () => {
           <Image src="/images/Gotech_Logo.webp" width={160} height={160} alt="logo" className="w-40" />
         </div>
 
-        <h1 className="text-2xl font-bold text-center text-foreground mb-8">登入您的帳戶</h1>
+        <h1 className="text-2xl font-bold text-center text-foreground mb-8">{t('loginTitle')}</h1>
 
         <div className="space-y-6">
           <Input
             type="text"
-            placeholder="請輸入您的電子郵箱/手機號碼"
+            placeholder={t('accountPlaceholder')}
             value={account}
             onChange={e => setAccount(e.target.value)}
             classNames={{
@@ -133,7 +135,7 @@ const Login = () => {
           <div className="relative">
             <Input
               type={showPassword ? 'text' : 'password'}
-              placeholder="請輸入您的密碼"
+              placeholder={t('passwordPlaceholder')}
               value={password}
               onChange={e => setPassword(e.target.value)}
               classNames={{
@@ -155,7 +157,7 @@ const Login = () => {
             disabled={isLoading || !account || !password}
             className="w-full h-14 text-lg font-semibold bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground disabled:opacity-50 transition-colors"
           >
-            {isLoading ? '登入中...' : '登入'}
+            {isLoading ? t('loggingIn') : t('login')}
           </Button>
         </div>
 
@@ -165,11 +167,11 @@ const Login = () => {
               href="/account/forget-password"
               className="text-foreground underline hover:text-primary transition-colors"
             >
-              忘記密碼?
+              {t('forgotPassword')}
             </Link>
           </div>
           <Link href="/account/register" className="text-foreground underline hover:text-primary transition-colors">
-            註冊新帳戶
+            {t('registerNew')}
           </Link>
         </div>
       </div>
@@ -178,10 +180,10 @@ const Login = () => {
       <div className="absolute bottom-0 left-0 right-0 bg-foreground/80 py-4">
         <div className="flex justify-center gap-8 text-sm text-background/80">
           <Link href="/legal-agreement/terms/terms-of-use" className="hover:text-background transition-colors">
-            服務條款
+            {t('termsOfService')}
           </Link>
           <Link href="/legal-agreement/terms/privacy" className="hover:text-background transition-colors">
-            私隱政策
+            {t('privacyPolicy')}
           </Link>
         </div>
       </div>

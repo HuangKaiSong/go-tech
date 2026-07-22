@@ -22,10 +22,12 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIframeContext } from '@/contexts/IframeContext';
+import LocaleSwitcher from './LocaleSwitcher';
 import { type PageBlock } from './PageBlocks';
 
 const SelectTenant = ({ generateCallback }: { generateCallback: (uri: string) => void }) => {
   const router = useRouter();
+  const t = useTranslations();
   const { hasIframe } = useIframeContext();
   const { isLoggedIn, tenants, token } = useAuth();
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -56,16 +58,16 @@ const SelectTenant = ({ generateCallback }: { generateCallback: (uri: string) =>
           if (!isLoggedIn) {
             router.push('/account/login');
           }
-          router.push('/select-account?from=header')
+          router.push('/select-account?from=header');
           // setIsOpen(true);
         }}
       >
-        點擊前往 GO-PMS
+        {t('Nav.gotoPms')}
       </div>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="w-3xl">
           <DialogHeader className="mb-4">
-            <DialogTitle className="flex items-center justify-center gap-2">選擇租户</DialogTitle>
+            <DialogTitle className="flex items-center justify-center gap-2">{t('Nav.selectTenant')}</DialogTitle>
           </DialogHeader>
           {/* 选择租户 */}
           <div className="grid grid-cols-3 gap-4 items-center justify-center">
@@ -240,23 +242,23 @@ const Header = ({ heroBg, initialBlocks }: { heroBg?: string | StaticImageData; 
             <div />
             <nav className="hidden  md:flex items-center justify-between gap-4">
               <Link href="/core-advantages" className="text-lg hover:text-primary transition-colors col-span-1">
-                核心優勢
+                {t('Nav.coreAdvantages')}
               </Link>
               <div className="h-10 border border-white/70" />
               <Link href="/system-features" className="text-lg hover:text-primary transition-colors col-span-1">
-                查看系統功能
+                {t('Nav.systemFeatures')}
               </Link>
               <div className="h-10 border border-white/70" />
               <Link href="/service-plan" className="text-lg hover:text-primary transition-colors col-span-1">
-                服務計劃
+                {t('Nav.servicePlan')}
               </Link>
               <div className="h-10 border border-white/70" />
               <Link href="/target-audience" className="text-lg hover:text-primary transition-colors col-span-1">
-                適合人群
+                {t('Nav.targetAudience')}
               </Link>
               <div className="h-10 border border-white/70" />
               <Link href="/contact" className="text-lg hover:text-primary transition-colors col-span-1">
-                聯繫我們
+                {t('Nav.contact')}
               </Link>
             </nav>
             <div className="grid grid-cols-2 text-sm text-white/80">
@@ -268,7 +270,7 @@ const Header = ({ heroBg, initialBlocks }: { heroBg?: string | StaticImageData; 
                 <Phone className="w-12 h-12" />
                 <div className="flex flex-col">
                   <div data-block-id="common-info" data-block-role="phoneTitle">
-                    Call Us
+                    {t('Nav.callUs')}
                   </div>
                   <div data-block-id="common-info" data-block-role="phoneValue">
                     {phoneValue}
@@ -283,7 +285,7 @@ const Header = ({ heroBg, initialBlocks }: { heroBg?: string | StaticImageData; 
                 <Mail className="w-12 h-12" />
                 <div className="flex flex-col">
                   <div data-block-id="common-info" data-block-role="emailTitle">
-                    Mail To Us
+                    {t('Nav.mailToUs')}
                   </div>
                   <div data-block-id="common-info" data-block-role="emailValue">
                     {emailValue}
@@ -326,7 +328,7 @@ const Header = ({ heroBg, initialBlocks }: { heroBg?: string | StaticImageData; 
                         onClick={() => setIsSheetOpen(false)}
                       >
                         <Package className="w-5 h-5 text-muted-foreground" />
-                        <span>我的訂單</span>
+                        <span>{t('Nav.myOrders')}</span>
                       </Link>
                       <Link
                         href="/settings"
@@ -353,9 +355,9 @@ const Header = ({ heroBg, initialBlocks }: { heroBg?: string | StaticImageData; 
                   </Button>
                 </Link>
               )}
-              {/* <LocaleSwitcher /> */}
+              <LocaleSwitcher />
             </div>
-            <div className="flex flex-row bg-background items-center rounded-l-sm rounded-r-lg">
+            <div className="flex flex-row bg-background items-center rounded-l-sm rounded-r-lg justify-end">
               {hasTenant ? (
                 <>
                   <SelectTenant generateCallback={generateCallback} />
@@ -365,7 +367,7 @@ const Header = ({ heroBg, initialBlocks }: { heroBg?: string | StaticImageData; 
                     className="shadow-primary shadow-2xl"
                     onClick={() => goNow()}
                   >
-                    立即前往
+                    {t('Nav.goNow')}
                   </Button>
                 </>
               ) : (
@@ -381,7 +383,7 @@ const Header = ({ heroBg, initialBlocks }: { heroBg?: string | StaticImageData; 
                       }
                     }}
                   >
-                    點擊立即開始試用
+                    {t('Nav.clickToTrial')}
                   </div>
                   <Button
                     size="sm"
@@ -389,7 +391,7 @@ const Header = ({ heroBg, initialBlocks }: { heroBg?: string | StaticImageData; 
                     className="shadow-primary shadow-2xl"
                     onClick={() => tryOut()}
                   >
-                    免費試用
+                    {t('Nav.freeTrial')}
                   </Button>
                 </>
               )}
