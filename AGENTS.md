@@ -189,6 +189,10 @@ Types: `feat`, `fix`, `refactor`, `chore`
 - **Path aliases**: `@/*` (web-h5) or `./src/*` (web-admin)
 - **No unused vars or any warnings** are disabled in ESLint configs
 
+### React Hooks
+
+- **尽量不使用 `useCallback`、`useMemo`**：除非有明确的性能优化需求（如避免子组件无谓的重渲染、派生计算开销很大），否则优先使用普通函数定义和直接内联计算。过度使用 `useCallback`/`useMemo` 会增加代码复杂度和依赖数组维护成本，而 React 19 的编译器（React Compiler）会自动处理大多数记忆化场景。
+
 ### File Naming
 
 - Components: `kebab-case` (e.g., `alert-dialog.tsx`, `date-picker.tsx`)
