@@ -272,7 +272,7 @@ const Header = ({ heroBg, initialBlocks }: { heroBg?: string | StaticImageData; 
                   <div data-block-id="common-info" data-block-role="phoneTitle">
                     {t('Nav.callUs')}
                   </div>
-                  <div data-block-id="common-info" data-block-role="phoneValue">
+                  <div data-block-id="common-info" data-block-role="phoneValue" className="select-all">
                     {phoneValue}
                   </div>
                 </div>
@@ -287,7 +287,7 @@ const Header = ({ heroBg, initialBlocks }: { heroBg?: string | StaticImageData; 
                   <div data-block-id="common-info" data-block-role="emailTitle">
                     {t('Nav.mailToUs')}
                   </div>
-                  <div data-block-id="common-info" data-block-role="emailValue">
+                  <div data-block-id="common-info" data-block-role="emailValue" className="select-all">
                     {emailValue}
                   </div>
                 </div>
