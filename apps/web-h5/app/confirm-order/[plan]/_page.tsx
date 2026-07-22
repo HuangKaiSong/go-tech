@@ -14,7 +14,7 @@ import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 import { usePromotions } from '@/app/hooks/usePromotions';
 import servicePlanBg from '@/assets/service-plan-bg.jpg';
 import { useAuth } from '@/contexts/AuthContext';
-import { selectedMonthsAtom, selectedServicesAtom } from '@/contexts/Order.jotai';
+import { needAddonsAtom, selectedMonthsAtom, selectedServicesAtom } from '@/contexts/Order.jotai';
 import Footer from '../../components/Footer';
 import Header from '../../components/Header';
 import { type OrderInfoType, OrderItemTypeEnum, OrderTypeEnum } from '../../constants/order';
@@ -70,6 +70,7 @@ const ConfirmOrder = ({
   const selectedPlan = data;
   const [hasMounted, setHasMounted] = useState(false);
 
+  const [needAddons, _] = useAtom(needAddonsAtom);
   const [selectedServices, setSelectedServices] = useAtom(selectedServicesAtom);
 
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
@@ -115,11 +116,12 @@ const ConfirmOrder = ({
     return 0;
   };
 
-  const addonsTotal =
-    Object.entries(selectedServicesSafe).reduce(
-      (sum, [serviceId, quantity]) => sum + getServiceUnitPrice(serviceId) * quantity,
-      0
-    ) * month;
+  const addonsTotal = !needAddons
+    ? 0
+    : Object.entries(selectedServicesSafe).reduce(
+        (sum, [serviceId, quantity]) => sum + getServiceUnitPrice(serviceId) * quantity,
+        0
+      ) * month;
   // @ts-ignore
   const originalPrice = (selectedPlan?.price * month || 0) + addonsTotal;
 
@@ -197,7 +199,7 @@ const ConfirmOrder = ({
       orderInfo.promotionId = selectedPromotion.promotionId;
     }
 
-    if (selectedServices) {
+    if (needAddons && selectedServices) {
       Object.entries(selectedServicesSafe).map(([serviceId, quantity]) => {
         const service = valueAddedServices.find(s => s.id === serviceId);
         if (!service) return null;
@@ -399,7 +401,7 @@ const ConfirmOrder = ({
           </div>
 
           {/* Value-Added Services Card */}
-          {Object.keys(selectedServicesSafe).length > 0 && (
+          {Object.keys(selectedServicesSafe).length > 0 && needAddons && (
             <div className="bg-white rounded-lg border border-border p-6 mb-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-1 h-6 bg-primary rounded-full" />

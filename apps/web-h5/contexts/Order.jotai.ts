@@ -14,3 +14,6 @@ export const selectedServicesAtom = atom<Record<string, number>>({});
  * 仅存于内存（Jotai globalStore），刷新页面即重置为默认值 1。
  */
 export const selectedMonthsAtom = atom<number>(1);
+
+
+export const needAddonsAtom = atom<boolean>(true)

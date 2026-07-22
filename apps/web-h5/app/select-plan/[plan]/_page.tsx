@@ -10,7 +10,7 @@ import Footer from '@/app/components/Footer';
 import Header from '@/app/components/Header';
 import valueAddedServices from '@/app/constants/addedServices';
 import servicePlanBg from '@/assets/service-plan-bg.jpg';
-import { selectedMonthsAtom, selectedServicesAtom } from '@/contexts/Order.jotai';
+import { needAddonsAtom, selectedMonthsAtom, selectedServicesAtom } from '@/contexts/Order.jotai';
 
 const getIconHref = (value: string) => {
   const normalized = value
@@ -34,7 +34,7 @@ const computeServiceTotal = (priceEach: number, qty: number, months: number) => 
 
 const SelectPlan = ({ plan }: { plan: Packages }) => {
   const router = useRouter();
-  const [needAddons, setNeedAddons] = useState(true);
+  const [needAddons, setNeedAddons] = useAtom(needAddonsAtom);
   const [hasMounted, setHasMounted] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState('1');
   const [customMonths, setCustomMonths] = useState(12);

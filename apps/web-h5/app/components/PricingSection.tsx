@@ -41,11 +41,19 @@ const PricingSection = ({ packages }: { packages: Packages[] }) => {
                     <div className="text-3xl font-bold text-primary">{t('stayTuned')}</div>
                   )}
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  <span>
+                <p className="text-xs text-muted-foreground flex flex-row flex-nowrap justify-center">
+                  <div className="truncate">
                     <DynamicText text="每年收費,年費收費" />
-                  </span>
-                  {plan.addUnitPrice && <span className="ml-1">+{plan.addUnitPrice} /unit</span>}
+                  </div>
+                  {plan.addUnitPrice && (
+                    <div className="ml-1 flex flex-row flex-nowrap">
+                      <div>+</div>
+                      <div className="">${plan.addUnitPrice}</div>
+                      <div className="scale-75 origin-bottom-left">HKD</div>
+                      <div> / </div>
+                      <DynamicText text="個" />
+                    </div>
+                  )}
                 </p>
               </CardContent>
 
