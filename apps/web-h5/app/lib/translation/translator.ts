@@ -1,7 +1,7 @@
 import * as deepl from 'deepl-node';
 import * as OpenCC from 'opencc-js';
 
-export type TranslationProvider = 'alibaba' | 'deepl' | 'openai';
+export type TranslationProvider = 'alibaba' | 'deepl' | 'google' | 'openai';
 
 // 默认 Provider（可通过环境变量覆盖）
 const DEFAULT_PROVIDER: TranslationProvider = (process.env.TRANSLATION_PROVIDER as TranslationProvider) || 'deepl';
@@ -73,6 +73,8 @@ async function callAITranslation(
       return translateWithDeepL(texts, locale);
     case 'alibaba':
       return translateWithAlibaba(texts, locale);
+    case 'google':
+      return translateWithGoogle(texts, locale);
     default:
       throw new Error(`Unsupported translation provider: ${provider}`);
   }
@@ -145,6 +147,40 @@ async function translateWithAlibaba(texts: string[], locale: string): Promise<Re
     result[text] = `[${locale}] ${text}`;
   }
   return result;
+}
+
+async function translateWithGoogle(texts: string[], locale: string): Promise<Record<string, string>> {
+  const apiKey = process.env.GOOGLE_TRANSLATE_API_KEY || '';
+
+  let targetLang: string;
+  if (locale === 'zh-cn') {
+    targetLang = 'zh-CN';
+  } else if (locale === 'zh-hk') {
+    targetLang = 'zh-TW';
+  } else {
+    targetLang = 'en';
+  }
+
+  const url = `https://translation.googleapis.com/language/translate/v2?key=${apiKey}`;
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ q: texts, target: targetLang, format: 'text' }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Google Translate API error: ${response.status} ${errorText}`);
+  }
+
+  const data = await response.json() as {
+    data: { translations: { translatedText: string }[] };
+  };
+
+  return Object.fromEntries(
+    texts.map((text, i) => [text, data.data.translations[i].translatedText])
+  );
 }
 
 // ---------- 对外公开的单条和批量接口 ----------

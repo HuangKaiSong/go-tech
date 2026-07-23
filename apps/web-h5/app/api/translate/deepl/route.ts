@@ -20,7 +20,5 @@ export async function POST(request: NextRequest) {
 
   const result = await translateWithDeepL(data.text, data.locale);
 
-  console.log(result);
-
   return NextResponse.json(result);
 }
