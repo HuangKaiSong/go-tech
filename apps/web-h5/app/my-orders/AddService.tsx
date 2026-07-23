@@ -16,6 +16,7 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { type FC, useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { DynamicText } from '../components/DynamicI18nText';
 import valueAddedServices, { type SpecificValueAddedServicesId } from '../constants/addedServices';
 import { type OrderItemInfoType, OrderItemTypeEnum, OrderTypeEnum } from '../constants/order';
 import { DAYSPERMONTH, PayTypeEnum, stashWebManagedCashier } from '../constants/payment';
@@ -269,15 +270,20 @@ export const AddService: FC<AddServiceProps> = ({
       <Dialog open={showAddonsDialog} onOpenChange={setShowAddonsDialog}>
         <DialogContent className="sm:max-w-lg max-h-[calc(100dvh-2rem)] flex flex-col overflow-hidden">
           <DialogHeader>
-            <DialogTitle>購買增值服務</DialogTitle>
+            <DialogTitle>
+              <DynamicText text="購買增值服務" />
+            </DialogTitle>
           </DialogHeader>
           {(() => {
             const { daysRemaining, expiryDate, ratio } = getProrationInfo();
             return (
               <div className="space-y-4 mt-4 flex-1 min-h-0 overflow-y-auto pr-1 scroll-on-hover">
                 <div className="p-3 rounded-lg bg-[#FFF8F5] border text-sm text-muted-foreground">
-                  按當前訂單剩餘 <span className="font-medium text-foreground">{daysRemaining}</span> 天計費（至{' '}
-                  {expiryDate} 到期），費用按單價 x {(ratio * 100).toFixed(2)}% 折算。
+                  <DynamicText text="按當前訂單剩餘" />{' '}
+                  <span className="font-medium text-foreground">{daysRemaining}</span>
+                  <DynamicText
+                    text={`天計費（至 ${expiryDate} 到期），費用按單價 x ${(ratio * 100).toFixed(2)}% 折算。`}
+                  />
                 </div>
                 {valueAddedServices.map(service => {
                   const isSelected = selectedServices[service.id] !== undefined;
@@ -301,7 +307,9 @@ export const AddService: FC<AddServiceProps> = ({
                           />
                           <div>
                             <p className="font-medium">{service.name}</p>
-                            <p className="text-sm text-muted-foreground">+${price} HKD Each / 月</p>
+                            <p className="text-sm text-muted-foreground">
+                              +${price} HKD Each / <DynamicText text="月" />
+                            </p>
                           </div>
                         </div>
 
@@ -326,12 +334,12 @@ export const AddService: FC<AddServiceProps> = ({
 
                       {isSelected && quantity > 0 && (
                         <div className="mt-2 pt-2 border-t text-right text-sm text-muted-foreground">
-                          小計：
+                          <DynamicText text="小計：" />
                           <span className="font-medium text-foreground">
                             ${Math.floor((price / DAYSPERMONTH) * daysRemaining * ratio * quantity * 100) / 100} HKD
                           </span>
                           <span className="ml-2 text-xs">
-                            （單價 ${((price / DAYSPERMONTH) * daysRemaining).toLocaleString()} x{' '}
+                            <DynamicText text="（單價" /> ${((price / DAYSPERMONTH) * daysRemaining).toLocaleString()} x{' '}
                             {(ratio * 100).toFixed(2)}%）
                           </span>
                         </div>
@@ -355,26 +363,32 @@ export const AddService: FC<AddServiceProps> = ({
                 <Separator />
 
                 <div className="flex justify-between items-center text-sm text-muted-foreground">
-                  <span>小計</span>
+                  <span>
+                    <DynamicText text="小計" />
+                  </span>
                   <span>${fmt(addonsBaseAmount)} HKD</span>
                 </div>
                 {promotionDiscount > 0 && (
                   <div className="flex justify-between items-center text-sm text-green-600">
-                    <span>活動優惠</span>
+                    <span>
+                      <DynamicText text="活動優惠" />
+                    </span>
                     <span>-${fmt(promotionDiscount)} HKD</span>
                   </div>
                 )}
                 <div className="flex justify-between items-center text-lg font-bold">
-                  <span>總計</span>
+                  <span>
+                    <DynamicText text="總計" />
+                  </span>
                   <span className="text-primary">${fmt(finalTotal)} HKD</span>
                 </div>
 
                 <div className="flex gap-3 pt-2">
                   <Button variant="outline" className="flex-1" onClick={() => setShowAddonsDialog(false)}>
-                    取消
+                    <DynamicText text="取消" />
                   </Button>
                   <Button className="flex-1" disabled={addonsBaseAmount === 0} onClick={handleConfirmAddons}>
-                    確認購買
+                    <DynamicText text="確認購買" />
                   </Button>
                 </div>
               </div>

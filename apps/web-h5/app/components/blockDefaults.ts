@@ -25,7 +25,7 @@ export const defaultHomeBlocks: PageBlock[] = [
     },
     subtitleStyle: {
       fontSize: '1.25rem',
-      color: 'var(--color-primary)'
+      color: 'var(--color-white)'
     },
     sectionStyle: {
       width: '100%',

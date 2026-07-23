@@ -17,11 +17,12 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { type FC, useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { usePromotions } from '../hooks/usePromotions';
+import { DynamicText } from '../components/DynamicI18nText';
 import valueAddedServices, { type SpecificValueAddedServicesId } from '../constants/addedServices';
 import { type OrderItemInfoType, OrderItemTypeEnum, OrderTypeEnum, type PlatformPackageDto } from '../constants/order';
 import { DAYSPERMONTH, PayTypeEnum, stashWebManagedCashier } from '../constants/payment';
 import { type PromotionOption, fetchPromotions } from '../constants/promotion';
+import { usePromotions } from '../hooks/usePromotions';
 import { PromotionSection } from './PromotionSection';
 const PaymentPanel = dynamic(() => import('../components/payment/Panel'), {
   ssr: false
@@ -336,16 +337,20 @@ export const Upgrade: FC<UpgradeProps> = ({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <ArrowUpCircle className="w-5 h-5 text-primary" />
-              套餐升級
+              <DynamicText text="套餐升級" />
             </DialogTitle>
           </DialogHeader>
           {(() => {
             if (upgradePlans.length === 0) {
-              return <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="沒有可用的升級方案" />;
+              return (
+                <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={<DynamicText text="沒有可用的升級方案" />} />
+              );
             }
             return (
               <div className="space-y-4 mt-4 flex-1 min-h-0 overflow-y-auto pr-1 scroll-on-hover">
-                <p className="text-sm text-muted-foreground">選擇您想升級的套餐方案，享受更多功能與服務</p>
+                <p className="text-sm text-muted-foreground">
+                  <DynamicText text="選擇您想升級的套餐方案，享受更多功能與服務" />
+                </p>
                 {upgradePlans.map(plan => {
                   const isCurrentPlan = currentOrder?.packageName === plan.packageName;
                   const isLowerPlan = plan.packageName === '升級版' && currentOrder?.packageName === '豪華版';
@@ -365,11 +370,16 @@ export const Upgrade: FC<UpgradeProps> = ({
                       <div className="flex items-start justify-between mb-3">
                         <div>
                           <h4 className="font-bold text-lg">{plan.packageName}</h4>
-                          <p className="text-sm text-muted-foreground">最多可創建{plan?.unitCount}個單位</p>
+                          <p className="text-sm text-muted-foreground">
+                            <DynamicText text={`最多可創建${plan?.unitCount}個單位`} />
+                          </p>
                         </div>
                         <div className="text-right">
                           <div className="text-xl font-bold text-primary">${plan.price.toLocaleString()}</div>
-                          <span className="text-xs text-muted-foreground">HKD/月</span>
+                          <span className="text-xs text-muted-foreground">
+                            HKD/
+                            <DynamicText text="月" />
+                          </span>
                         </div>
                       </div>
 
@@ -388,7 +398,7 @@ export const Upgrade: FC<UpgradeProps> = ({
                           ))}
                         {plan.packageItemList.length > 6 && (
                           <span className="text-xs text-muted-foreground">
-                            +{plan.packageItemList.length - 6} 更多功能
+                            +{plan.packageItemList.length - 6} <DynamicText text="更多功能" />
                           </span>
                         )}
                       </div>
@@ -504,44 +514,62 @@ export const Upgrade: FC<UpgradeProps> = ({
                     <div className="space-y-2">
                       <div className="p-3 rounded-lg bg-[#FFF8F5] border text-xs text-muted-foreground space-y-1">
                         <div>
-                          升級後按原訂單時長 <span className="font-medium text-foreground">{months} 個月</span>{' '}
-                          重新計費， 新到期日：
+                          <DynamicText text="升級後按原訂單時長" />{' '}
+                          <span className="font-medium text-foreground">
+                            {months} <DynamicText text="個月" />
+                          </span>{' '}
+                          <DynamicText text="重新計費， 新到期日：" />
                           <span className="font-medium text-foreground">{newExpiryDate}</span>。
                         </div>
                         <div>
-                          原套餐已使用 <span className="font-medium text-foreground">{usedDays}</span> / {totalDays}{' '}
-                          天， 剩餘 <span className="font-medium text-foreground">{remainingDays}</span> 天， 可抵扣餘額{' '}
+                          <DynamicText text="原套餐已使用" />{' '}
+                          <span className="font-medium text-foreground">{usedDays}</span> / {totalDays}{' '}
+                          <DynamicText text="天， 剩餘" />{' '}
+                          <span className="font-medium text-foreground">{remainingDays}</span>{' '}
+                          <DynamicText text="天， 可抵扣餘額" />{' '}
                           <span className="font-medium text-foreground">${remainingCredit?.toLocaleString()} HKD</span>
                           。
                         </div>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">新套餐費用（{months} 個月）</span>
+                        <span className="text-muted-foreground">
+                          <DynamicText text={`新套餐費用（${months} 個月）`} />
+                        </span>
                         <span>${fmt(newPlanCost)} HKD</span>
                       </div>
                       <div className="flex justify-between text-sm text-green-600">
-                        <span>抵扣原套餐剩餘餘額</span>
+                        <span>
+                          <DynamicText text="抵扣原套餐剩餘餘額" />
+                        </span>
                         <span>-${fmt(Math.min(remainingCredit ?? 0, newPlanCost))} HKD</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">套餐升級應付尾款</span>
+                        <span className="text-muted-foreground">
+                          <DynamicText text="套餐升級應付尾款" />
+                        </span>
                         <span>${fmt(getUpgradePrice())} HKD</span>
                       </div>
                       {calculateUpgradeAddonsTotal() > 0 && (
                         <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">增值服務（{months} 個月）</span>
+                          <span className="text-muted-foreground">
+                            <DynamicText text="增值服務（{months} 個月）" />
+                          </span>
                           <span>${fmt(calculateUpgradeAddonsTotal())} HKD</span>
                         </div>
                       )}
                       {promotionDiscount > 0 && (
                         <div className="flex justify-between text-sm text-green-600">
-                          <span>活動優惠</span>
+                          <span>
+                            <DynamicText text="活動優惠" />
+                          </span>
                           <span>-${fmt(promotionDiscount)} HKD</span>
                         </div>
                       )}
                       <Separator />
                       <div className="flex justify-between items-center text-lg font-bold">
-                        <span>總計</span>
+                        <span>
+                          <DynamicText text="總計" />
+                        </span>
                         <span className="text-primary">${fmt(finalTotal)} HKD</span>
                       </div>
                     </div>
@@ -550,10 +578,10 @@ export const Upgrade: FC<UpgradeProps> = ({
 
                 <div className="flex gap-3 pt-2">
                   <Button variant="outline" className="flex-1" onClick={() => setShowUpgradeDialog(false)}>
-                    取消
+                    <DynamicText text="取消" />
                   </Button>
                   <Button className="flex-1" disabled={!selectedUpgradePlan} onClick={handleConfirmUpgrade}>
-                    確認升級
+                    <DynamicText text="確認升級" />
                   </Button>
                 </div>
               </div>

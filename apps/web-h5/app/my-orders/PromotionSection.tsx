@@ -3,6 +3,8 @@
 import { Button, Input } from '@go-tech-frontend/ui';
 import type { FC } from 'react';
 import { type PromotionOption, getPromotionDiscount } from '@/app/constants/promotion';
+import { DynamicText } from '../components/DynamicI18nText';
+import { useBatchTranslation } from '../hooks/useBatchTranslation';
 
 interface PromotionSectionProps {
   applying: boolean;
@@ -28,7 +30,9 @@ export const PromotionSection: FC<PromotionSectionProps> = ({
 }) => {
   return (
     <div className="rounded-lg border border-border p-3">
-      <p className="font-medium mb-3">優惠活動</p>
+      <p className="font-medium mb-3">
+        <DynamicText text="優惠活動" />
+      </p>
 
       {promotions.length > 0 ? (
         <div className="space-y-2">
@@ -51,9 +55,13 @@ export const PromotionSection: FC<PromotionSectionProps> = ({
                     className="w-4 h-4 text-primary focus:ring-primary"
                   />
                   <div>
-                    <p className="text-sm font-medium">{promotion.promotionName}</p>
+                    <p className="text-sm font-medium">
+                      <DynamicText text={promotion.promotionName} />
+                    </p>
                     {promotion.promotionDesc && (
-                      <p className="text-xs text-muted-foreground">{promotion.promotionDesc}</p>
+                      <p className="text-xs text-muted-foreground">
+                        <DynamicText text="promotion.promotionDesc" />
+                      </p>
                     )}
                   </div>
                 </div>
@@ -73,11 +81,15 @@ export const PromotionSection: FC<PromotionSectionProps> = ({
               onChange={() => onSelect(null)}
               className="w-4 h-4 text-primary focus:ring-primary"
             />
-            <span className="text-sm">不使用優惠</span>
+            <span className="text-sm">
+              <DynamicText text="不使用優惠" />
+            </span>
           </label>
         </div>
       ) : (
-        <p className="text-sm text-muted-foreground">該套餐暫無可用優惠活動</p>
+        <p className="text-sm text-muted-foreground">
+          <DynamicText text="該套餐暫無可用優惠活動" />
+        </p>
       )}
 
       {/* 优惠码 */}
@@ -85,7 +97,7 @@ export const PromotionSection: FC<PromotionSectionProps> = ({
         <Input
           value={code}
           onChange={e => onCodeChange(e.target.value)}
-          placeholder="輸入優惠碼"
+          placeholder={useBatchTranslation('輸入優惠碼')}
           className="h-10 flex-1"
           onKeyDown={e => {
             if (e.key === 'Enter') {
@@ -100,7 +112,7 @@ export const PromotionSection: FC<PromotionSectionProps> = ({
           disabled={applying}
           onClick={onApply}
         >
-          {applying ? '驗證中...' : '使用優惠碼'}
+          {applying ? <DynamicText text="驗證中..." /> : <DynamicText text="使用優惠碼" />}
         </Button>
       </div>
     </div>

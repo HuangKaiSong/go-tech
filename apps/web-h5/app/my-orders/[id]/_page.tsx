@@ -1,10 +1,10 @@
 'use client';
 
-import { Badge, Button, Card, CardContent, CardHeader, Separator } from '@go-tech-frontend/ui';
-import { ArrowLeft, CheckCircle, Download, Package, RefreshCw, Settings } from 'lucide-react';
-import type { GetStaticPaths, GetStaticProps } from 'next';
+import { Badge, Button, Card, CardContent, CardHeader, Separator, toast } from '@go-tech-frontend/ui';
+import { ArrowLeft, CheckCircle, CreditCard, Download, Package, RefreshCw, Settings, XCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { DynamicText } from '@/app/components/DynamicI18nText';
 import Footer from '@/app/components/Footer';
 import Header from '@/app/components/Header';
 import Link from '@/app/components/Link';
@@ -15,7 +15,8 @@ import {
   PayTypelabel,
   clearWebManagedCashier,
   openWebManagedCashier,
-  peekWebManagedCashier
+  peekWebManagedCashier,
+  stashWebManagedCashier
 } from '@/app/constants/payment';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -23,26 +24,8 @@ import { useAuth } from '@/contexts/AuthContext';
 const POLL_INTERVAL = 5000; // 每 5 秒查询一次
 const POLL_MAX_ATTEMPTS = 60; // 最多 60 次（约 5 分钟）
 
-type OrderProps = {
-  id: string;
-};
-
-export const getStaticProps = (async context => {
-  return { props: { id: context.params?.id as string } };
-}) satisfies GetStaticProps<OrderProps>;
-
-export const getStaticPaths = (async () => {
-  return {
-    paths: [
-      {
-        params: {
-          id: 'ORD-2024-001'
-        }
-      } // See the "paths" section below
-    ],
-    fallback: true
-  };
-}) satisfies GetStaticPaths;
+/** 订单支付过期时间（分钟），超过此时间未支付的订单视为已过期 */
+const ORDER_PAYMENT_TIMEOUT_MINUTES = 30;
 
 const getStatusColor = (status: OrderStatusEnum) => {
   switch (status) {
@@ -61,8 +44,8 @@ const getStatusColor = (status: OrderStatusEnum) => {
 
 /** 跳转第三方支付（全托管收银台）。 */
 const goToThirdPartyPay = (data: OrderAddResponse) => {
-  clearWebManagedCashier();
   openWebManagedCashier(data);
+  clearWebManagedCashier();
 };
 
 // oxlint-disable-next-line complexity
@@ -138,6 +121,72 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
     };
   }, [token, _orderId, order?.payType, order?.orderStatus]);
 
+  /** 判断订单是否已过支付有效期 */
+  const isExpired = useMemo(() => {
+    if (!order?.createTime) return false;
+    const createTime = new Date(order.createTime).getTime();
+    if (Number.isNaN(createTime)) return false;
+    const now = Date.now();
+    return now - createTime > ORDER_PAYMENT_TIMEOUT_MINUTES * 60 * 1000;
+  }, [order?.createTime]);
+
+  /** 繼續付款：重新獲取支付參數並跳轉收銀台 */
+  const handleContinuePay = async () => {
+    if (!token) return;
+    const toastId = toast.loading('獲取支付信息中…');
+    try {
+      const res = await fetch(`/go-tech/platform/packageOrder/repay/${_orderId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Type': 'platform_customer',
+          Authorization: `Bearer ${token}`
+        }
+      }).then(r => r.json());
+
+      if (res.code === 200 && res.data) {
+        toast.success('正在跳轉至支付頁面', { id: toastId });
+        stashWebManagedCashier(res.data);
+        goToThirdPartyPay(res.data);
+      } else {
+        toast.error(res.message || '獲取支付信息失敗', { id: toastId });
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('獲取支付信息失敗，請稍後重試', { id: toastId });
+    }
+  };
+
+  /** 取消訂單 */
+  const handleCancelOrder = async () => {
+    if (!token) return;
+    const toastId = toast.loading('取消訂單中…');
+    try {
+      const res = await fetch(`/go-tech/platform/packageOrder/cancel/${_orderId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Type': 'platform_customer',
+          Authorization: `Bearer ${token}`
+        }
+      }).then(r => r.json());
+
+      if (res.code === 200) {
+        toast.success('訂單已取消', { id: toastId });
+        setOrder((prev: any) => ({
+          ...prev,
+          orderStatus: OrderStatusEnum.CANCELED,
+          orderStatusName: '已取消'
+        }));
+      } else {
+        toast.error(res.message || '取消訂單失敗', { id: toastId });
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('取消訂單失敗，請稍後重試', { id: toastId });
+    }
+  };
+
   if (!order) {
     return (
       <div className="min-h-screen bg-background">
@@ -169,18 +218,23 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
             className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
-            返回我的訂單
+            <DynamicText text="返回我的訂單" />
           </button>
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-primary mb-2">訂單詳情</h1>
-              <p className="text-muted-foreground">訂單編號：{order.orderNo}</p>
+              <h1 className="text-3xl md:text-4xl font-bold text-primary mb-2">
+                <DynamicText text="訂單詳情" />
+              </h1>
+              <p className="text-muted-foreground">
+                <DynamicText text="訂單編號：" />
+                {order.orderNo}
+              </p>
             </div>
             <div className="flex items-center gap-2">
               {isPolling && (
                 <span className="flex items-center gap-1 text-xs text-muted-foreground">
                   <RefreshCw className="w-3 h-3 animate-spin" />
-                  支付確認中…
+                  <DynamicText text="支付確認中…" />
                 </span>
               )}
               <Badge className={`text-sm px-3 py-1 ${getStatusColor(order.orderStatus)}`}>
@@ -201,10 +255,12 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
                 <CardContent className="flex items-center justify-between gap-4 py-4">
                   <div className="flex items-center gap-2 text-sm">
                     <RefreshCw className="w-4 h-4 animate-spin text-primary" />
-                    <span>訂單已創建，即將跳轉至支付頁面…</span>
+                    <span>
+                      <DynamicText text="訂單已創建，即將跳轉至支付頁面…" />
+                    </span>
                   </div>
                   <Button size="sm" onClick={() => goToThirdPartyPay(pendingCashier)}>
-                    立即前往支付
+                    <DynamicText text="立即前往支付" />
                   </Button>
                 </CardContent>
               </Card>
@@ -220,7 +276,7 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
                   <div>
                     <h2 className="text-xl font-bold">{order.packageName}</h2>
                     <p className="text-sm text-muted-foreground">
-                      最多可創建{order.platformPackageDto?.unitCount}個單位
+                      <DynamicText text={`最多可創建${order.platformPackageDto?.unitCount}個單位`} />
                     </p>
                   </div>
                 </div>
@@ -228,7 +284,7 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
               <CardContent>
                 <h3 className="font-medium mb-4 flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 text-green-500" />
-                  包含功能
+                  <DynamicText text="包含功能" />
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {order.platformPackageDto?.packageItemList?.map((feature: any) => (
@@ -238,7 +294,9 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
                           <use href={`#icon-${feature.menuIcon}`} xlinkHref={`#icon-${feature.menuIcon}`} />
                         </svg>
                       )}
-                      <span className="text-sm">{feature.menuTitle}</span>
+                      <span className="text-sm">
+                        <DynamicText text={feature.menuTitle} />
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -248,11 +306,15 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
             {/* 訂單明細 */}
             <Card>
               <CardHeader>
-                <h2 className="text-lg font-bold">訂單明細</h2>
+                <h2 className="text-lg font-bold">
+                  <DynamicText text="訂單明細" />
+                </h2>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span>{order.packageName}</span>
+                  <span>
+                    <DynamicText text={order.packageName} />
+                  </span>
                   <span className="font-medium">{order.finalAmount} HKD</span>
                 </div>
 
@@ -260,14 +322,18 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
                   <>
                     <Separator />
                     <div className="space-y-2">
-                      <p className="text-sm text-muted-foreground">增值服務</p>
+                      <p className="text-sm text-muted-foreground">
+                        <DynamicText text="增值服務" />
+                      </p>
                       {order.orderItems
                         ?.filter((item: any) => item.itemType !== 1)
                         ?.map((addon: any) => (
                           <div key={addon.id} className="flex justify-between items-center pl-4">
                             <span className="text-sm">
                               {addon.itemName} × {addon.count}
-                              <span className="text-muted-foreground ml-2">({addon.price}/個)</span>
+                              <span className="text-muted-foreground ml-2">
+                                ({addon.price}/<DynamicText text="個" />)
+                              </span>
                             </span>
                             <span className="font-medium">{addon.amount} HKD</span>
                           </div>
@@ -278,7 +344,9 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
 
                 <Separator />
                 <div className="flex justify-between items-center text-lg font-bold">
-                  <span>總計</span>
+                  <span>
+                    <DynamicText text="總計" />
+                  </span>
                   <span className="text-primary">${order.finalAmount?.toLocaleString()} HKD</span>
                 </div>
               </CardContent>
@@ -287,27 +355,37 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
             {/* 付款信息 */}
             <Card>
               <CardHeader>
-                <h2 className="text-lg font-bold">付款信息</h2>
+                <h2 className="text-lg font-bold">
+                  <DynamicText text="付款信息" />
+                </h2>
               </CardHeader>
               <CardContent>
                 <div className="grid md:grid-cols-2 gap-4 text-sm">
                   <div className="space-y-3">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">付款方式</span>
+                      <span className="text-muted-foreground">
+                        <DynamicText text="付款方式" />
+                      </span>
                       <span>{PayTypelabel[order.payType as PayTypeEnum] || '-'}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">交易編號</span>
+                      <span className="text-muted-foreground">
+                        <DynamicText text="交易編號" />
+                      </span>
                       <span className="font-mono text-xs">{order.transactionId || '-'}</span>
                     </div>
                   </div>
                   <div className="space-y-3">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">下單日期</span>
+                      <span className="text-muted-foreground">
+                        <DynamicText text="下單日期" />
+                      </span>
                       <span>{order.createTime}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">到期日期</span>
+                      <span className="text-muted-foreground">
+                        <DynamicText text="到期日期" />
+                      </span>
                       <span>{order.expireDate || '-'}</span>
                     </div>
                   </div>
@@ -315,12 +393,26 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
               </CardContent>
             </Card>
 
+            {/* 待付款訂單操作按鈕（未過期才顯示） */}
+            {order.orderStatus === OrderStatusEnum.WAIT_PAY && !isExpired && (
+              <div className="flex flex-col sm:flex-row gap-4 justify-end">
+                <Button variant="outline" className="gap-2" onClick={handleCancelOrder}>
+                  <XCircle className="w-4 h-4" />
+                  <DynamicText text="取消訂單" />
+                </Button>
+                <Button className="gap-2" onClick={handleContinuePay}>
+                  <CreditCard className="w-4 h-4" />
+                  <DynamicText text="繼續付款" />
+                </Button>
+              </div>
+            )}
+
             {/* 操作按鈕 */}
             {order.orderStatus === OrderStatusEnum.COMPLETED && (
               <div className="flex flex-col sm:flex-row gap-4 justify-end">
                 <Button variant="outline" className="gap-2" onClick={() => router.push(`/invoice/${order.id}`)}>
                   <Download className="w-4 h-4" />
-                  下載發票
+                  <DynamicText text="下載發票" />
                 </Button>
                 {order.isEffective && (
                   <>
@@ -335,14 +427,16 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
                     <Link href={`/renew-order/${order.id}`}>
                       <Button className="gap-2 w-full sm:w-auto">
                         <RefreshCw className="w-4 h-4" />
-                        續費套餐
+                        <DynamicText text="續費套餐" />
                       </Button>
                     </Link>
                   </>
                 )}
                 {order.status === 'expired' && (
                   <Link href="/service-plan">
-                    <Button className="gap-2 w-full sm:w-auto">重新訂購</Button>
+                    <Button className="gap-2 w-full sm:w-auto">
+                      <DynamicText text="重新訂購" />
+                    </Button>
                   </Link>
                 )}
               </div>
