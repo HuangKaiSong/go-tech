@@ -3,12 +3,14 @@
 import { useCountDown } from '@go-tech/hooks';
 import { Button, Checkbox, Input, toast } from '@go-tech/web-ui';
 import { CircleAlert, X } from 'lucide-react';
-import Image from 'next/image';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import z from 'zod';
+import { DynamicText } from '@/app/components/DynamicI18nText';
 import Link from '@/app/components/Link';
+import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 // import Logo from "@/assets/Gotech_Logo.webp";
 import authBgImg from '@/assets/background.webp';
 import { sendToBetterStack } from '@/lib/betterstack-logger';
@@ -29,15 +31,59 @@ const Register = () => {
   const router = useRouter();
   const t = useTranslations('Account');
   const existingEmailMessage = t('emailExists');
+  const passwordPlaceholder = useBatchTranslation('請輸入密碼');
+  const pwdConfirmPlaceholder = useBatchTranslation('請再次輸入密碼');
+  const namePlaceholder = useBatchTranslation('請輸入您的姓名');
+  const emailPlaceholder = useBatchTranslation('請輸入您的電子郵箱');
+  const phonePlaceholder = useBatchTranslation('請輸入您的聯繫電話');
+  const companyPlaceholder = useBatchTranslation('請輸入您的公司名稱');
+  const codePlaceholder = useBatchTranslation('請輸入郵箱收到的驗證碼');
+  const codeSentMsg = useBatchTranslation('驗證碼已發送至您的郵箱');
+  const codeFailMsg = useBatchTranslation('驗證碼發送失敗，請稍後再試');
+  const regSuccessLoading = useBatchTranslation('注册成功, 正在為您跳转登录页面...');
+  const regSuccessMsg = useBatchTranslation('跳轉成功, 請登入');
+  const sendCodeText = useBatchTranslation('發送驗證碼');
+  const sendingText = useBatchTranslation('發送中...');
+  const retrySuffix = useBatchTranslation('後重發');
+  const processingText = useBatchTranslation('處理中...');
+  const registerText = useBatchTranslation('註冊');
+  const nextStepText = useBatchTranslation('下一步');
+  const loginText = useBatchTranslation('立即登入');
+  const codeLabel = useBatchTranslation('驗證碼');
+  const agreeText = useBatchTranslation('我已閱讀並同意');
+  const termsText = useBatchTranslation('《服務條款》');
+  const privacyText = useBatchTranslation('《私隱政策》');
+  const haveAccountText = useBatchTranslation('已有帳戶？');
+  const emailVerifyingText = useBatchTranslation('正在驗證郵箱...');
 
   const verificationCodeSchema = z.object({
-    email: z.string().min(1, t('vEmailRequired')).email({ message: t('vEmailInvalid') }).trim()
+    email: z
+      .string()
+      .min(1, t('vEmailRequired'))
+      .email({ message: t('vEmailInvalid') })
+      .trim()
   });
   const signupSchema = verificationCodeSchema.extend({
-    name: z.string({ message: t('vNameRequired') }).min(2, t('vNameRequired')).max(50).trim(),
-    phone: z.string({ message: t('vPhoneRequired') }).min(1, t('vPhoneRequired')).min(7, t('vPhoneMin')).trim(),
-    company: z.string({ message: t('vCompanyRequired') }).min(2).max(50).trim(),
-    verificationCode: z.string({ message: t('vCodeRequired') }).min(1, t('vCodeRequired')).length(6).trim()
+    name: z
+      .string({ message: t('vNameRequired') })
+      .min(2, t('vNameRequired'))
+      .max(50)
+      .trim(),
+    phone: z
+      .string({ message: t('vPhoneRequired') })
+      .min(1, t('vPhoneRequired'))
+      .min(7, t('vPhoneMin'))
+      .trim(),
+    company: z
+      .string({ message: t('vCompanyRequired') })
+      .min(2)
+      .max(50)
+      .trim(),
+    verificationCode: z
+      .string({ message: t('vCodeRequired') })
+      .min(1, t('vCodeRequired'))
+      .length(6)
+      .trim()
   });
   const signupSchema2 = signupSchema
     .extend({
@@ -166,7 +212,7 @@ const Register = () => {
       const fetchResult = await response.json();
 
       if (fetchResult && fetchResult.code && fetchResult.code === 200) {
-        toast.success('驗證碼已發送至您的郵箱');
+        toast.success(codeSentMsg);
         setTargetDate(Date.now() + 60 * 1000);
         return;
       }
@@ -178,7 +224,7 @@ const Register = () => {
           extra: await err.json()
         });
       }
-      toast.error('驗證碼發送失敗，請稍後再試');
+      toast.error(codeFailMsg);
     } finally {
       setPending(false);
     }
@@ -284,8 +330,8 @@ const Register = () => {
           }, 1000);
         }),
         {
-          loading: '注册成功, 正在為您跳转登录页面...',
-          success: '跳轉成功, 請登入',
+          loading: regSuccessLoading,
+          success: regSuccessMsg,
           duration: 1000,
           onAutoClose() {
             toast.dismiss();
@@ -306,9 +352,9 @@ const Register = () => {
     }
   };
 
-  let sendCodeLabel = '發送驗證碼';
-  if (pending) sendCodeLabel = '發送中...';
-  else if (countdown > 0) sendCodeLabel = `${Math.ceil(countdown / 1000)}s 後重發`;
+  let sendCodeLabel = sendCodeText;
+  if (pending) sendCodeLabel = sendingText;
+  else if (countdown > 0) sendCodeLabel = `${Math.ceil(countdown / 1000)}s ${retrySuffix}`;
 
   return (
     <div className="min-h-screen relative flex items-center justify-center p-4">
@@ -322,7 +368,7 @@ const Register = () => {
       />
       <div className="absolute inset-0 bg-foreground/30 backdrop-blur-sm" />
       {/* Register Card */}
-      <div className="relative bg-background rounded-2xl shadow-2xl w-full max-w-xl p-8 md:p-12 my-8">
+      <div className="relative bg-background rounded-2xl shadow-2xl w-full max-w-xl p-8 md:p-12 my-8 min-w-fit">
         {/* Close Button */}
 
         <Link href="/" className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors">
@@ -341,9 +387,11 @@ const Register = () => {
           />
         </div>
 
-        <h1 className="text-2xl font-bold text-center text-foreground mb-6">注册新帳戶</h1>
+        <h1 className="text-2xl font-bold text-center text-foreground mb-6">
+          <DynamicText text="注册新帳戶" />
+        </h1>
 
-        <form onSubmit={step === 1 ? handleSubmit : handlePrevSubmit} className="space-y-4">
+        <form onSubmit={step === 1 ? handleSubmit : handlePrevSubmit} className="space-y-4 ">
           {step === 1 ? (
             <>
               <div>
@@ -351,7 +399,7 @@ const Register = () => {
                   <span className="text-destructive">*</span>
                   <Input
                     type="text"
-                    placeholder="請輸入密碼"
+                    placeholder={passwordPlaceholder}
                     value={formData.password}
                     onChange={handleChange('password')}
                     classNames={{
@@ -362,14 +410,14 @@ const Register = () => {
                 </div>
                 <p className="text-xs text-gray-400 mt-2 ml-5 flex items-center gap-1">
                   <CircleAlert className="w-3.5 h-3.5" />
-                  密碼需至少包含一個字母、一個數字和一個特殊字符
+                  <DynamicText text="密碼需至少包含一個字母、一個數字和一個特殊字符" />
                 </p>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-destructive">*</span>
                 <Input
                   type="text"
-                  placeholder="請再次輸入密碼"
+                  placeholder={pwdConfirmPlaceholder}
                   value={formData.confirmPassword}
                   onChange={handleChange('confirmPassword')}
                   classNames={{
@@ -383,7 +431,7 @@ const Register = () => {
                 disabled={signupPending}
                 className="w-full h-14 text-lg font-semibold bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
               >
-                {signupPending ? '處理中...' : '註冊'}
+                {signupPending ? processingText : registerText}
               </Button>
             </>
           ) : (
@@ -392,7 +440,7 @@ const Register = () => {
                 <span className="text-destructive">*</span>
                 <Input
                   type="text"
-                  placeholder="請輸入您的姓名"
+                  placeholder={namePlaceholder}
                   value={formData.name}
                   onChange={handleChange('name')}
                   classNames={{
@@ -407,7 +455,7 @@ const Register = () => {
                 <div className="relative flex-1">
                   <Input
                     type="email"
-                    placeholder="請輸入您的電子郵箱"
+                    placeholder={emailPlaceholder}
                     value={formData.email}
                     onChange={handleChange('email')}
                     onBlur={handleEmailBlur}
@@ -455,7 +503,7 @@ const Register = () => {
                   </span>
                 </div>
               </div>
-              {emailChecking && <p className="text-xs text-gray-400 ml-5 -mt-2">正在驗證郵箱...</p>}
+              {emailChecking && <p className="text-xs text-gray-400 ml-5 -mt-2">{emailVerifyingText}</p>}
               {!emailChecking && emailExists && (
                 <p className="text-xs text-destructive ml-5 -mt-2">{existingEmailMessage}</p>
               )}
@@ -464,7 +512,7 @@ const Register = () => {
                 <span className="text-destructive">*</span>
                 <Input
                   type="tel"
-                  placeholder="請輸入您的聯繫電話"
+                  placeholder={phonePlaceholder}
                   value={formData.phone}
                   onChange={handleChange('phone')}
                   classNames={{
@@ -478,7 +526,7 @@ const Register = () => {
                 <span className="text-destructive">*</span>
                 <Input
                   type="text"
-                  placeholder="請輸入您的公司名稱"
+                  placeholder={companyPlaceholder}
                   value={formData.company}
                   onChange={handleChange('company')}
                   classNames={{
@@ -489,10 +537,10 @@ const Register = () => {
               </div>
 
               <div className="flex items-center gap-3">
-                <span className="text-sm text-muted-foreground whitespace-nowrap">驗證碼</span>
+                <span className="text-sm text-muted-foreground whitespace-nowrap">{codeLabel}</span>
                 <Input
                   type="text"
-                  placeholder="請輸入郵箱收到的驗證碼"
+                  placeholder={codePlaceholder}
                   value={formData.verificationCode}
                   onChange={handleChange('verificationCode')}
                   classNames={{
@@ -517,13 +565,13 @@ const Register = () => {
                   onCheckedChange={checked => setAcceptTerms(checked as boolean)}
                 />
                 <label htmlFor="terms" className="text-sm text-muted-foreground">
-                  我已閱讀並同意
+                  {agreeText}
                   <Link href="/legal-agreement/terms/terms-of-use" className="text-primary hover:underline">
-                    《服務條款》
+                    {termsText}
                   </Link>
-                  及
+                  <DynamicText text="及" />
                   <Link href="/legal-agreement/terms/privacy" className="text-primary hover:underline">
-                    《私隱政策》
+                    {privacyText}
                   </Link>
                 </label>
               </div>
@@ -533,16 +581,16 @@ const Register = () => {
                 disabled={validatedPending}
                 className="w-full h-14 text-lg font-semibold bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
               >
-                {validatedPending ? '處理中...' : '下一步'}
+                {validatedPending ? processingText : nextStepText}
               </Button>
             </>
           )}
         </form>
 
         <div className="text-center mt-4 text-sm">
-          <span className="text-muted-foreground">已有帳戶？</span>{' '}
+          <span className="text-muted-foreground">{haveAccountText}</span>{' '}
           <Link href="/account/login" className="text-primary hover:underline">
-            立即登入
+            {loginText}
           </Link>
         </div>
       </div>

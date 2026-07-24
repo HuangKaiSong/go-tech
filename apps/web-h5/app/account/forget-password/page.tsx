@@ -7,7 +7,9 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import z from 'zod';
+import { DynamicText } from '@/app/components/DynamicI18nText';
 import Link from '@/app/components/Link';
+import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 // import Logo from "@/assets/Gotech_Logo.webp";
 import authBgImg from '@/assets/background.webp';
 import { sendToBetterStack } from '@/lib/betterstack-logger';
@@ -46,6 +48,22 @@ const Register = () => {
   const [isSendingCode, setIsSendingCode] = useState(false);
   const [step, setStep] = useState(0);
 
+  const codeSentMsg = useBatchTranslation('驗證碼已發送至您的郵箱');
+  const codeFailMsg = useBatchTranslation('驗證碼發送失敗，請稍後再試');
+  const resetSuccessLoading = useBatchTranslation('重置密碼成功, 正在為您跳转登录页面...');
+  const resetSuccessMsg = useBatchTranslation('跳轉成功, 請登入');
+  const sendCodeText = useBatchTranslation('發送驗證碼');
+  const sendingText = useBatchTranslation('發送中...');
+  const retrySuffix = useBatchTranslation('後重發');
+  const passwordPlaceholder = useBatchTranslation('請輸入密碼');
+  const pwdConfirmPlaceholder = useBatchTranslation('請再次輸入密碼');
+  const emailPlaceholder = useBatchTranslation('請輸入您的電子郵箱');
+  const codePlaceholder = useBatchTranslation('請輸入收到的驗證碼');
+  const processingText = useBatchTranslation('處理中...');
+  const confirmResetText = useBatchTranslation('確認重置');
+  const nextStepText = useBatchTranslation('下一步');
+  const codeLabel = useBatchTranslation('驗證碼');
+
   const [targetDate, setTargetDate] = useState<number>();
 
   const [countdown] = useCountDown({
@@ -82,7 +100,7 @@ const Register = () => {
       const fetchResult = await response.json();
 
       if (fetchResult && fetchResult.code && fetchResult.code === 200) {
-        toast.success('驗證碼已發送至您的郵箱');
+        toast.success(codeSentMsg);
         setTargetDate(Date.now() + 60 * 1000);
         return;
       }
@@ -94,7 +112,7 @@ const Register = () => {
           extra: await err.json()
         });
       }
-      toast.error('驗證碼發送失敗，請稍後再試');
+      toast.error(codeFailMsg);
     } finally {
       setIsSendingCode(false);
     }
@@ -182,8 +200,8 @@ const Register = () => {
           }, 1000);
         }),
         {
-          loading: '重置密碼成功, 正在為您跳转登录页面...',
-          success: '跳轉成功, 請登入',
+          loading: resetSuccessLoading,
+          success: resetSuccessMsg,
           duration: 1000,
           onAutoClose() {
             toast.dismiss();
@@ -204,9 +222,9 @@ const Register = () => {
     }
   };
 
-  let sendCodeLabel = '發送驗證碼';
-  if (isSendingCode) sendCodeLabel = '發送中...';
-  else if (countdown > 0) sendCodeLabel = `${Math.ceil(countdown / 1000)}s 後重發`;
+  let sendCodeLabel = sendCodeText;
+  if (isSendingCode) sendCodeLabel = sendingText;
+  else if (countdown > 0) sendCodeLabel = `${Math.ceil(countdown / 1000)}s ${retrySuffix}`;
 
   return (
     <div className="min-h-screen relative flex items-center justify-center p-4">
@@ -221,7 +239,7 @@ const Register = () => {
       <div className="absolute inset-0 bg-foreground/30 backdrop-blur-sm" />
 
       {/* Register Card */}
-      <div className="relative bg-background rounded-2xl shadow-2xl w-full max-w-xl p-8 md:p-12 my-8">
+      <div className="relative bg-background rounded-2xl shadow-2xl w-full max-w-xl p-8 md:p-12 my-8 min-w-fit">
         {/* Close Button */}
         <Link href="/" className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors">
           <X className="w-6 h-6" />
@@ -239,7 +257,9 @@ const Register = () => {
           />
         </div>
 
-        <h1 className="text-2xl font-bold text-center text-foreground mb-6">重置您的密碼</h1>
+        <h1 className="text-2xl font-bold text-center text-foreground mb-6">
+          <DynamicText text="重置您的密碼" />
+        </h1>
 
         <form onSubmit={step === 1 ? handleSubmit : handlePrevSubmit} className="space-y-4">
           {step === 1 ? (
@@ -248,7 +268,7 @@ const Register = () => {
                 <span className="text-destructive">*</span>
                 <Input
                   type="text"
-                  placeholder="請輸入密碼"
+                  placeholder={passwordPlaceholder}
                   value={formData.pwd}
                   onChange={handleChange('pwd')}
                   classNames={{
@@ -259,13 +279,13 @@ const Register = () => {
               </div>
               <p className="text-xs text-gray-400 mt-2 ml-5 flex items-center gap-1">
                 <CircleAlert className="w-3.5 h-3.5" />
-                密碼需至少包含一個字母、一個數字和一個特殊字符
+                <DynamicText text="密碼需至少包含一個字母、一個數字和一個特殊字符" />
               </p>
               <div className="flex items-center gap-2">
                 <span className="text-destructive">*</span>
                 <Input
                   type="text"
-                  placeholder="請再次輸入密碼"
+                  placeholder={pwdConfirmPlaceholder}
                   value={formData.verifyPwd}
                   onChange={handleChange('verifyPwd')}
                   classNames={{
@@ -279,7 +299,7 @@ const Register = () => {
                 disabled={isLoading}
                 className="w-full h-14 text-lg font-semibold bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
               >
-                {isLoading ? '處理中...' : '確認重置'}
+                {isLoading ? processingText : confirmResetText}
               </Button>
             </>
           ) : (
@@ -288,7 +308,7 @@ const Register = () => {
                 <span className="text-destructive">*</span>
                 <Input
                   type="text"
-                  placeholder="請輸入您的電子郵箱"
+                  placeholder={emailPlaceholder}
                   value={formData.account}
                   onChange={handleChange('account')}
                   classNames={{
@@ -299,10 +319,10 @@ const Register = () => {
               </div>
 
               <div className="flex items-center gap-3">
-                <span className="text-sm text-muted-foreground whitespace-nowrap">驗證碼</span>
+                <span className="text-sm text-muted-foreground whitespace-nowrap">{codeLabel}</span>
                 <Input
                   type="text"
-                  placeholder="請輸入收到的驗證碼"
+                  placeholder={codePlaceholder}
                   value={formData.verificationCode}
                   onChange={handleChange('verificationCode')}
                   classNames={{
@@ -325,7 +345,7 @@ const Register = () => {
                 disabled={isLoading}
                 className="w-full h-14 text-lg font-semibold bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
               >
-                {isLoading ? '處理中...' : '下一步'}
+                {isLoading ? processingText : nextStepText}
               </Button>
             </>
           )}

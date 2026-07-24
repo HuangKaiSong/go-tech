@@ -1,6 +1,5 @@
-
-import { useLocale } from "next-intl";
-import { useEffect, useRef, useState } from "react";
+import { useLocale } from 'next-intl';
+import { useEffect, useRef, useState } from 'react';
 
 type BatchItem = {
   locale: string;
@@ -22,26 +21,35 @@ function flushBatch(locale: any) {
   batchQueue = [];
   scheduled = false;
 
-  const texts = items.map((item) => item.text);
-  fetch("/api/translate/batch", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ texts, locale }),
+  // 过滤空字符串，避免 API 报错
+  const nonEmptyItems = items.filter(item => item.text !== '');
+  const emptyItems = items.filter(item => item.text === '');
+
+  // 空字符串项直接 resolve 为空字符串
+  emptyItems.forEach(item => item.resolve(''));
+
+  if (nonEmptyItems.length === 0) return;
+
+  const texts = nonEmptyItems.map(item => item.text);
+  fetch('/api/translate/batch', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ texts, locale })
   })
-    .then((res) => res.json())
-    .then((data) => {
+    .then(res => res.json())
+    .then(data => {
       const translations = data.translations || {};
-      items.forEach((item) => {
+      nonEmptyItems.forEach(item => {
         const translated = translations[item.text];
         if (translated) {
           item.resolve(translated);
         } else {
-          item.reject(new Error("No translation found"));
+          item.reject(new Error('No translation found'));
         }
       });
     })
-    .catch((err) => {
-      items.forEach((item) => item.reject(err));
+    .catch(err => {
+      nonEmptyItems.forEach(item => item.reject(err));
     });
 }
 
@@ -61,11 +69,12 @@ export function useBatchTranslation(text: string): string {
 
   useEffect(() => {
     isMounted.current = true;
-    // // 如果当前语言是默认语言，直接返回原文 坑: 可能会有更改原文的情况
-    // if (locale === "zh-hk") {
-    //   setTranslated(text);
-    //   return;
-    // }
+
+    // 空字符串无需翻译，直接返回
+    if (!text) {
+      setTranslated(text);
+      return;
+    }
 
     let resolved = false;
     const promise = new Promise<string>((resolve, reject) => {
@@ -74,7 +83,7 @@ export function useBatchTranslation(text: string): string {
     });
 
     promise
-      .then((val) => {
+      .then(val => {
         if (isMounted.current && !resolved) {
           resolved = true;
           setTranslated(val);
