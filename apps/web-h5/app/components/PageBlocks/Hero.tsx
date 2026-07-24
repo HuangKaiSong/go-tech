@@ -9,7 +9,7 @@ import 'slick-carousel/slick/slick-theme.css';
 // oxlint-disable-next-line import/no-unassigned-import
 import 'slick-carousel/slick/slick.css';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
-import { DynamicText } from '../DynamicI18nText';
+import { DynamicText } from '../DynamicI18nText.client';
 
 type BlockBase = {
   id: string;

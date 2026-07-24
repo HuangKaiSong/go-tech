@@ -3,7 +3,7 @@
 import { Button, Input } from '@go-tech-frontend/ui';
 import type { FC } from 'react';
 import { type PromotionOption, getPromotionDiscount } from '@/app/constants/promotion';
-import { DynamicText } from '../components/DynamicI18nText';
+import { DynamicText } from '../components/DynamicI18nText.client';
 import { useBatchTranslation } from '../hooks/useBatchTranslation';
 
 interface PromotionSectionProps {

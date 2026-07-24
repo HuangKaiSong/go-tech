@@ -1,4 +1,4 @@
-import { DynamicText } from '@/app/components/DynamicI18nText';
+import { DynamicText } from '@/app/components/DynamicI18nText.client';
 
 interface PriceSummaryProps {
   durationDiscount: number;

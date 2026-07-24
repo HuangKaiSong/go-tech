@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import Footer from '@/app/components/Footer';
 import Header from '@/app/components/Header';
-import { DynamicText } from '../components/DynamicI18nText';
+import { DynamicText } from '../components/DynamicI18nText.client';
 import { useBatchTranslation } from '../hooks/useBatchTranslation';
 
 const FreeTrial = () => {

@@ -14,6 +14,8 @@ import { createSvgSpriteHtml } from '@/plugins/createSvgIcons';
 import './globals.css';
 import Layout from './components/Layout';
 import LocaleInitializer from './components/LocaleInitializer';
+import { DynamicI18nProvider } from './components/DynamicI18nProvider';
+import { getDynamicMessages } from './lib/translation/messages';
 
 export const metadata: Metadata = {
   title: 'GO-TECH租務系統',
@@ -41,6 +43,7 @@ export default async function RootLayout({
   const cookieLocale = cookiesStore.get('GO_TECH_LANGUAGE')?.value;
   const language = isSupportedLocale(cookieLocale) ? cookieLocale : defaultLocale;
   const shouldInitLocale = !isSupportedLocale(cookieLocale);
+  const dynamicMessages = await getDynamicMessages(language);
 
   let tenants: Tenant[] = [];
   let user: User | null = null;
@@ -80,14 +83,16 @@ export default async function RootLayout({
         {shouldInitLocale ? <LocaleInitializer locale={language} /> : null}
         <div aria-hidden="true" dangerouslySetInnerHTML={{ __html: svgSpriteHtml }} />
         <NextIntlClientProvider>
-          <ThemeProvider attribute="class" enableSystem={false}>
-            <TooltipProvider>
-              <AuthProvider _tenants={tenants} initialUser={user} _token={token}>
-                <Layout>{children}</Layout>
-              </AuthProvider>
-              <Sonner className="toaster group" position="top-right" richColors />
-            </TooltipProvider>
-          </ThemeProvider>
+          <DynamicI18nProvider messages={dynamicMessages}>
+            <ThemeProvider attribute="class" enableSystem={false}>
+              <TooltipProvider>
+                <AuthProvider _tenants={tenants} initialUser={user} _token={token}>
+                  <Layout>{children}</Layout>
+                </AuthProvider>
+                <Sonner className="toaster group" position="top-right" richColors />
+              </TooltipProvider>
+            </ThemeProvider>
+          </DynamicI18nProvider>
         </NextIntlClientProvider>
       </body>
     </html>

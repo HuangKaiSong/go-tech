@@ -4,7 +4,7 @@ import { Button, Dialog, DialogContent, Input, Textarea, toast } from '@go-tech-
 import { useState } from 'react';
 import Footer from '@/app/components/Footer';
 import Header from '@/app/components/Header';
-import { DynamicText } from '../components/DynamicI18nText';
+import { DynamicText } from '../components/DynamicI18nText.client';
 import { useBatchTranslation } from '../hooks/useBatchTranslation';
 
 const Page = () => {
@@ -149,8 +149,12 @@ const Page = () => {
       {/* Success Dialog */}
       <Dialog open={showSuccess} onOpenChange={setShowSuccess}>
         <DialogContent className="sm:max-w-md text-center p-8">
-          <h2 className="text-2xl font-bold text-gray-700 mb-4">發送成功</h2>
-          <p className="text-muted-foreground">我們看到後會第一時間跟您聯繫，請耐心等待並保持電話暢通。</p>
+          <h2 className="text-2xl font-bold text-gray-700 mb-4">
+            <DynamicText text="發送成功" />
+          </h2>
+          <p className="text-muted-foreground">
+            <DynamicText text="我們看到後會第一時間跟您聯繫，請耐心等待並保持電話暢通。" />
+          </p>
         </DialogContent>
       </Dialog>
     </div>

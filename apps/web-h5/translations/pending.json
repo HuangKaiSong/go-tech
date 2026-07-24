@@ -462,7 +462,7 @@
   {
     "source": "公司名稱",
     "firstSeenAt": 1784608417030,
-    "count": 2
+    "count": 3
   },
   {
     "source": "保存修改",
@@ -747,7 +747,7 @@
   {
     "source": "選擇套餐",
     "firstSeenAt": 1784609143237,
-    "count": 2
+    "count": 3
   },
   {
     "source": "月",
@@ -757,42 +757,42 @@
   {
     "source": "套餐内容",
     "firstSeenAt": 1784609288322,
-    "count": 2
+    "count": 3
   },
   {
     "source": "開通月份",
     "firstSeenAt": 1784609364408,
-    "count": 2
+    "count": 3
   },
   {
     "source": "自定義",
     "firstSeenAt": 1784609387953,
-    "count": 2
+    "count": 3
   },
   {
     "source": "1 個月",
     "firstSeenAt": 1784609396565,
-    "count": 2
+    "count": 3
   },
   {
     "source": "2 個月",
     "firstSeenAt": 1784609396565,
-    "count": 2
+    "count": 3
   },
   {
     "source": "3 個月",
     "firstSeenAt": 1784609396565,
-    "count": 2
+    "count": 3
   },
   {
     "source": "6 個月",
     "firstSeenAt": 1784609396565,
-    "count": 2
+    "count": 3
   },
   {
     "source": "套餐小計：",
     "firstSeenAt": 1784609443956,
-    "count": 2
+    "count": 3
   },
   {
     "source": "增值服務",
@@ -802,27 +802,27 @@
   {
     "source": "需要",
     "firstSeenAt": 1784609473044,
-    "count": 2
+    "count": 3
   },
   {
     "source": "不需要",
     "firstSeenAt": 1784609480387,
-    "count": 2
+    "count": 3
   },
   {
     "source": "請選擇增值服務",
     "firstSeenAt": 1784609493855,
-    "count": 2
+    "count": 3
   },
   {
     "source": "（可多選，依套餐開通月份計算 1 個月）",
     "firstSeenAt": 1784609511016,
-    "count": 2
+    "count": 3
   },
   {
     "source": "增值服務總計：",
     "firstSeenAt": 1784609615479,
-    "count": 2
+    "count": 3
   },
   {
     "source": "升級營鋪 Module",
@@ -832,27 +832,27 @@
   {
     "source": "升級場地 Module",
     "firstSeenAt": 1784609634062,
-    "count": 2
+    "count": 3
   },
   {
     "source": "升級會計 Module",
     "firstSeenAt": 1784609634062,
-    "count": 2
+    "count": 3
   },
   {
     "source": "升級客服 Module (場務)",
     "firstSeenAt": 1784609634062,
-    "count": 2
+    "count": 3
   },
   {
     "source": "增加單位數量",
     "firstSeenAt": 1784609634062,
-    "count": 2
+    "count": 3
   },
   {
     "source": "上一步",
     "firstSeenAt": 1784609687918,
-    "count": 2
+    "count": 3
   },
   {
     "source": "下一步",
@@ -862,42 +862,42 @@
   {
     "source": "套餐確認",
     "firstSeenAt": 1784609765676,
-    "count": 2
+    "count": 3
   },
   {
     "source": "! 為確保您的發票有效，請提供與貴公司營業登記相符的公司名稱，如需修改請點擊修改按鈕",
     "firstSeenAt": 1784609790905,
-    "count": 2
+    "count": 3
   },
   {
     "source": "時長",
     "firstSeenAt": 1784609857439,
-    "count": 2
+    "count": 3
   },
   {
     "source": "發票信息",
     "firstSeenAt": 1784610022724,
-    "count": 2
+    "count": 3
   },
   {
     "source": "是否需要開具發票？",
     "firstSeenAt": 1784610033364,
-    "count": 2
+    "count": 3
   },
   {
     "source": "發票抬頭（公司或個人名稱）",
     "firstSeenAt": 1784610042726,
-    "count": 2
+    "count": 3
   },
   {
     "source": "請輸入公司或個人名稱",
     "firstSeenAt": 1784610055551,
-    "count": 2
+    "count": 3
   },
   {
     "source": "確認支付",
     "firstSeenAt": 1784610095931,
-    "count": 2
+    "count": 3
   },
   {
     "source": "優惠活動",
@@ -912,7 +912,7 @@
   {
     "source": "輸入優惠碼",
     "firstSeenAt": 1784613010525,
-    "count": 2
+    "count": 3
   },
   {
     "source": "使用優惠碼",
@@ -922,12 +922,12 @@
   {
     "source": "原價：",
     "firstSeenAt": 1784613055475,
-    "count": 2
+    "count": 3
   },
   {
     "source": "總計：",
     "firstSeenAt": 1784613082694,
-    "count": 2
+    "count": 3
   },
   {
     "source": "GO - PMS",
@@ -1302,17 +1302,17 @@
   {
     "source": "選擇支付方式",
     "firstSeenAt": 1784709827527,
-    "count": 1
+    "count": 2
   },
   {
     "source": "線上支付",
     "firstSeenAt": 1784709827527,
-    "count": 1
+    "count": 2
   },
   {
     "source": "FPS 轉數快",
     "firstSeenAt": 1784709827527,
-    "count": 1
+    "count": 2
   },
   {
     "source": "FPS 轉數快支付",
@@ -1457,126 +1457,176 @@
   {
     "source": "注册新帳戶",
     "firstSeenAt": 1784801289475,
-    "count": 1
+    "count": 2
   },
   {
     "source": "請輸入密碼",
     "firstSeenAt": 1784801409008,
-    "count": 1
+    "count": 2
   },
   {
     "source": "請再次輸入密碼",
     "firstSeenAt": 1784801568118,
-    "count": 1
+    "count": 2
   },
   {
     "source": "請輸入郵箱收到的驗證碼",
     "firstSeenAt": 1784801568118,
-    "count": 1
+    "count": 2
   },
   {
     "source": "驗證碼已發送至您的郵箱",
     "firstSeenAt": 1784801568118,
-    "count": 1
+    "count": 2
   },
   {
     "source": "驗證碼發送失敗，請稍後再試",
     "firstSeenAt": 1784801568118,
-    "count": 1
+    "count": 2
   },
   {
     "source": "注册成功, 正在為您跳转登录页面...",
     "firstSeenAt": 1784801568118,
-    "count": 1
+    "count": 2
   },
   {
     "source": "跳轉成功, 請登入",
     "firstSeenAt": 1784801568118,
-    "count": 1
+    "count": 2
   },
   {
     "source": "發送驗證碼",
     "firstSeenAt": 1784801568118,
-    "count": 1
+    "count": 2
   },
   {
     "source": "發送中...",
     "firstSeenAt": 1784801568118,
-    "count": 1
+    "count": 2
   },
   {
     "source": "後重發",
     "firstSeenAt": 1784801568118,
-    "count": 1
+    "count": 2
   },
   {
     "source": "處理中...",
     "firstSeenAt": 1784801568118,
-    "count": 1
+    "count": 2
   },
   {
     "source": "註冊",
     "firstSeenAt": 1784801568118,
-    "count": 1
+    "count": 2
   },
   {
     "source": "立即登入",
     "firstSeenAt": 1784801568118,
-    "count": 1
+    "count": 2
   },
   {
     "source": "驗證碼",
     "firstSeenAt": 1784801568118,
-    "count": 1
+    "count": 2
   },
   {
     "source": "我已閱讀並同意",
     "firstSeenAt": 1784801589391,
-    "count": 1
+    "count": 2
   },
   {
     "source": "《服務條款》",
     "firstSeenAt": 1784801589391,
-    "count": 1
+    "count": 2
   },
   {
     "source": "《私隱政策》",
     "firstSeenAt": 1784801589391,
-    "count": 1
+    "count": 2
   },
   {
     "source": "已有帳戶？",
     "firstSeenAt": 1784801589391,
-    "count": 1
+    "count": 2
   },
   {
     "source": "正在驗證郵箱...",
     "firstSeenAt": 1784801589391,
-    "count": 1
+    "count": 2
   },
   {
     "source": "及",
     "firstSeenAt": 1784801714736,
-    "count": 1
+    "count": 2
   },
   {
     "source": "重置密碼成功, 正在為您跳转登录页面...",
     "firstSeenAt": 1784802204983,
-    "count": 1
+    "count": 2
   },
   {
     "source": "請輸入收到的驗證碼",
     "firstSeenAt": 1784802204983,
-    "count": 1
+    "count": 2
   },
   {
     "source": "確認重置",
     "firstSeenAt": 1784802204983,
-    "count": 1
+    "count": 2
   },
   {
     "source": "重置您的密碼",
     "firstSeenAt": 1784802222994,
+    "count": 2
+  },
+  {
+    "source": "體驗完整功能，無需任何付款",
+    "firstSeenAt": 1784876607294,
+    "count": 4
+  },
+  {
+    "source": "試用包含",
+    "firstSeenAt": 1784876607294,
+    "count": 4
+  },
+  {
+    "source": "14天完整功能體驗",
+    "firstSeenAt": 1784876607294,
+    "count": 4
+  },
+  {
+    "source": "無需信用卡",
+    "firstSeenAt": 1784876607294,
+    "count": 4
+  },
+  {
+    "source": "專人客服支援",
+    "firstSeenAt": 1784876607294,
+    "count": 4
+  },
+  {
+    "source": "數據安全保障",
+    "firstSeenAt": 1784876607294,
+    "count": 4
+  },
+  {
+    "source": "填寫資料",
+    "firstSeenAt": 1784876607294,
+    "count": 6
+  },
+  {
+    "source": "開始免費試用",
+    "firstSeenAt": 1784876607294,
+    "count": 6
+  },
+  {
+    "source": "請輸入您的公司名稱（選填）",
+    "firstSeenAt": 1784876607294,
+    "count": 6
+  },
+  {
+    "source": "用戶名或密碼錯誤",
+    "firstSeenAt": 1784879224139,
     "count": 1
   }
 ]

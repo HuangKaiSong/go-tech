@@ -1,7 +1,7 @@
 'use client';
 
 import { useIframeContext } from '@/contexts/IframeContext';
-import { DynamicText } from './DynamicI18nText';
+import { DynamicText } from './DynamicI18nText.client';
 
 const IntroSection = ({ initialBlocks }: { initialBlocks?: any[] }) => {
   let intro = '簡化流程，提高效率，讓您的租務管理更輕鬆！\n隨時隨地掌握租務動態，安心管理，省心生活。',

@@ -5,7 +5,7 @@ import { CreditCard } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { type FC, useEffect, useState } from 'react';
 import { KPAY_ENABLE, PayTypeEnum } from '@/app/constants/payment';
-import { DynamicText } from '../DynamicI18nText';
+import { DynamicText } from '../DynamicI18nText.client';
 const Fps = dynamic(() => import('./Fps'), { ssr: false });
 
 type PanelProps = {

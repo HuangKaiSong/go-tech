@@ -7,7 +7,7 @@ import { FileCheck } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
-import { DynamicText } from '@/app/components/DynamicI18nText';
+import { DynamicText } from '@/app/components/DynamicI18nText.client';
 import valueAddedServices from '@/app/constants/addedServices';
 import { type PromotionOption } from '@/app/constants/promotion';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';

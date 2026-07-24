@@ -2,7 +2,7 @@ import { Button, Card, CardContent, CardFooter, CardHeader } from '@go-tech-fron
 import { ChevronRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import Link from '@/app/components/Link';
-import { DynamicText } from './DynamicI18nText';
+import { DynamicText } from './DynamicI18nText.client';
 
 const PricingSection = ({ packages }: { packages: Packages[] }) => {
   const t = useTranslations('Common');
@@ -41,7 +41,7 @@ const PricingSection = ({ packages }: { packages: Packages[] }) => {
                     <div className="text-3xl font-bold text-primary">{t('stayTuned')}</div>
                   )}
                 </div>
-                <p className="text-xs text-muted-foreground flex flex-row flex-nowrap justify-center">
+                <div className="text-xs text-muted-foreground flex flex-row flex-nowrap justify-center">
                   <div className="truncate">
                     <DynamicText text="每年收費,年費收費" />
                   </div>
@@ -54,7 +54,7 @@ const PricingSection = ({ packages }: { packages: Packages[] }) => {
                       <DynamicText text="個" />
                     </div>
                   )}
-                </p>
+                </div>
               </CardContent>
 
               <CardFooter className="pt-4">

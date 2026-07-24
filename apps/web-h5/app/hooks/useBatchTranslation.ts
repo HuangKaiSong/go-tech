@@ -1,5 +1,6 @@
 import { useLocale } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
+import { useDynamicMessages } from '@/app/components/DynamicI18nProvider';
 
 type BatchItem = {
   locale: string;
@@ -63,6 +64,10 @@ function scheduleBatch(locale: any) {
 
 export function useBatchTranslation(text: string): string {
   const locale = useLocale();
+  const messages = useDynamicMessages();
+
+  // 与 next-intl 一致：渲染期同步查字典，SSR 输出的 HTML 即包含译文
+  const hit = text ? messages?.[text] : undefined;
 
   const [translated, setTranslated] = useState<string>(text);
   const isMounted = useRef(true);
@@ -70,12 +75,13 @@ export function useBatchTranslation(text: string): string {
   useEffect(() => {
     isMounted.current = true;
 
-    // 空字符串无需翻译，直接返回
-    if (!text) {
-      setTranslated(text);
+    // 字典已命中或空文本：无需发请求
+    if (!text || hit) {
+      setTranslated(hit ?? text);
       return;
     }
 
+    // 字典未命中（从未翻译过的新文本）：走批量接口兜底
     let resolved = false;
     const promise = new Promise<string>((resolve, reject) => {
       batchQueue.push({ text, resolve, reject, locale });
@@ -98,9 +104,8 @@ export function useBatchTranslation(text: string): string {
 
     return () => {
       isMounted.current = false;
-      // 可在此取消未完成的请求（使用 AbortController 更复杂，此处简化）
     };
-  }, [text, locale]);
+  }, [text, locale, hit]);
 
-  return translated;
+  return hit ?? translated;
 }

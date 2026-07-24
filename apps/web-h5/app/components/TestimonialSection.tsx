@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import homeOffice from '@/assets/home-office.jpg';
 import { useIframeContext } from '@/contexts/IframeContext';
-import { DynamicText } from './DynamicI18nText';
+import { DynamicText } from './DynamicI18nText.client';
 
 let defaultContent = {
   title: '更標準，更高效的管理方式',

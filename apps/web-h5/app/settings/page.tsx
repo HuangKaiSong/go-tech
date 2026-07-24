@@ -20,7 +20,7 @@ import { useState } from 'react';
 import Footer from '@/app/components/Footer';
 import Header from '@/app/components/Header';
 import { useAuth } from '@/contexts/AuthContext';
-import { DynamicText } from '../components/DynamicI18nText';
+import { DynamicText } from '../components/DynamicI18nText.client';
 import { useBatchTranslation } from '../hooks/useBatchTranslation';
 
 const Settings = ({ token, user }: any) => {

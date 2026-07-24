@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
 
   const result: Record<string, string> = {};
 
-  result[data.text] = translateWithOpenCC(data.text, data.locale)
+  result[data.text] = await translateWithOpenCC(data.text, data.locale)
 
   return NextResponse.json(result)
 }

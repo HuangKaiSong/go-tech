@@ -38,6 +38,7 @@
     "react": "catalog:react19",
     "react-dom": "catalog:react19",
     "react-slick": "^0.31.0",
+    "server-only": "^0.0.1",
     "slick-carousel": "^1.8.1",
     "sonner": "^2.0.7",
     "svg-baker": "^1.7.0",

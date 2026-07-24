@@ -2,7 +2,7 @@
 
 import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { DynamicText } from '@/app/components/DynamicI18nText';
+import { DynamicText } from '@/app/components/DynamicI18nText.client';
 
 const BackButton = () => {
   const router = useRouter();

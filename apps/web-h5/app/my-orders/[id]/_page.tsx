@@ -4,7 +4,7 @@ import { Badge, Button, Card, CardContent, CardHeader, Separator, toast } from '
 import { ArrowLeft, CheckCircle, CreditCard, Download, Package, RefreshCw, Settings, XCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
-import { DynamicText } from '@/app/components/DynamicI18nText';
+import { DynamicText } from '@/app/components/DynamicI18nText.client';
 import Footer from '@/app/components/Footer';
 import Header from '@/app/components/Header';
 import Link from '@/app/components/Link';

@@ -5,7 +5,7 @@ import { useAtom, useSetAtom } from 'jotai';
 import { Check, Minus, Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { DynamicText } from '@/app/components/DynamicI18nText';
+import { DynamicText } from '@/app/components/DynamicI18nText.client';
 import Footer from '@/app/components/Footer';
 import Header from '@/app/components/Header';
 import valueAddedServices from '@/app/constants/addedServices';

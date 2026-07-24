@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { audiences } from '@/app/components/blockDefaults';
 import Link from '@/app/components/Link';
 import { useIframeContext } from '@/contexts/IframeContext';
-import { DynamicText } from './DynamicI18nText';
+import { DynamicText } from './DynamicI18nText.client';
 
 const TargetAudienceSection = ({ initialBlocks }: { initialBlocks?: any[] }) => {
   const { hasIframe } = useIframeContext();

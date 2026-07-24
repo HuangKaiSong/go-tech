@@ -1,9 +1,9 @@
-import { hash } from "./hash";
-import { addPending, addPendingBatch, loadDB, updateDB } from "./loader";
-import { pendingPromises, translationCache } from "./cache";
-import { translateBatchByAI, translateByAI } from "./translator";
-import type { Locale, TranslationEntry } from "./types";
-
+'use server';
+import { pendingPromises, translationCache } from './cache';
+import { hash } from './hash';
+import { addPending, addPendingBatch, loadDB, updateDB } from './loader';
+import { translateBatchByAI, translateByAI } from './translator';
+import type { Locale, TranslationEntry } from './types';
 
 export async function translate(text: string, locale: Locale): Promise<string> {
   if (!text) return text;
@@ -40,12 +40,12 @@ export async function translate(text: string, locale: Locale): Promise<string> {
       const translated = await translateByAI(text, locale);
 
       // 3.4 原子性写入（排队执行，保证不覆盖其它并发写入）
-      await updateDB((currentDb) => {
+      await updateDB(currentDb => {
         if (!currentDb[key]) {
           currentDb[key] = {
             source: text,
             translations: {} as Record<Locale, string>,
-            updatedAt: Date.now(),
+            updatedAt: Date.now()
           };
         }
         currentDb[key].translations[locale] = translated;
@@ -76,13 +76,8 @@ export async function translate(text: string, locale: Locale): Promise<string> {
   }
 }
 
-/**
- * 批量翻译（合并多个文本，一次 AI 调用）
- */
-export async function translateBatch(
-  texts: string[],
-  locale: Locale
-): Promise<Record<string, string>> {
+/** 批量翻译（合并多个文本，一次 AI 调用） */
+export async function translateBatch(texts: string[], locale: Locale): Promise<Record<string, string>> {
   if (texts.length === 0) return {};
 
   const result: Record<string, string> = {};
@@ -135,8 +130,8 @@ export async function translateBatch(
         entry: {
           source: text,
           translations: { [locale]: translated } as Record<Locale, string>,
-          updatedAt: Date.now(),
-        },
+          updatedAt: Date.now()
+        }
       });
     } else {
       // 降级：返回原文
@@ -146,13 +141,13 @@ export async function translateBatch(
 
   // 4. 批量写入 dynamic.json（一次原子写入）
   if (entriesToUpdate.length > 0) {
-    await updateDB((db) => {
+    await updateDB(db => {
       for (const { entry, key } of entriesToUpdate) {
         if (!db[key]) {
           db[key] = {
             source: entry.source,
             translations: {} as Record<Locale, string>,
-            updatedAt: entry.updatedAt,
+            updatedAt: entry.updatedAt
           };
         }
         db[key].translations[locale] = entry.translations[locale];

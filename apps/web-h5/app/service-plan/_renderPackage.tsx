@@ -3,7 +3,7 @@
 import { Button, Card, CardContent, CardHeader } from '@go-tech-frontend/ui';
 import { Settings } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { DynamicText } from '../components/DynamicI18nText';
+import { DynamicText } from '../components/DynamicI18nText.client';
 
 type ExtendedPackages = Packages & {
   newFeatures: { icon?: any; label: string }[];

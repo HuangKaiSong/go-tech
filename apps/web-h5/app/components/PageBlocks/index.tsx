@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import type { CSSProperties, ReactNode } from 'react';
 import Link from '@/app/components/Link';
-import { DynamicText } from '../DynamicI18nText';
+import { DynamicText } from '../DynamicI18nText.client';
 import Hero, { type HeroBlock } from './Hero';
 
 type BlockBase = {

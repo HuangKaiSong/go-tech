@@ -1,3 +1,4 @@
+'use server';
 import * as deepl from 'deepl-node';
 import * as OpenCC from 'opencc-js';
 
@@ -29,7 +30,7 @@ function detectScript(text: string) {
   return 'unknown';
 }
 
-export function translateWithOpenCC(text: string, locale: string): string {
+export async function translateWithOpenCC(text: string, locale: string): Promise<string> {
   const sourceLang = detectScript(text);
   if (sourceLang === 'unknown') {
     return text;
@@ -60,9 +61,11 @@ async function callAITranslation(
   if (locale === 'zh-cn' || locale === 'zh-hk') {
     // 假设源语言是中文（简/繁）
     const result: Record<string, string> = {};
-    for (const text of texts) {
-      result[text] = translateWithOpenCC(text, locale);
-    }
+    await Promise.all(
+      texts.map(async text => {
+        result[text] = await translateWithOpenCC(text, locale);
+      })
+    );
     return result;
   }
 
@@ -166,7 +169,7 @@ async function translateWithGoogle(texts: string[], locale: string): Promise<Rec
   const response = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ q: texts, target: targetLang, format: 'text' }),
+    body: JSON.stringify({ q: texts, target: targetLang, format: 'text' })
   });
 
   if (!response.ok) {
@@ -174,13 +177,11 @@ async function translateWithGoogle(texts: string[], locale: string): Promise<Rec
     throw new Error(`Google Translate API error: ${response.status} ${errorText}`);
   }
 
-  const data = await response.json() as {
+  const data = (await response.json()) as {
     data: { translations: { translatedText: string }[] };
   };
 
-  return Object.fromEntries(
-    texts.map((text, i) => [text, data.data.translations[i].translatedText])
-  );
+  return Object.fromEntries(texts.map((text, i) => [text, data.data.translations[i].translatedText]));
 }
 
 // ---------- 对外公开的单条和批量接口 ----------

@@ -3,14 +3,15 @@
 import { useCountDown } from '@go-tech/hooks';
 import { Button, Checkbox, Input, toast } from '@go-tech/web-ui';
 import { CircleAlert, X } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import z from 'zod';
-import { DynamicText } from '@/app/components/DynamicI18nText';
+import { DynamicText } from '@/app/components/DynamicI18nText.client';
 import Link from '@/app/components/Link';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
+import { translateError } from '@/app/lib/translate-error';
 // import Logo from "@/assets/Gotech_Logo.webp";
 import authBgImg from '@/assets/background.webp';
 import { sendToBetterStack } from '@/lib/betterstack-logger';
@@ -30,6 +31,7 @@ const parseEmailExists = (result: any) => {
 const Register = () => {
   const router = useRouter();
   const t = useTranslations('Account');
+  const locale = useLocale();
   const existingEmailMessage = t('emailExists');
   const passwordPlaceholder = useBatchTranslation('請輸入密碼');
   const pwdConfirmPlaceholder = useBatchTranslation('請再次輸入密碼');
@@ -216,7 +218,7 @@ const Register = () => {
         setTargetDate(Date.now() + 60 * 1000);
         return;
       }
-      toast.error(fetchResult.message);
+      toast.error((await translateError(fetchResult.message, locale)) || fetchResult.message);
     } catch (err) {
       if (err instanceof Response) {
         sendToBetterStack('error', err.statusText, {
@@ -269,7 +271,7 @@ const Register = () => {
       const validatedResult = await response.json();
 
       if (validatedResult.code !== 200) {
-        toast.error(validatedResult.message);
+        toast.error((await translateError(validatedResult.message, locale)) || validatedResult.message);
         return;
       }
       setStep(1);
@@ -294,7 +296,7 @@ const Register = () => {
 
     if (!result.success) {
       const message = result.error.message || '';
-      toast.error(message);
+      toast.error((await translateError(message, locale)) || message);
       return;
     }
     try {
@@ -319,7 +321,7 @@ const Register = () => {
 
       const signupResult = await response.json();
       if (signupResult.code !== 200) {
-        toast.error(signupResult.message);
+        toast.error((await translateError(signupResult.message, locale)) || signupResult.message);
         return;
       }
 

@@ -1,5 +1,5 @@
 import { Button, Input } from '@go-tech-frontend/ui';
-import { DynamicText } from '@/app/components/DynamicI18nText';
+import { DynamicText } from '@/app/components/DynamicI18nText.client';
 import { type PromotionOption, getPromotionDiscount } from '@/app/constants/promotion';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 

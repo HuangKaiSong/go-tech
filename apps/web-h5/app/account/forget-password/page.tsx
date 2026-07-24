@@ -3,13 +3,15 @@
 import { useCountDown } from '@go-tech/hooks';
 import { Button, Input, toast } from '@go-tech/web-ui';
 import { CircleAlert, X } from 'lucide-react';
+import { useLocale } from 'next-intl';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import z from 'zod';
-import { DynamicText } from '@/app/components/DynamicI18nText';
+import { DynamicText } from '@/app/components/DynamicI18nText.client';
 import Link from '@/app/components/Link';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
+import { translateError } from '@/app/lib/translate-error';
 // import Logo from "@/assets/Gotech_Logo.webp";
 import authBgImg from '@/assets/background.webp';
 import { sendToBetterStack } from '@/lib/betterstack-logger';
@@ -47,6 +49,8 @@ const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSendingCode, setIsSendingCode] = useState(false);
   const [step, setStep] = useState(0);
+
+  const locale = useLocale();
 
   const codeSentMsg = useBatchTranslation('驗證碼已發送至您的郵箱');
   const codeFailMsg = useBatchTranslation('驗證碼發送失敗，請稍後再試');
@@ -125,7 +129,7 @@ const Register = () => {
 
     if (!result.success) {
       const message = result.error.message || '';
-      toast.error(message);
+      toast.error((await translateError(message, locale)) || message);
       return;
     }
 
@@ -144,7 +148,7 @@ const Register = () => {
       const validatedResult = await response.json();
 
       if (validatedResult.code !== 200) {
-        toast.error(validatedResult.message);
+        toast.error((await translateError(validatedResult.message, locale)) || validatedResult.message);
         return;
       }
       setStep(1);
@@ -170,7 +174,7 @@ const Register = () => {
 
     if (!result.success) {
       const message = result.error.message || '';
-      toast.error(message);
+      toast.error((await translateError(message, locale)) || message);
       return;
     }
     try {
@@ -189,7 +193,7 @@ const Register = () => {
 
       const signupResult = await response.json();
       if (signupResult.code !== 200) {
-        toast.error(signupResult.message);
+        toast.error((await translateError(signupResult.message, locale)) || signupResult.message);
         return;
       }
 

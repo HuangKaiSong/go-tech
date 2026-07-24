@@ -17,7 +17,7 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { type FC, useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { DynamicText } from '../components/DynamicI18nText';
+import { DynamicText } from '../components/DynamicI18nText.client';
 import valueAddedServices, { type SpecificValueAddedServicesId } from '../constants/addedServices';
 import { type OrderItemInfoType, OrderItemTypeEnum, OrderTypeEnum, type PlatformPackageDto } from '../constants/order';
 import { DAYSPERMONTH, PayTypeEnum, stashWebManagedCashier } from '../constants/payment';

@@ -848,9 +848,10 @@
     "source": "公司名稱",
     "translations": {
       "zh-cn": "公司名称",
-      "en-us": "Company Name"
+      "en-us": "Company Name",
+      "zh-hk": "公司名稱"
     },
-    "updatedAt": 1784800658387
+    "updatedAt": 1784877812963
   },
   "60b4ae9082a3da6aede05b9a2bd3ab2146d62858": {
     "source": "保存修改",
@@ -1339,9 +1340,10 @@
     "source": "選擇套餐",
     "translations": {
       "zh-cn": "选择套餐",
-      "zh-hk": "選擇套餐"
+      "zh-hk": "選擇套餐",
+      "en-us": "Choose a Plan"
     },
-    "updatedAt": 1784709487498
+    "updatedAt": 1784866526135
   },
   "d9b59879f3b83656682a13244a4690ff63728156": {
     "source": "月",
@@ -1356,65 +1358,73 @@
     "source": "套餐内容",
     "translations": {
       "zh-cn": "套餐内容",
-      "zh-hk": "套餐內容"
+      "zh-hk": "套餐內容",
+      "en-us": "Package Details"
     },
-    "updatedAt": 1784709487498
+    "updatedAt": 1784866526135
   },
   "250ac847ae069a4219a5e72205922f9d938de4db": {
     "source": "開通月份",
     "translations": {
       "zh-cn": "开通月份",
-      "zh-hk": "開通月份"
+      "zh-hk": "開通月份",
+      "en-us": "Activation Month"
     },
-    "updatedAt": 1784709487498
+    "updatedAt": 1784866526135
   },
   "05af56547f80dd038906afa4c5f4dc692f1ae897": {
     "source": "自定義",
     "translations": {
       "zh-cn": "自定义",
-      "zh-hk": "自定義"
+      "zh-hk": "自定義",
+      "en-us": "Custom"
     },
-    "updatedAt": 1784709487498
+    "updatedAt": 1784866526135
   },
   "5a69b3a44dee7d92312cf1acb77239f3ba58be0d": {
     "source": "1 個月",
     "translations": {
       "zh-cn": "1 个月",
-      "zh-hk": "1 個月"
+      "zh-hk": "1 個月",
+      "en-us": "1 month"
     },
-    "updatedAt": 1784709487498
+    "updatedAt": 1784866526135
   },
   "dcae24526c11eaa058c67efcb701f602d48b6b98": {
     "source": "2 個月",
     "translations": {
       "zh-cn": "2 个月",
-      "zh-hk": "2 個月"
+      "zh-hk": "2 個月",
+      "en-us": "2 months"
     },
-    "updatedAt": 1784709487498
+    "updatedAt": 1784866526135
   },
   "bb132b8934157f684a3919f3c013f4074e2aaaed": {
     "source": "3 個月",
     "translations": {
       "zh-cn": "3 个月",
-      "zh-hk": "3 個月"
+      "zh-hk": "3 個月",
+      "en-us": "3 months"
     },
-    "updatedAt": 1784709487498
+    "updatedAt": 1784866526135
   },
   "e3b72e36a8b6ef492183825ec256cd79d927a04c": {
     "source": "6 個月",
     "translations": {
       "zh-cn": "6 个月",
-      "zh-hk": "6 個月"
+      "zh-hk": "6 個月",
+      "en-us": "6 months"
     },
-    "updatedAt": 1784709487498
+    "updatedAt": 1784866526135
   },
   "b2f48b251c20af0292d03bb224bbaa5ed8ada906": {
     "source": "套餐小計：",
     "translations": {
       "zh-cn": "套餐小计：",
-      "zh-hk": "套餐小計："
+      "zh-hk": "套餐小計：",
+      "en-us": "Subtotal for the meal set:"
     },
-    "updatedAt": 1784709487498
+    "updatedAt": 1784866526135
   },
   "b9fad2290fdce702ff71f0a16c9bc23df2900fd4": {
     "source": "增值服務",
@@ -1429,41 +1439,46 @@
     "source": "需要",
     "translations": {
       "zh-cn": "需要",
-      "zh-hk": "需要"
+      "zh-hk": "需要",
+      "en-us": "Required"
     },
-    "updatedAt": 1784709487498
+    "updatedAt": 1784866526135
   },
   "6a7cd2d9358cdf9f89be6ca9ab730320b603ddfd": {
     "source": "不需要",
     "translations": {
       "zh-cn": "不需要",
-      "zh-hk": "不需要"
+      "zh-hk": "不需要",
+      "en-us": "Not necessary"
     },
-    "updatedAt": 1784709487498
+    "updatedAt": 1784866526135
   },
   "f51b61995d6223562cc719cff29304c0946b3c91": {
     "source": "請選擇增值服務",
     "translations": {
       "zh-cn": "请选择增值服务",
-      "zh-hk": "請選擇增值服務"
+      "zh-hk": "請選擇增值服務",
+      "en-us": "Please select a value-added service"
     },
-    "updatedAt": 1784709487498
+    "updatedAt": 1784866526135
   },
   "ee119a50a6c70aaa904a730087e82e8c24ce5544": {
     "source": "（可多選，依套餐開通月份計算 1 個月）",
     "translations": {
       "zh-cn": "（可多选，依套餐开通月份计算 1 个月）",
-      "zh-hk": "（可多選，依套餐開通月份計算 1 個月）"
+      "zh-hk": "（可多選，依套餐開通月份計算 1 個月）",
+      "en-us": "(Multiple selections allowed; one month is counted based on the month the plan was activated.)"
     },
-    "updatedAt": 1784709487498
+    "updatedAt": 1784866526135
   },
   "9ea2aec177cd72b480cffa4ef848467d732bc99b": {
     "source": "增值服務總計：",
     "translations": {
       "zh-cn": "增值服务总计：",
-      "zh-hk": "增值服務總計："
+      "zh-hk": "增值服務總計：",
+      "en-us": "Total Value-Added Services:"
     },
-    "updatedAt": 1784709487498
+    "updatedAt": 1784866526135
   },
   "6b833feeb5edefcdfbf6b867e3df3483c3c3d4c3": {
     "source": "升級營鋪 Module",
@@ -1478,41 +1493,46 @@
     "source": "升級場地 Module",
     "translations": {
       "zh-cn": "升级场地 Module",
-      "zh-hk": "升級場地 Module"
+      "zh-hk": "升級場地 Module",
+      "en-us": "Upgrade Venue Module"
     },
-    "updatedAt": 1784709487498
+    "updatedAt": 1784866526135
   },
   "e434fd9867de37b244527d793b4d966fbfc51fb1": {
     "source": "升級會計 Module",
     "translations": {
       "zh-cn": "升级会计 Module",
-      "zh-hk": "升級會計 Module"
+      "zh-hk": "升級會計 Module",
+      "en-us": "Upgrade the Accounting Module"
     },
-    "updatedAt": 1784709487498
+    "updatedAt": 1784866526135
   },
   "7c434dbcaaf18e533d63f24ebc26a8132ddd5712": {
     "source": "升級客服 Module (場務)",
     "translations": {
       "zh-cn": "升级客服 Module (场务)",
-      "zh-hk": "升級客服 Module (場務)"
+      "zh-hk": "升級客服 Module (場務)",
+      "en-us": "Upgrade the Customer Service Module (Field Operations)"
     },
-    "updatedAt": 1784709487498
+    "updatedAt": 1784866526135
   },
   "b96afc7ecdc3e81f8de38e069c770bde0fb3af8b": {
     "source": "增加單位數量",
     "translations": {
       "zh-cn": "增加单位数量",
-      "zh-hk": "增加單位數量"
+      "zh-hk": "增加單位數量",
+      "en-us": "Increase the Number of Units"
     },
-    "updatedAt": 1784709487498
+    "updatedAt": 1784866526135
   },
   "75ef1241c0f464bf9fd1326b791c85b71f51f987": {
     "source": "上一步",
     "translations": {
       "zh-cn": "上一步",
-      "zh-hk": "上一步"
+      "zh-hk": "上一步",
+      "en-us": "Previous"
     },
-    "updatedAt": 1784709487498
+    "updatedAt": 1784866526135
   },
   "ea0ef2ae72458b15c1ee59c36a57cdd34127e973": {
     "source": "下一步",
@@ -1527,65 +1547,73 @@
     "source": "套餐確認",
     "translations": {
       "zh-cn": "套餐确认",
-      "zh-hk": "套餐確認"
+      "zh-hk": "套餐確認",
+      "en-us": "Package Confirmation"
     },
-    "updatedAt": 1784709495115
+    "updatedAt": 1784866545035
   },
   "6a1ae29197607167bed81e20faee40440cc51e4c": {
     "source": "! 為確保您的發票有效，請提供與貴公司營業登記相符的公司名稱，如需修改請點擊修改按鈕",
     "translations": {
       "zh-cn": "! 为确保您的发票有效，请提供与贵公司营业登记相符的公司名称，如需修改请点击修改按钮",
-      "zh-hk": "! 為確保您的發票有效，請提供與貴公司營業登記相符的公司名稱，如需修改請點擊修改按鈕"
+      "zh-hk": "! 為確保您的發票有效，請提供與貴公司營業登記相符的公司名稱，如需修改請點擊修改按鈕",
+      "en-us": "! To ensure your invoice is valid, please provide the company name that matches your business registration. If you need to make changes, click the \"Edit\" button."
     },
-    "updatedAt": 1784709495115
+    "updatedAt": 1784866545035
   },
   "f9cf84c3040a40333c7cbf0e0ffc1b9f0ced2033": {
     "source": "時長",
     "translations": {
       "zh-cn": "时长",
-      "zh-hk": "時長"
+      "zh-hk": "時長",
+      "en-us": "Duration"
     },
-    "updatedAt": 1784709495115
+    "updatedAt": 1784866545035
   },
   "26abec4cdb99cc3d21e1d9ab7a9fa5ebae1a5084": {
     "source": "發票信息",
     "translations": {
       "zh-cn": "发票信息",
-      "zh-hk": "發票信息"
+      "zh-hk": "發票信息",
+      "en-us": "Invoice Information"
     },
-    "updatedAt": 1784709495115
+    "updatedAt": 1784866545035
   },
   "dd295b94dea40454303faaa0244c2cb5eff4ddc8": {
     "source": "是否需要開具發票？",
     "translations": {
       "zh-cn": "是否需要开具发票？",
-      "zh-hk": "是否需要開具發票？"
+      "zh-hk": "是否需要開具發票？",
+      "en-us": "Do you need an invoice?"
     },
-    "updatedAt": 1784709495115
+    "updatedAt": 1784866545035
   },
   "a8be41de751fd1169463966fb7602e62adf20c5e": {
     "source": "發票抬頭（公司或個人名稱）",
     "translations": {
       "zh-cn": "发票抬头（公司或个人名称）",
-      "zh-hk": "發票抬頭（公司或個人名稱）"
+      "zh-hk": "發票抬頭（公司或個人名稱）",
+      "en-us": "Invoice Recipient (Company or Individual Name)"
     },
-    "updatedAt": 1784709495115
+    "updatedAt": 1784866545035
   },
   "5e9fefcfd18d1a83d6e676f3dca82e44e141caca": {
     "source": "請輸入公司或個人名稱",
     "translations": {
       "zh-cn": "请输入公司或个人名称",
-      "zh-hk": "請輸入公司或個人名稱"
+      "zh-hk": "請輸入公司或個人名稱",
+      "en-us": "Please enter a company or individual name"
     },
-    "updatedAt": 1784709495115
+    "updatedAt": 1784866545035
   },
   "8340ccbfaf683f8ac8528fcfab47bd7820681dcd": {
     "source": "確認支付",
     "translations": {
       "zh-cn": "确认支付",
-      "zh-hk": "確認支付"
+      "zh-hk": "確認支付",
+      "en-us": "Confirm Payment"
     },
-    "updatedAt": 1784709495115
+    "updatedAt": 1784866545035
   },
   "ff37c6b015ab1816d598e01bda17e2d836745eec": {
     "source": "優惠活動",
@@ -1609,9 +1637,10 @@
     "source": "輸入優惠碼",
     "translations": {
       "zh-cn": "输入优惠码",
-      "zh-hk": "輸入優惠碼"
+      "zh-hk": "輸入優惠碼",
+      "en-us": "Enter the promo code"
     },
-    "updatedAt": 1784709495115
+    "updatedAt": 1784866545478
   },
   "d41883f878fc502d452212405157f1772590ac59": {
     "source": "使用優惠碼",
@@ -1626,17 +1655,19 @@
     "source": "原價：",
     "translations": {
       "zh-cn": "原价：",
-      "zh-hk": "原價："
+      "zh-hk": "原價：",
+      "en-us": "Original Price:"
     },
-    "updatedAt": 1784709495310
+    "updatedAt": 1784866545478
   },
   "63c528ec0dd9c6096febd10d50931b00acc697c7": {
     "source": "總計：",
     "translations": {
       "zh-cn": "总计：",
-      "zh-hk": "總計："
+      "zh-hk": "總計：",
+      "en-us": "Total:"
     },
-    "updatedAt": 1784709495310
+    "updatedAt": 1784866545478
   },
   "97af7939825375bdbad4bee82e61297a043b29d8": {
     "source": "GO - PMS",
@@ -2275,23 +2306,26 @@
   "a50d6605f4da757cdde732a8f2d5d38795acf34c": {
     "source": "選擇支付方式",
     "translations": {
-      "zh-hk": "選擇支付方式"
+      "zh-hk": "選擇支付方式",
+      "en-us": "Select a Payment Method"
     },
-    "updatedAt": 1784709827524
+    "updatedAt": 1784866548619
   },
   "6e249e45b116faa8d93d4c9ca2e7a71e4d587570": {
     "source": "線上支付",
     "translations": {
-      "zh-hk": "線上支付"
+      "zh-hk": "線上支付",
+      "en-us": "Online Payment"
     },
-    "updatedAt": 1784709827524
+    "updatedAt": 1784866548619
   },
   "4707f3eb3c3f6a27b4f7bb04d83a605ca633f559": {
     "source": "FPS 轉數快",
     "translations": {
-      "zh-hk": "FPS 轉數快"
+      "zh-hk": "FPS 轉數快",
+      "en-us": "FPS (Fast Payment System)"
     },
-    "updatedAt": 1784709827524
+    "updatedAt": 1784866548619
   },
   "0331853a609036b4e3677bcc0496b60352da7228": {
     "source": "FPS 轉數快支付",
@@ -2492,176 +2526,289 @@
   "15151a09cf1b40d987333af9c3b5d71fac8b9f6b": {
     "source": "注册新帳戶",
     "translations": {
-      "en-us": "Sign Up for a New Account"
+      "en-us": "Sign Up for a New Account",
+      "zh-cn": "注册新帐户"
     },
-    "updatedAt": 1784801289465
+    "updatedAt": 1784878228290
   },
   "c2f287cab8f4cd4bc1bbe25dcfc64a6eefef8693": {
     "source": "請輸入密碼",
     "translations": {
-      "en-us": "Please enter your password"
+      "en-us": "Please enter your password",
+      "zh-cn": "请输入密码"
     },
-    "updatedAt": 1784801409003
+    "updatedAt": 1784878228290
   },
   "941db2aedd4a0f34b32e9af7c170a501980fc87d": {
     "source": "請再次輸入密碼",
     "translations": {
-      "en-us": "Please re-enter your password"
+      "en-us": "Please re-enter your password",
+      "zh-cn": "请再次输入密码"
     },
-    "updatedAt": 1784801568107
+    "updatedAt": 1784878228290
   },
   "1e4c22f8ad47d14acef7924370afd99bd2223fbf": {
     "source": "請輸入郵箱收到的驗證碼",
     "translations": {
-      "en-us": "Please enter the verification code you received via email"
+      "en-us": "Please enter the verification code you received via email",
+      "zh-cn": "请输入邮箱收到的验证码"
     },
-    "updatedAt": 1784801568107
+    "updatedAt": 1784878228290
   },
   "467daf622fc59ad76c0d27978e7a1ae001550898": {
     "source": "驗證碼已發送至您的郵箱",
     "translations": {
-      "en-us": "A verification code has been sent to your email address."
+      "en-us": "A verification code has been sent to your email address.",
+      "zh-cn": "验证码已发送至您的邮箱"
     },
-    "updatedAt": 1784801568107
+    "updatedAt": 1784878228290
   },
   "c6ec1ccd233c36db75812607053aef50d630f3de": {
     "source": "驗證碼發送失敗，請稍後再試",
     "translations": {
-      "en-us": "Failed to send the verification code. Please try again later."
+      "en-us": "Failed to send the verification code. Please try again later.",
+      "zh-cn": "验证码发送失败，请稍后再试"
     },
-    "updatedAt": 1784801568107
+    "updatedAt": 1784878228290
   },
   "cbdfd542a946330679ad4d12f92c861ff1562209": {
     "source": "注册成功, 正在為您跳转登录页面...",
     "translations": {
-      "en-us": "Registration was successful. You are being redirected to the login page..."
+      "en-us": "Registration was successful. You are being redirected to the login page...",
+      "zh-cn": "注册成功, 正在为您跳转登录页面..."
     },
-    "updatedAt": 1784801568107
+    "updatedAt": 1784878228290
   },
   "7d94756ee1dac9eda45e99192291dafc4b5d4c33": {
     "source": "跳轉成功, 請登入",
     "translations": {
-      "en-us": "Redirect successful. Please log in."
+      "en-us": "Redirect successful. Please log in.",
+      "zh-cn": "跳转成功, 请登入"
     },
-    "updatedAt": 1784801568107
+    "updatedAt": 1784878228290
   },
   "fbdba7d51a18ac8f23a92a6c0b678d1dfd9b587f": {
     "source": "發送驗證碼",
     "translations": {
-      "en-us": "Send Verification Code"
+      "en-us": "Send Verification Code",
+      "zh-cn": "发送验证码"
     },
-    "updatedAt": 1784801568107
+    "updatedAt": 1784878228290
   },
   "a05a87892c2b0790d2b4c9c8b9da38c47f40db03": {
     "source": "發送中...",
     "translations": {
-      "en-us": "Sending..."
+      "en-us": "Sending...",
+      "zh-cn": "发送中..."
     },
-    "updatedAt": 1784801568107
+    "updatedAt": 1784878228290
   },
   "503e9c0ff03819d1780ba58e2f7187b8feea55f7": {
     "source": "後重發",
     "translations": {
-      "en-us": "Reposted"
+      "en-us": "Reposted",
+      "zh-cn": "后重发"
     },
-    "updatedAt": 1784801568107
+    "updatedAt": 1784878228290
   },
   "77009c7a9c6890f2071ed3a6dc6a9b90b7e06544": {
     "source": "處理中...",
     "translations": {
-      "en-us": "Processing..."
+      "en-us": "Processing...",
+      "zh-cn": "处理中..."
     },
-    "updatedAt": 1784801568108
+    "updatedAt": 1784878228290
   },
   "0fae7712294039b442dc65b96da2817d03ff993e": {
     "source": "註冊",
     "translations": {
-      "en-us": "Register"
+      "en-us": "Register",
+      "zh-cn": "注册"
     },
-    "updatedAt": 1784801568108
+    "updatedAt": 1784878228290
   },
   "52a2bcc6bca68bcae675c6426113db6b7187cbae": {
     "source": "立即登入",
     "translations": {
-      "en-us": "Log in now"
+      "en-us": "Log in now",
+      "zh-cn": "立即登入"
     },
-    "updatedAt": 1784801568108
+    "updatedAt": 1784878228290
   },
   "b9f2b2fb540991c6ec8b24b715afdd282e656242": {
     "source": "驗證碼",
     "translations": {
-      "en-us": "Verification Code"
+      "en-us": "Verification Code",
+      "zh-cn": "验证码"
     },
-    "updatedAt": 1784801568108
+    "updatedAt": 1784878228290
   },
   "2ad6bffe88ff67349a0160e333bfe8885750f99a": {
     "source": "我已閱讀並同意",
     "translations": {
-      "en-us": "I have read and agree to"
+      "en-us": "I have read and agree to",
+      "zh-cn": "我已阅读并同意"
     },
-    "updatedAt": 1784801589383
+    "updatedAt": 1784878228290
   },
   "54dd351a5abca7e5cd3cadc9ae15e4f5de6e27a3": {
     "source": "《服務條款》",
     "translations": {
-      "en-us": "\"Terms of Service\""
+      "en-us": "\"Terms of Service\"",
+      "zh-cn": "《服务条款》"
     },
-    "updatedAt": 1784801589383
+    "updatedAt": 1784878228290
   },
   "16f587747765e19546a31e8f77f7e126e6b150fa": {
     "source": "《私隱政策》",
     "translations": {
-      "en-us": "\"Privacy Policy\""
+      "en-us": "\"Privacy Policy\"",
+      "zh-cn": "《私隐政策》"
     },
-    "updatedAt": 1784801589383
+    "updatedAt": 1784878228290
   },
   "8701d774ae858edf4a980f9218cb1d9923f34cb8": {
     "source": "已有帳戶？",
     "translations": {
-      "en-us": "Already have an account?"
+      "en-us": "Already have an account?",
+      "zh-cn": "已有帐户？"
     },
-    "updatedAt": 1784801589383
+    "updatedAt": 1784878228290
   },
   "36a4881c3cd51d02caa4f80d447daa7c38ec3306": {
     "source": "正在驗證郵箱...",
     "translations": {
-      "en-us": "Verifying email address..."
+      "en-us": "Verifying email address...",
+      "zh-cn": "正在验证邮箱..."
     },
-    "updatedAt": 1784801589383
+    "updatedAt": 1784878228290
   },
   "22579e1b764b9fa833b462b650b9e29fe068ae82": {
     "source": "及",
     "translations": {
-      "en-us": "And"
+      "en-us": "And",
+      "zh-cn": "及"
     },
-    "updatedAt": 1784801714732
+    "updatedAt": 1784878228290
   },
   "496a43303f5f292e6c0c42c52dfb10fdf794ded7": {
     "source": "重置密碼成功, 正在為您跳转登录页面...",
     "translations": {
-      "en-us": "Password reset successful. You are being redirected to the login page..."
+      "en-us": "Password reset successful. You are being redirected to the login page...",
+      "zh-cn": "重置密码成功, 正在为您跳转登录页面..."
     },
-    "updatedAt": 1784802204972
+    "updatedAt": 1784878319022
   },
   "e56f3586f52014ad22cc5bf2eaf862439a1b12c7": {
     "source": "請輸入收到的驗證碼",
     "translations": {
-      "en-us": "Please enter the verification code you received"
+      "en-us": "Please enter the verification code you received",
+      "zh-cn": "请输入收到的验证码"
     },
-    "updatedAt": 1784802204972
+    "updatedAt": 1784878319022
   },
   "230415ffd733b3d33888d5b9a210f230776ba77a": {
     "source": "確認重置",
     "translations": {
-      "en-us": "Confirm Reset"
+      "en-us": "Confirm Reset",
+      "zh-cn": "确认重置"
     },
-    "updatedAt": 1784802204972
+    "updatedAt": 1784878319022
   },
   "88ae4f2d6c25b84f28d041ebe1bd4e23b8049f9e": {
     "source": "重置您的密碼",
     "translations": {
-      "en-us": "Reset Your Password"
+      "en-us": "Reset Your Password",
+      "zh-cn": "重置您的密码"
     },
-    "updatedAt": 1784802222987
+    "updatedAt": 1784878319022
+  },
+  "f2eed5a5af94d845c7d6cf81b282501d0ef2f9a6": {
+    "source": "體驗完整功能，無需任何付款",
+    "translations": {
+      "zh-cn": "体验完整功能，无需任何付款",
+      "zh-hk": "體驗完整功能，無需任何付款",
+      "en-us": "Experience the full range of features—no payment required"
+    },
+    "updatedAt": 1784877827596
+  },
+  "dc222e5d4d8fae552f97ac2aacf0400b99611a75": {
+    "source": "試用包含",
+    "translations": {
+      "zh-cn": "试用包含",
+      "zh-hk": "試用包含",
+      "en-us": "The trial includes"
+    },
+    "updatedAt": 1784877827596
+  },
+  "65a11c7ed31967ea6e5da9a0d4457f691902ac11": {
+    "source": "14天完整功能體驗",
+    "translations": {
+      "zh-cn": "14天完整功能体验",
+      "zh-hk": "14天完整功能體驗",
+      "en-us": "14-Day Full-Featured Trial"
+    },
+    "updatedAt": 1784877827596
+  },
+  "a27dae81c0a5994aa9f38d58439c40cedca6b2b5": {
+    "source": "無需信用卡",
+    "translations": {
+      "zh-cn": "无需信用卡",
+      "zh-hk": "無需信用卡",
+      "en-us": "No credit card required"
+    },
+    "updatedAt": 1784877827596
+  },
+  "4bd7b6e1f2134fd8c5023cce998dfea9544e99b4": {
+    "source": "專人客服支援",
+    "translations": {
+      "zh-cn": "专人客服支援",
+      "zh-hk": "專人客服支援",
+      "en-us": "Dedicated Customer Service Support"
+    },
+    "updatedAt": 1784877827596
+  },
+  "5e553de5f224b6612ed3e2d7e76f4f7c462cdc95": {
+    "source": "數據安全保障",
+    "translations": {
+      "zh-cn": "数据安全保障",
+      "zh-hk": "數據安全保障",
+      "en-us": "Data Security Measures"
+    },
+    "updatedAt": 1784877827596
+  },
+  "3f331d7a51c6c550895b3002b5e5bd0f2e577a7d": {
+    "source": "填寫資料",
+    "translations": {
+      "zh-cn": "填写资料",
+      "zh-hk": "填寫資料",
+      "en-us": "Fill in the Information"
+    },
+    "updatedAt": 1784878156974
+  },
+  "766f4d4289a1c6c0b11748c0b960b2f70277e350": {
+    "source": "開始免費試用",
+    "translations": {
+      "zh-cn": "开始免费试用",
+      "zh-hk": "開始免費試用",
+      "en-us": "Start a Free Trial"
+    },
+    "updatedAt": 1784878156975
+  },
+  "67cc37911522ec37d4e03725e9b90dddf2fd1359": {
+    "source": "請輸入您的公司名稱（選填）",
+    "translations": {
+      "zh-cn": "请输入您的公司名称（选填）",
+      "zh-hk": "請輸入您的公司名稱（選填）",
+      "en-us": "Please enter your company name (optional)"
+    },
+    "updatedAt": 1784878156975
+  },
+  "05892906b055c7ad093953c419f7ddaf55ace201": {
+    "source": "用戶名或密碼錯誤",
+    "translations": {
+      "zh-cn": "用户名或密码错误"
+    },
+    "updatedAt": 1784879224136
   }
 }

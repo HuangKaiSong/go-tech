@@ -13,6 +13,7 @@ import z from 'zod';
 import authBgImg from '@/assets/background.webp';
 import { useAuth } from '@/contexts/AuthContext';
 import { sendToBetterStack } from '@/lib/betterstack-logger';
+import { HttpError, httpFetch } from '@/lib/http-fetch';
 
 const signinSchema = z.object({
   username: z.string(),
@@ -57,16 +58,13 @@ const Login = () => {
             }
           : result.data;
 
-      const response = await fetch(uri, {
+      const response = await httpFetch(uri, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(body)
       });
-      if (!response.ok) {
-        throw response;
-      }
 
       const signResponse = await response.json();
       if (signResponse.code === 200) {
@@ -83,11 +81,11 @@ const Login = () => {
             router.replace(redirect || '/select-account');
           });
       }
-    } catch (error: Response | any) {
-      if (error instanceof Response) {
-        const err = await error.json();
-        sendToBetterStack('error', error.statusText, { extra: err, body: result.data });
-        toast.error(err.message || t('loginFailed'));
+    } catch (error) {
+      if (error instanceof HttpError) {
+        sendToBetterStack('error', error.response.statusText, { extra: error.data, body: result.data });
+        // httpFetch 已将服务端中文 message 翻译为当前语言
+        toast.error(error.message || t('loginFailed'));
       }
     } finally {
       setIsLoading(false);
