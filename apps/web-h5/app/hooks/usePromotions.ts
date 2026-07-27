@@ -1,10 +1,13 @@
 import { toast } from '@go-tech-frontend/ui';
 import { useEffect, useMemo, useState } from 'react';
 import { type PromotionOption, getPromotionDiscount, toArray } from '@/app/constants/promotion';
+import { translateError } from '@/app/lib/translate-error';
 
 interface UsePromotionsParams {
   /** 优惠前的应付金额，用于计算折扣额与自动选最优 */
   baseAmount: number;
+  /** 当前语言环境，用于翻译错误信息 */
+  locale?: string;
   /** 当前套餐 id，用于过滤活动优惠 / 查询优惠码 */
   packageId: number | string | undefined;
   /** 服务端预取的活动优惠 */
@@ -30,7 +33,13 @@ interface UsePromotionsResult {
  *
  * 维护选中的优惠、优惠码兑换的优惠，并基于 `baseAmount` 计算折扣额、默认选中力度最大的优惠。
  */
-export const usePromotions = ({ baseAmount, packageId, promotions, token }: UsePromotionsParams): UsePromotionsResult => {
+export const usePromotions = ({
+  baseAmount,
+  locale,
+  packageId,
+  promotions,
+  token
+}: UsePromotionsParams): UsePromotionsResult => {
   /** 当前选中的优惠活动 id（null 表示不使用优惠） */
   const [selectedPromotionId, setSelectedPromotionId] = useState<number | null>(null);
   /** 优惠码输入框内容 */
@@ -77,7 +86,7 @@ export const usePromotions = ({ baseAmount, packageId, promotions, token }: UseP
   const handleApplyCode = async () => {
     const code = promotionCode.trim();
     if (!code) {
-      toast.error('請輸入優惠碼');
+      toast.error((await translateError('請輸入優惠碼', locale as string)) || '請輸入優惠碼');
       return;
     }
     setApplyingCode(true);
@@ -101,9 +110,11 @@ export const usePromotions = ({ baseAmount, packageId, promotions, token }: UseP
       });
       setSelectedPromotionId(valid[0].promotionId);
       setPromotionCode('');
-      toast.success('優惠碼已應用');
+      toast.success((await translateError('優惠碼已應用', locale as string)) || '優惠碼已應用');
     } catch (error) {
-      toast.error((error as Error).message);
+      const msg = (error as Error).message;
+      const translated = locale ? await translateError(msg, locale) : null;
+      toast.error(translated || msg);
     } finally {
       setApplyingCode(false);
     }

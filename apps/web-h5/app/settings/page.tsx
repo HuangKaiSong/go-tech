@@ -47,6 +47,16 @@ const Settings = ({ token, user }: any) => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isPasswordLoading, setIsPasswordLoading] = useState(false);
 
+  // i18n messages
+  const fillRequiredFields = useBatchTranslation('請填寫所有必填欄位');
+  const profileUpdated = useBatchTranslation('個人資料已更新');
+  const enterCurrentPassword = useBatchTranslation('請輸入當前密碼');
+  const enterNewPassword = useBatchTranslation('請輸入新密碼');
+  const passwordMinLength = useBatchTranslation('新密碼長度至少為6個字符');
+  const passwordsMismatch = useBatchTranslation('兩次輸入的新密碼不一致');
+  const apiNotFound = useBatchTranslation('接口 /go-tech/platform/platformCustomer/updatePwd 未定义');
+  const passwordChanged = useBatchTranslation('密碼修改成功');
+
   const handleProfileChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setProfileData(prev => ({ ...prev, [field]: e.target.value }));
   };
@@ -59,7 +69,7 @@ const Settings = ({ token, user }: any) => {
     e.preventDefault();
 
     if (!profileData.custName.trim() || !profileData.email.trim() || !profileData.phone.trim()) {
-      toast.error('請填寫所有必填欄位');
+      toast.error(fillRequiredFields);
       return;
     }
 
@@ -87,7 +97,7 @@ const Settings = ({ token, user }: any) => {
           .then(res => res.json())
           .then(res => {
             setUser(res.data);
-            toast.success('個人資料已更新');
+            toast.success(profileUpdated);
           });
       }
     } catch (error: any) {
@@ -102,22 +112,22 @@ const Settings = ({ token, user }: any) => {
     e.preventDefault();
 
     if (!passwordData.currentPassword.trim()) {
-      toast.error('請輸入當前密碼');
+      toast.error(enterCurrentPassword);
       return;
     }
 
     if (!passwordData.newPassword.trim()) {
-      toast.error('請輸入新密碼');
+      toast.error(enterNewPassword);
       return;
     }
 
     if (passwordData.newPassword.length < 6) {
-      toast.error('新密碼長度至少為6個字符');
+      toast.error(passwordMinLength);
       return;
     }
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.error('兩次輸入的新密碼不一致');
+      toast.error(passwordsMismatch);
       return;
     }
 
@@ -138,7 +148,7 @@ const Settings = ({ token, user }: any) => {
       if (!response.ok) {
         const statusCode = response.status;
         if (statusCode === 404) {
-          toast.error(`接口 /go-tech/platform/platformCustomer/updatePwd 未定义`);
+          toast.error(apiNotFound);
         } else {
           throw new Error(`API request failed: ${statusCode} ${response.statusText}`);
         }
@@ -153,7 +163,7 @@ const Settings = ({ token, user }: any) => {
           newPassword: '',
           confirmPassword: ''
         });
-        toast.success('密碼修改成功');
+        toast.success(passwordChanged);
       }
     } catch (error: any) {
       toast.error(error.message);

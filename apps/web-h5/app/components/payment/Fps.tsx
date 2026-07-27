@@ -2,6 +2,7 @@ import { Button, FileUpload, Label, type UploadedFile, toast } from '@go-tech-fr
 import { Banknote, Check, Copy, Upload } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
+import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 import { useAuth } from '@/contexts/AuthContext';
 
 // FPS Account Info
@@ -58,6 +59,10 @@ export default function Fps({
   price: number;
 }) {
   const t = useTranslations('Payment');
+
+  const copiedMsg = useBatchTranslation('已複製到剪貼板');
+  const copyFailedMsg = useBatchTranslation('复制失败，请手动复制');
+  const uploadEvidenceMsg = useBatchTranslation('請上傳支付憑證');
   const { token } = useAuth();
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
 
@@ -96,7 +101,7 @@ export default function Fps({
       if (typeof navigator === 'undefined' || !navigator.clipboard) {
         await fallbackCopyTextToClipboard(text);
         setCopiedField(field);
-        toast.success('已複製到剪貼板');
+        toast.success(copiedMsg);
         timeoutRefs.current[field] = setTimeout(() => setCopiedField(null), 2000);
         return;
       }
@@ -114,7 +119,7 @@ export default function Fps({
             if (permission.state === 'granted' || permission.state === 'prompt') {
               await navigator.clipboard.writeText(text);
               setCopiedField(field);
-              toast.success('已複製到剪貼板');
+              toast.success(copiedMsg);
               timeoutRefs.current[field] = setTimeout(() => setCopiedField(null), 2000);
               return;
             }
@@ -123,25 +128,25 @@ export default function Fps({
           // 如果没有权限API或权限被拒绝，直接尝试写入
           await navigator.clipboard.writeText(text);
           setCopiedField(field);
-          toast.success('已複製到剪貼板');
+          toast.success(copiedMsg);
           timeoutRefs.current[field] = setTimeout(() => setCopiedField(null), 2000);
         } catch (clipboardError) {
           console.warn('Clipboard API failed, using fallback:', clipboardError);
           await fallbackCopyTextToClipboard(text);
           setCopiedField(field);
-          toast.success('已複製到剪貼板');
+          toast.success(copiedMsg);
           timeoutRefs.current[field] = setTimeout(() => setCopiedField(null), 2000);
         }
       } else {
         // 非安全上下文，使用备用方法
         await fallbackCopyTextToClipboard(text);
         setCopiedField(field);
-        toast.success('已複製到剪貼板');
+        toast.success(copiedMsg);
         timeoutRefs.current[field] = setTimeout(() => setCopiedField(null), 2000);
       }
     } catch (error) {
       console.error('复制操作失败:', error);
-      toast.error('复制失败，请手动复制');
+      toast.error(copyFailedMsg);
     }
   };
 
@@ -152,7 +157,7 @@ export default function Fps({
 
   const confirmPayment = () => {
     if (!uploadedFile) {
-      toast.error('請上傳支付憑證');
+      toast.error(uploadEvidenceMsg);
       return;
     }
     handleFpsPaymentConfirm(uploadedFile);

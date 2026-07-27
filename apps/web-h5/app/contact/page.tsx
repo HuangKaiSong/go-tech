@@ -1,9 +1,12 @@
 'use client';
 
 import { Button, Dialog, DialogContent, Input, Textarea, toast } from '@go-tech-frontend/ui';
+import { useLocale } from 'next-intl';
 import { useState } from 'react';
 import Footer from '@/app/components/Footer';
 import Header from '@/app/components/Header';
+import { translateError } from '@/app/lib/translate-error';
+import { HttpError, httpFetch } from '@/lib/http-fetch';
 import { DynamicText } from '../components/DynamicI18nText.client';
 import { useBatchTranslation } from '../hooks/useBatchTranslation';
 
@@ -16,6 +19,7 @@ const Page = () => {
   });
   const [showSuccess, setShowSuccess] = useState(false);
   const [pending, setPending] = useState(false);
+  const locale = useLocale();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,17 +27,13 @@ const Page = () => {
     try {
       setPending(true);
 
-      const response = await fetch('/go-tech/platform/leaveMessage/add', {
+      const response = await httpFetch('/go-tech/platform/leaveMessage/add', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(formData)
       });
-
-      if (!response.ok) {
-        throw response;
-      }
 
       const result = await response.json();
       if (result && result.code && result.code === 200) {
@@ -42,17 +42,12 @@ const Page = () => {
         // Reset form
         setFormData({ name: '', email: '', phone: '', message: '' });
       } else {
-        toast.error(result.message);
+        toast.error((await translateError(result.message, locale)) || result.message);
       }
     } catch (error) {
-      console.log(error);
-      if (error instanceof Response) {
-        if (error.ok) {
-          const result = await error.json();
-          toast.error(result.message);
-        } else {
-          toast.error('An error occurred while submitting the form.');
-        }
+      // httpFetch 已将服务端中文 message 翻译为当前语言
+      if (error instanceof HttpError) {
+        toast.error(error.message);
       }
     } finally {
       setPending(false);

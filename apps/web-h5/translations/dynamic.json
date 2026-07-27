@@ -2810,5 +2810,53 @@
       "zh-cn": "用户名或密码错误"
     },
     "updatedAt": 1784879224136
+  },
+  "481652141f3afad00bbe3b674d7094d941df4eed": {
+    "source": "請輸入邮箱",
+    "translations": {
+      "zh-cn": "请输入邮箱",
+      "en-us": "Please enter your email address"
+    },
+    "updatedAt": 1784887953508
+  },
+  "ff323c96da1a8a9ec006f17b654f3a77b072cd57": {
+    "source": "請輸入正確的郵箱",
+    "translations": {
+      "zh-cn": "请输入正确的邮箱",
+      "en-us": "Please enter a valid email address"
+    },
+    "updatedAt": 1784887953508
+  },
+  "0b75dd538cbc67a50e8f73506949d0d901afd517": {
+    "source": "請輸入驗證碼",
+    "translations": {
+      "zh-cn": "请输入验证码",
+      "en-us": "Please enter the verification code"
+    },
+    "updatedAt": 1784887953508
+  },
+  "2e0efa4d9583214d0063dd9b0b8102f1fd1097dd": {
+    "source": "密码至少需要6位字符",
+    "translations": {
+      "zh-cn": "密码至少需要6位字符",
+      "en-us": "The password must be at least 6 characters long."
+    },
+    "updatedAt": 1784887953509
+  },
+  "ae38eed1e375fdbb1a41d62abb1d3c9918d843b2": {
+    "source": "密码需至少包含一个字母、一个数字和一个特殊字符",
+    "translations": {
+      "zh-cn": "密码需至少包含一个字母、一个数字和一个特殊字符",
+      "en-us": "The password must contain at least one letter, one number, and one special character."
+    },
+    "updatedAt": 1784887953509
+  },
+  "bcffbca69398c129d19a34b038f93c878d389778": {
+    "source": "密码不一致",
+    "translations": {
+      "zh-cn": "密码不一致",
+      "en-us": "Passwords do not match"
+    },
+    "updatedAt": 1784887953509
   }
 }

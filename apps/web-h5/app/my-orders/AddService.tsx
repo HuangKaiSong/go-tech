@@ -12,10 +12,13 @@ import {
 } from '@go-tech-frontend/ui';
 import dayjs from 'dayjs';
 import { Minus, Plus } from 'lucide-react';
+import { useLocale } from 'next-intl';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { type FC, useEffect, useState } from 'react';
+import { translateError } from '@/app/lib/translate-error';
 import { useAuth } from '@/contexts/AuthContext';
+import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 import { DynamicText } from '../components/DynamicI18nText.client';
 import valueAddedServices, { type SpecificValueAddedServicesId } from '../constants/addedServices';
 import { type OrderItemInfoType, OrderItemTypeEnum, OrderTypeEnum } from '../constants/order';
@@ -49,9 +52,17 @@ export const AddService: FC<AddServiceProps> = ({
 
   const { token } = useAuth();
   const router = useRouter();
+  const locale = useLocale();
   const [selectedServices, setSelectedServices] = useState<Record<string, number>>({});
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [promotions, setPromotions] = useState<PromotionOption[]>([]);
+
+  // i18n messages
+  const addServiceOrderCreating = useBatchTranslation('創建增值服務訂單中...');
+  const addServiceOrderCreated = useBatchTranslation('增值服務訂單創建成功');
+  const addServiceEvidenceSubmitted = useBatchTranslation('支付憑證已提交，我們將在確認後為您增加增值服務');
+  const orderCreatedRedirecting = useBatchTranslation('訂單創建成功，正在跳转...');
+  const addServiceOrderFailed = useBatchTranslation('創建增值服務訂單失敗，請稍後重試');
 
   const packageId = currentOrder?.platformPackageDto?.id;
 
@@ -138,7 +149,7 @@ export const AddService: FC<AddServiceProps> = ({
     selectedPromotionId,
     setPromotionCode,
     setSelectedPromotionId
-  } = usePromotions({ baseAmount: addonsBaseAmount, packageId, promotions, token });
+  } = usePromotions({ baseAmount: addonsBaseAmount, packageId, promotions, token, locale });
 
   // 优惠后实付金额
   const finalTotal = Math.max(0, addonsBaseAmount - promotionDiscount);
@@ -192,7 +203,7 @@ export const AddService: FC<AddServiceProps> = ({
 
   const handleFpsPaymentConfirm = async (voucherFile: UploadedFile) => {
     toast.dismiss();
-    const toastId = toast.loading('創建增值服務訂單中...');
+    const toastId = toast.loading(addServiceOrderCreating);
     const headers = requestHeaders();
     const orderInfo = buildOrderInfo(PayTypeEnum.FPS);
 
@@ -208,7 +219,7 @@ export const AddService: FC<AddServiceProps> = ({
           throw err;
         });
       if (orderResponse.code === 200) {
-        toast.success('增值服務訂單創建成功', { id: toastId });
+        toast.success(addServiceOrderCreated, { id: toastId });
         const orderId = orderResponse.data;
         // 上传凭证
         await fetch('/go-tech/platform/packageOrder/payEvidence', {
@@ -227,9 +238,9 @@ export const AddService: FC<AddServiceProps> = ({
         router.push(`/my-orders/${orderId}`);
 
         setShowPaymentDialog(false);
-        toast.success('支付憑證已提交，我們將在確認後為您增加增值服務');
+        toast.success(addServiceEvidenceSubmitted);
       } else {
-        toast.error(orderResponse.message, { id: toastId });
+        toast.error((await translateError(orderResponse.message, locale)) || orderResponse.message, { id: toastId });
       }
     } catch (error) {
       console.log(error);
@@ -239,7 +250,7 @@ export const AddService: FC<AddServiceProps> = ({
   /** 线上支付：先创建增值服务订单（payType=Online），再生成全托管收银台并跳转 */
   const handleOnlinePaymentConfirm = async () => {
     toast.dismiss();
-    const toastId = toast.loading('創建增值服務訂單中...');
+    const toastId = toast.loading(addServiceOrderCreating);
     const orderInfo = buildOrderInfo(PayTypeEnum.Online);
 
     try {
@@ -250,18 +261,18 @@ export const AddService: FC<AddServiceProps> = ({
       }).then(res => res.json());
 
       if (orderResponse.code !== 200) {
-        toast.error(orderResponse.message, { id: toastId });
+        toast.error((await translateError(orderResponse.message, locale)) || orderResponse.message, { id: toastId });
         return;
       }
 
       // 后端返回 OrderAddResponse（含签名等参数）；先跳转订单详情，再由详情页唤起第三方支付
-      toast.success('訂單創建成功，正在跳转...', { id: toastId });
+      toast.success(orderCreatedRedirecting, { id: toastId });
       setShowPaymentDialog(false);
       stashWebManagedCashier(orderResponse.data);
       router.push(`/my-orders/${orderResponse.data.orderId}`);
     } catch (error) {
       console.log(error);
-      toast.error('創建增值服務訂單失敗，請稍後重試', { id: toastId });
+      toast.error(addServiceOrderFailed, { id: toastId });
     }
   };
 

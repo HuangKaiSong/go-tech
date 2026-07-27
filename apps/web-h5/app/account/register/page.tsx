@@ -15,6 +15,7 @@ import { translateError } from '@/app/lib/translate-error';
 // import Logo from "@/assets/Gotech_Logo.webp";
 import authBgImg from '@/assets/background.webp';
 import { sendToBetterStack } from '@/lib/betterstack-logger';
+import { HttpError, httpFetch } from '@/lib/http-fetch';
 
 const parseEmailExists = (result: any) => {
   if (typeof result?.data === 'boolean') return !result.data;
@@ -151,7 +152,7 @@ const Register = () => {
 
     setEmailChecking(true);
     try {
-      const response = await fetch(
+      const response = await httpFetch(
         `/go-tech/platform/platformCustomer/emailExistVerify?email=${encodeURIComponent(email)}`,
         { method: 'POST' }
       );
@@ -171,10 +172,10 @@ const Register = () => {
       }
       return exists;
     } catch (err) {
-      if (err instanceof Response) {
-        sendToBetterStack('error', err.statusText, {
+      if (err instanceof HttpError) {
+        sendToBetterStack('error', err.response.statusText, {
           uri: `/go-tech/platform/platformCustomer/checkEmail?email=${email}`,
-          extra: await err.json()
+          extra: err.data
         });
       }
       return false;
@@ -208,7 +209,7 @@ const Register = () => {
 
     try {
       setPending(true);
-      const response = await fetch(`/go-tech/platform/platformCustomer/sendCode?email=${formData.email}`, {
+      const response = await httpFetch(`/go-tech/platform/platformCustomer/sendCode?email=${formData.email}`, {
         method: 'POST'
       });
       const fetchResult = await response.json();
@@ -220,13 +221,14 @@ const Register = () => {
       }
       toast.error((await translateError(fetchResult.message, locale)) || fetchResult.message);
     } catch (err) {
-      if (err instanceof Response) {
-        sendToBetterStack('error', err.statusText, {
+      if (err instanceof HttpError) {
+        sendToBetterStack('error', err.response.statusText, {
           uri: `/go-tech/platform/platformCustomer/sendCode?email=${formData.email}`,
-          extra: await err.json()
+          extra: err.data
         });
       }
-      toast.error(codeFailMsg);
+      // HttpError 的 message 已被 httpFetch 翻译
+      toast.error(err instanceof HttpError && err.message ? err.message : codeFailMsg);
     } finally {
       setPending(false);
     }
@@ -254,7 +256,7 @@ const Register = () => {
 
       const { company, email, name, phone, verificationCode } = result.data;
 
-      const response = await fetch('/go-tech/platform/platformCustomer/verify', {
+      const response = await httpFetch('/go-tech/platform/platformCustomer/verify', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -277,12 +279,14 @@ const Register = () => {
       setStep(1);
       setTargetDate(undefined);
     } catch (err) {
-      if (err instanceof Response) {
-        sendToBetterStack('error', err.statusText, {
+      if (err instanceof HttpError) {
+        sendToBetterStack('error', err.response.statusText, {
           uri: `/go-tech/platform/platformCustomer/verify`,
-          extra: await err.json(),
+          extra: err.data,
           body: result.data
         });
+        // message 已被 httpFetch 翻译（此前由 code!==200 分支展示）
+        toast.error(err.message);
       }
     } finally {
       setValidatedPending(false);
@@ -304,7 +308,7 @@ const Register = () => {
       const { company: companyName, email, name: custName, password, phone } = result.data;
       const type = new URLSearchParams(window.location.search).get('type') || undefined;
 
-      const response = await fetch('/go-tech/platform/platformCustomer/register', {
+      const response = await httpFetch('/go-tech/platform/platformCustomer/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -342,12 +346,14 @@ const Register = () => {
         }
       );
     } catch (err) {
-      if (err instanceof Response) {
-        sendToBetterStack('error', err.statusText, {
+      if (err instanceof HttpError) {
+        sendToBetterStack('error', err.response.statusText, {
           uri: `/go-tech/platform/platformCustomer/register`,
-          extra: await err.json(),
+          extra: err.data,
           body: result.data
         });
+        // message 已被 httpFetch 翻译（此前由 code!==200 分支展示）
+        toast.error(err.message);
       }
     } finally {
       setSignupPending(false);

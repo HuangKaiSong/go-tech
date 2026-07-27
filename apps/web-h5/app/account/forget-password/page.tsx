@@ -12,33 +12,16 @@ import { DynamicText } from '@/app/components/DynamicI18nText.client';
 import Link from '@/app/components/Link';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 import { translateError } from '@/app/lib/translate-error';
-// import Logo from "@/assets/Gotech_Logo.webp";
 import authBgImg from '@/assets/background.webp';
 import { sendToBetterStack } from '@/lib/betterstack-logger';
+import { HttpError, httpFetch } from '@/lib/http-fetch';
 
-const sendCodeSchema = z.object({
-  account: z.string().min(1, '請輸入邮箱').email({ message: '请输入正确的邮箱' }).trim()
-});
+const inputClassNames = {
+  root: 'h-14 px-3 pr-12 border-border',
+  control: 'md:text-sm text-base text-foreground caret-foreground'
+};
 
-const verificationCodeSchema = sendCodeSchema.extend({
-  verificationCode: z.string().min(1, '請輸入驗證碼')
-});
-
-const forgetPwdVerifySchema = verificationCodeSchema
-  .extend({
-    pwd: z
-      .string()
-      .min(6, '密码至少需要6位字符')
-      .regex(/^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).+$/, '密码需至少包含一个字母、一个数字和一个特殊字符')
-      .trim(),
-    verifyPwd: z.string().trim()
-  })
-  .refine(data => data.pwd === data.verifyPwd, {
-    message: '密码不一致',
-    path: ['confirmPassword']
-  });
-
-const Register = () => {
+const ForgetPassword = () => {
   const router = useRouter();
   const [formData, setFormData] = useState({
     account: '',
@@ -67,6 +50,36 @@ const Register = () => {
   const confirmResetText = useBatchTranslation('確認重置');
   const nextStepText = useBatchTranslation('下一步');
   const codeLabel = useBatchTranslation('驗證碼');
+
+  // schema 校验消息
+  const emailRequiredMsg = useBatchTranslation('請輸入邮箱');
+  const emailInvalidMsg = useBatchTranslation('請輸入正確的郵箱');
+  const verificationCodeRequired = useBatchTranslation('請輸入驗證碼');
+  const passwordMinLengthMsg = useBatchTranslation('密码至少需要6位字符');
+  const passwordPatternMsg = useBatchTranslation('密码需至少包含一个字母、一个数字和一个特殊字符');
+  const passwordMismatchMsg = useBatchTranslation('密码不一致');
+
+  const sendCodeSchema = z.object({
+    account: z.string().min(1, emailRequiredMsg).email({ message: emailInvalidMsg }).trim()
+  });
+
+  const verificationCodeSchema = sendCodeSchema.extend({
+    verificationCode: z.string().min(1, verificationCodeRequired)
+  });
+
+  const forgetPwdVerifySchema = verificationCodeSchema
+    .extend({
+      pwd: z
+        .string()
+        .min(6, passwordMinLengthMsg)
+        .regex(/^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).+$/, passwordPatternMsg)
+        .trim(),
+      verifyPwd: z.string().trim()
+    })
+    .refine(data => data.pwd === data.verifyPwd, {
+      message: passwordMismatchMsg,
+      path: ['confirmPassword']
+    });
 
   const [targetDate, setTargetDate] = useState<number>();
 
@@ -98,7 +111,7 @@ const Register = () => {
     try {
       setIsSendingCode(true);
 
-      const response = await fetch(`/go-tech/platform/platformCustomer/sendCode?email=${formData.account}`, {
+      const response = await httpFetch(`/go-tech/platform/platformCustomer/sendCode?email=${formData.account}`, {
         method: 'POST'
       });
       const fetchResult = await response.json();
@@ -108,15 +121,16 @@ const Register = () => {
         setTargetDate(Date.now() + 60 * 1000);
         return;
       }
-      toast.error(fetchResult.message);
+      toast.error((await translateError(fetchResult.message, locale)) || fetchResult.message);
     } catch (err) {
-      if (err instanceof Response) {
-        sendToBetterStack('error', err.statusText, {
+      if (err instanceof HttpError) {
+        sendToBetterStack('error', err.response.statusText, {
           uri: `/go-tech/platform/platformCustomer/sendCode?email=${formData.account}`,
-          extra: await err.json()
+          extra: err.data
         });
       }
-      toast.error(codeFailMsg);
+      // HttpError 的 message 已被 httpFetch 翻译
+      toast.error(err instanceof HttpError && err.message ? err.message : codeFailMsg);
     } finally {
       setIsSendingCode(false);
     }
@@ -128,13 +142,13 @@ const Register = () => {
     const result = verificationCodeSchema.safeParse(formData);
 
     if (!result.success) {
-      const message = result.error.message || '';
-      toast.error((await translateError(message, locale)) || message);
+      toast.error(result.error.message || '');
       return;
     }
 
     try {
-      const response = await fetch('/go-tech/platform/platformCustomer/forgetPwdVerify', {
+      setIsLoading(true);
+      const response = await httpFetch('/go-tech/platform/platformCustomer/forgetPwdVerify', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -154,12 +168,14 @@ const Register = () => {
       setStep(1);
       setTargetDate(undefined);
     } catch (error) {
-      if (error instanceof Response) {
-        sendToBetterStack('error', error.statusText, {
-          uri: `/go-tech/platform/platformCustomer/verify`,
-          extra: await error.json(),
+      if (error instanceof HttpError) {
+        sendToBetterStack('error', error.response.statusText, {
+          uri: `/go-tech/platform/platformCustomer/forgetPwdVerify`,
+          extra: error.data,
           body: result.data
         });
+        // message 已被 httpFetch 翻译（此前由 code!==200 分支展示）
+        toast.error(error.message);
       }
     } finally {
       setIsLoading(false);
@@ -173,14 +189,13 @@ const Register = () => {
     const result = forgetPwdVerifySchema.safeParse(formData);
 
     if (!result.success) {
-      const message = result.error.message || '';
-      toast.error((await translateError(message, locale)) || message);
+      toast.error(result.error.message || '');
       return;
     }
     try {
       setIsLoading(true);
 
-      const response = await fetch('/go-tech/platform/platformCustomer/resetPwd', {
+      const response = await httpFetch('/go-tech/platform/platformCustomer/resetPwd', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -191,9 +206,9 @@ const Register = () => {
         })
       });
 
-      const signupResult = await response.json();
-      if (signupResult.code !== 200) {
-        toast.error((await translateError(signupResult.message, locale)) || signupResult.message);
+      const resetResult = await response.json();
+      if (resetResult.code !== 200) {
+        toast.error((await translateError(resetResult.message, locale)) || resetResult.message);
         return;
       }
 
@@ -214,12 +229,14 @@ const Register = () => {
         }
       );
     } catch (err) {
-      if (err instanceof Response) {
-        sendToBetterStack('error', err.statusText, {
+      if (err instanceof HttpError) {
+        sendToBetterStack('error', err.response.statusText, {
           uri: `/go-tech/platform/platformCustomer/resetPwd`,
-          extra: await err.json(),
+          extra: err.data,
           body: result.data
         });
+        // message 已被 httpFetch 翻译（此前由 code!==200 分支展示）
+        toast.error(err.message);
       }
     } finally {
       setIsLoading(false);
@@ -275,10 +292,7 @@ const Register = () => {
                   placeholder={passwordPlaceholder}
                   value={formData.pwd}
                   onChange={handleChange('pwd')}
-                  classNames={{
-                    root: 'h-14 px-3 pr-12 border-border',
-                    control: 'md:text-sm text-base text-foreground caret-foreground'
-                  }}
+                  classNames={inputClassNames}
                 />
               </div>
               <p className="text-xs text-gray-400 mt-2 ml-5 flex items-center gap-1">
@@ -292,10 +306,7 @@ const Register = () => {
                   placeholder={pwdConfirmPlaceholder}
                   value={formData.verifyPwd}
                   onChange={handleChange('verifyPwd')}
-                  classNames={{
-                    root: 'h-14 px-3 pr-12 border-border',
-                    control: 'md:text-sm text-base text-foreground caret-foreground'
-                  }}
+                  classNames={inputClassNames}
                 />
               </div>
               <Button
@@ -359,4 +370,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default ForgetPassword;

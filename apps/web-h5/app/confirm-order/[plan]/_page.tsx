@@ -4,10 +4,12 @@ import { Button, Input, Label, Switch, type UploadedFile, toast } from '@go-tech
 import { Result, Spin } from 'antd';
 import { useAtom, useAtomValue } from 'jotai';
 import { FileCheck } from 'lucide-react';
+import { useLocale } from 'next-intl';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { DynamicText } from '@/app/components/DynamicI18nText.client';
+import { translateError } from '@/app/lib/translate-error';
 import valueAddedServices from '@/app/constants/addedServices';
 import { type PromotionOption } from '@/app/constants/promotion';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
@@ -66,6 +68,7 @@ const ConfirmOrder = ({
   const router = useRouter();
   const { planId } = { planId: planIdFromQuery };
   const { token, user } = useAuth();
+  const locale = useLocale();
 
   const selectedPlan = data;
   const [hasMounted, setHasMounted] = useState(false);
@@ -89,6 +92,13 @@ const ConfirmOrder = ({
 
   const [needInvoice, setNeedInvoice] = useState<boolean>(true);
   const [invoiceName, setInvoiceName] = useState<string>(user?.nickname || '');
+
+  // i18n messages
+  const orderCreating = useBatchTranslation('创建订单中...');
+  const orderCreated = useBatchTranslation('訂單創建成功');
+  const evidenceSubmitted = useBatchTranslation('支付憑證已提交，我們將在確認後為您開通服務');
+  const redirectingToCashier = useBatchTranslation('正在跳转至收银台');
+  const addServiceOrderFailed = useBatchTranslation('創建增值服務訂單失敗，請稍後重試');
 
   useEffect(() => {
     setHasMounted(true);
@@ -162,7 +172,7 @@ const ConfirmOrder = ({
     selectedPromotionId,
     setPromotionCode,
     setSelectedPromotionId
-  } = usePromotions({ baseAmount: promotionBaseAmount, packageId: selectedPlan?.id, promotions, token });
+  } = usePromotions({ baseAmount: promotionBaseAmount, packageId: selectedPlan?.id, promotions, token, locale });
 
   const totalPrice = Math.max(0, originalPrice - discount - promotionDiscount);
 
@@ -221,7 +231,7 @@ const ConfirmOrder = ({
 
   const handleFpsPaymentConfirm = async (voucherFile: UploadedFile) => {
     toast.dismiss();
-    const toastId = toast.loading('创建订单中...');
+    const toastId = toast.loading(orderCreating);
     const orderInfo: OrderInfoType = buildOrderInfo(PayTypeEnum.FPS);
     const headers = requestHeaders();
 
@@ -238,7 +248,7 @@ const ConfirmOrder = ({
           throw err;
         });
       if (orderResponse.code === 200) {
-        toast.success('訂單創建成功', { id: toastId });
+        toast.success(orderCreated, { id: toastId });
         const orderId = orderResponse.data;
         if (orderInfo.payType === PayTypeEnum.FPS) {
           // 上传凭证
@@ -261,9 +271,9 @@ const ConfirmOrder = ({
         setShowPaymentDialog(false);
         // 下单成功后才清空已选增值服务，避免带入下一笔订单（刷新页面不应清空）
         setSelectedServices({});
-        toast.success('支付憑證已提交，我們將在確認後為您開通服務', { id: toastId });
+        toast.success(evidenceSubmitted, { id: toastId });
       } else {
-        toast.error(orderResponse.message, { id: toastId });
+        toast.error((await translateError(orderResponse.message, locale)) || orderResponse.message, { id: toastId });
       }
     } catch (error) {
       toast.dismiss();
@@ -274,7 +284,7 @@ const ConfirmOrder = ({
   /** 线上支付：先创建增值服务订单（payType=Online），再生成全托管收银台并跳转 */
   const handleOnlinePaymentConfirm = async () => {
     toast.dismiss();
-    const toastId = toast.loading('创建订单中...');
+    const toastId = toast.loading(orderCreating);
     const orderInfo = buildOrderInfo(PayTypeEnum.Online);
 
     try {
@@ -285,19 +295,19 @@ const ConfirmOrder = ({
       }).then(res => res.json());
 
       if (orderResponse.code !== 200) {
-        toast.error(orderResponse.message, { id: toastId });
+        toast.error((await translateError(orderResponse.message, locale)) || orderResponse.message, { id: toastId });
         return;
       }
 
       // 后端返回 OrderAddResponse（含签名等参数），以 GET 表单方式喚起全托管收银台
-      toast.success('正在跳转至收银台', { id: toastId });
+      toast.success(redirectingToCashier, { id: toastId });
       setShowPaymentDialog(false);
       stashWebManagedCashier(orderResponse.data);
       router.push(`/my-orders/${orderResponse.data.orderId}`);
       // openWebManagedCashier(orderResponse.data);
     } catch (error) {
       console.log(error);
-      toast.error('創建增值服務訂單失敗，請稍後重試', { id: toastId });
+      toast.error(addServiceOrderFailed, { id: toastId });
     }
   };
 

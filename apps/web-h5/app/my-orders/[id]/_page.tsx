@@ -2,6 +2,7 @@
 
 import { Badge, Button, Card, CardContent, CardHeader, Separator, toast } from '@go-tech-frontend/ui';
 import { ArrowLeft, CheckCircle, CreditCard, Download, Package, RefreshCw, Settings, XCircle } from 'lucide-react';
+import { useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { DynamicText } from '@/app/components/DynamicI18nText.client';
@@ -18,6 +19,8 @@ import {
   peekWebManagedCashier,
   stashWebManagedCashier
 } from '@/app/constants/payment';
+import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
+import { translateError } from '@/app/lib/translate-error';
 import { useAuth } from '@/contexts/AuthContext';
 
 // 线上支付回跳后轮询配置
@@ -52,8 +55,20 @@ const goToThirdPartyPay = (data: OrderAddResponse) => {
 const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
   const router = useRouter();
   const { token } = useAuth();
+  const locale = useLocale();
 
   const [order, setOrder] = useState(detail);
+
+  // i18n messages
+  const fetchingPaymentInfo = useBatchTranslation('獲取支付信息中…');
+  const redirectingToPay = useBatchTranslation('正在跳轉至支付頁面');
+  const fetchPaymentInfoFailed = useBatchTranslation('獲取支付信息失敗');
+  const fetchPaymentInfoRetry = useBatchTranslation('獲取支付信息失敗，請稍後重試');
+  const cancellingOrder = useBatchTranslation('取消訂單中…');
+  const orderCancelled = useBatchTranslation('訂單已取消');
+  const orderCancelledStatus = useBatchTranslation('已取消');
+  const cancelOrderFailed = useBatchTranslation('取消訂單失敗');
+  const cancelOrderRetry = useBatchTranslation('取消訂單失敗，請稍後重試');
   const [isPolling, setIsPolling] = useState(false);
   const [pendingCashier, setPendingCashier] = useState<OrderAddResponse | null>(null);
 
@@ -133,7 +148,7 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
   /** 繼續付款：重新獲取支付參數並跳轉收銀台 */
   const handleContinuePay = async () => {
     if (!token) return;
-    const toastId = toast.loading('獲取支付信息中…');
+    const toastId = toast.loading(fetchingPaymentInfo);
     try {
       const res = await fetch(`/go-tech/platform/packageOrder/repay/${_orderId}`, {
         method: 'POST',
@@ -145,22 +160,24 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
       }).then(r => r.json());
 
       if (res.code === 200 && res.data) {
-        toast.success('正在跳轉至支付頁面', { id: toastId });
+        toast.success(redirectingToPay, { id: toastId });
         stashWebManagedCashier(res.data);
         goToThirdPartyPay(res.data);
       } else {
-        toast.error(res.message || '獲取支付信息失敗', { id: toastId });
+        toast.error((await translateError(res.message, locale)) || res.message || fetchPaymentInfoFailed, {
+          id: toastId
+        });
       }
     } catch (error) {
       console.error(error);
-      toast.error('獲取支付信息失敗，請稍後重試', { id: toastId });
+      toast.error(fetchPaymentInfoRetry, { id: toastId });
     }
   };
 
   /** 取消訂單 */
   const handleCancelOrder = async () => {
     if (!token) return;
-    const toastId = toast.loading('取消訂單中…');
+    const toastId = toast.loading(cancellingOrder);
     try {
       const res = await fetch(`/go-tech/platform/packageOrder/cancel/${_orderId}`, {
         method: 'POST',
@@ -172,18 +189,18 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
       }).then(r => r.json());
 
       if (res.code === 200) {
-        toast.success('訂單已取消', { id: toastId });
+        toast.success(orderCancelled, { id: toastId });
         setOrder((prev: any) => ({
           ...prev,
           orderStatus: OrderStatusEnum.CANCELED,
-          orderStatusName: '已取消'
+          orderStatusName: orderCancelledStatus
         }));
       } else {
-        toast.error(res.message || '取消訂單失敗', { id: toastId });
+        toast.error((await translateError(res.message, locale)) || res.message || cancelOrderFailed, { id: toastId });
       }
     } catch (error) {
       console.error(error);
-      toast.error('取消訂單失敗，請稍後重試', { id: toastId });
+      toast.error(cancelOrderRetry, { id: toastId });
     }
   };
 
@@ -194,10 +211,16 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
         <section className="pt-32 pb-16">
           <div className="container mx-auto px-4 text-center">
             <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h1 className="text-2xl font-bold mb-4">找不到訂單</h1>
-            <p className="text-muted-foreground mb-6">該訂單不存在或已被刪除</p>
+            <h1 className="text-2xl font-bold mb-4">
+              <DynamicText text="訂單詳情" />
+            </h1>
+            <p className="text-muted-foreground mb-6">
+              <DynamicText text="該訂單不存在或已被刪除" />
+            </p>
             <Link href="/my-orders">
-              <Button>返回我的訂單</Button>
+              <Button>
+                <DynamicText text="返回我的訂單" />
+              </Button>
             </Link>
           </div>
         </section>

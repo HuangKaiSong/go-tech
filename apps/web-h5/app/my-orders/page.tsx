@@ -15,13 +15,14 @@ import {
 } from '@go-tech-frontend/ui';
 import { useAsyncEffect } from 'ahooks';
 import { ArrowUpCircle, Eye, Package, RefreshCw, Settings, ShoppingCart } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import Footer from '@/app/components/Footer';
 import Header from '@/app/components/Header';
 import Link from '@/app/components/Link';
+import { translateError } from '@/app/lib/translate-error';
 import { useAuth } from '@/contexts/AuthContext';
 import { type OrderItemInfoType, OrderStatusEnum } from '../constants/order';
 import { AddService } from './AddService';
@@ -51,6 +52,7 @@ const MyOrders = () => {
   const { token } = useAuth();
   const router = useRouter();
   const t = useTranslations('Order');
+  const locale = useLocale();
 
   const [orderList, setOrderList] = useState<OrderItemInfoType[]>([]);
   const [showAddonsDialog, setShowAddonsDialog] = useState(false);
@@ -95,7 +97,7 @@ const MyOrders = () => {
         setShowPaymentDialog(false);
         router.push(`/my-orders/${selectOrder.id}`);
       } else {
-        toast.error(res.message, { id: toastId });
+        toast.error((await translateError(res.message, locale)) || res.message, { id: toastId });
       }
     } catch (error) {
       console.log(error);

@@ -13,10 +13,13 @@ import {
 } from '@go-tech-frontend/ui';
 import dayjs from 'dayjs';
 import { ArrowUpCircle, Check } from 'lucide-react';
+import { useLocale } from 'next-intl';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { type FC, useEffect, useState } from 'react';
+import { translateError } from '@/app/lib/translate-error';
 import { useAuth } from '@/contexts/AuthContext';
+import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 import { DynamicText } from '../components/DynamicI18nText.client';
 import valueAddedServices, { type SpecificValueAddedServicesId } from '../constants/addedServices';
 import { type OrderItemInfoType, OrderItemTypeEnum, OrderTypeEnum, type PlatformPackageDto } from '../constants/order';
@@ -50,7 +53,15 @@ export const Upgrade: FC<UpgradeProps> = ({
 
   const { token } = useAuth();
   const router = useRouter();
+  const locale = useLocale();
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+
+  // i18n messages
+  const upgradeOrderCreating = useBatchTranslation('創建升級訂單中...');
+  const upgradeOrderCreated = useBatchTranslation('升級訂單創建成功');
+  const upgradeEvidenceSubmitted = useBatchTranslation('支付憑證已提交，我們將在確認後為您升級');
+  const orderCreatedRedirecting = useBatchTranslation('訂單創建成功，正在跳转...');
+  const upgradeOrderFailed = useBatchTranslation('創建升級訂單失敗，請稍後重試');
 
   const [upgradePlans, setUpgradePlans] = useState<PlatformPackageDto[]>([]);
   const [selectedUpgradePlan, setSelectedUpgradePlan] = useState<number | null>(null);
@@ -174,7 +185,7 @@ export const Upgrade: FC<UpgradeProps> = ({
     selectedPromotionId,
     setPromotionCode,
     setSelectedPromotionId
-  } = usePromotions({ baseAmount: upgradeBaseAmount, packageId: selectedUpgradePlan ?? undefined, promotions, token });
+  } = usePromotions({ baseAmount: upgradeBaseAmount, packageId: selectedUpgradePlan ?? undefined, promotions, token, locale });
 
   // 优惠后实付金额
   const finalTotal = Math.max(0, upgradeBaseAmount - promotionDiscount);
@@ -235,7 +246,7 @@ export const Upgrade: FC<UpgradeProps> = ({
 
   const handleFpsPaymentConfirm = async (voucherFile: UploadedFile) => {
     toast.dismiss();
-    const toastId = toast.loading('創建升級訂單中...');
+    const toastId = toast.loading(upgradeOrderCreating);
     const headers = requestHeaders();
     const orderInfo = buildOrderInfo(PayTypeEnum.FPS);
 
@@ -251,7 +262,7 @@ export const Upgrade: FC<UpgradeProps> = ({
           throw err;
         });
       if (orderResponse.code === 200) {
-        toast.success('升級訂單創建成功', { id: toastId });
+        toast.success(upgradeOrderCreated, { id: toastId });
         const orderId = orderResponse.data;
         // 上传凭证
         await fetch('/go-tech/platform/packageOrder/payEvidence', {
@@ -270,9 +281,9 @@ export const Upgrade: FC<UpgradeProps> = ({
         router.push(`/my-orders/${orderId}`);
 
         setShowPaymentDialog(false);
-        toast.success('支付憑證已提交，我們將在確認後為您升級');
+        toast.success(upgradeEvidenceSubmitted);
       } else {
-        toast.error(orderResponse.message);
+        toast.error((await translateError(orderResponse.message, locale)) || orderResponse.message);
       }
     } catch (error) {
       console.log(error);
@@ -282,7 +293,7 @@ export const Upgrade: FC<UpgradeProps> = ({
   /** 线上支付：先创建升级订单（payType=Online），再生成全托管收银台并跳转 */
   const handleOnlinePaymentConfirm = async () => {
     toast.dismiss();
-    const toastId = toast.loading('創建升級訂單中...');
+    const toastId = toast.loading(upgradeOrderCreating);
     const orderInfo = buildOrderInfo(PayTypeEnum.Online);
 
     try {
@@ -293,18 +304,18 @@ export const Upgrade: FC<UpgradeProps> = ({
       }).then(res => res.json());
 
       if (orderResponse.code !== 200) {
-        toast.error(orderResponse.message, { id: toastId });
+        toast.error((await translateError(orderResponse.message, locale)) || orderResponse.message, { id: toastId });
         return;
       }
 
       // 后端返回 OrderAddResponse（含签名等参数）；先跳转订单详情，再由详情页唤起第三方支付
-      toast.success('訂單創建成功，正在跳转...', { id: toastId });
+      toast.success(orderCreatedRedirecting, { id: toastId });
       setShowPaymentDialog(false);
       stashWebManagedCashier(orderResponse.data);
       router.push(`/my-orders/${orderResponse.data.orderId}`);
     } catch (error) {
       console.log(error);
-      toast.error('創建升級訂單失敗，請稍後重試', { id: toastId });
+      toast.error(upgradeOrderFailed, { id: toastId });
     }
   };
 

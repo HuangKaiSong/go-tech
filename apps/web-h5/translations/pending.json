@@ -1628,5 +1628,35 @@
     "source": "用戶名或密碼錯誤",
     "firstSeenAt": 1784879224139,
     "count": 1
+  },
+  {
+    "source": "請輸入邮箱",
+    "firstSeenAt": 1784887942278,
+    "count": 2
+  },
+  {
+    "source": "請輸入正確的郵箱",
+    "firstSeenAt": 1784887942278,
+    "count": 2
+  },
+  {
+    "source": "請輸入驗證碼",
+    "firstSeenAt": 1784887942278,
+    "count": 2
+  },
+  {
+    "source": "密码至少需要6位字符",
+    "firstSeenAt": 1784887942278,
+    "count": 2
+  },
+  {
+    "source": "密码需至少包含一个字母、一个数字和一个特殊字符",
+    "firstSeenAt": 1784887942278,
+    "count": 2
+  },
+  {
+    "source": "密码不一致",
+    "firstSeenAt": 1784887942278,
+    "count": 2
   }
 ]
