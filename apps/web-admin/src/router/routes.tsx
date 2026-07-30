@@ -26,6 +26,7 @@ const ContentAddPage = lazyPage(() => import('@/pages/ContentAddPage'));
 const ContentEditPage = lazyPage(() => import('@/pages/ContentEditPage'));
 const SiteSettingPage = lazyPage(() => import('@/pages/SiteSettingPage'));
 const MessageBoard = lazyPage(() => import('@/pages/MessageBoard'));
+const SettingI18n = lazyPage(() => import('@/pages/SettingI18n'));
 
 export const routes: RouteObject[] = [
   {
@@ -122,6 +123,10 @@ export const routes: RouteObject[] = [
       {
         path: '/message-board',
         element: <MessageBoard />
+      },
+      {
+        path: '/settings/i18n',
+        element: <SettingI18n />
       }
     ]
   },

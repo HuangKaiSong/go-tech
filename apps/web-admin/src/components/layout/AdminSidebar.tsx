@@ -33,7 +33,8 @@ const menuItems: MenuItem[] = [
       { title: '角色管理', path: '/settings/roles' },
       { title: '用戶管理', path: '/settings/users' },
       // { title: "圖文管理", path: "/settings/content" },
-      { title: '站點設置', path: '/settings/site/h5' }
+      { title: '站點設置', path: '/settings/site/h5' },
+      { title: '國際化維護', path: '/settings/i18n' }
     ]
   }
 ];
