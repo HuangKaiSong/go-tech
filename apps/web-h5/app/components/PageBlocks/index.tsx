@@ -47,6 +47,7 @@ type FeatureGridBlock = BlockBase & {
   subtitle: string;
   title: string;
   type: 'featureGrid';
+  sort?: number;
 };
 
 type TextBlock = BlockBase & {
@@ -100,11 +101,23 @@ const getAlignClass = (align?: CSSProperties['textAlign']) => {
 
 const cursorClass = (hasIframe: boolean) => (hasIframe ? 'cursor-editor' : '');
 
-export const PageBlocks = ({ blocks, hasIframe }: { blocks: PageBlock[]; hasIframe: boolean }) => {
+export const PageBlocks = ({
+  blocks,
+  hasIframe,
+  renderOnly
+}: {
+  blocks: PageBlock[];
+  hasIframe: boolean;
+  renderOnly?: 'hero' | 'nonHero';
+}) => {
   const renderedBlocks: ReactNode[] = [];
 
   for (let i = 0; i < blocks.length; i += 1) {
     const block = blocks[i];
+
+    // 如果设定了 renderOnly 过滤，跳过不匹配的 block 类型
+    if (renderOnly === 'hero' && block.type !== 'hero') continue;
+    if (renderOnly === 'nonHero' && block.type === 'hero') continue;
 
     if (block.type === 'hero') {
       const heroStartIndex = i;

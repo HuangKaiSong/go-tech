@@ -12,7 +12,15 @@ const mergeHeroDefaults = (nextBlocks: PageBlock[]) =>
     };
   });
 
-const HeroSection = ({ initialBlocks, page = 'home' }: { initialBlocks?: PageBlock[]; page?: string }) => {
+const HeroSection = ({
+  initialBlocks,
+  page = 'home',
+  renderOnly
+}: {
+  initialBlocks?: PageBlock[];
+  page?: string;
+  renderOnly?: 'hero' | 'nonHero';
+}) => {
   const { hasIframe } = useIframeContext();
 
   const resolvedBlocks = useMemo(
@@ -55,7 +63,7 @@ const HeroSection = ({ initialBlocks, page = 'home' }: { initialBlocks?: PageBlo
 
   return (
     <div className="min-h-150">
-      <PageBlocks blocks={blocks} hasIframe={hasIframe} />
+      <PageBlocks blocks={blocks} hasIframe={hasIframe} renderOnly={renderOnly} />
     </div>
   );
 };
