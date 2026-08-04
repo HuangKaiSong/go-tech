@@ -1,3 +1,4 @@
+import { JotaiProvider } from '@go-tech/core-state';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Toaster as Sonner } from '@/components/ui/sonner';
@@ -25,34 +26,36 @@ import {
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-          <Routes>
-            <Route path="/" element={<Login />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/clock" element={<ClockIn />} />
-            <Route path="/applications" element={<Applications />} />
-            <Route path="/salary" element={<Salary />} />
-            <Route path="/kpi" element={<KPI />} />
-            <Route path="/notifications" element={<Notifications />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/training" element={<TrainingLayout />}>
-              <Route index element={<TrainingListPage />} />
-              <Route path=":categoryId" element={<TrainingCategoryPage />} />
-              <Route path=":categoryId/:courseId" element={<TrainingDetailPage />} />
-              <Route path=":categoryId/:courseId/:moduleIndex" element={<TrainingLearningPage />} />
-            </Route>
-            <Route path="/contacts" element={<Contacts />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
+  <JotaiProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+            <Routes>
+              <Route path="/" element={<Login />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/clock" element={<ClockIn />} />
+              <Route path="/applications" element={<Applications />} />
+              <Route path="/salary" element={<Salary />} />
+              <Route path="/kpi" element={<KPI />} />
+              <Route path="/notifications" element={<Notifications />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/training" element={<TrainingLayout />}>
+                <Route index element={<TrainingListPage />} />
+                <Route path=":categoryId" element={<TrainingCategoryPage />} />
+                <Route path=":categoryId/:courseId" element={<TrainingDetailPage />} />
+                <Route path=":categoryId/:courseId/:moduleIndex" element={<TrainingLearningPage />} />
+              </Route>
+              <Route path="/contacts" element={<Contacts />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  </JotaiProvider>
 );
 
 export default App;

@@ -1,25 +1,35 @@
+import { useForm } from 'alova/client';
 import { Eye, EyeOff, Shield, Smartphone } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useAuth } from '@/hooks/use-auth';
+import { fetchLogin } from '@/service/api/auth/api';
 
 const Login = () => {
   const navigate = useNavigate();
+  const { setAuth } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
-  const [account, setAccount] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+
+  const {
+    form,
+    loading: isLoading,
+    send: submit,
+    updateForm
+  } = useForm(formData => fetchLogin(formData), {
+    initialForm: {
+      account: '',
+      password: ''
+    }
+  }).onError(error => {
+    console.log(error);
+  });
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    // Simulate login
-    setTimeout(() => {
-      setIsLoading(false);
-      navigate('/dashboard');
-    }, 800);
+    submit();
   };
 
   return (
@@ -49,8 +59,8 @@ const Login = () => {
             <Input
               id="account"
               placeholder="請輸入帳號或手機號碼"
-              value={account}
-              onChange={e => setAccount(e.target.value)}
+              value={form.account}
+              onChange={({ target }) => updateForm({ account: target.value })}
               className="h-12 rounded-xl bg-secondary border-0 px-4"
             />
           </div>
@@ -64,8 +74,8 @@ const Login = () => {
                 id="password"
                 type={showPassword ? 'text' : 'password'}
                 placeholder="請輸入密碼"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
+                value={form.password}
+                onChange={({ target }) => updateForm({ password: target.value })}
                 className="h-12 rounded-xl bg-secondary border-0 px-4 pr-12"
               />
               <button
