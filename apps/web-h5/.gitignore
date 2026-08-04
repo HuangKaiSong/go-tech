@@ -44,4 +44,8 @@ next-env.d.ts
 # page-blocks
 /public/page-blocks/
 
+# generated translations
+/translations/dynamic.json
+/translations/pending.json
+
 certificates

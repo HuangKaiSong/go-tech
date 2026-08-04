@@ -12,9 +12,9 @@ import { getBaseUrl } from '@/lib/http';
 import { createSvgSpriteHtml } from '@/plugins/createSvgIcons';
 // oxlint-disable import/no-unassigned-import
 import './globals.css';
+import { DynamicI18nProvider } from './components/DynamicI18nProvider';
 import Layout from './components/Layout';
 import LocaleInitializer from './components/LocaleInitializer';
-import { DynamicI18nProvider } from './components/DynamicI18nProvider';
 import { getDynamicMessages } from './lib/translation/messages';
 
 export const metadata: Metadata = {
@@ -94,6 +94,14 @@ export default async function RootLayout({
             </ThemeProvider>
           </DynamicI18nProvider>
         </NextIntlClientProvider>
+        {/* <!-- Cloudflare Web Analytics --> */}
+        <script
+          type="module"
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+          data-cf-beacon='{"token": "6a34f8df413a45c28cdcc71f8bc2d939"}'
+          async
+        />
+        {/* <!-- End Cloudflare Web Analytics --> */}
       </body>
     </html>
   );

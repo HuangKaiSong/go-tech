@@ -47,7 +47,6 @@ type FeatureGridBlock = BlockBase & {
   subtitle: string;
   title: string;
   type: 'featureGrid';
-  sort?: number;
 };
 
 type TextBlock = BlockBase & {
