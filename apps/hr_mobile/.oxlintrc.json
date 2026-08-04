@@ -1,0 +1,7 @@
+{
+  "$schema": "../../node_modules/oxlint/configuration_schema.json",
+  "extends": ["../../internal/config/oxlint/react.json"],
+  "rules": {
+    "react/only-export-components": "off"
+  }
+}
