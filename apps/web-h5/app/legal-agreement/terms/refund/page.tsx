@@ -1,10 +1,13 @@
 import Head from 'next/head';
-import { useMemo } from 'react';
+import { cookies } from 'next/headers';
 
-export default function Refund() {
-  const url = useMemo(() => {
-    return 'https://go-techs.com/terms/refund.docx';
-  }, []);
+export default async function Refund() {
+  let url = 'https://go-techs.com/terms/refund.docx';
+  const cookie = await cookies();
+  const local = cookie.get('GO_TECH_LANGUAGE');
+  if (local?.value === 'en') {
+    url = 'https://go-techs.com/terms/refund-en.docx';
+  }
 
   return (
     <div>
@@ -12,11 +15,11 @@ export default function Refund() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
+      {/* oxlint-disable-next-line react/iframe-missing-sandbox */}
       <iframe
-        src={`https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`}
+        src={`https://docs.google.com/viewerng/viewer?url=${url}&embedded=true`}
         style={{ width: '100%', height: '100vh' }}
         frameBorder="0"
-        sandbox=""
       />
     </div>
   );
