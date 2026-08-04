@@ -3,9 +3,9 @@ import type { ApiResult } from "@/api/auth";
 
 /** 员工下拉选项（对齐后端 EmployeeOptionVO） */
 export interface EmployeeOption {
+  employeeNo?: string;
   id: number;
   name: string;
-  employeeNo?: string;
 }
 
 /** 在职员工下拉选项 */
@@ -15,18 +15,18 @@ export function getActiveEmployeeOptions() {
 
 /** 当前登录员工个人信息（对齐后端 EmployeeDetailVO，仅取「我的」页所需字段） */
 export interface MyProfile {
-  id: number;
-  employeeNo?: string;
-  name?: string;
-  englishName?: string;
-  gender?: string;
-  phone?: string;
-  email?: string;
   address?: string;
   department?: string;
-  position?: string;
+  email?: string;
+  employeeNo?: string;
   employmentType?: string;
+  englishName?: string;
+  gender?: string;
+  id: number;
   joinDate?: string;
+  name?: string;
+  phone?: string;
+  position?: string;
   status?: string;
 }
 
@@ -37,13 +37,13 @@ export function getMyProfile() {
 
 /** 通讯录条目（对齐后端 EmployeeVO） */
 export interface DirectoryEmployee {
-  id: number;
-  employeeNo?: string;
-  name: string;
   department?: string;
-  position?: string;
-  phone?: string;
+  employeeNo?: string;
+  id: number;
   joinDate?: string;
+  name: string;
+  phone?: string;
+  position?: string;
   status?: string;
 }
 
@@ -67,13 +67,13 @@ export function getEmployeeDetailById(id: number) {
 
 /** 组织架构树节点（对齐后端 OrgDeptNodeVO） */
 export interface OrgDeptNode {
-  id: number;
-  name: string;
-  code?: string;
-  memberCount?: number;
-  statusCode?: number;
-  status?: string;
   children?: OrgDeptNode[];
+  code?: string;
+  id: number;
+  memberCount?: number;
+  name: string;
+  status?: string;
+  statusCode?: number;
 }
 
 /** 组织架构树（部门层级嵌套，含在职人数） */

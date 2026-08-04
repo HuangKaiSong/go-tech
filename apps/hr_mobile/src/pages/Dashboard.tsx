@@ -2,12 +2,18 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import MobileLayout from "@/components/MobileLayout";
 import {
-  Clock, FileText, DollarSign, BarChart3, User, Bell,
-  CalendarDays, MapPin, ChevronRight, GraduationCap, BookUser, CheckCircle2
+  BarChart3, Bell, BookUser, CalendarDays, CheckCircle2, ChevronRight,
+  Clock, DollarSign, FileText, GraduationCap, MapPin, User
 } from "lucide-react";
-import { getMyPending, APPROVAL_TYPE_TEXT } from "@/api/approval";
+import { APPROVAL_TYPE_TEXT, getMyPending } from "@/api/approval";
 import { getMyProfile } from "@/api/employee";
 import { getTodayClock } from "@/api/attendance";
+
+const greetingFor = (hours: number) => {
+  if (hours < 12) return "早安";
+  if (hours < 18) return "午安";
+  return "晚安";
+};
 
 const quickActions = [
   { icon: Clock, label: "打卡", path: "/clock", color: "bg-primary" },
@@ -20,10 +26,11 @@ const quickActions = [
   { icon: Bell, label: "通知", path: "/notifications", color: "bg-destructive" },
 ];
 
+// oxlint-disable-next-line complexity
 const Dashboard = () => {
   const navigate = useNavigate();
   const now = new Date();
-  const greeting = now.getHours() < 12 ? "早安" : now.getHours() < 18 ? "午安" : "晚安";
+  const greeting = greetingFor(now.getHours());
 
   // 待辦事項 = 待我審批的單據
   const { data: pending = [], isLoading: pendingLoading } = useQuery({
@@ -41,9 +48,12 @@ const Dashboard = () => {
     queryKey: ["todayClock"],
     queryFn: async () => (await getTodayClock()).data,
   });
-  const workHours = today?.hoursWorked != null
-    ? `${today.hoursWorked} 小時`
-    : today?.clockIn && !today?.clockOut ? "進行中" : "--";
+  let workHours = "--";
+  if (today && today.hoursWorked !== null) {
+    workHours = `${today.hoursWorked} 小時`;
+  } else if (today?.clockIn && !today?.clockOut) {
+    workHours = "進行中";
+  }
 
   return (
     <MobileLayout>
@@ -119,19 +129,19 @@ const Dashboard = () => {
           </button>
         </div>
         <div className="space-y-3">
-          {pendingLoading ? (
-            [0, 1, 2].map((i) => (
-              <div key={i} className="bg-card rounded-xl border border-border p-3.5">
-                <div className="h-4 w-2/5 bg-muted rounded animate-pulse" />
-                <div className="h-3 w-3/5 bg-muted rounded animate-pulse mt-2" />
-              </div>
-            ))
-          ) : todoItems.length === 0 ? (
+          {pendingLoading && [0, 1, 2].map((i) => (
+            <div key={i} className="bg-card rounded-xl border border-border p-3.5">
+              <div className="h-4 w-2/5 bg-muted rounded animate-pulse" />
+              <div className="h-3 w-3/5 bg-muted rounded animate-pulse mt-2" />
+            </div>
+          ))}
+          {!pendingLoading && todoItems.length === 0 && (
             <div className="bg-card rounded-xl border border-border p-6 flex flex-col items-center gap-2 text-muted-foreground">
               <CheckCircle2 className="w-8 h-8 opacity-40" />
               <p className="text-sm">暫無待辦事項</p>
             </div>
-          ) : (
+          )}
+          {!pendingLoading && todoItems.length > 0 && (
             todoItems.map((item) => {
               const title = item.typeName ?? APPROVAL_TYPE_TEXT[item.type] ?? "審批申請";
               const subtitle = [item.applicantName, item.summary].filter(Boolean).join(" · ");

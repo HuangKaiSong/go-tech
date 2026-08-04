@@ -3,15 +3,15 @@ import type { ApiResult } from "@/api/auth";
 
 /** 站内通知（对齐后端 NotificationVO） */
 export interface AppNotification {
+  bizId?: number;
+  bizType?: string;
+  content?: string;
+  createTime: string;
   id: number;
+  read: boolean;
+  title: string;
   /** APPROVAL/PAYROLL/ATTENDANCE/ONBOARDING/SYSTEM */
   type: string;
-  title: string;
-  content?: string;
-  bizType?: string;
-  bizId?: number;
-  read: boolean;
-  createTime: string;
 }
 
 /** 我的通知（onlyUnread=true 仅未读） */

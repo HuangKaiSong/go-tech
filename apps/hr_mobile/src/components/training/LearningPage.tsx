@@ -1,26 +1,19 @@
 import { useState } from "react";
 import MobileLayout from "@/components/MobileLayout";
-import { Progress } from "@/components/ui/progress";
 import {
-  ArrowLeft, PlayCircle, BookOpen, CheckCircle2, ChevronDown, ChevronUp,
-  Bookmark, BookmarkCheck, MessageSquare, Volume2, VolumeX, Maximize,
-  SkipForward, Clock, FileText, Award, ThumbsUp, Lightbulb, AlertCircle, CircleCheck
+  AlertCircle, ArrowLeft, Award, BookOpen, Bookmark, BookmarkCheck,
+  CheckCircle2, ChevronDown, ChevronUp, CircleCheck, Clock, FileText,
+  Lightbulb, Maximize, MessageSquare, PlayCircle, SkipForward, ThumbsUp, Volume2, VolumeX
 } from "lucide-react";
 
-interface Module {
-  name: string;
-  completed: boolean;
-  duration: string;
-}
-
 interface LearningPageProps {
+  courseTitle: string;
+  moduleDuration: string;
   moduleIndex: number;
   moduleName: string;
-  moduleDuration: string;
-  courseTitle: string;
-  totalModules: number;
-  onComplete: () => void;
   onBack: () => void;
+  onComplete: () => void;
+  totalModules: number;
 }
 
 // Simulated learning content per module
@@ -67,13 +60,13 @@ const learningContent = {
 };
 
 const LearningPage = ({
+  courseTitle,
+  moduleDuration,
   moduleIndex,
   moduleName,
-  moduleDuration,
-  courseTitle,
-  totalModules,
-  onComplete,
   onBack,
+  onComplete,
+  totalModules,
 }: LearningPageProps) => {
   const [currentStep, setCurrentStep] = useState(0); // 0=content, 1=quiz, 2=completed
   const [videoPlaying, setVideoPlaying] = useState(false);
@@ -86,7 +79,7 @@ const LearningPage = ({
   const [showNotes, setShowNotes] = useState(false);
   const [videoProgress, setVideoProgress] = useState(0);
 
-  const contentProgress = currentStep === 0 ? 33 : currentStep === 1 ? 66 : 100;
+  
 
   const handleQuizSubmit = () => {
     setQuizSubmitted(true);

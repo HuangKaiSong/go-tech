@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import MobileLayout from "@/components/MobileLayout";
-import { User, Phone, Mail, MapPin, Shield, ChevronRight, LogOut, FileText, Settings, Moon, Sun } from "lucide-react";
+import { ChevronRight, FileText, LogOut, Mail, MapPin, Moon, Phone, Settings, Shield, Sun, User } from "lucide-react";
 import { useTheme } from "@/hooks/use-theme";
 import { Switch } from "@/components/ui/switch";
 import { getMyProfile } from "@/api/employee";

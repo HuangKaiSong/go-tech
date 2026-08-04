@@ -1,20 +1,19 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import MobileLayout from "@/components/MobileLayout";
 import { useNavigate } from "react-router-dom";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
-  MapPin, Wifi, Clock, History, ArrowLeft, CheckCircle2, AlertCircle, XCircle,
-  FileEdit, CalendarDays, Camera, ImageIcon, X, RotateCcw
+  AlertCircle, ArrowLeft, CalendarDays, Camera, CheckCircle2, Clock, FileEdit, History,
+  ImageIcon, MapPin, RotateCcw, Wifi, XCircle
 } from "lucide-react";
-import { useRef } from "react";
 import { toast } from "sonner";
-import { getTodayClock, punchClock, getClockHistory, type ClockToday, type ClockHistoryItem } from "@/api/attendance";
+import { type ClockHistoryItem, type ClockToday, getClockHistory, getTodayClock, punchClock } from "@/api/attendance";
 import {
-  getMyApplications, TYPE_CODE,
-  SUPPLEMENT_CLOCK_IN, SUPPLEMENT_CLOCK_OUT, SUPPLEMENT_BOTH,
-  type Approval,
+  type Approval, SUPPLEMENT_BOTH,
+  SUPPLEMENT_CLOCK_IN, SUPPLEMENT_CLOCK_OUT, TYPE_CODE,
+  getMyApplications,
 } from "@/api/approval";
 
 /** 状态码 → 展示样式键 + 文案 */
@@ -29,7 +28,7 @@ const STATUS_MAP: Record<number, { key: AttendanceRecord["status"]; label: strin
 
 /** 十进制小时 → "Xh Ym" */
 function formatHours(h?: number): string {
-  if (h == null || h <= 0) return "--";
+  if (h === undefined || h <= 0) return "--";
   const total = Math.round(h * 60);
   const hh = Math.floor(total / 60);
   const mm = total % 60;
@@ -56,16 +55,16 @@ function mapHistory(item: ClockHistoryItem): AttendanceRecord {
 }
 
 type AttendanceRecord = {
+  clockIn: string;
+  clockOut: string;
   /** 顯示用 MM/DD */
   date: string;
   /** 完整日期 yyyy-MM-dd（補卡提交用） */
   fullDate: string;
-  weekday: string;
-  clockIn: string;
-  clockOut: string;
-  status: "normal" | "late" | "early" | "absent" | "leave";
-  statusLabel: string;
   hours: string;
+  status: "absent" | "early" | "late" | "leave" | "normal";
+  statusLabel: string;
+  weekday: string;
 };
 
 const getStatusStyle = (status: string) => {
@@ -84,13 +83,13 @@ type SupplementRequest = {
   date: string;
   /** 完整日期 yyyy-MM-dd（比對缺勤記錄用） */
   fullDate: string;
+  reason: string;
   /** 補卡時段：上班打卡 / 下班打卡 / 上下班皆漏 */
   slot: string;
-  time: string;
-  reason: string;
   /** 單據狀態碼 1待審 2審批中 3已通過 4已拒絕 5已撤回 */
   statusCode: number;
   statusText: string;
+  time: string;
 };
 
 /** 補卡單狀態碼 → 徽章配色（對齊後端 ApprovalStatusEnum） */
@@ -102,14 +101,46 @@ const SUPPLEMENT_STATUS_STYLE: Record<number, string> = {
   5: "text-muted-foreground bg-muted",
 };
 
-type ViewMode = "clock" | "history" | "supplement" | "absent";
+type ViewMode = "absent" | "clock" | "history" | "supplement";
 
+/** 获取定位：返回坐标；失败时带 error 原因（不阻塞打卡，是否必须由后端按地点判定） */
+const getCoords = (): Promise<{ error?: string; lat?: number; lng?: number }> =>
+  new Promise((resolve) => {
+    if (!("geolocation" in navigator)) {
+      resolve({ error: "此瀏覽器不支援定位" });
+      return;
+    }
+    // 非安全上下文（HTTP 非 localhost）浏览器会停用定位
+    if (typeof window !== "undefined" && !window.isSecureContext) {
+      resolve({ error: "當前為非安全連線(HTTP)，瀏覽器已停用定位，請用 HTTPS 或 localhost 存取" });
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      (err) => {
+        let msg = "定位失敗";
+        if (err.code === err.PERMISSION_DENIED) msg = "定位權限被拒絕，請在瀏覽器允許定位後再打卡";
+        else if (err.code === err.POSITION_UNAVAILABLE) msg = "無法取得目前位置，請確認已開啟定位";
+        else if (err.code === err.TIMEOUT) msg = "定位逾時，請重試";
+        resolve({ error: msg });
+      },
+      { timeout: 8000, enableHighAccuracy: true },
+    );
+  });
+
+const toMin = (t?: string): number | null => {
+  if (!t) return null;
+  const [h, m] = t.split(":").map(Number);
+  return h * 60 + m;
+};
+
+// oxlint-disable-next-line complexity
 const ClockIn = () => {
   const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [today, setToday] = useState<ClockToday | null>(null);
   const [punching, setPunching] = useState(false);
-  const clockedOut = !!today?.clockOut;
+  const clockedOut = Boolean(today?.clockOut);
   const [viewMode, setViewMode] = useState<ViewMode>("clock");
   const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
   const [showCameraPrompt, setShowCameraPrompt] = useState(false);
@@ -173,47 +204,15 @@ const ClockIn = () => {
     const now = new Date();
     const prefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
     const cur = rawHistory.filter((r) => r.date.startsWith(prefix));
-    const attend = cur.filter((r) => !!r.clockIn).length;
+    const attend = cur.filter((r) => Boolean(r.clockIn)).length;
     const late = cur.filter((r) => r.statusCode === 2).length;
     const absent = cur.filter((r) => r.statusCode === 4).length;
     const hours = cur.reduce((sum, r) => sum + (r.hoursWorked ?? 0), 0);
     return { attend, late, absent, hours: Math.round(hours * 10) / 10 };
   }, [rawHistory]);
 
-  /** 获取定位：返回坐标；失败时带 error 原因（不阻塞打卡，是否必须由后端按地点判定） */
-  const getCoords = (): Promise<{ lat?: number; lng?: number; error?: string }> =>
-    new Promise((resolve) => {
-      if (!("geolocation" in navigator)) {
-        resolve({ error: "此瀏覽器不支援定位" });
-        return;
-      }
-      // 非安全上下文（HTTP 非 localhost）浏览器会停用定位
-      if (typeof window !== "undefined" && !window.isSecureContext) {
-        resolve({ error: "當前為非安全連線(HTTP)，瀏覽器已停用定位，請用 HTTPS 或 localhost 存取" });
-        return;
-      }
-      navigator.geolocation.getCurrentPosition(
-        (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-        (err) => {
-          const msg =
-            err.code === err.PERMISSION_DENIED ? "定位權限被拒絕，請在瀏覽器允許定位後再打卡"
-              : err.code === err.POSITION_UNAVAILABLE ? "無法取得目前位置，請確認已開啟定位"
-                : err.code === err.TIMEOUT ? "定位逾時，請重試"
-                  : "定位失敗";
-          resolve({ error: msg });
-        },
-        { timeout: 8000, enableHighAccuracy: true },
-      );
-    });
-
   // 迟到/早退确认弹框
-  const [confirm, setConfirm] = useState<{ open: boolean; msg: string }>({ open: false, msg: "" });
-
-  const toMin = (t?: string): number | null => {
-    if (!t) return null;
-    const [h, m] = t.split(":").map(Number);
-    return h * 60 + m;
-  };
+  const [confirm, setConfirm] = useState<{ msg: string; open: boolean }>({ open: false, msg: "" });
 
   /** 判断本次打卡是否迟到/早退，返回提示语（无则 null） */
   const checkAbnormal = (): string | null => {
@@ -222,12 +221,12 @@ const ClockIn = () => {
     const nowMin = now.getHours() * 60 + now.getMinutes();
     if (today.canClockIn) {
       const start = toMin(today.workStart);
-      if (start != null && nowMin > start + (today.lateGrace ?? 0)) {
+      if (start !== null && nowMin > start + (today.lateGrace ?? 0)) {
         return `目前已超過上班時間（${today.workStart}），本次打卡將記為「遲到」，確定要打卡嗎？`;
       }
     } else if (today.canClockOut) {
       const end = toMin(today.workEnd);
-      if (end != null && nowMin < end - (today.earlyLeaveGrace ?? 0)) {
+      if (end !== null && nowMin < end - (today.earlyLeaveGrace ?? 0)) {
         return `目前尚未到下班時間（${today.workEnd}），本次打卡將記為「早退」，確定要打卡嗎？`;
       }
     }
@@ -238,7 +237,7 @@ const ClockIn = () => {
   const doPunch = async () => {
     setShowCameraPrompt(false);
     setPunching(true);
-    const { lat, lng, error: geoErr } = await getCoords();
+    const { error: geoErr, lat, lng } = await getCoords();
     try {
       const res = await punchClock({ lat, lng });
       setToday(res.data);
@@ -269,10 +268,10 @@ const ClockIn = () => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (ev) => {
+      reader.addEventListener("load", (ev) => {
         setCapturedPhoto(ev.target?.result as string);
         setShowCameraPrompt(false);
-      };
+      });
       reader.readAsDataURL(file);
     }
   };
@@ -284,11 +283,12 @@ const ClockIn = () => {
 
   // 補卡表單與「新增申請」共用一套，此處只帶著日期跳過去
   const goSupplementForm = (record: AttendanceRecord) => {
-    const slot = record.clockIn === "--:--" && record.clockOut === "--:--"
-      ? SUPPLEMENT_BOTH
-      : record.clockIn === "--:--"
-        ? SUPPLEMENT_CLOCK_IN
-        : SUPPLEMENT_CLOCK_OUT;
+    let slot = SUPPLEMENT_CLOCK_OUT;
+    if (record.clockIn === "--:--" && record.clockOut === "--:--") {
+      slot = SUPPLEMENT_BOTH;
+    } else if (record.clockIn === "--:--") {
+      slot = SUPPLEMENT_CLOCK_IN;
+    }
     navigate("/applications", {
       state: {
         openForm: "supplement",
@@ -478,7 +478,7 @@ const ClockIn = () => {
                   </span>
                   {record.status === "absent" && (
                     <button
-                      onClick={() => { selectAbsentRecord(record); setSupplementTime(""); setSupplementReason(""); setShowSupplementDialog(true); }}
+                      onClick={() => goSupplementForm(record)}
                       className="text-[10px] text-primary font-medium px-2 py-0.5 rounded-full bg-primary/10 active:bg-primary/20"
                     >
                       補卡
@@ -494,6 +494,37 @@ const ClockIn = () => {
   }
 
   // ── Clock view ──
+  let locationLabel = "定位打卡";
+  if (today?.locationName) {
+    locationLabel = today.locationName;
+  } else if (today?.scheduleName) {
+    locationLabel = `班次：${today.scheduleName}`;
+  }
+
+  const photoReady = !requirePhoto || capturedPhoto;
+  let ringCls = "bg-gradient-to-br from-muted-foreground/40 to-muted-foreground/30 shadow-none";
+  if (clockedOut) {
+    ringCls = "bg-gradient-to-br from-emerald-400 to-teal-500 dark:from-emerald-600 dark:to-teal-700 shadow-[0_0_30px_rgba(16,185,129,0.3)] dark:shadow-[0_0_30px_rgba(16,185,129,0.15)]";
+  } else if (photoReady) {
+    ringCls = "bg-gradient-to-br from-primary to-blue-600 dark:from-[hsl(220,30%,25%)] dark:to-[hsl(215,25%,30%)] shadow-[0_0_30px_rgba(59,130,246,0.3)] dark:shadow-[0_0_30px_rgba(59,130,246,0.15)]";
+  }
+  let btnCls = "bg-gradient-to-br from-muted to-muted text-muted-foreground cursor-not-allowed";
+  if (clockedOut) {
+    btnCls = "bg-gradient-to-br from-emerald-500 to-teal-600 dark:from-emerald-700 dark:to-teal-800 text-white";
+  } else if (photoReady) {
+    btnCls = "bg-gradient-to-br from-primary to-blue-600 dark:from-[hsl(220,30%,22%)] dark:to-[hsl(215,25%,28%)] text-primary-foreground hover:opacity-90";
+  }
+  let clockLabel = "✓ 已完成打卡";
+  if (punching) {
+    clockLabel = "打卡中...";
+  } else if (requirePhoto && !capturedPhoto) {
+    clockLabel = "📷 請先拍照";
+  } else if (today?.canClockIn) {
+    clockLabel = "點擊上班打卡";
+  } else if (today?.canClockOut) {
+    clockLabel = "點擊下班打卡";
+  }
+
   return (
     <MobileLayout title="打卡">
       <div className="px-5 pt-6">
@@ -501,7 +532,7 @@ const ClockIn = () => {
         <div className="flex items-center gap-2 justify-center text-muted-foreground mb-4">
           <MapPin className="w-4 h-4" />
           <span className="text-sm">
-            {today?.locationName ? today.locationName : today?.scheduleName ? `班次：${today.scheduleName}` : "定位打卡"}
+            {locationLabel}
           </span>
           <Wifi className="w-4 h-4 text-success" />
         </div>
@@ -615,34 +646,18 @@ const ClockIn = () => {
 
         {/* Clock circle */}
         <div className="flex flex-col items-center mt-2">
-          <div className={`rounded-full p-1 ${
-            clockedOut
-              ? "bg-gradient-to-br from-emerald-400 to-teal-500 dark:from-emerald-600 dark:to-teal-700 shadow-[0_0_30px_rgba(16,185,129,0.3)] dark:shadow-[0_0_30px_rgba(16,185,129,0.15)]"
-              : (!requirePhoto || capturedPhoto)
-                ? "bg-gradient-to-br from-primary to-blue-600 dark:from-[hsl(220,30%,25%)] dark:to-[hsl(215,25%,30%)] shadow-[0_0_30px_rgba(59,130,246,0.3)] dark:shadow-[0_0_30px_rgba(59,130,246,0.15)]"
-                : "bg-gradient-to-br from-muted-foreground/40 to-muted-foreground/30 shadow-none"
-          }`}>
+          <div className={`rounded-full p-1 ${ringCls}`}>
             <button
               onClick={handleClock}
               disabled={punching || !today || (!today.canClockIn && !today.canClockOut)}
-              className={`w-44 h-44 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
-                clockedOut
-                  ? "bg-gradient-to-br from-emerald-500 to-teal-600 dark:from-emerald-700 dark:to-teal-800 text-white"
-                  : (!requirePhoto || capturedPhoto)
-                    ? "bg-gradient-to-br from-primary to-blue-600 dark:from-[hsl(220,30%,22%)] dark:to-[hsl(215,25%,28%)] text-primary-foreground hover:opacity-90"
-                    : "bg-gradient-to-br from-muted to-muted text-muted-foreground cursor-not-allowed"
-              }`}
+              className={`w-44 h-44 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${btnCls}`}
             >
               <Clock className="w-8 h-8 mb-2" />
               <span className="text-2xl font-bold">
                 {currentTime.toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit" })}
               </span>
               <span className="text-sm mt-1 opacity-90">
-                {punching ? "打卡中..."
-                  : (requirePhoto && !capturedPhoto) ? "📷 請先拍照"
-                  : today?.canClockIn ? "點擊上班打卡"
-                  : today?.canClockOut ? "點擊下班打卡"
-                  : "✓ 已完成打卡"}
+                {clockLabel}
               </span>
             </button>
           </div>

@@ -19,9 +19,9 @@
     "dev:admin": "pnpm --filter web-admin run dev",
     "build:admin": "pnpm --filter web-admin run build",
     "preview:admin": "pnpm --filter web-admin run preview",
-    "dev:hr-m": "pnpm --filter hr-mobile-manager run dev",
-    "build:hr-m": "pnpm --filter hr-mobile-manager run build",
-    "start:hr-m": "pnpm --filter hr-mobile-manager run start",
+    "dev:hr-m": "pnpm --filter hr_mobile run dev",
+    "build:hr-m": "pnpm --filter hr_mobile run build",
+    "start:hr-m": "pnpm --filter hr_mobile run start",
     "dev:hr-admin": "pnpm --filter hr-admin run dev",
     "build:hr-admin": "pnpm --filter hr-admin run build",
     "start:hr-admin": "pnpm --filter hr-admin run start"

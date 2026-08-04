@@ -1,35 +1,35 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import MobileLayout from "@/components/MobileLayout";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import {
-  FileCheck, DollarSign, UserCheck, Info, AlarmClock,
-  MessageCircle, Users, Plus, Send, ArrowLeft, Search,
-  MoreVertical, Smile, Image, Mic, Check, CheckCheck,
-  LogOut, Trash2, UserPlus, Bell, BellOff, ChevronRight, Crown, X, Loader2,
+  AlarmClock, ArrowLeft, Bell, BellOff, Check,
+  CheckCheck, ChevronRight, Crown, DollarSign, FileCheck, Image,
+  Info, Loader2, LogOut, MessageCircle, Mic, MoreVertical,
+  Plus, Search, Send, Smile, Trash2, UserCheck, UserPlus, Users, X,
 } from "lucide-react";
 import {
-  getMyNotifications, markNotificationRead, markAllNotificationsRead,
-  type AppNotification,
+  type AppNotification, getMyNotifications, markAllNotificationsRead,
+  markNotificationRead,
 } from "@/api/notification";
 import {
-  getConversations, getMessages, sendMessage, markConversationRead,
-  startDirect, createGroup, getChatMembers, leaveConversation, dissolveGroup,
-  addGroupMembers, removeGroupMember, muteConversation,
-  type Conversation, type ChatMember,
+  type ChatMember, type Conversation, addGroupMembers, createGroup,
+  dissolveGroup, getChatMembers, getConversations, getMessages, leaveConversation,
+  markConversationRead, muteConversation, removeGroupMember,
+  sendMessage, startDirect,
 } from "@/api/chat";
-import { getEmployeeDirectory, type DirectoryEmployee } from "@/api/employee";
+import { type DirectoryEmployee, getEmployeeDirectory } from "@/api/employee";
 
 // ── Notification type → icon / color ──
-const NOTIF_META: Record<string, { icon: typeof Info; color: string }> = {
+const NOTIF_META: Record<string, { color: string; icon: typeof Info }> = {
   APPROVAL: { icon: FileCheck, color: "bg-success" },
   PAYROLL: { icon: DollarSign, color: "bg-primary" },
   ATTENDANCE: { icon: AlarmClock, color: "bg-warning" },
@@ -125,11 +125,11 @@ const NotificationTab = () => {
 };
 
 // ── Chat List ──
-const ChatList = ({ conversations, onOpen, onCreateGroup, loading }: {
+const ChatList = ({ conversations, loading, onCreateGroup, onOpen }: {
   conversations: Conversation[];
-  onOpen: (c: Conversation) => void;
-  onCreateGroup: () => void;
   loading: boolean;
+  onCreateGroup: () => void;
+  onOpen: (c: Conversation) => void;
 }) => {
   const [search, setSearch] = useState("");
   const filtered = conversations.filter((c) => c.name.includes(search));
@@ -194,16 +194,16 @@ const MemberInfoPanel = ({ member, onBack, onChat }: { member: ChatMember; onBac
 );
 
 // ── Group Info Panel ──
-const GroupInfoPanel = ({ conv, members, onBack, onLeave, onDissolve, onMemberClick, onAddMember, onToggleMute, onRemoveMember }: {
+const GroupInfoPanel = ({ conv, members, onAddMember, onBack, onDissolve, onLeave, onMemberClick, onRemoveMember, onToggleMute }: {
   conv: Conversation;
   members: ChatMember[];
-  onBack: () => void;
-  onLeave: () => void;
-  onDissolve: () => void;
-  onMemberClick: (m: ChatMember) => void;
   onAddMember: () => void;
-  onToggleMute: () => void;
+  onBack: () => void;
+  onDissolve: () => void;
+  onLeave: () => void;
+  onMemberClick: (m: ChatMember) => void;
   onRemoveMember: (m: ChatMember) => void;
+  onToggleMute: () => void;
 }) => {
   const isOwner = members.some((m) => m.mine && m.owner);
   const [confirmAction, setConfirmAction] = useState<"leave" | "dissolve" | null>(null);
@@ -277,7 +277,7 @@ const GroupInfoPanel = ({ conv, members, onBack, onLeave, onDissolve, onMemberCl
         )}
       </div>
 
-      <Dialog open={!!confirmAction} onOpenChange={() => setConfirmAction(null)}>
+      <Dialog open={Boolean(confirmAction)} onOpenChange={() => setConfirmAction(null)}>
         <DialogContent className="max-w-xs mx-auto">
           <DialogHeader>
             <DialogTitle className="text-base">{confirmAction === "leave" ? "確認退出" : "確認解散"}</DialogTitle>
@@ -300,12 +300,12 @@ const GroupInfoPanel = ({ conv, members, onBack, onLeave, onDissolve, onMemberCl
 };
 
 // ── Chat Room ──
-const ChatRoom = ({ conv, messages, onBack, onSend, onOpenInfo, sending }: {
+const ChatRoom = ({ conv, messages, onBack, onOpenInfo, onSend, sending }: {
   conv: Conversation;
   messages: import("@/api/chat").ChatMessage[];
   onBack: () => void;
-  onSend: (text: string) => void;
   onOpenInfo: () => void;
+  onSend: (text: string) => void;
   sending: boolean;
 }) => {
   const [input, setInput] = useState("");
@@ -356,7 +356,22 @@ const ChatRoom = ({ conv, messages, onBack, onSend, onOpenInfo, sending }: {
 
       <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-4 py-3 space-y-3 bg-muted/30">
         {messages.length === 0 && <p className="text-center text-xs text-muted-foreground py-8">開始你們的對話吧</p>}
-        {messages.map((msg) => (
+        {messages.map((msg) => {
+          let groupReadBadge: ReactNode = null;
+          if (msg.mine && conv.type === 2) {
+            const total = msg.totalReaders ?? 0;
+            const readCount = msg.readCount ?? 0;
+            if (total === 0) {
+              groupReadBadge = <span className="text-[9px] text-muted-foreground/50">—</span>;
+            } else if (readCount >= total) {
+              groupReadBadge = <span className="flex items-center gap-0.5 text-[9px] text-primary/70"><CheckCheck className="w-3 h-3" />全部已讀</span>;
+            } else if (readCount === 0) {
+              groupReadBadge = <span className="flex items-center gap-0.5 text-[9px] text-muted-foreground/50"><Check className="w-3 h-3" />未讀</span>;
+            } else {
+              groupReadBadge = <span className="text-[9px] text-primary/70">{msg.readCount}/{msg.totalReaders} 已讀</span>;
+            }
+          }
+          return (
           <div key={msg.id} className={`flex ${msg.mine ? "justify-end" : "justify-start"}`}>
             <div className={`flex gap-2 max-w-[75%] ${msg.mine ? "flex-row-reverse" : ""}`}>
               {!msg.mine && <Avatar className="w-8 h-8 shrink-0 mt-1"><AvatarFallback className="text-[10px] bg-accent text-accent-foreground">{(msg.senderName ?? "?").slice(0, 1)}</AvatarFallback></Avatar>}
@@ -370,20 +385,13 @@ const ChatRoom = ({ conv, messages, onBack, onSend, onOpenInfo, sending }: {
                       ? <span className="flex items-center gap-0.5 text-[9px] text-primary/70"><CheckCheck className="w-3 h-3" />已讀</span>
                       : <span className="flex items-center gap-0.5 text-[9px] text-muted-foreground/50"><Check className="w-3 h-3" />未讀</span>
                   )}
-                  {msg.mine && conv.type === 2 && (
-                    (msg.totalReaders ?? 0) === 0
-                      ? <span className="text-[9px] text-muted-foreground/50">—</span>
-                      : (msg.readCount ?? 0) >= (msg.totalReaders ?? 0)
-                        ? <span className="flex items-center gap-0.5 text-[9px] text-primary/70"><CheckCheck className="w-3 h-3" />全部已讀</span>
-                        : (msg.readCount ?? 0) === 0
-                          ? <span className="flex items-center gap-0.5 text-[9px] text-muted-foreground/50"><Check className="w-3 h-3" />未讀</span>
-                          : <span className="text-[9px] text-primary/70">{msg.readCount}/{msg.totalReaders} 已讀</span>
-                  )}
+                  {groupReadBadge}
                 </div>
               </div>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className="px-3 py-2 border-t border-border bg-card flex items-end gap-2 shrink-0">
@@ -404,11 +412,11 @@ const ChatRoom = ({ conv, messages, onBack, onSend, onOpenInfo, sending }: {
 };
 
 // ── Member Picker（建群 / 邀请 共用） ──
-const MemberPicker = ({ directory, excludeIds, selected, onToggle }: {
+const MemberPicker = ({ directory, excludeIds, onToggle, selected }: {
   directory: DirectoryEmployee[];
   excludeIds: Set<number>;
-  selected: number[];
   onToggle: (id: number) => void;
+  selected: number[];
 }) => {
   const [search, setSearch] = useState("");
   const available = directory.filter((e) => !excludeIds.has(e.id));
@@ -443,8 +451,11 @@ const MemberPicker = ({ directory, excludeIds, selected, onToggle }: {
 };
 
 // ── Main Component ──
-type ChatView = "list" | "chat" | "groupInfo" | "memberInfo" | "addMember";
+type ChatView = "addMember" | "chat" | "groupInfo" | "list" | "memberInfo";
 
+const onErr = (e: any) => toast.error(e?.message || "操作失敗");
+
+// oxlint-disable-next-line complexity
 const Notifications = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
@@ -473,13 +484,13 @@ const Notifications = () => {
   const { data: messages = [] } = useQuery({
     queryKey: ["chatMsgs", activeId],
     queryFn: async () => (await getMessages(activeId!)).data ?? [],
-    enabled: !!activeId && inChat,
+    enabled: Boolean(activeId) && inChat,
     refetchInterval: inChat ? 3000 : false,
   });
   const { data: members = [] } = useQuery({
     queryKey: ["chatMembers", activeId],
     queryFn: async () => (await getChatMembers(activeId!)).data ?? [],
-    enabled: !!activeId && (inGroupInfo || inAddMember),
+    enabled: Boolean(activeId) && (inGroupInfo || inAddMember),
   });
   const { data: directory = [] } = useQuery({
     queryKey: ["empDirectory"],
@@ -490,7 +501,7 @@ const Notifications = () => {
   const invalidateConvs = () => queryClient.invalidateQueries({ queryKey: ["chatConvs"] });
   const invalidateMsgs = () => queryClient.invalidateQueries({ queryKey: ["chatMsgs", activeId] });
   const invalidateMembers = () => queryClient.invalidateQueries({ queryKey: ["chatMembers", activeId] });
-  const onErr = (e: any) => toast.error(e?.message || "操作失敗");
+  const backToList = () => { setActiveId(null); setSelectedMember(null); setView("list"); };
 
   // ── Mutations ──
   const readM = useMutation({ mutationFn: (id: string) => markConversationRead(id), onSuccess: invalidateConvs });
@@ -540,7 +551,6 @@ const Notifications = () => {
     onError: onErr,
   });
 
-  const backToList = () => { setActiveId(null); setSelectedMember(null); setView("list"); };
   const togglePick = (id: number) => setPickIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
 
   // 深链：通讯录「發訊息」→ ?tab=chat&contactId=<id>

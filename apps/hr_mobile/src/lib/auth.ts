@@ -5,9 +5,9 @@ const USER_KEY = "hr_user";
 
 /** 当前登录用户（登录接口返回，前端缓存） */
 export interface AuthUser {
+  employeeNo?: string;
   userId: number;
   userName: string;
-  employeeNo?: string;
 }
 
 /** 存入完整 Authorization 值（tokenHead + token，例如 "Bearer xxx"） */
@@ -43,5 +43,5 @@ export function clearUser() {
 }
 
 export function isLoggedIn(): boolean {
-  return !!getToken();
+  return Boolean(getToken());
 }

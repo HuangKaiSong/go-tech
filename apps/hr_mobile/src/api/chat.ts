@@ -3,42 +3,42 @@ import type { ApiResult } from "@/api/auth";
 
 /** 会话（后端 ConversationVO；id 等为字符串化的 Long） */
 export interface Conversation {
-  id: string;
-  type: 1 | 2; // 1单聊 2群聊
-  name: string;
   avatar: string;
-  lastMessage?: string | null;
+  id: string; lastMessage?: string | null;
   lastTime?: string | null;
-  unread: number;
   memberCount?: number | null;
   muted?: boolean;
+  // 1单聊 2群聊
+  name: string;
   ownerId?: string | null;
+  type: 1 | 2;
+  unread: number;
 }
 
 /** 消息（后端 MessageVO） */
 export interface ChatMessage {
-  id: string;
-  senderId: string;
-  senderName?: string;
   content: string;
-  mine: boolean;
   createTime: string;
+  id: string;
+  mine: boolean;
   /** 对方是否已读（仅单聊本人消息有值，群聊/对方消息为 null） */
   read?: boolean | null;
   /** 已读人数（仅群聊本人消息有值，不含本人） */
   readCount?: number | null;
+  senderId: string;
+  senderName?: string;
   /** 应读人数（仅群聊本人消息有值，群成员数减本人） */
   totalReaders?: number | null;
 }
 
 /** 会话成员（后端 ChatMemberVO） */
 export interface ChatMember {
-  userId: string;
-  name?: string;
   department?: string;
-  position?: string;
-  owner: boolean;
   mine: boolean;
+  name?: string;
+  owner: boolean;
+  position?: string;
+  userId: string;
 }
 
 export function getConversations() {

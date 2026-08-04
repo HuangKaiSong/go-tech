@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { Home, Clock, FileText, Bell, User, BookUser } from "lucide-react";
+import { Bell, BookUser, Clock, Home, User } from "lucide-react";
 
 const navItems = [
   { path: "/dashboard", icon: Home, label: "首頁" },

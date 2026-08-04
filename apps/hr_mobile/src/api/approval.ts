@@ -52,71 +52,71 @@ export const NODE_STATUS_TEXT: Record<number, string> = {
 
 /** 审批节点（对齐后端 ApprovalNodeVO） */
 export interface ApprovalNode {
+  approvedAt?: string;
+  approverId?: number;
+  approverName?: string;
+  comment?: string;
+  /** 是否为当前待处理节点 */
+  current?: boolean;
+  dueAt?: string;
   id: number;
   levelNo: number;
   name: string;
-  approverId?: number;
-  approverName?: string;
-  statusCode: number;
   status?: string;
-  /** 是否为当前待处理节点 */
-  current?: boolean;
-  approvedAt?: string;
-  comment?: string;
-  dueAt?: string;
+  statusCode: number;
 }
 
 /** 审批操作流水（对齐后端 ApprovalHistoryVO） */
 export interface ApprovalHistory {
-  id: number;
-  node?: string;
-  approverId?: number;
-  approverName?: string;
   action: number;
   actionName?: string;
+  approverId?: number;
+  approverName?: string;
   comment?: string;
   createdAt?: string;
+  id: number;
+  node?: string;
 }
 
 /** 审批单（对齐后端 ApprovalVO；payload/attachments/nodes/history 仅详情返回） */
 export interface Approval {
-  id: number;
-  code: string;
-  type: number;
-  typeName?: string;
-  subType?: string;
   applicantId?: number;
   applicantName?: string;
-  departmentName?: string;
-  summary?: string;
-  currentNode?: string;
-  currentLevel?: number;
-  statusCode: number;
-  status?: string;
-  submittedAt?: string;
-  canWithdraw?: boolean;
-  canApprove?: boolean;
-  payload?: Record<string, any>;
   attachments?: string[];
-  nodes?: ApprovalNode[];
+  canApprove?: boolean;
+  canWithdraw?: boolean;
+  code: string;
+  currentLevel?: number;
+  currentNode?: string;
+  departmentName?: string;
   history?: ApprovalHistory[];
+  id: number;
+  nodes?: ApprovalNode[];
+  payload?: Record<string, any>;
+  status?: string;
+  statusCode: number;
+  submittedAt?: string;
+  subType?: string;
+  summary?: string;
+  type: number;
+  typeName?: string;
 }
 
 /** 提交申请单入参 */
 export interface ApprovalSubmitParams {
-  type: number;
-  subType?: string;
-  summary?: string;
+  attachments?: string[];
   /** 表单数据：days/hours/amount 等键参与规则条件判定 */
   payload?: Record<string, any>;
-  attachments?: string[];
+  subType?: string;
+  summary?: string;
+  type: number;
 }
 
 /** 附件上传返回（对齐后端 MinioUploadVO） */
 export interface UploadResult {
-  url: string;
   objectName: string;
   originalFilename: string;
+  url: string;
 }
 
 /** 上传申请单附件（单据尚未落库，先拿地址，提交时随 attachments 带上） */
@@ -136,7 +136,7 @@ export function submitApproval(data: ApprovalSubmitParams) {
 }
 
 /** 我的申请（含 payload；可按类型/状态筛选） */
-export function getMyApplications(params?: { type?: number; status?: number }) {
+export function getMyApplications(params?: { status?: number; type?: number }) {
   return request.get<any, ApiResult<Approval[]>>("approval/my", { params });
 }
 

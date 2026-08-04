@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Upload, Paperclip, X, CalendarDays, Clock, Receipt, Plane, LogOut, Loader2, ClipboardCheck } from "lucide-react";
+import { ArrowLeft, CalendarDays, ClipboardCheck, Clock, Loader2, LogOut, Paperclip, Plane, Receipt, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import {
-  submitApproval, uploadAttachment, TYPE_CODE,
-  SUPPLEMENT_CLOCK_IN, SUPPLEMENT_CLOCK_OUT, SUPPLEMENT_BOTH,
-  type ApplicationTypeKey,
+  type ApplicationTypeKey, SUPPLEMENT_BOTH, SUPPLEMENT_CLOCK_IN,
+  SUPPLEMENT_CLOCK_OUT, TYPE_CODE, submitApproval,
+  uploadAttachment,
 } from "@/api/approval";
-import { getActiveEmployeeOptions, type EmployeeOption } from "@/api/employee";
+import { type EmployeeOption, getActiveEmployeeOptions } from "@/api/employee";
 import { getLeaveTypes } from "@/api/leave";
 import { useQuery } from "@tanstack/react-query";
 
@@ -22,13 +22,13 @@ export type ApplicationFormInitial = {
 };
 
 type Props = {
-  typeKey: ApplicationTypeKey;
   initial?: ApplicationFormInitial;
   onBack: () => void;
   onSubmit: () => void;
+  typeKey: ApplicationTypeKey;
 };
 
-const typeMeta: Record<ApplicationTypeKey, { label: string; icon: React.ComponentType<{ className?: string }>; color: string }> = {
+const typeMeta: Record<ApplicationTypeKey, { color: string; icon: React.ComponentType<{ className?: string }>; label: string }> = {
   leave: { label: "請假申請", icon: CalendarDays, color: "bg-primary" },
   overtime: { label: "加班申請", icon: Clock, color: "bg-warning" },
   expense: { label: "報銷申請", icon: Receipt, color: "bg-accent" },
@@ -61,7 +61,7 @@ const inputCls = "w-full border border-border rounded-lg px-3 py-2.5 text-sm bg-
 const labelCls = "text-xs font-medium text-foreground mb-1.5 block";
 const requiredMark = <span className="text-destructive ml-0.5">*</span>;
 
-const Field = ({ label, required, children, hint }: { label: string; required?: boolean; children: React.ReactNode; hint?: string }) => (
+const Field = ({ children, hint, label, required }: { children: React.ReactNode; hint?: string; label: string; required?: boolean }) => (
   <div>
     <label className={labelCls}>{label}{required && requiredMark}</label>
     {children}
@@ -69,7 +69,7 @@ const Field = ({ label, required, children, hint }: { label: string; required?: 
   </div>
 );
 
-const ChipGroup = ({ options, value, onChange }: { options: string[]; value: string; onChange: (v: string) => void }) => (
+const ChipGroup = ({ onChange, options, value }: { onChange: (v: string) => void; options: string[]; value: string }) => (
   <div className="flex flex-wrap gap-2">
     {options.map((opt) => (
       <button
@@ -88,7 +88,7 @@ const ChipGroup = ({ options, value, onChange }: { options: string[]; value: str
   </div>
 );
 
-const AttachmentPicker = ({ files, setFiles, label = "上傳附件" }: { files: Attachment[]; setFiles: (f: Attachment[]) => void; label?: string }) => {
+const AttachmentPicker = ({ files, label = "上傳附件", setFiles }: { files: Attachment[]; label?: string; setFiles: (f: Attachment[]) => void }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -135,7 +135,19 @@ const AttachmentPicker = ({ files, setFiles, label = "上傳附件" }: { files: 
   );
 };
 
-const ApplicationForm = ({ typeKey, initial, onBack, onSubmit }: Props) => {
+const daySpan = (start: string, end: string) => {
+  if (!start || !end) return 0;
+  const diff = Math.floor((new Date(end).getTime() - new Date(start).getTime()) / 86400000) + 1;
+  return diff > 0 ? diff : 0;
+};
+
+/** 校验失败：提示并返回 null */
+const err = (msg: string) => {
+  toast.error(msg);
+  return null;
+};
+
+const ApplicationForm = ({ initial, onBack, onSubmit, typeKey }: Props) => {
   const meta = typeMeta[typeKey];
   const Icon = meta.icon;
 
@@ -171,7 +183,7 @@ const ApplicationForm = ({ typeKey, initial, onBack, onSubmit }: Props) => {
   }, [leaveCategories, leaveType]);
   const [leaveStart, setLeaveStart] = useState("");
   const [leaveEnd, setLeaveEnd] = useState("");
-  const [leaveHalf, setLeaveHalf] = useState<"full" | "am" | "pm">("full");
+  const [leaveHalf, setLeaveHalf] = useState<"am" | "full" | "pm">("full");
   const [leaveContact, setLeaveContact] = useState("");
 
   // Overtime
@@ -179,7 +191,7 @@ const ApplicationForm = ({ typeKey, initial, onBack, onSubmit }: Props) => {
   const [otDate, setOtDate] = useState("");
   const [otStart, setOtStart] = useState("");
   const [otEnd, setOtEnd] = useState("");
-  const [otCompensation, setOtCompensation] = useState<"pay" | "leave">("pay");
+  const [otCompensation, setOtCompensation] = useState<"leave" | "pay">("pay");
 
   // Expense
   const [expCategory, setExpCategory] = useState(expenseCategories[0]);
@@ -233,12 +245,6 @@ const ApplicationForm = ({ typeKey, initial, onBack, onSubmit }: Props) => {
   }, [typeKey]);
 
   /** 两个 yyyy-MM-dd 之间的自然日天数（含头尾）；无效返回 0 */
-  const daySpan = (start: string, end: string) => {
-    if (!start || !end) return 0;
-    const diff = Math.floor((new Date(end).getTime() - new Date(start).getTime()) / 86400000) + 1;
-    return diff > 0 ? diff : 0;
-  };
-
   /** 加班时数（数值，参与规则条件判定） */
   const otHours = useMemo(() => {
     if (!otStart || !otEnd) return 0;
@@ -263,11 +269,8 @@ const ApplicationForm = ({ typeKey, initial, onBack, onSubmit }: Props) => {
    * payload 中 days/hours/amount/subType 为规则引擎的条件判定字段，键名不可改。
    * 校验不通过时提示并返回 null。
    */
+  // oxlint-disable-next-line complexity
   const buildParams = () => {
-    const err = (msg: string) => {
-      toast.error(msg);
-      return null;
-    };
     const attachments = files.map((f) => f.url);
 
     if (typeKey === "leave") {

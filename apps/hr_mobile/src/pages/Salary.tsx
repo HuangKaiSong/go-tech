@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import MobileLayout from "@/components/MobileLayout";
 import { ArrowLeft, CheckCircle2, Clock, History, Loader2, Wallet } from "lucide-react";
-import { getMyPayslips, type Payslip } from "@/api/payroll";
+import { type Payslip, getMyPayslips } from "@/api/payroll";
 
 type ViewMode = "current" | "history";
 
@@ -16,6 +16,7 @@ const fmtPeriod = (p?: string | null) => {
 /** 已發放(3) 视为已发放，其余为待发放 */
 const isPaid = (s?: number) => s === 3;
 
+// oxlint-disable-next-line complexity
 const Salary = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("current");
   const [selectedIdx, setSelectedIdx] = useState(0);

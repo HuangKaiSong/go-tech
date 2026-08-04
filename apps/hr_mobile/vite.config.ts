@@ -1,5 +1,5 @@
-import path from 'node:path';
 import react from '@vitejs/plugin-react-swc';
+import path, { resolve } from 'node:path';
 import { defineConfig } from 'vite';
 
 // https://vitejs.dev/config/
@@ -22,6 +22,33 @@ export default defineConfig(() => ({
   resolve: {
     alias: {
       '@': path.resolve(import.meta.dirname, './src')
+    }
+  },
+  build: {
+    rollupOptions: {
+      input: {
+        index: resolve(__dirname, '', 'index.html')
+      },
+       output: {
+          chunkFileNames: 'static/js/[name]-[hash].js',
+          entryFileNames: 'static/js/[name]-[hash].js',
+          assetFileNames: 'static/[ext]/[name]-[hash].[ext]',
+          manualChunks: (moduleId) => {
+            if (['react', 'react-dom'].includes(moduleId)) {
+              return 'react'
+            }
+            if (['react-router-dom'].includes(moduleId)) {
+              return 'router'
+            }
+            if (['@go-tech-frontend/ui'].includes(moduleId)) {
+              return 'ui'
+            }
+            if (['lucide-react'].includes(moduleId)) {
+              return 'icon'
+            }
+            return 'vendor'
+          }
+        }
     }
   }
 }));

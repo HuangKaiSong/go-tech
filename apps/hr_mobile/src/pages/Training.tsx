@@ -1,34 +1,33 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import MobileLayout from "@/components/MobileLayout";
 import { Progress } from "@/components/ui/progress";
 import LearningPage from "@/components/training/LearningPage";
 import {
-  GraduationCap, BookOpen, CheckCircle2, Clock, ChevronRight,
-  ArrowLeft, PlayCircle, FileText, Award, Lock, CircleCheck
+  ArrowLeft, Award, BookOpen, CheckCircle2, ChevronRight,
+  CircleCheck, Clock, FileText, GraduationCap, Lock, PlayCircle
 } from "lucide-react";
 
 type CourseStatus = "completed" | "in_progress" | "locked";
 
 interface Course {
-  id: string;
-  title: string;
-  duration: string;
-  status: CourseStatus;
-  progress: number;
   description: string;
-  modules: { name: string; completed: boolean; duration: string }[];
+  duration: string;
+  id: string;
+  modules: { completed: boolean; duration: string; name: string }[];
+  progress: number;
+  status: CourseStatus;
+  title: string;
 }
 
 interface TrainingCategory {
-  id: string;
-  title: string;
-  icon: typeof GraduationCap;
   color: string;
-  description: string;
-  totalCourses: number;
   completedCourses: number;
   courses: Course[];
+  description: string;
+  icon: typeof GraduationCap;
+  id: string;
+  title: string;
+  totalCourses: number;
 }
 
 const trainingData: TrainingCategory[] = [
@@ -131,13 +130,14 @@ const getStatusConfig = (status: CourseStatus) => {
     case "completed": return { label: "已完成", color: "text-[hsl(var(--success))]", bg: "bg-[hsl(var(--success))]/10", icon: CheckCircle2 };
     case "in_progress": return { label: "進行中", color: "text-primary", bg: "bg-primary/10", icon: Clock };
     case "locked": return { label: "未解鎖", color: "text-muted-foreground", bg: "bg-muted", icon: Lock };
+    default: return { label: "未解鎖", color: "text-muted-foreground", bg: "bg-muted", icon: Lock };
   }
 };
 
-type ViewMode = "list" | "category" | "detail" | "learning";
+type ViewMode = "category" | "detail" | "learning" | "list";
 
 const Training = () => {
-  const navigate = useNavigate();
+  
   const [view, setView] = useState<ViewMode>("list");
   const [selectedCategory, setSelectedCategory] = useState<TrainingCategory | null>(null);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
@@ -253,16 +253,19 @@ const Training = () => {
           <div className="space-y-2.5">
             {selectedCourse.modules.map((mod, i) => {
               const canStart = !mod.completed && (i === 0 || selectedCourse.modules[i - 1].completed) && selectedCourse.status !== "locked";
+              let iconWrapCls = "bg-muted";
+              let moduleIcon = <Lock className="w-5 h-5 text-muted-foreground" />;
+              if (mod.completed) {
+                iconWrapCls = "bg-[hsl(var(--success))]/10";
+                moduleIcon = <CircleCheck className="w-5 h-5 text-[hsl(var(--success))]" />;
+              } else if (canStart) {
+                iconWrapCls = "bg-primary/10";
+                moduleIcon = <PlayCircle className="w-5 h-5 text-primary" />;
+              }
               return (
                 <div key={i} className={`bg-card rounded-xl border p-4 flex items-center gap-3 ${mod.completed ? "border-[hsl(var(--success))]/30" : "border-border"}`}>
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${mod.completed ? "bg-[hsl(var(--success))]/10" : canStart ? "bg-primary/10" : "bg-muted"}`}>
-                    {mod.completed ? (
-                      <CircleCheck className="w-5 h-5 text-[hsl(var(--success))]" />
-                    ) : canStart ? (
-                      <PlayCircle className="w-5 h-5 text-primary" />
-                    ) : (
-                      <Lock className="w-5 h-5 text-muted-foreground" />
-                    )}
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${iconWrapCls}`}>
+                    {moduleIcon}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className={`text-sm font-medium ${mod.completed ? "text-muted-foreground line-through" : "text-foreground"}`}>{mod.name}</p>

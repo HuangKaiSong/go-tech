@@ -1,25 +1,24 @@
 import { useState } from "react";
 import MobileLayout from "@/components/MobileLayout";
 import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
-import { CheckCircle, Clock, Users, UserCheck, ChevronRight, Send, Star } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { CheckCircle, ChevronRight, Clock, Send, Star, UserCheck, Users } from "lucide-react";
 import { toast } from "sonner";
 
-type Phase = "self" | "peer" | "manager" | "completed";
+type Phase = "completed" | "manager" | "peer" | "self";
 
 interface KpiItem {
   id: string;
-  name: string;
-  weight: string;
-  selfScore: number | null;
-  selfComment: string;
-  peerScores: { name: string; score: number; comment: string }[];
-  managerScore: number | null;
   managerComment: string;
+  managerScore: number | null;
+  name: string;
+  peerScores: { comment: string; name: string; score: number }[];
+  selfComment: string;
+  selfScore: number | null;
+  weight: string;
 }
 
 const initialKpiItems: KpiItem[] = [
@@ -31,11 +30,36 @@ const initialKpiItems: KpiItem[] = [
 
 const peers = ["李小華", "張大偉", "陳美玲"];
 
-const phaseConfig: Record<Phase, { label: string; icon: typeof Clock; color: string; bgColor: string }> = {
+const phaseConfig: Record<Phase, { bgColor: string; color: string; icon: typeof Clock; label: string }> = {
   self: { label: "自評階段", icon: Clock, color: "text-warning", bgColor: "bg-warning/10" },
   peer: { label: "互評階段", icon: Users, color: "text-info", bgColor: "bg-info/10" },
   manager: { label: "主管評核", icon: UserCheck, color: "text-accent", bgColor: "bg-accent/10" },
   completed: { label: "評核完成", icon: CheckCircle, color: "text-success", bgColor: "bg-success/10" },
+};
+
+const getScoreColor = (score: number) => {
+  if (score >= 90) return "text-success";
+  if (score >= 75) return "text-primary";
+  if (score >= 60) return "text-warning";
+  return "text-destructive";
+};
+
+const submitLabel = (p: Phase) => {
+  if (p === "self") return "提交自評";
+  if (p === "peer") return "提交互評";
+  return "提交主管評核";
+};
+
+const evalName = (p: Phase) => {
+  if (p === "self") return "自評";
+  if (p === "peer") return "互評";
+  return "主管評核";
+};
+
+const dialogTitle = (p: Phase, peerName: string) => {
+  if (p === "self") return "自我評分";
+  if (p === "peer") return `評核 - ${peerName}`;
+  return "主管評分";
 };
 
 const KPI = () => {
@@ -53,7 +77,7 @@ const KPI = () => {
   const getWeightedAvg = (getter: (k: KpiItem) => number | null) => {
     const scores = kpiItems.map(getter);
     if (scores.some((s) => s === null)) return null;
-    return Math.round(kpiItems.reduce((sum, k, i) => sum + (scores[i]! * parseFloat(k.weight)) / 100, 0));
+    return Math.round(kpiItems.reduce((sum, k, i) => sum + (scores[i]! * Number.parseFloat(k.weight)) / 100, 0));
   };
 
   const selfAvg = getWeightedAvg((k) => k.selfScore);
@@ -109,13 +133,6 @@ const KPI = () => {
     else if (phase === "peer") { setPhase("manager"); toast.success("互評已提交，進入主管評核"); }
     else if (phase === "manager") { setPhase("completed"); toast.success("評核流程已完成！"); }
     setConfirmOpen(false);
-  };
-
-  const getScoreColor = (score: number) => {
-    if (score >= 90) return "text-success";
-    if (score >= 75) return "text-primary";
-    if (score >= 60) return "text-warning";
-    return "text-destructive";
   };
 
   const displayScore = finalScore ?? selfAvg ?? 0;
@@ -205,10 +222,12 @@ const KPI = () => {
         <div className="space-y-3">
           <h3 className="text-sm font-semibold text-foreground">考核指標</h3>
           {kpiItems.map((kpi) => {
-            const currentScore = phase === "self" ? kpi.selfScore
-              : phase === "peer" ? kpi.peerScores.find((p) => p.name === peers[currentPeerIndex])?.score ?? null
-              : phase === "manager" ? kpi.managerScore
-              : kpi.selfScore;
+            let currentScore = kpi.selfScore;
+            if (phase === "peer") {
+              currentScore = kpi.peerScores.find((p) => p.name === peers[currentPeerIndex])?.score ?? null;
+            } else if (phase === "manager") {
+              currentScore = kpi.managerScore;
+            }
 
             return (
               <div
@@ -242,7 +261,7 @@ const KPI = () => {
             onClick={() => setConfirmOpen(true)}
           >
             <Send className="w-4 h-4 mr-2" />
-            {phase === "self" ? "提交自評" : phase === "peer" ? "提交互評" : "提交主管評核"}
+            {submitLabel(phase)}
           </Button>
         )}
 
@@ -261,11 +280,11 @@ const KPI = () => {
       </div>
 
       {/* Score Editor Dialog */}
-      <Dialog open={!!editingItem} onOpenChange={(o) => !o && setEditingItem(null)}>
+      <Dialog open={Boolean(editingItem)} onOpenChange={(o) => !o && setEditingItem(null)}>
         <DialogContent className="max-w-[92vw] rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-base">
-              {phase === "self" ? "自我評分" : phase === "peer" ? `評核 - ${peers[currentPeerIndex]}` : "主管評分"} · {editingItem?.name}
+              {dialogTitle(phase, peers[currentPeerIndex])} · {editingItem?.name}
             </DialogTitle>
             <DialogDescription className="text-xs">
               請根據實際表現給予 0-100 的評分並填寫評語
@@ -316,7 +335,7 @@ const KPI = () => {
           <DialogHeader>
             <DialogTitle>確認提交</DialogTitle>
             <DialogDescription>
-              提交後將無法修改{phase === "self" ? "自評" : phase === "peer" ? "互評" : "主管評核"}結果，確定要提交嗎？
+              提交後將無法修改{evalName(phase)}結果，確定要提交嗎？
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex-row gap-2">

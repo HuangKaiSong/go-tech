@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { type ReactNode } from "react";
 import BottomNav from "./BottomNav";
 
 const MobileLayout = ({ children, title }: { children: ReactNode; title?: string }) => {

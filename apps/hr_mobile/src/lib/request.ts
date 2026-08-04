@@ -1,9 +1,10 @@
 import axios from "axios";
-import { getToken, clearToken } from "./auth";
+import { clearToken, getToken } from "./auth";
 
 /** 手机端与 PC 端共用同一套后端；登录页为 "/"（不同于 PC 的 /login） */
 const LOGIN_PATH = "/";
 
+// oxlint-disable-next-line import/no-named-as-default-member
 const request = axios.create({
   baseURL: "/hr-manage",
   timeout: 10000,

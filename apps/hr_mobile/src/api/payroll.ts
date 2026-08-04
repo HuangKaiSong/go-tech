@@ -3,21 +3,21 @@ import type { ApiResult } from "@/api/auth";
 
 /** 金额明细行（对齐后端 AmountLineVO） */
 export interface AmountLine {
-  name: string;
   amount: number;
+  name: string;
 }
 
 /** 我的粮单（对齐后端 MyPayslipVO） */
 export interface Payslip {
-  period: string;
+  deductions: AmountLine[];
   grossPay: number;
-  totalDeduction: number;
+  incomes: AmountLine[];
   netPay: number;
+  period: string;
+  status?: string;
   /** 批次状态码 2已確認 3已發放 */
   statusCode?: number;
-  status?: string;
-  incomes: AmountLine[];
-  deductions: AmountLine[];
+  totalDeduction: number;
 }
 
 /** 当前登录员工的粮单列表（已確認/已發放，按期间倒序） */

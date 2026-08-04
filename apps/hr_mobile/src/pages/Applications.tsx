@@ -1,19 +1,19 @@
 import { useCallback, useEffect, useState } from "react";
 import MobileLayout from "@/components/MobileLayout";
 import { useLocation, useNavigate } from "react-router-dom";
-import { CalendarDays, Clock, Receipt, Plane, LogOut, ChevronRight, Plus, ArrowLeft, Check, X as XIcon, RotateCcw, CheckCircle2, Circle, AlertCircle, Loader2, Paperclip, MinusCircle, ClipboardCheck } from "lucide-react";
+import { AlertCircle, ArrowLeft, CalendarDays, Check, CheckCircle2, ChevronRight, Circle, ClipboardCheck, Clock, Loader2, LogOut, MinusCircle, Paperclip, Plane, Plus, Receipt, RotateCcw, X as XIcon } from "lucide-react";
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import ApplicationForm, { type ApplicationFormInitial } from "@/components/ApplicationForm";
 import {
-  getMyApplications, getMyPending, getMyReviewed, getApprovalById,
-  approveApproval, rejectApproval, withdrawApproval,
-  APPROVAL_STATUS_COLOR, NODE_STATUS_TEXT,
-  type Approval, type ApplicationTypeKey,
+  APPROVAL_STATUS_COLOR, type ApplicationTypeKey, type Approval, NODE_STATUS_TEXT,
+  approveApproval, getApprovalById, getMyApplications,
+  getMyPending, getMyReviewed,
+  rejectApproval, withdrawApproval,
 } from "@/api/approval";
 
-const applicationTypes: { key: ApplicationTypeKey; icon: typeof CalendarDays; label: string; desc: string; color: string }[] = [
+const applicationTypes: { color: string; desc: string; icon: typeof CalendarDays; key: ApplicationTypeKey; label: string }[] = [
   { key: "leave", icon: CalendarDays, label: "請假申請", desc: "類別/起止時間/事由", color: "bg-primary" },
   { key: "overtime", icon: Clock, label: "加班申請", desc: "日期/時段/預計工時", color: "bg-warning" },
   { key: "expense", icon: Receipt, label: "報銷申請", desc: "金額/幣別/發票附件", color: "bg-accent" },
@@ -69,8 +69,28 @@ const formatValue = (key: string, value: unknown) => {
   return String(value);
 };
 
-type ViewMode = "list" | "detail" | "form";
+type ViewMode = "detail" | "form" | "list";
 
+const getFlowIcon = (statusCode: number, current?: boolean) => {
+  if (statusCode === 2) return <CheckCircle2 className="w-5 h-5 text-success" />;
+  if (statusCode === 3) return <AlertCircle className="w-5 h-5 text-destructive" />;
+  if (statusCode === 4) return <MinusCircle className="w-5 h-5 text-muted-foreground" />;
+  return current
+    ? <Clock className="w-5 h-5 text-warning" />
+    : <Circle className="w-5 h-5 text-muted-foreground" />;
+};
+
+const nodeBadgeCls = (statusCode: number, current?: boolean) => {
+  if (statusCode === 2) return "text-success bg-success/10";
+  if (statusCode === 3) return "text-destructive bg-destructive/10";
+  if (statusCode === 1 && current) return "text-warning bg-warning/10";
+  return "text-muted-foreground bg-muted";
+};
+
+const nodeBadgeText = (statusCode: number, current?: boolean) =>
+  statusCode === 1 && !current ? "等待中" : NODE_STATUS_TEXT[statusCode] ?? "";
+
+// oxlint-disable-next-line complexity
 const Applications = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -117,7 +137,7 @@ const Applications = () => {
   // 由打卡页「申請補卡」跳转而来：直接开表单并预填日期
   // 用完即清掉 state，避免返回列表后再次刷新又弹回表单
   useEffect(() => {
-    const state = location.state as { openForm?: ApplicationTypeKey; initial?: ApplicationFormInitial } | null;
+    const state = location.state as { initial?: ApplicationFormInitial; openForm?: ApplicationTypeKey } | null;
     if (!state?.openForm) return;
     setFormType(state.openForm);
     setFormInitial(state.initial);
@@ -125,7 +145,9 @@ const Applications = () => {
     navigate(location.pathname, { replace: true, state: null });
   }, [location, navigate]);
 
-  const currentRecords = activeTab === 0 ? myList : activeTab === 1 ? pendingList : reviewedList;
+  let currentRecords = reviewedList;
+  if (activeTab === 0) currentRecords = myList;
+  else if (activeTab === 1) currentRecords = pendingList;
 
   const openDetail = async (id: number) => {
     setViewMode("detail");
@@ -168,25 +190,6 @@ const Applications = () => {
       setActing(false);
     }
   };
-
-  const getFlowIcon = (statusCode: number, current?: boolean) => {
-    if (statusCode === 2) return <CheckCircle2 className="w-5 h-5 text-success" />;
-    if (statusCode === 3) return <AlertCircle className="w-5 h-5 text-destructive" />;
-    if (statusCode === 4) return <MinusCircle className="w-5 h-5 text-muted-foreground" />;
-    return current
-      ? <Clock className="w-5 h-5 text-warning" />
-      : <Circle className="w-5 h-5 text-muted-foreground" />;
-  };
-
-  const nodeBadgeCls = (statusCode: number, current?: boolean) => {
-    if (statusCode === 2) return "text-success bg-success/10";
-    if (statusCode === 3) return "text-destructive bg-destructive/10";
-    if (statusCode === 1 && current) return "text-warning bg-warning/10";
-    return "text-muted-foreground bg-muted";
-  };
-
-  const nodeBadgeText = (statusCode: number, current?: boolean) =>
-    statusCode === 1 && !current ? "等待中" : NODE_STATUS_TEXT[statusCode] ?? "";
 
   // Form view
   if (viewMode === "form" && formType) {
@@ -344,7 +347,7 @@ const Applications = () => {
           )}
 
           {/* Action buttons：以后端返回的权限为准，不靠 Tab 推断 */}
-          {detail.canApprove ? (
+          {detail.canApprove && (
             <div className="flex gap-3 mb-6">
               <button
                 onClick={() => setShowRejectDialog(true)}
@@ -361,7 +364,8 @@ const Applications = () => {
                 通過
               </button>
             </div>
-          ) : detail.canWithdraw ? (
+          )}
+          {!detail.canApprove && detail.canWithdraw && (
             <button
               onClick={() => setShowRecallDialog(true)}
               className="w-full bg-warning/10 text-warning rounded-xl py-3 text-sm font-medium active:scale-[0.98] transition-transform flex items-center justify-center gap-1.5 mb-6"
@@ -369,7 +373,7 @@ const Applications = () => {
               <RotateCcw className="w-4 h-4" />
               撤回申請
             </button>
-          ) : null}
+          )}
         </div>
 
         {/* Recall confirmation */}

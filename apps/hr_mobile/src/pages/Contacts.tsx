@@ -6,25 +6,25 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
-  Search, ArrowLeft, Phone, MessageCircle, ChevronRight,
-  ChevronDown, Building2, Users, User, Briefcase, MapPin, PhoneCall, PhoneOff, Loader2
+  ArrowLeft, Briefcase, Building2, ChevronDown, ChevronRight,
+  Loader2, MapPin, MessageCircle, Phone, PhoneCall, PhoneOff, Search, User, Users
 } from "lucide-react";
 import {
-  getEmployeeDirectory, getEmployeeDetailById, getOrgTree,
-  type DirectoryEmployee, type OrgDeptNode,
+  type DirectoryEmployee, type OrgDeptNode, getEmployeeDetailById,
+  getEmployeeDirectory, getOrgTree,
 } from "@/api/employee";
 
 /** 页面内使用的员工结构（由后端 DirectoryEmployee 映射而来） */
 type Employee = {
-  id: string;
-  name: string;
   avatar: string;
   dept: string;
-  title: string;
-  phone: string;
+  id: string;
   isManager?: boolean;
+  name: string;
+  phone: string;
+  title: string;
 };
 
 /** 主管职称关键字：用于展示「主管」徽章（后端无该标志，按职称推断，仅影响展示） */
@@ -63,8 +63,8 @@ const EmployeeCard = ({ emp, onClick }: { emp: Employee; onClick: () => void }) 
 );
 
 // ── Employee Detail ──
-const EmployeeDetail = ({ emp, colleagues, onBack, onChat, onCall }: {
-  emp: Employee; colleagues: Employee[]; onBack: () => void; onChat: () => void; onCall: () => void;
+const EmployeeDetail = ({ colleagues, emp, onBack, onCall, onChat }: {
+  colleagues: Employee[]; emp: Employee; onBack: () => void; onCall: () => void; onChat: () => void;
 }) => {
   // 详情按需拉 email / 地址（列表接口不含）
   const { data: detail } = useQuery({
@@ -225,8 +225,8 @@ const OrgNode = ({ dept, directory, level = 0, onSelectEmp }: {
 // ── Main Contacts Page ──
 const Contacts = () => {
   const navigate = useNavigate();
-  const [view, setView] = useState<"main" | "detail">("main");
-  const [tab, setTab] = useState<"people" | "org">("people");
+  const [view, setView] = useState<"detail" | "main">("main");
+  const [tab, setTab] = useState<"org" | "people">("people");
   const [search, setSearch] = useState("");
   const [deptFilter, setDeptFilter] = useState("全部");
   const [selectedEmp, setSelectedEmp] = useState<Employee | null>(null);
@@ -394,13 +394,15 @@ const Contacts = () => {
               <Building2 className="w-4 h-4 text-primary" />
               <span className="text-xs text-muted-foreground">點擊部門展開查看人員列表</span>
             </div>
-            {orgLoading ? (
+            {orgLoading && (
               <div className="flex justify-center py-12 text-muted-foreground">
                 <Loader2 className="w-6 h-6 animate-spin" />
               </div>
-            ) : orgTree.length === 0 ? (
+            )}
+            {!orgLoading && orgTree.length === 0 && (
               <div className="text-center py-12 text-muted-foreground text-sm">暫無組織架構資料</div>
-            ) : (
+            )}
+            {!orgLoading && orgTree.length > 0 && (
               orgTree.map((dept) => (
                 <OrgNode
                   key={dept.id}
