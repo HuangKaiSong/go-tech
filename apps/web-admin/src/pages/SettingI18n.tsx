@@ -15,6 +15,15 @@ type FieldType = {
 const RolesPage = () => {
   const [form] = Form.useForm<FieldType>();
 
+  const clearCache = useMutation({
+    mutationFn: async () => {
+      const response = await fetch('/h5-hook/api/translate/clear', {
+        method: 'POST'
+      });
+      return response.json();
+    }
+  });
+
   const searchMutation = useMutation({
     mutationFn: async (source: string) => {
       const searchParams = new URLSearchParams({
@@ -40,6 +49,7 @@ const RolesPage = () => {
 
       form.setFieldsValue({
         key: response.key,
+        source: response.source,
         'en-us': translations['en-us'],
         'zh-cn': translations['zh-cn'],
         'zh-hk': translations['zh-hk']
@@ -84,6 +94,8 @@ const RolesPage = () => {
         'zh-cn': translations['zh-cn'],
         'zh-hk': translations['zh-hk']
       });
+      // 还需要刷新缓存
+      clearCache.mutateAsync();
 
       toast.success('保存成功');
     },

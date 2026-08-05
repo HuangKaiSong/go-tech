@@ -1,3 +1,4 @@
+import { connection } from 'next/server';
 import { defaultHomeBlocks } from '@/app/components/blockDefaults';
 import Footer from '@/app/components/Footer';
 import Header from '@/app/components/Header';
@@ -22,6 +23,7 @@ function getBaseUrl(): string {
 
 export default async function Home() {
   const blocks = await loadPageBlocks('home', defaultHomeBlocks);
+  await connection();
   let packages: Packages[] = [];
   try {
     const baseUrl = getBaseUrl();

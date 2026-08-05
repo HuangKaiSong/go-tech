@@ -85,7 +85,7 @@
   },
 
   // i18n-ally
-  "i18n-ally.localesPaths": [ "packages/web/admin-i18n/src/langs", "apps/web-h5/locales" ],
+  "i18n-ally.localesPaths": [ "apps/web-h5/locales", "apps/**/src/locales/langs", "packages/web/admin-i18n/src/langs" ],
   "i18n-ally.namespace": true,
   "i18n-ally.keystyle": "nested",
   "i18n-ally.sourceLanguage": "zh-cn",

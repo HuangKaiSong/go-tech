@@ -49,9 +49,12 @@ export const AuthProvider = ({
           Authorization: `Bearer ${voucher}`
         }
       });
-      const data = await response.json();
-      setTenants(data?.data || []);
+      if (response.ok) {
+        const data = await response.json();
+        setTenants(Array.isArray(data?.data) ? data.data : []);
+      }
     } catch (error) {
+      setTenants([]);
       console.error('Error fetching tenants:', error);
     }
   };

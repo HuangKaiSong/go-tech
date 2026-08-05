@@ -93,3 +93,4 @@ build
 dist
 .open-next
 .wrangler
+MIGRATION_PLAN.md

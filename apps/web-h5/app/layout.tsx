@@ -52,15 +52,21 @@ export default async function RootLayout({
   if (token) {
     user = decodeJwt(token) as User;
     const baseUrl = getBaseUrl();
-    await fetch(`${baseUrl}/go-tech/platform/packageOrder/myTenants`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
-      .then(res => res.json())
-      .then(data => {
-        tenants = data?.data || [];
+    try {
+      const res = await fetch(`${baseUrl}/go-tech/platform/packageOrder/myTenants`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
       });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data?.data)) {
+          tenants = data.data;
+        }
+      }
+    } catch {
+      // fetch 失败时 tenants 保持为空数组
+    }
   }
 
   // 相对模块文件解析图标目录，避免使用 process.cwd() 触发 Turbopack 追踪整个项目

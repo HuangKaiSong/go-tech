@@ -26,6 +26,7 @@ const ContentAddPage = lazyPage(() => import('@/pages/ContentAddPage'));
 const ContentEditPage = lazyPage(() => import('@/pages/ContentEditPage'));
 const SiteSettingPage = lazyPage(() => import('@/pages/SiteSettingPage'));
 const MessageBoard = lazyPage(() => import('@/pages/MessageBoard'));
+const MessagePage = lazyPage(() => import('@/pages/MessagePage'));
 const FeedbackPage = lazyPage(() => import('@/pages/FeedbackPage'));
 const SettingI18n = lazyPage(() => import('@/pages/SettingI18n'));
 
@@ -124,6 +125,10 @@ export const routes: RouteObject[] = [
       {
         path: '/message-board',
         element: <MessageBoard />
+      },
+      {
+        path: '/messages',
+        element: <MessagePage />
       },
       {
         path: '/feedback',

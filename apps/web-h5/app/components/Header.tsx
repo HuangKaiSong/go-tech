@@ -72,18 +72,19 @@ const SelectTenant = ({ generateCallback }: { generateCallback: (uri: string) =>
           </DialogHeader>
           {/* 选择租户 */}
           <div className="grid grid-cols-3 gap-4 items-center justify-center">
-            {tenants?.map(tenant => (
-              <div
-                key={tenant.tenantId}
-                onClick={() => handleClick(tenant)}
-                className="flex flex-col items-center rounded-lg border-solid border border-transparent py-2 gap-y-2 transition-all hover:border-primary active:hover:border-primary"
-              >
-                <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center">
-                  <span className="text-xl">{tenant.tenantName?.slice(0, 1)}</span>
+            {Array.isArray(tenants) &&
+              tenants.map(tenant => (
+                <div
+                  key={tenant.tenantId}
+                  onClick={() => handleClick(tenant)}
+                  className="flex flex-col items-center rounded-lg border-solid border border-transparent py-2 gap-y-2 transition-all hover:border-primary active:hover:border-primary"
+                >
+                  <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center">
+                    <span className="text-xl">{tenant.tenantName?.slice(0, 1)}</span>
+                  </div>
+                  <p className="text-sm font-medium">{tenant.tenantName}</p>
                 </div>
-                <p className="text-sm font-medium">{tenant.tenantName}</p>
-              </div>
-            ))}
+              ))}
           </div>
         </DialogContent>
       </Dialog>
