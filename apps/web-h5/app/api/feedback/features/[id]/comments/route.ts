@@ -20,15 +20,28 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     return NextResponse.json({ success: false, message: '留言內容無效' }, { status: 400 });
   }
 
-  if (!(await verifyBotToken(turnstileToken, 'feedback_comment'))) {
+  const botVerification = await verifyBotToken(turnstileToken, 'feedback_comment');
+  if (!botVerification.success) {
+    if (botVerification.reason === 'unavailable') {
+      return NextResponse.json(
+        { success: false, code: 'BOT_VERIFICATION_UNAVAILABLE', message: '機器人驗證服務連線失敗，請稍後重試' },
+        { status: 503 }
+      );
+    }
     return NextResponse.json(
       { success: false, code: 'BOT_VERIFICATION_FAILED', message: '機器人驗證失敗，請重試' },
       { status: 400 }
     );
   }
 
-  const moderation = moderateFeedbackContent([content]);
+  const moderation = await moderateFeedbackContent([content]);
   if (!moderation.allowed) {
+    if ('error' in moderation) {
+      return NextResponse.json(
+        { success: false, code: 'CONTENT_MODERATION_FAILED', message: '內容審核服務暫時不可用，請稍後重試' },
+        { status: 503 }
+      );
+    }
     return NextResponse.json(
       { success: false, code: 'CONTENT_REJECTED', message: '留言未通過安全審核，請修改後重試' },
       { status: 422 }
@@ -57,7 +70,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       content,
       createdAt: new Date().toISOString(),
       id: String(insertResult.insertId),
-      isOfficial: false
+      isOfficial: false,
+      parentId: null
     };
   });
 

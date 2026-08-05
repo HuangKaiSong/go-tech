@@ -89,13 +89,16 @@ const FeedbackCategoryPage = async ({ params }: { params: Promise<{ category: st
     subCategory: row.subCategory?.name || undefined,
     likes: row.likeCount ?? 0,
     likedBy: (row.votes || []).map((v: any) => v.user?.custName).filter(Boolean) as string[],
-    comments: (row.comments || []).map((c: any) => ({
-      id: String(c.id),
-      author: c.author?.custName || 'Anonymous',
-      content: c.content,
-      createdAt: new Date(c.createdAt).toISOString(),
-      isOfficial: false // platformCustomer 表无 isOfficial 字段，默认 false
-    })),
+    comments: (row.comments || [])
+      .filter((c: any) => !c.parentId || (row.comments || []).some((parent: any) => parent.id === c.parentId))
+      .map((c: any) => ({
+        id: String(c.id),
+        author: c.isOfficial ? 'GO-TECH Manager' : c.author?.custName || 'Anonymous',
+        content: c.content,
+        createdAt: new Date(c.createdAt).toISOString(),
+        isOfficial: c.isOfficial,
+        parentId: c.parentId ? String(c.parentId) : null
+      })),
     status: row.status as Feature['status'],
     createdAt: new Date(row.createdAt).toISOString(),
     shippedAt: row.shippedAt ? new Date(row.shippedAt).toISOString() : undefined,

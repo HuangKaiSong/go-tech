@@ -79,7 +79,7 @@ export default async function RootLayout({
           {themeColorScript}
         </Script>
       </head>
-      <body>
+      <body className="min-w-[1280px]">
         {shouldInitLocale ? <LocaleInitializer locale={language} /> : null}
         <div aria-hidden="true" dangerouslySetInnerHTML={{ __html: svgSpriteHtml }} />
         <NextIntlClientProvider>

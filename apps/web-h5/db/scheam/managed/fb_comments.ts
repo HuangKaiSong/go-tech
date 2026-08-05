@@ -1,6 +1,5 @@
 import { sql } from 'drizzle-orm';
 import { bigint, boolean, datetime, foreignKey, index, mysqlTable, text, varchar } from 'drizzle-orm/mysql-core';
-import { platformCustomer } from '../external/platform_customer';
 import { fbFeature } from './fb_feature';
 
 /**
@@ -20,9 +19,8 @@ export const fbComment = mysqlTable(
       .references(() => fbFeature.id, { onDelete: 'cascade' }),
     /** 回覆的上層留言；NULL 表示一級留言 */
     parentId: bigint('parent_id', { mode: 'number', unsigned: true }),
-    authorId: bigint('author_id', { mode: 'number', unsigned: true })
-      .notNull()
-      .references(() => platformCustomer.id),
+    /** 普通留言指向 platform_customer；官方回复指向 ums_admin，由 is_official 区分。 */
+    authorId: bigint('author_id', { mode: 'number', unsigned: true }).notNull(),
     content: text('content').notNull(),
     /** 官方回覆（深色氣泡） */
     isOfficial: boolean('is_official').notNull().default(false),
@@ -48,6 +46,7 @@ export const fbComment = mysqlTable(
   t => [
     index('idx_comment_feature').on(t.featureId, t.deletedAt, t.isVisible, t.createdAt),
     index('idx_comment_parent').on(t.parentId, t.createdAt),
+    index('idx_comment_author_official').on(t.authorId, t.isOfficial),
     foreignKey({
       name: 'fk_comment_parent',
       columns: [t.parentId],

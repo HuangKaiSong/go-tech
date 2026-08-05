@@ -1,5 +1,5 @@
 import { cn } from '@go-tech/utils';
-import { ChevronDown, ChevronRight, FileText, Gift, MessageSquareText, Package, Settings, Users } from 'lucide-react';
+import { ChevronDown, ChevronRight, FileText, Gift, Lightbulb, MessageSquareText, Package, Settings, Users } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Logo from '@/assets/images/Gotech_Logo.webp';
@@ -16,6 +16,7 @@ const menuItems: MenuItem[] = [
   { title: '訂單列表', path: '/orders', icon: FileText },
   // { title: "系統用戶列表", path: "/system-users", icon: UserCog },
   { title: '留言板', path: '/message-board', icon: MessageSquareText },
+  { title: '需求反饋', path: '/feedback', icon: Lightbulb },
   {
     title: '優惠管理',
     icon: Gift,

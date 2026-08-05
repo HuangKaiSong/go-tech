@@ -1,5 +1,6 @@
 import { relations } from 'drizzle-orm';
 import { platformCustomer } from '../external/platform_customer';
+import { umsAdmin } from '../external/ums_admin';
 import { fbCategory, fbSubCategory } from './fb_categories';
 import { fbComment } from './fb_comments';
 import { fbFeature } from './fb_feature';
@@ -60,6 +61,10 @@ export const fbCommentRelations = relations(fbComment, ({ many, one }) => ({
   author: one(platformCustomer, {
     fields: [fbComment.authorId],
     references: [platformCustomer.id]
+  }),
+  adminAuthor: one(umsAdmin, {
+    fields: [fbComment.authorId],
+    references: [umsAdmin.id]
   }),
   parent: one(fbComment, {
     fields: [fbComment.parentId],

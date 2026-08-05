@@ -22,6 +22,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIframeContext } from '@/contexts/IframeContext';
+import { DynamicText } from './DynamicI18nText';
 import LocaleSwitcher from './LocaleSwitcher';
 import { type PageBlock } from './PageBlocks';
 
@@ -214,7 +215,7 @@ const Header = ({ heroBg, initialBlocks }: { heroBg?: string | StaticImageData; 
   };
 
   return (
-    <div className="h-44 backdrop-blur-xl bg-black/70 text-white/70 overflow-hidden relative select-none">
+    <div className="h-44 min-w-[1280px] backdrop-blur-xl bg-black/70 text-white/70 overflow-hidden relative select-none">
       {heroBg && (
         <Image
           src={heroBg}
@@ -225,9 +226,9 @@ const Header = ({ heroBg, initialBlocks }: { heroBg?: string | StaticImageData; 
         />
       )}
       <div className="w-full h-full backdrop-blur-xl">
-        <div className="container h-full mx-auto flex flex-row items-center gap-10">
+        <div className="mx-auto flex h-full w-[1280px] min-w-[1280px] max-w-[1280px] flex-row items-center gap-10">
           {/* logo */}
-          <Link href="/">
+          <Link href="/" className="shrink-0">
             {/* oxlint-disable next/no-img-element */}
             <img
               src={logo}
@@ -238,9 +239,9 @@ const Header = ({ heroBg, initialBlocks }: { heroBg?: string | StaticImageData; 
             />
           </Link>
           {/* menu */}
-          <div className="flex-1 flex flex-col h-full py-4 justify-between">
+          <div className="flex-1 min-w-0 flex flex-col h-full py-4 justify-between">
             <div />
-            <nav className="hidden  md:flex items-center justify-between gap-4">
+            <nav className="hidden md:flex items-center justify-between gap-4 whitespace-nowrap">
               <Link href="/core-advantages" className="text-lg hover:text-primary transition-colors col-span-1">
                 {t('Nav.coreAdvantages')}
               </Link>
@@ -259,6 +260,10 @@ const Header = ({ heroBg, initialBlocks }: { heroBg?: string | StaticImageData; 
               <div className="h-10 border border-white/70" />
               <Link href="/contact" className="text-lg hover:text-primary transition-colors col-span-1">
                 {t('Nav.contact')}
+              </Link>
+              <div className="h-10 border border-white/70" />
+              <Link href="/feedback" className="text-lg hover:text-primary transition-colors col-span-1">
+                <DynamicText text="需求反饋" />
               </Link>
             </nav>
             <div className="grid grid-cols-2 text-sm text-white/80">
@@ -295,7 +300,7 @@ const Header = ({ heroBg, initialBlocks }: { heroBg?: string | StaticImageData; 
             </div>
           </div>
           {/* operate */}
-          <div className="basis-50 flex flex-col h-full py-4 justify-between">
+          <div className="basis-50 shrink-0 flex flex-col h-full py-4 justify-between">
             <div />
             <div className="flex flex-row justify-between gap-3 items-center">
               {isLoggedIn && user ? (

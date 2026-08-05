@@ -1,5 +1,5 @@
 import { and, asc, desc, eq, isNull, like, or } from 'drizzle-orm';
-import { type NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { fbCategory, fbComment, fbFeature, fbSubCategory, fbVote } from '@/db/scheam';
 import { getFeedbackUser } from '../auth';
@@ -15,13 +15,16 @@ const mapFeature = (row: any) => ({
   subCategory: row.subCategory?.name || undefined,
   likes: row.likeCount ?? 0,
   likedBy: (row.votes || []).map((v: any) => v.user?.custName).filter(Boolean) as string[],
-  comments: (row.comments || []).map((c: any) => ({
-    id: String(c.id),
-    author: c.author?.custName || 'Anonymous',
-    content: c.content,
-    createdAt: new Date(c.createdAt),
-    isOfficial: false
-  })),
+  comments: (row.comments || [])
+    .filter((c: any) => !c.parentId || (row.comments || []).some((parent: any) => parent.id === c.parentId))
+    .map((c: any) => ({
+      id: String(c.id),
+      author: c.isOfficial ? 'GO-TECH Manager' : c.author?.custName || 'Anonymous',
+      content: c.content,
+      createdAt: new Date(c.createdAt),
+      isOfficial: c.isOfficial,
+      parentId: c.parentId ? String(c.parentId) : null
+    })),
   status: row.status,
   createdAt: new Date(row.createdAt).toISOString(),
   shippedAt: row.shippedAt ? new Date(row.shippedAt).toISOString() : undefined,
@@ -40,14 +43,29 @@ const validateFeatureSubmission = async ({ categoryName, description, title, tur
     return NextResponse.json({ success: false, message: '需求內容無效' }, { status: 400 });
   }
 
-  if (!(await verifyBotToken(turnstileToken, 'feedback_post'))) {
+  const botVerification = await verifyBotToken(turnstileToken, 'feedback_post');
+  if (!botVerification.success) {
+    if (botVerification.reason === 'unavailable') {
+      return NextResponse.json(
+        { success: false, code: 'BOT_VERIFICATION_UNAVAILABLE', message: '機器人驗證服務連線失敗，請稍後重試' },
+        { status: 503 }
+      );
+    }
     return NextResponse.json(
       { success: false, code: 'BOT_VERIFICATION_FAILED', message: '機器人驗證失敗，請重試' },
       { status: 400 }
     );
   }
 
-  if (!moderateFeedbackContent([title, description]).allowed) {
+  const response = await moderateFeedbackContent([title, description]);
+
+  if (!response.allowed) {
+    if ('error' in response) {
+      return NextResponse.json(
+        { success: false, code: 'CONTENT_MODERATION_FAILED', message: '內容審核服務暫時不可用，請稍後重試' },
+        { status: 503 }
+      );
+    }
     return NextResponse.json(
       { success: false, code: 'CONTENT_REJECTED', message: '標題或內容未通過安全審核，請修改後重試' },
       { status: 422 }
@@ -64,7 +82,7 @@ export async function GET(req: NextRequest) {
   }
 
   const rows = await db.query.fbFeature.findMany({
-    where: or(like(fbFeature.title, `%${q}%`), like(fbFeature.description, `%${q}%`)),
+    where: and(isNull(fbFeature.deletedAt), or(like(fbFeature.title, `%${q}%`), like(fbFeature.description, `%${q}%`))),
     with: {
       author: { columns: { custName: true } },
       category: { columns: { name: true } },
@@ -105,6 +123,7 @@ export async function POST(req: NextRequest) {
   const turnstileToken = typeof body?.turnstileToken === 'string' ? body.turnstileToken : '';
 
   const validationResponse = await validateFeatureSubmission({ categoryName, description, title, turnstileToken });
+
   if (validationResponse) return validationResponse;
 
   const category = await db.query.fbCategory.findFirst({

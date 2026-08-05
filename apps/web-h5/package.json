@@ -38,6 +38,7 @@
     "next": "16.2.9",
     "next-intl": "^4.13.0",
     "next-seo": "^7.0.1",
+    "openai": "^7.4.0",
     "opencc-js": "^1.4.1",
     "react": "catalog:react19",
     "react-dom": "catalog:react19",

@@ -1,5 +1,5 @@
-import { toast } from '@go-tech-frontend/ui';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -12,6 +12,7 @@ export type Feature = {
     createdAt: string;
     id: string;
     isOfficial?: boolean;
+    parentId?: string | null;
   }[];
   createdAt: string;
   description: string;
@@ -25,9 +26,27 @@ export type Feature = {
   version?: string;
 };
 
+export const orderCommentsByThread = (comments: Feature['comments']) => {
+  const repliesByParent = new Map<string, Feature['comments']>();
+  const rootComments: Feature['comments'] = [];
+
+  comments.forEach(comment => {
+    if (!comment.parentId) {
+      rootComments.push(comment);
+      return;
+    }
+    const replies = repliesByParent.get(comment.parentId) || [];
+    replies.push(comment);
+    repliesByParent.set(comment.parentId, replies);
+  });
+
+  return rootComments.flatMap(comment => [comment, ...(repliesByParent.get(comment.id) || [])]);
+};
+
 export const useFeedbackFeatures = (_categoryName?: string, initialFeatures: Feature[] = []) => {
   const { isLoggedIn } = useAuth();
   const commentFailed = useBatchTranslation('留言失敗');
+  const contentRejected = useBatchTranslation('留言未通過安全審核，請修改後重試');
   const loginRequired = useBatchTranslation('請先登入後再操作');
   const operationFailed = useBatchTranslation('操作失敗');
   const [features, setFeatures] = useState<Feature[]>(initialFeatures);
@@ -81,8 +100,23 @@ export const useFeedbackFeatures = (_categoryName?: string, initialFeatures: Fea
         headers: { 'Content-Type': 'application/json' },
         method: 'POST'
       });
-      const result = (await response.json()) as { data?: Feature['comments'][number]; message?: string };
-      if (!response.ok || !result.data) throw new Error(result.message || commentFailed);
+      const result = (await response.json()) as {
+        code?:
+          | 'BOT_VERIFICATION_FAILED'
+          | 'BOT_VERIFICATION_UNAVAILABLE'
+          | 'CONTENT_MODERATION_FAILED'
+          | 'CONTENT_REJECTED';
+        data?: Feature['comments'][number];
+        message?: string;
+      };
+      if (result.code === 'CONTENT_REJECTED') {
+        toast.error(result.message || contentRejected);
+        return false;
+      }
+      if (!response.ok || !result.data) {
+        toast.error(result.message || commentFailed);
+        return false;
+      }
 
       const comment = result.data;
       setFeatures(prev =>
@@ -106,8 +140,6 @@ export const formatDate = (iso: string, serverLanguage = 'zh-hk') => {
     typeof document === 'undefined'
       ? serverLanguage
       : document.cookie.match(/(?:^|;\s*)GO_TECH_LANGUAGE=([^;]*)/)?.[1] || serverLanguage;
-
-  console.log(language);
 
   const locale = {
     'zh-cn': 'zh-CN',

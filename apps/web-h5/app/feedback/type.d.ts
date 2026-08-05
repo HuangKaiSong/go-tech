@@ -6,6 +6,7 @@ interface Comments {
   createdAt: string;
   id: string;
   isOfficial?: boolean;
+  parentId?: string | null;
 }
 
 interface Feature {

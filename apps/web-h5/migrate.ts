@@ -4,8 +4,8 @@ import { migrate } from 'drizzle-orm/mysql2/migrator';
 import mysql from 'mysql2/promise';
 
 // 按 Next.js 优先级加载 .env 文件
-dotenv.config({ path: '.env.local' });
-dotenv.config({ path: '.env' });
+dotenv.config({ path: '.env.local', quiet: true });
+dotenv.config({ path: '.env', quiet: true });
 
 const run = async () => {
   const databaseUrl = process.env.DATABASE_URL;

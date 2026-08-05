@@ -1,9 +1,10 @@
 'use client';
 
-import { Button, Input, toast } from '@go-tech-frontend/ui';
-import { ArrowLeft, ArrowUp, CheckCircle2, ChevronDown, MessageCircle, Plus, Search } from 'lucide-react';
+import { Button, Input } from '@go-tech-frontend/ui';
+import { ArrowLeft, ArrowUp, CheckCircle2, ChevronDown, LoaderCircle, MessageCircle, Plus, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import { DynamicText } from '@/app/components/DynamicI18nText.client';
 import { SmallOfficialAvatar, SmallUserAvatar } from '@/app/components/feedback/Avatars';
 import NewPostDialog from '@/app/components/feedback/NewPostDialog';
@@ -13,7 +14,7 @@ import Header from '@/app/components/Header';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 import { useAuth } from '@/contexts/AuthContext';
 import { SERIF, statusMeta } from '../data';
-import { formatDate, maskName, useFeedbackFeatures } from '../useFeedbackFeatures';
+import { formatDate, maskName, orderCommentsByThread, useFeedbackFeatures } from '../useFeedbackFeatures';
 import type { Feature } from '../useFeedbackFeatures';
 import type { CategoryForPage } from './page';
 
@@ -36,6 +37,8 @@ const CategoryContent = ({ activeCat, categoriesForPage, featuresFromDB, languag
   const [innerSearch, setInnerSearch] = useState('');
   const [commentDraft, setCommentDraft] = useState<Record<string, string>>({});
   const [openReply, setOpenReply] = useState<string | null>(null);
+  const reviewingCommentRef = useRef(false);
+  const [reviewingCommentId, setReviewingCommentId] = useState<string | null>(null);
   const [tab, setTab] = useState<'active' | 'history'>('active');
   const [turnstileToken, setTurnstileToken] = useState('');
   const [turnstileResetKey, setTurnstileResetKey] = useState(0);
@@ -103,6 +106,7 @@ const CategoryContent = ({ activeCat, categoriesForPage, featuresFromDB, languag
   }, [shippedFromDB, activeCat, activeSub, innerSearch]);
 
   const sendComment = async (id: string) => {
+    if (reviewingCommentRef.current) return;
     if (!requireLogin()) return;
     const text = (commentDraft[id] || '').trim();
     if (!text) return;
@@ -110,11 +114,21 @@ const CategoryContent = ({ activeCat, categoriesForPage, featuresFromDB, languag
       toast.warning(verificationRequired);
       return;
     }
-    if (await addComment(id, text, turnstileToken)) {
-      setCommentDraft(d => ({ ...d, [id]: '' }));
+    reviewingCommentRef.current = true;
+    setReviewingCommentId(id);
+    try {
+      const commentAdded = await addComment(id, text, turnstileToken);
+      setTurnstileToken('');
+      if (commentAdded) {
+        setCommentDraft(d => ({ ...d, [id]: '' }));
+        setOpenReply(null);
+        return;
+      }
+      setTurnstileResetKey(key => key + 1);
+    } finally {
+      reviewingCommentRef.current = false;
+      setReviewingCommentId(null);
     }
-    setTurnstileToken('');
-    setTurnstileResetKey(key => key + 1);
   };
 
   /** 传给 NewPostDialog 的分类数据 */
@@ -193,8 +207,11 @@ const CategoryContent = ({ activeCat, categoriesForPage, featuresFromDB, languag
 
           {f.comments.length > 0 && (
             <div className="mt-5 space-y-4">
-              {f.comments.map(c => (
-                <div key={c.id} className="flex gap-3 items-start">
+              {orderCommentsByThread(f.comments).map(c => (
+                <div
+                  key={c.id}
+                  className={`flex gap-3 items-start ${c.parentId ? 'ml-8 border-l border-stone-200 pl-4 md:ml-12' : ''}`}
+                >
                   {c.isOfficial ? <SmallOfficialAvatar /> : <SmallUserAvatar />}
                   <div
                     className={`flex-1 min-w-0 border rounded-md px-4 py-3 ${
@@ -227,6 +244,7 @@ const CategoryContent = ({ activeCat, categoriesForPage, featuresFromDB, languag
             <div className="mt-4 space-y-3">
               <div className="flex gap-2">
                 <Input
+                  disabled={reviewingCommentId === f.id}
                   placeholder={`${replyText} ${maskName(f.author)}...`}
                   value={commentDraft[f.id] || ''}
                   onChange={e => setCommentDraft(d => ({ ...d, [f.id]: e.target.value }))}
@@ -234,11 +252,19 @@ const CategoryContent = ({ activeCat, categoriesForPage, featuresFromDB, languag
                   className="bg-white border-stone-200"
                 />
                 <Button
-                  disabled={!turnstileToken}
+                  aria-live="polite"
+                  disabled={!turnstileToken || reviewingCommentId === f.id}
                   onClick={() => sendComment(f.id)}
                   className="bg-stone-900 hover:bg-stone-800 text-white"
                 >
-                  <DynamicText text="發送" />
+                  {reviewingCommentId === f.id ? (
+                    <>
+                      <LoaderCircle className="h-4 w-4 animate-spin" />
+                      <DynamicText text="正在自動審核…" />
+                    </>
+                  ) : (
+                    <DynamicText text="發送" />
+                  )}
                 </Button>
               </div>
               <Turnstile action="feedback_comment" onVerify={setTurnstileToken} resetKey={turnstileResetKey} />

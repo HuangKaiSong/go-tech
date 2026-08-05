@@ -1,11 +1,22 @@
 'use client';
 
-import { Button, Input, Skeleton, toast } from '@go-tech-frontend/ui';
+import { Button, Input, Skeleton } from '@go-tech-frontend/ui';
 import { useDebounce } from 'ahooks';
-import { ArrowRight, ArrowUp, CheckCircle2, History, MessageCircle, Plus, Search, User } from 'lucide-react';
+import {
+  ArrowRight,
+  ArrowUp,
+  CheckCircle2,
+  History,
+  LoaderCircle,
+  MessageCircle,
+  Plus,
+  Search,
+  User
+} from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import { DynamicText } from '@/app/components/DynamicI18nText.client';
 import { OfficialAvatar, SmallOfficialAvatar, SmallUserAvatar, UserAvatar } from '@/app/components/feedback/Avatars';
 import NewPostDialog from '@/app/components/feedback/NewPostDialog';
@@ -15,7 +26,7 @@ import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 import { useAuth } from '@/contexts/AuthContext';
 import type { FbFeature } from '@/db/scheam';
 import { SERIF, statusMeta } from './data';
-import { formatDate, maskName } from './useFeedbackFeatures';
+import { formatDate, maskName, orderCommentsByThread } from './useFeedbackFeatures';
 import type { Feature } from './useFeedbackFeatures';
 
 /** 服务端传入的原始分类数据 */
@@ -56,6 +67,7 @@ const FeedbackContent = ({ categoriesFromDB, featureCompleted, language }: Props
   const currentUser = user?.nickname ?? '';
   const router = useRouter();
   const commentFailed = useBatchTranslation('留言失敗');
+  const contentRejected = useBatchTranslation('留言未通過安全審核，請修改後重試');
   const loginRequired = useBatchTranslation('請先登入後再操作');
   const operationFailed = useBatchTranslation('操作失敗');
   const replyText = useBatchTranslation('回覆');
@@ -67,6 +79,8 @@ const FeedbackContent = ({ categoriesFromDB, featureCompleted, language }: Props
   const [showHistory, setShowHistory] = useState(false);
   const [commentDraft, setCommentDraft] = useState<Record<string, string>>({});
   const [openReply, setOpenReply] = useState<string | null>(null);
+  const reviewingCommentRef = useRef(false);
+  const [reviewingCommentId, setReviewingCommentId] = useState<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState('');
   const [turnstileResetKey, setTurnstileResetKey] = useState(0);
 
@@ -152,8 +166,23 @@ const FeedbackContent = ({ categoriesFromDB, featureCompleted, language }: Props
         headers: { 'Content-Type': 'application/json' },
         method: 'POST'
       });
-      const result = (await response.json()) as { data?: Feature['comments'][number]; message?: string };
-      if (!response.ok || !result.data) throw new Error(result.message || commentFailed);
+      const result = (await response.json()) as {
+        code?:
+          | 'BOT_VERIFICATION_FAILED'
+          | 'BOT_VERIFICATION_UNAVAILABLE'
+          | 'CONTENT_MODERATION_FAILED'
+          | 'CONTENT_REJECTED';
+        data?: Feature['comments'][number];
+        message?: string;
+      };
+      if (result.code === 'CONTENT_REJECTED') {
+        toast.error(result.message || contentRejected);
+        return false;
+      }
+      if (!response.ok || !result.data) {
+        toast.error(result.message || commentFailed);
+        return false;
+      }
 
       const comment = result.data;
       setSearchResults(prev =>
@@ -185,6 +214,7 @@ const FeedbackContent = ({ categoriesFromDB, featureCompleted, language }: Props
   };
 
   const sendComment = async (id: string) => {
+    if (reviewingCommentRef.current) return;
     if (!requireLogin()) return;
     const text = (commentDraft[id] || '').trim();
     if (!text) return;
@@ -192,11 +222,21 @@ const FeedbackContent = ({ categoriesFromDB, featureCompleted, language }: Props
       toast.warning(verificationRequired);
       return;
     }
-    if (await addComment(id, text, turnstileToken)) {
-      setCommentDraft(d => ({ ...d, [id]: '' }));
+    reviewingCommentRef.current = true;
+    setReviewingCommentId(id);
+    try {
+      const commentAdded = await addComment(id, text, turnstileToken);
+      setTurnstileToken('');
+      if (commentAdded) {
+        setCommentDraft(d => ({ ...d, [id]: '' }));
+        setOpenReply(null);
+        return;
+      }
+      setTurnstileResetKey(key => key + 1);
+    } finally {
+      reviewingCommentRef.current = false;
+      setReviewingCommentId(null);
     }
-    setTurnstileToken('');
-    setTurnstileResetKey(key => key + 1);
   };
 
   const renderPost = (f: Feature) => {
@@ -261,8 +301,8 @@ const FeedbackContent = ({ categoriesFromDB, featureCompleted, language }: Props
           </div>
         </div>
 
-        {f.comments.map(c => (
-          <div key={c.id} className="flex gap-4 items-start ml-12 md:ml-20">
+        {orderCommentsByThread(f.comments).map(c => (
+          <div key={c.id} className={`flex gap-4 items-start ${c.parentId ? 'ml-20 md:ml-28' : 'ml-12 md:ml-20'}`}>
             {c.isOfficial ? <SmallOfficialAvatar /> : <SmallUserAvatar />}
             <div className="flex-1 min-w-0">
               <div
@@ -300,6 +340,7 @@ const FeedbackContent = ({ categoriesFromDB, featureCompleted, language }: Props
             <div className="flex-1 space-y-3">
               <div className="flex gap-2">
                 <Input
+                  disabled={reviewingCommentId === f.id}
                   placeholder={`${replyText} ${maskName(f.author)}...`}
                   value={commentDraft[f.id] || ''}
                   onChange={e => setCommentDraft(d => ({ ...d, [f.id]: e.target.value }))}
@@ -307,11 +348,19 @@ const FeedbackContent = ({ categoriesFromDB, featureCompleted, language }: Props
                   className="bg-white border-stone-200"
                 />
                 <Button
-                  disabled={!turnstileToken}
+                  aria-live="polite"
+                  disabled={!turnstileToken || reviewingCommentId === f.id}
                   onClick={() => sendComment(f.id)}
                   className="bg-stone-900 hover:bg-stone-800 text-white"
                 >
-                  <DynamicText text="發送" />
+                  {reviewingCommentId === f.id ? (
+                    <>
+                      <LoaderCircle className="h-4 w-4 animate-spin" />
+                      <DynamicText text="正在自動審核…" />
+                    </>
+                  ) : (
+                    <DynamicText text="發送" />
+                  )}
                 </Button>
               </div>
               <Turnstile action="feedback_comment" onVerify={setTurnstileToken} resetKey={turnstileResetKey} />

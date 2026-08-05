@@ -5,7 +5,7 @@ import { defineConfig } from 'drizzle-kit';
 // 按 Next.js 优先级顺序加载 .env 文件
 const env = process.env.NODE_ENV || 'development';
 [`.env.${env}.local`, `.env.local`, `.env.${env}`, '.env'].forEach(file => {
-  dotenv.config({ path: path.resolve(process.cwd(), file) });
+  dotenv.config({ path: path.resolve(process.cwd(), file), quiet: true });
 });
 
 export default defineConfig({
