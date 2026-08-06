@@ -18,8 +18,12 @@ interface ChatMessage extends AssistantHistoryMessage {
 
 const quickQuestions = ['找出點讚大於 50 的需求', '按評論數列出前 10 筆需求', '最近有哪些值得優先處理的反饋？'];
 
+function uid(): string {
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
 function createMessage(role: ChatMessage['role'], content: string): ChatMessage {
-  return { id: crypto.randomUUID(), role, content };
+  return { id: uid(), role, content };
 }
 
 export function FeedbackAssistant() {
