@@ -15,6 +15,7 @@ import { Lightbulb, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { getFeedbackCounts } from './api';
 import { statusOptions } from './contrans';
+import { FeedbackAssistant } from './FeedbackAssistant';
 import Posts from './Posts';
 import Trash from './Trash';
 import type { FeedbackStatus, FeedbackView } from './types';
@@ -33,9 +34,12 @@ const FeedbackPage = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <Lightbulb className="w-6 h-6 text-primary" />
-        <h1 className="text-2xl font-bold text-foreground">需求反饋</h1>
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <Lightbulb className="w-6 h-6 text-primary" />
+          <h1 className="text-2xl font-bold text-foreground">需求反饋</h1>
+        </div>
+        <FeedbackAssistant />
       </div>
       <div className="flex items-center gap-4">
         <div className="relative flex-1 max-w-md">

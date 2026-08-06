@@ -1,0 +1,25 @@
+{
+  "name": "aide",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [],
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "scripts": {
+    "chat": "tsx index.js chat",
+    "ingest": "tsx index.js ingest",
+    "start": "tsx index.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@go-tech/feedback-ai": "workspace:*",
+    "dotenv": "^17.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.2",
+    "tsx": "^4.23.8",
+    "typescript": "catalog:core"
+  },
+  "packageManager": "pnpm@10.17.0"
+}

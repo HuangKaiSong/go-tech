@@ -1,13 +1,14 @@
 import path from 'node:path';
+import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 import { type Rewrite } from 'next/dist/lib/load-custom-routes';
-import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
   reactStrictMode: false,
   cleanDistDir: true,
+  transpilePackages: ['@go-tech/feedback-ai'],
   allowedDevOrigins: ['localhost', '192.168.0.168', '192.168.0.202', 'admin.go-techs.com'],
   async rewrites() {
     const proxy: Rewrite[] = [
@@ -52,7 +53,7 @@ const nextConfig: NextConfig = {
   //   serverFunctions: true
   // },
   turbopack: {
-    root: path.join(/*turbopackIgnore: true*/__dirname, '../../')
+    root: path.join(/*turbopackIgnore: true*/ __dirname, '../../')
   }
 };
 

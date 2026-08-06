@@ -1,0 +1,9 @@
+{
+  "extends": "../../internal/tsconfig/node.json",
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "ignoreDeprecations": "6.0",
+    "moduleResolution": "bundler"
+  },
+  "include": ["index.ts"]
+}

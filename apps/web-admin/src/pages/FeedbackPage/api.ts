@@ -10,7 +10,7 @@ import type {
   TrashedComment
 } from './types';
 
-const API_BASE = '/h5-hook/api/feedback/features/admin';
+export const API_BASE = '/h5-hook/api/feedback/features/admin';
 
 interface ApiResponse<T> {
   data?: T;
