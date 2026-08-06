@@ -10,6 +10,8 @@
     "chat": "tsx index.js chat",
     "ingest": "tsx index.js ingest",
     "start": "tsx index.js",
+    "sync": "tsx index.js sync",
+    "sync:watch": "tsx index.js sync --watch",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

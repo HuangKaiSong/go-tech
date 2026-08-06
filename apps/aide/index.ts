@@ -3,11 +3,41 @@ import 'dotenv/config';
 
 import { createInterface } from 'node:readline/promises';
 
-import { type FeedbackChatMessage, ingest, streamFeedbackAnswer } from '@go-tech/feedback-ai';
+import { type FeedbackChatMessage, ingest, processPendingSyncJobs, streamFeedbackAnswer } from '@go-tech/feedback-ai';
 
 function option(name: string, fallback: string) {
   const index = process.argv.indexOf(`--${name}`);
   return index >= 0 && process.argv[index + 1] ? process.argv[index + 1] : fallback;
+}
+
+function positiveIntegerOption(name: string, fallback: number) {
+  const value = Number.parseInt(option(name, String(fallback)), 10);
+  if (!Number.isSafeInteger(value) || value <= 0) throw new Error(`--${name} 必须是正整数`);
+  return value;
+}
+
+function delay(milliseconds: number) {
+  return new Promise(resolve => {
+    setTimeout(resolve, milliseconds);
+  });
+}
+
+async function sync() {
+  const watch = process.argv.includes('--watch');
+  const limit = positiveIntegerOption('limit', 10);
+  const interval = positiveIntegerOption('interval', 5_000);
+
+  let keepRunning = true;
+  while (keepRunning) {
+    // oxlint-disable-next-line no-await-in-loop
+    const result = await processPendingSyncJobs({ limit });
+    if (result.processed > 0) {
+      console.log(`增量同步完成：处理 ${result.processed}，成功 ${result.succeeded}，失败 ${result.failed}`);
+    }
+    keepRunning = watch;
+    // oxlint-disable-next-line no-await-in-loop
+    if (keepRunning) await delay(interval);
+  }
 }
 
 async function chat() {
@@ -70,8 +100,10 @@ const command = process.argv[2] ?? 'chat';
 
 if (command === 'ingest') {
   await ingest();
+} else if (command === 'sync') {
+  await sync();
 } else if (command === 'chat') {
   await chat();
 } else {
-  throw new Error(`未知命令：${command}。可用命令：ingest、chat`);
+  throw new Error(`未知命令：${command}。可用命令：ingest、sync、chat`);
 }

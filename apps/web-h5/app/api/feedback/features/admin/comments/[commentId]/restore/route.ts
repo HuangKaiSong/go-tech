@@ -1,5 +1,6 @@
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import { type NextRequest, NextResponse } from 'next/server';
+import { enqueueFeedbackSync, scheduleFeedbackSync } from '@/app/api/feedback/sync';
 import { db } from '@/db';
 import { fbComment, fbFeature } from '@/db/scheam';
 import { requireFeedbackAdmin } from '../../../auth';
@@ -16,7 +17,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ com
   const result = await db.transaction(async tx => {
     const target = await tx.query.fbComment.findFirst({ where: eq(fbComment.id, commentId) });
     if (!target) return null;
-    if (!target.deletedAt) return { affected: 0, featureId: target.featureId };
+    if (!target.deletedAt) {
+      await enqueueFeedbackSync(tx, target.featureId);
+      return { affected: 0, featureId: target.featureId };
+    }
 
     const cascadeRows = target.isOfficial
       ? []
@@ -38,9 +42,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ com
         .set({ commentCount: sql`${fbFeature.commentCount} + ${restoredVisibleCount}` })
         .where(eq(fbFeature.id, target.featureId));
     }
+    await enqueueFeedbackSync(tx, target.featureId);
     return { affected: ids.length, featureId: target.featureId };
   });
 
   if (!result) return NextResponse.json({ success: false, message: '評論不存在' }, { status: 404 });
+  scheduleFeedbackSync();
   return NextResponse.json({ success: true, data: { id: String(commentId), deleted: false } });
 }

@@ -72,4 +72,28 @@ pnpm dev:h5
 pnpm dev:admin
 ```
 
-DeepSeek、Embedding 和 PostgreSQL 相关环境变量需要配置在 `apps/web-h5/.env.local` 或服务端部署环境中，不能添加 `VITE_*` 或 `NEXT_PUBLIC_*` 前缀。知识库仍是导入时的快照；MySQL 产品反馈变更后，需要重新执行 `pnpm --filter aide ingest`。
+DeepSeek、Embedding 和 PostgreSQL 相关环境变量需要配置在 `apps/web-h5/.env.local` 或服务端部署环境中，不能添加 `VITE_*` 或 `NEXT_PUBLIC_*` 前缀。
+
+## 增量同步
+
+先执行 MySQL migration，创建 `fb_aide_sync_job` Outbox 表：
+
+```bash
+pnpm --filter web-h5 db:migrate
+```
+
+需求、点赞和评论写接口会在业务事务内按 `feature_id` 写入或合并同步任务，并在响应发送后尝试消费。同步采用“先插入新版本切片，再删除旧版本切片”的方式；Embedding 服务失败不会先删除现有知识，失败任务会保留并设置指数退避时间，由后续接口触发或常驻消费者重试。
+
+如需手动消费积压任务，可以执行：
+
+```bash
+pnpm --filter aide sync
+```
+
+常驻消费（适合独立服务器或开发环境）：
+
+```bash
+pnpm --filter aide sync:watch
+```
+
+`--limit` 控制每批数量，`--interval` 控制 watch 模式轮询毫秒数。全量 `ingest` 仍保留用于首次初始化和异常修复。

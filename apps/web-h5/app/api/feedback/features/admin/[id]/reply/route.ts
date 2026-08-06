@@ -1,5 +1,6 @@
 import { and, desc, eq, isNull, sql } from 'drizzle-orm';
 import { type NextRequest, NextResponse } from 'next/server';
+import { enqueueFeedbackSync, scheduleFeedbackSync } from '@/app/api/feedback/sync';
 import { db } from '@/db';
 import { fbComment, fbFeature } from '@/db/scheam';
 import { requireFeedbackAdmin } from '../../auth';
@@ -89,6 +90,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       createdAt = new Date();
     }
 
+    await enqueueFeedbackSync(tx, featureId);
     return { id, createdAt };
   });
 
@@ -96,6 +98,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const message = reply.error === 'feature' ? '需求不存在或已移除' : '被回覆的評論不存在或已移除';
     return NextResponse.json({ success: false, message }, { status: 404 });
   }
+  scheduleFeedbackSync();
   return NextResponse.json({
     success: true,
     data: {

@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
+import type { Document } from '@langchain/core/documents';
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
 
 import { getRagConfig } from './config';
@@ -8,24 +9,32 @@ import { createVectorStores } from './vector-store';
 
 const MYSQL_SOURCE = 'mysql_feature';
 
-export async function ingest() {
+export async function splitFeedbackDocuments(documents: Document[]) {
   const ragConfig = getRagConfig();
-  const documents = await loadDocumentsFromMySQL();
   const splitter = new RecursiveCharacterTextSplitter({
     chunkSize: ragConfig.chunkSize,
     chunkOverlap: ragConfig.chunkOverlap,
     separators: ['\n\n', '\n', '。', '！', '？', ';', '；', ' ', '']
   });
   const chunks = await splitter.splitDocuments(documents);
+  const syncVersion = randomUUID();
 
   for (const [index, chunk] of chunks.entries()) {
     chunk.metadata = {
       ...chunk.metadata,
       source: MYSQL_SOURCE,
       chunk_index: index,
-      ingested_at: new Date().toISOString()
+      ingested_at: new Date().toISOString(),
+      sync_version: syncVersion
     };
   }
+
+  return { chunks, syncVersion };
+}
+
+export async function ingest() {
+  const documents = await loadDocumentsFromMySQL();
+  const { chunks } = await splitFeedbackDocuments(documents);
 
   const stores = await createVectorStores();
 

@@ -1,5 +1,6 @@
 import { and, eq, isNull, sql } from 'drizzle-orm';
 import { type NextRequest, NextResponse } from 'next/server';
+import { enqueueFeedbackSync, scheduleFeedbackSync } from '@/app/api/feedback/sync';
 import { db } from '@/db';
 import { fbComment, fbFeature } from '@/db/scheam';
 import { getFeedbackUser } from '../../../auth';
@@ -64,6 +65,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       .update(fbFeature)
       .set({ commentCount: sql`${fbFeature.commentCount} + 1` })
       .where(eq(fbFeature.id, featureId));
+    await enqueueFeedbackSync(tx, featureId);
 
     return {
       author: user.custName,
@@ -79,5 +81,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     return NextResponse.json({ success: false, message: '需求不存在' }, { status: 404 });
   }
 
+  scheduleFeedbackSync();
   return NextResponse.json({ success: true, data: comment });
 }

@@ -1,5 +1,6 @@
 import { and, asc, desc, eq, isNull, like, or } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
+import { enqueueFeedbackSync, scheduleFeedbackSync } from '@/app/api/feedback/sync';
 import { db } from '@/db';
 import { fbCategory, fbComment, fbFeature, fbSubCategory, fbVote } from '@/db/scheam';
 import { getFeedbackUser } from '../auth';
@@ -155,6 +156,7 @@ export async function POST(req: NextRequest) {
     });
     const featureId = insertResult.insertId;
     await tx.insert(fbVote).values({ featureId, userId: user.id });
+    await enqueueFeedbackSync(tx, featureId);
 
     return {
       author: user.custName,
@@ -171,5 +173,6 @@ export async function POST(req: NextRequest) {
     };
   });
 
+  scheduleFeedbackSync();
   return NextResponse.json({ success: true, data: feature }, { status: 201 });
 }

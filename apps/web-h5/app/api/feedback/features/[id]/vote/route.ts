@@ -1,5 +1,6 @@
 import { and, eq, isNull, sql } from 'drizzle-orm';
 import { type NextRequest, NextResponse } from 'next/server';
+import { enqueueFeedbackSync, scheduleFeedbackSync } from '@/app/api/feedback/sync';
 import { db } from '@/db';
 import { fbFeature, fbVote } from '@/db/scheam';
 import { getFeedbackUser } from '../../../auth';
@@ -45,6 +46,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
       where: eq(fbFeature.id, featureId),
       columns: { likeCount: true }
     });
+    await enqueueFeedbackSync(tx, featureId);
     return { liked: !existingVote, likes: updated?.likeCount ?? 0, userName: user.custName };
   });
 
@@ -52,5 +54,6 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
     return NextResponse.json({ success: false, message: '需求不存在' }, { status: 404 });
   }
 
+  scheduleFeedbackSync();
   return NextResponse.json({ success: true, data: result });
 }

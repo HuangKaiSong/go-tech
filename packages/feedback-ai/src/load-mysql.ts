@@ -17,12 +17,14 @@ interface FeatureRow extends RowDataPacket {
   version: string | null;
 }
 
-export async function loadDocumentsFromMySQL() {
+async function loadDocuments(featureId?: number) {
   const connection = await mysql.createConnection(getMySQLConfig().connectionString);
 
   try {
     // 获取 fb_category、fb_comment、fb_feature、fb_sub_category、fb_vote。
-    const [rows] = await connection.execute<FeatureRow[]>(`
+    const featureCondition = featureId === undefined ? '' : 'AND f.id = ?';
+    const [rows] = await connection.execute<FeatureRow[]>(
+      `
       SELECT
         f.id,
         f.title,
@@ -51,9 +53,12 @@ export async function loadDocumentsFromMySQL() {
         AND com.hidden_at IS NULL
         AND com.deleted_at IS NULL
       WHERE f.deleted_at IS NULL
+        ${featureCondition}
       GROUP BY f.id
       ORDER BY f.created_at DESC
-    `);
+    `,
+      featureId === undefined ? [] : [featureId]
+    );
 
     const statusMap: Record<string, string> = {
       pending: '待評估',
@@ -91,9 +96,19 @@ export async function loadDocumentsFromMySQL() {
       });
     });
 
-    console.log(`从 MySQL 读取 ${docs.length} 条记录`);
     return docs;
   } finally {
     await connection.end();
   }
+}
+
+export async function loadDocumentsFromMySQL() {
+  const documents = await loadDocuments();
+  console.log(`从 MySQL 读取 ${documents.length} 条记录`);
+  return documents;
+}
+
+export async function loadDocumentFromMySQL(featureId: number) {
+  const documents = await loadDocuments(featureId);
+  return documents[0];
 }

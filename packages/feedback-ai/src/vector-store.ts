@@ -11,6 +11,7 @@ const COLLECTION_ID_FOREIGN_KEY = 'aide_vectors_collection_id_fkey';
 
 export interface VectorStores {
   close: () => Promise<void>;
+  deleteKnowledgeByFeatureId: (featureId: number, exceptSyncVersion?: string) => Promise<number>;
   findKnowledgeByComments: (minimum: number, inclusive?: boolean, limit?: number) => Promise<Document[]>;
   findKnowledgeByLikes: (minimum: number, inclusive?: boolean, limit?: number) => Promise<Document[]>;
   knowledge: PGVectorStore;
@@ -171,10 +172,25 @@ export async function createVectorStores(): Promise<VectorStores> {
           })
       );
     };
+    const deleteKnowledgeByFeatureId = async (featureId: number, exceptSyncVersion?: string) => {
+      const result = await pool.query(
+        `
+          DELETE FROM ${TABLE_NAME} vectors
+          USING ${COLLECTION_TABLE_NAME} collections
+          WHERE collections.uuid = vectors.collection_id
+            AND collections.name = $1
+            AND vectors.metadata->>'feature_id' = $2
+            AND ($3::text IS NULL OR vectors.metadata->>'sync_version' IS DISTINCT FROM $3);
+        `,
+        ['aide_knowledge', String(featureId), exceptSyncVersion ?? null]
+      );
+      return result.rowCount ?? 0;
+    };
 
     return {
       knowledge,
       longTermMemory,
+      deleteKnowledgeByFeatureId,
       findKnowledgeByComments,
       findKnowledgeByLikes,
       close

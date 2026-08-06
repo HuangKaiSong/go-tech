@@ -15,6 +15,13 @@
       "when": 1785839292079,
       "tag": "0001_quick_sandman",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1786001734668,
+      "tag": "0002_familiar_dark_beast",
+      "breakpoints": true
     }
   ]
 }
