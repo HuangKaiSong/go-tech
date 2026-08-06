@@ -11,6 +11,7 @@ import { Bot, Eraser, Send, Sparkles, Square } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { streamAssistantAnswer } from './assistant-api';
 import type { AssistantHistoryMessage } from './assistant-api';
+import { AssistantMarkdown } from './AssistantMarkdown';
 
 interface ChatMessage extends AssistantHistoryMessage {
   id: string;
@@ -24,6 +25,31 @@ function uid(): string {
 
 function createMessage(role: ChatMessage['role'], content: string): ChatMessage {
   return { id: uid(), role, content };
+}
+
+function LoadingLine({ className }: { className: string }) {
+  return (
+    <span className={`relative block h-3.5 overflow-hidden rounded-full bg-muted ${className}`}>
+      <span className="absolute inset-0 -translate-x-[120%] animate-[feedback-assistant-shimmer_1.35s_ease-in-out_infinite] bg-linear-to-r from-transparent via-primary/20 to-transparent motion-reduce:animate-none" />
+    </span>
+  );
+}
+
+function MessageLoading() {
+  return (
+    <span className="block w-full max-w-md space-y-2.5 py-1" role="status" aria-live="polite">
+      <span className="sr-only">正在查詢知識庫...</span>
+      <LoadingLine className="w-full" />
+      <LoadingLine className="w-[86%]" />
+      <LoadingLine className="w-[62%]" />
+    </span>
+  );
+}
+
+function MessageContent({ message }: { message: ChatMessage }) {
+  if (!message.content) return <MessageLoading />;
+  if (message.role === 'assistant') return <AssistantMarkdown content={message.content} />;
+  return message.content;
 }
 
 export function FeedbackAssistant() {
@@ -120,16 +146,13 @@ export function FeedbackAssistant() {
             {messages.map(message => (
               <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div
-                  className={`max-w-[88%] whitespace-pre-wrap break-words rounded-lg px-4 py-3 text-sm ${
-                    message.role === 'user' ? 'bg-primary text-primary-foreground' : 'border bg-background'
+                  className={`break-words rounded-xl px-4 py-3 text-sm shadow-xs ${
+                    message.role === 'user'
+                      ? 'max-w-[82%] whitespace-pre-wrap bg-primary text-primary-foreground'
+                      : 'w-full border bg-background text-foreground'
                   }`}
                 >
-                  {message.content || (
-                    <span className="inline-flex items-center gap-2 text-muted-foreground">
-                      <span className="size-2 animate-pulse rounded-full bg-primary" />
-                      正在查詢知識庫...
-                    </span>
-                  )}
+                  <MessageContent message={message} />
                 </div>
               </div>
             ))}

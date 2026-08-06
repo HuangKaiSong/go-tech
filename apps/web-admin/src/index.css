@@ -1,5 +1,15 @@
 @import '@go-tech-frontend/styles/src/index.css';
 
+@keyframes feedback-assistant-shimmer {
+  0% {
+    transform: translateX(-120%);
+  }
+
+  100% {
+    transform: translateX(120%);
+  }
+}
+
 :root {
   --background: 0 0% 98%;
   --foreground: 220 15% 20%;
