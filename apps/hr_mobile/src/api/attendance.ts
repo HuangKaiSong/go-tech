@@ -1,5 +1,5 @@
-import request from "@/lib/request";
-import type { ApiResult } from "@/api/auth";
+import type { ApiResult } from '@/api/auth';
+import request from '@/lib/request';
 
 /** 今日打卡状态（对齐后端 ClockTodayVO） */
 export interface ClockToday {
@@ -27,19 +27,37 @@ export interface ClockToday {
 
 /** 打卡入参（经纬度可空） */
 export interface ClockParams {
+  accuracy?: number;
   lat?: number;
   lng?: number;
+  /** 拍照打卡照片(base64 dataURL)，后端上传MinIO后存记录；预检不需要 */
+  photo?: string;
   remark?: string;
 }
 
 /** 查询今日打卡状态 */
 export function getTodayClock() {
-  return request.get<any, ApiResult<ClockToday>>("attendance/clock/today");
+  return request.get<any, ApiResult<ClockToday>>('attendance/clock/today');
 }
 
 /** 打卡（自动判定上班/下班） */
 export function punchClock(data: ClockParams) {
-  return request.post<any, ApiResult<ClockToday>>("attendance/clock/punch", data);
+  return request.post<any, ApiResult<ClockToday>>('attendance/clock/punch', data);
+}
+
+/** 打卡范围预检结果 */
+export type ClockRangeStatus = 'in_range' | 'no_gps' | 'no_location' | 'out_of_range' | 'remote';
+export interface ClockPrecheck {
+  canClock: boolean;
+  locationName?: string;
+  message?: string;
+  remote: boolean;
+  status: ClockRangeStatus;
+}
+
+/** 打卡前范围预检（不落库，供按钮变色与远端打卡确认） */
+export function precheckClock(data: ClockParams) {
+  return request.post<any, ApiResult<ClockPrecheck>>('attendance/clock/precheck', data);
 }
 
 /** 考勤历史记录（对齐后端 AttendanceRecordVO，员工自身） */
@@ -57,5 +75,5 @@ export interface ClockHistoryItem {
 
 /** 我的考勤历史（某年，可选某月；不传默认当年全部） */
 export function getClockHistory(params?: { month?: number; year?: number }) {
-  return request.get<any, ApiResult<ClockHistoryItem[]>>("attendance/clock/history", { params });
+  return request.get<any, ApiResult<ClockHistoryItem[]>>('attendance/clock/history', { params });
 }
