@@ -13,15 +13,16 @@ function formatSearchResults(documents: Awaited<ReturnType<VectorStores['knowled
   return documents
     .map(
       (document, index) =>
-        `[${index + 1}] feature_id=${String(document.metadata.feature_id ?? 'unknown')}, like_count=${String(document.metadata.like_count ?? 'unknown')}, comment_count=${String(document.metadata.comment_count ?? 'unknown')}\n${document.pageContent}`
+        `[${index + 1}] feature_id=${String(document.metadata.feature_id ?? 'unknown')}, like_count=${String(document.metadata.like_count ?? 'unknown')}, comment_count=${String(document.metadata.comment_count ?? 'unknown')}, is_deleted=${String(document.metadata.is_deleted ?? false)}, deleted_comment_count=${String(document.metadata.deleted_comment_count ?? 0)}\n${document.pageContent}`
     )
     .join('\n\n');
 }
 
 export function createAideAgent(userId: string, stores: VectorStores, longTermMemory: LongTermMemory) {
   const searchKnowledge = tool(
-    async ({ limit, query }) => {
-      const documents = await stores.knowledge.similaritySearch(query, limit);
+    async ({ limit, query, scope }) => {
+      const filter = scope === 'all' ? undefined : { is_deleted: scope === 'trash' };
+      const documents = await stores.knowledge.similaritySearch(query, limit, filter);
       return formatSearchResults(documents);
     },
     {
@@ -29,7 +30,22 @@ export function createAideAgent(userId: string, stores: VectorStores, longTermMe
       description: '在产品反馈知识库中进行语义检索。当前上下文不足以回答时使用。',
       schema: z.object({
         query: z.string().min(1).describe('检索问题或关键词'),
-        limit: z.number().int().min(1).max(10).default(4).describe('最多返回的结果数')
+        limit: z.number().int().min(1).max(10).default(4).describe('最多返回的结果数'),
+        scope: z.enum(['active', 'trash', 'all']).default('active').describe('active 为有效需求，trash 为被删除需求')
+      })
+    }
+  );
+  const filterTrash = tool(
+    async ({ limit }) => {
+      const result = await stores.findTrashKnowledge(limit);
+      const summary = `回收站共有 ${result.total} 条数据：被删除需求 ${result.deletedFeatures} 条、被删除评论 ${result.deletedComments} 条。`;
+      return result.documents.length > 0 ? `${summary}\n\n${formatSearchResults(result.documents)}` : summary;
+    },
+    {
+      name: 'filter_trash',
+      description: '精确查询回收站（软删除）数据，并分别统计被删除需求和被删除评论。涉及回收站或删除状态时必须使用。',
+      schema: z.object({
+        limit: z.number().int().min(1).max(100).default(100).describe('最多返回的关联需求数')
       })
     }
   );
@@ -94,7 +110,7 @@ export function createAideAgent(userId: string, stores: VectorStores, longTermMe
 
   return createDeepAgent({
     model: createChatModel(),
-    tools: [searchKnowledge, filterByLikes, filterByComments, recallMemory, saveMemory],
+    tools: [searchKnowledge, filterByLikes, filterByComments, filterTrash, recallMemory, saveMemory],
     systemPrompt: SYSTEM_PROMPT
   });
 }

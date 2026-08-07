@@ -14,8 +14,16 @@ export interface VectorStores {
   deleteKnowledgeByFeatureId: (featureId: number, exceptSyncVersion?: string) => Promise<number>;
   findKnowledgeByComments: (minimum: number, inclusive?: boolean, limit?: number) => Promise<Document[]>;
   findKnowledgeByLikes: (minimum: number, inclusive?: boolean, limit?: number) => Promise<Document[]>;
+  findTrashKnowledge: (limit?: number) => Promise<TrashKnowledgeResult>;
   knowledge: PGVectorStore;
   longTermMemory: PGVectorStore;
+}
+
+export interface TrashKnowledgeResult {
+  deletedComments: number;
+  deletedFeatures: number;
+  documents: Document[];
+  total: number;
 }
 
 async function ensureSchema(pool: Pool) {
@@ -114,6 +122,7 @@ export async function createVectorStores(): Promise<VectorStores> {
             INNER JOIN ${COLLECTION_TABLE_NAME} collections
               ON collections.uuid = vectors.collection_id
             WHERE collections.name = $1
+              AND COALESCE((vectors.metadata->>'is_deleted')::boolean, false) = false
               AND vectors.metadata->>'like_count' ~ '^[0-9]+$'
               AND (vectors.metadata->>'like_count')::integer ${comparator} $2
             ORDER BY
@@ -150,6 +159,7 @@ export async function createVectorStores(): Promise<VectorStores> {
             INNER JOIN ${COLLECTION_TABLE_NAME} collections
               ON collections.uuid = vectors.collection_id
             WHERE collections.name = $1
+              AND COALESCE((vectors.metadata->>'is_deleted')::boolean, false) = false
               AND vectors.metadata->>'comment_count' ~ '^[0-9]+$'
               AND (vectors.metadata->>'comment_count')::integer ${comparator} $2
             ORDER BY
@@ -172,6 +182,66 @@ export async function createVectorStores(): Promise<VectorStores> {
           })
       );
     };
+    const findTrashKnowledge = async (limit = 100): Promise<TrashKnowledgeResult> => {
+      const safeLimit = Math.min(Math.max(Math.trunc(limit), 1), 100);
+      const result = await pool.query<{
+        deleted_comments: number | string;
+        deleted_features: number | string;
+        metadata: Record<string, unknown>;
+        text: string;
+      }>(
+        `
+          WITH features AS (
+            SELECT DISTINCT ON (vectors.metadata->>'feature_id')
+              vectors.text,
+              vectors.metadata
+            FROM ${TABLE_NAME} vectors
+            INNER JOIN ${COLLECTION_TABLE_NAME} collections
+              ON collections.uuid = vectors.collection_id
+            WHERE collections.name = $1
+            ORDER BY
+              vectors.metadata->>'feature_id',
+              COALESCE((vectors.metadata->>'chunk_index')::integer, 0)
+          ), trash AS (
+            SELECT
+              text,
+              metadata,
+              CASE WHEN COALESCE((metadata->>'is_deleted')::boolean, false) THEN 1 ELSE 0 END AS deleted_feature,
+              CASE
+                WHEN metadata->>'deleted_comment_count' ~ '^[0-9]+$'
+                  THEN (metadata->>'deleted_comment_count')::integer
+                ELSE 0
+              END AS deleted_comments
+            FROM features
+          )
+          SELECT
+            text,
+            metadata,
+            SUM(deleted_feature) OVER () AS deleted_features,
+            SUM(deleted_comments) OVER () AS deleted_comments
+          FROM trash
+          WHERE deleted_feature = 1 OR deleted_comments > 0
+          ORDER BY metadata->>'deleted_at' DESC NULLS LAST, metadata->>'feature_id'
+          LIMIT $2;
+        `,
+        ['aide_knowledge', safeLimit]
+      );
+      const deletedFeatures = Number(result.rows[0]?.deleted_features ?? 0);
+      const deletedComments = Number(result.rows[0]?.deleted_comments ?? 0);
+
+      return {
+        deletedComments,
+        deletedFeatures,
+        documents: result.rows.map(
+          row =>
+            new Document({
+              pageContent: row.text,
+              metadata: row.metadata
+            })
+        ),
+        total: deletedFeatures + deletedComments
+      };
+    };
     const deleteKnowledgeByFeatureId = async (featureId: number, exceptSyncVersion?: string) => {
       const result = await pool.query(
         `
@@ -193,6 +263,7 @@ export async function createVectorStores(): Promise<VectorStores> {
       deleteKnowledgeByFeatureId,
       findKnowledgeByComments,
       findKnowledgeByLikes,
+      findTrashKnowledge,
       close
     };
   } catch (error) {

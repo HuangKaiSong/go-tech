@@ -44,6 +44,10 @@ function extractCommentFilter(question: string) {
   };
 }
 
+function asksAboutTrash(question: string) {
+  return /回收站|垃圾桶|已刪除|已删除|被刪除|被删除|軟刪除|软删除|deleted|trash|recycle\s*bin/i.test(question);
+}
+
 // oxlint-disable-next-line max-params
 export async function buildContext(
   question: string,
@@ -54,11 +58,17 @@ export async function buildContext(
   const config = getRagConfig();
   const likeFilter = extractLikeFilter(question);
   const commentFilter = extractCommentFilter(question);
-  const [knowledge, memories, filteredByLikes, filteredByComments] = await Promise.all([
-    stores.knowledge.similaritySearch(question, config.knowledgeLimit),
+  const trashIntent = asksAboutTrash(question);
+  const [knowledge, memories, filteredByLikes, filteredByComments, trash] = await Promise.all([
+    trashIntent
+      ? Promise.resolve([])
+      : stores.knowledge.similaritySearch(question, config.knowledgeLimit, { is_deleted: false }),
     longTermMemory.recall(userId, question, config.memoryLimit),
     likeFilter ? stores.findKnowledgeByLikes(likeFilter.minimum, likeFilter.inclusive) : Promise.resolve([]),
-    commentFilter ? stores.findKnowledgeByComments(commentFilter.minimum, commentFilter.inclusive) : Promise.resolve([])
+    commentFilter
+      ? stores.findKnowledgeByComments(commentFilter.minimum, commentFilter.inclusive)
+      : Promise.resolve([]),
+    trashIntent ? stores.findTrashKnowledge() : Promise.resolve(undefined)
   ]);
 
   return [
@@ -73,6 +83,12 @@ export async function buildContext(
       ? formatDocuments(
           `按评论数精确过滤结果（comment_count ${commentFilter.inclusive ? '>=' : '>'} ${commentFilter.minimum}）`,
           filteredByComments
+        )
+      : '',
+    trash
+      ? formatDocuments(
+          `回收站精确结果（共 ${trash.total} 条：被删除需求 ${trash.deletedFeatures} 条、被删除评论 ${trash.deletedComments} 条）`,
+          trash.documents
         )
       : '',
     formatDocuments('与当前用户相关的长期记忆', memories)
