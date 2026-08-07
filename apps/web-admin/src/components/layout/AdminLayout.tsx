@@ -1,5 +1,5 @@
 import { useLayoutEffect } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/use-auth';
 import AdminHeader from './AdminHeader';
@@ -7,6 +7,7 @@ import AdminSidebar from './AdminSidebar';
 
 const AdminLayout = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isAuthenticated, isExpired, token } = useAuth();
   const originFetch = window.fetch;
 

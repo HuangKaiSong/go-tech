@@ -29,6 +29,8 @@ const animateType: readonly WeightedOption<AnimateType>[] = [
   }
 ];
 
+const effectType = weightedRandom(animateType);
+
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -38,7 +40,6 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const threeDom = useRef<HTMLCanvasElement>(null);
-  const effectType = weightedRandom(animateType);
   // const [effectType, setEffectType] = useState<AnimateType>(() => weightedRandom(animateType));
 
   // 获取来源页面路径
@@ -49,7 +50,7 @@ const Login = () => {
       if (!account || !password) {
         throw new Error('請填寫所有欄位');
       }
-      const response = await fetch(`${import.meta.env.VITE_PROXY_PREFIX}/go-tech/platform/admin/login`, {
+      const response = await fetch(`${import.meta.env.VITE_PROXY_PREFIX}/go-tech/platform/platformAdmin/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -66,9 +67,10 @@ const Login = () => {
     },
     onSuccess: result => {
       if (result && result.code === 200) {
+        setToken(result.data.token);
         setIsLoading(false);
 
-        setToken(result.data.token);
+        console.log(from);
 
         navigate(from, { replace: true });
       } else {
@@ -83,6 +85,12 @@ const Login = () => {
   });
 
   useKeyPress(['Enter'], () => {
+    if (isLoading || loginMutation.isPending) {
+      return;
+    }
+
+    // 如果按键被一直按住，event.repeat返回值为true
+
     loginMutation.mutate();
   });
 
