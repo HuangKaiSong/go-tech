@@ -49,7 +49,7 @@ const Dashboard = () => {
     queryFn: async () => (await getTodayClock()).data,
   });
   let workHours = "--";
-  if (today && today.hoursWorked !== null) {
+  if (typeof today?.hoursWorked === "number") {
     workHours = `${today.hoursWorked} 小時`;
   } else if (today?.clockIn && !today?.clockOut) {
     workHours = "進行中";
