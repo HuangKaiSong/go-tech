@@ -1,7 +1,18 @@
-import { Button, Checkbox, Input, Switch, toast } from '@go-tech-frontend/ui';
+import {
+  Button,
+  Checkbox,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Switch,
+  toast
+} from '@go-tech-frontend/ui';
 import { useMutation, useQueries } from '@tanstack/react-query';
 import { ArrowLeft, ChevronDown, ChevronRight, Package } from 'lucide-react';
-import { useEffect, useReducer } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import valueAddedServices, { type SpecificValueAddedServicesId } from '@/constants/addedServices';
 import { type PackageItem } from '@/mocks/packages';
@@ -42,6 +53,9 @@ interface PackageState {
   status: number;
 }
 
+type PackageType = 'hr' | 'pms';
+type PackageMutationPayload = PackageItem & { bizCode: PackageType };
+
 const valueAddedServiceNames = new Map(valueAddedServices.map(service => [service.id, service.name]));
 
 const getValueAddedServiceName = (id: SpecificValueAddedServicesId) => valueAddedServiceNames.get(id) ?? id;
@@ -68,7 +82,8 @@ const defaultState: PackageState = {
     accountingSysPrice: undefined,
     custServiceSysPrice: undefined,
     status: 0,
-    packageItemList: []
+    packageItemList: [],
+    bizCode: 'pms'
   },
   status: 0,
   featureGroups: [],
@@ -131,9 +146,10 @@ const PackageEditPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [state, dispatch] = useReducer(packageReducer, defaultState);
+  const [packageType, setPackageType] = useState<PackageType | undefined>(() => (id ? undefined : 'pms'));
 
   const updateMun = useMutation({
-    mutationFn: async (data: PackageItem) => {
+    mutationFn: async (data: PackageMutationPayload) => {
       const response = await fetch(`${import.meta.env.VITE_PROXY_PREFIX}/go-tech/platform/platformPackage/update`, {
         method: 'POST',
         headers: {
@@ -157,7 +173,7 @@ const PackageEditPage = () => {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: PackageItem) => {
+    mutationFn: async (data: PackageMutationPayload) => {
       const response = await fetch(`${import.meta.env.VITE_PROXY_PREFIX}/go-tech/platform/platformPackage/add`, {
         method: 'POST',
         headers: {
@@ -202,9 +218,13 @@ const PackageEditPage = () => {
         }
       },
       {
-        queryKey: ['platform/platformPackage/menuTree'],
+        queryKey: ['platform/platformPackage/menuTree', packageType],
+        enabled: packageType !== undefined,
         queryFn: async () => {
-          const res = await fetch(`${import.meta.env.VITE_PROXY_PREFIX}/go-tech/platform/platformPackage/menuTree`);
+          const params = new URLSearchParams({ bizCode: packageType ?? 'pms' });
+          const res = await fetch(
+            `${import.meta.env.VITE_PROXY_PREFIX}/go-tech/platform/platformPackage/menuTree?${params}`
+          );
           const response = await res.json();
           if (response.code !== 200) {
             return [];
@@ -232,7 +252,8 @@ const PackageEditPage = () => {
     ],
     combine: ([detail, tree]) => {
       // oxlint-disable eslint/no-underscore-dangle
-      const _result: { packageinfo: PackageItem; tree: FeatureGroup[] } = {
+      const _result: { detailLoaded: boolean; packageinfo: PackageItem; tree: FeatureGroup[] } = {
+        detailLoaded: detail.status === 'success',
         packageinfo: defaultState.packageData,
         tree: []
       };
@@ -248,7 +269,16 @@ const PackageEditPage = () => {
 
   useEffect(() => {
     if (!result) return;
-    const { packageinfo, tree } = result;
+    const { detailLoaded, packageinfo, tree } = result;
+
+    if (id && packageType === undefined) {
+      if (!detailLoaded) return;
+      setPackageType(packageinfo.bizCode === 'hr' ? 'hr' : 'pms');
+      return;
+    }
+
+    if (packageType === undefined) return;
+
     if (packageinfo && tree) {
       dispatch({
         type: 'SET_PACKAGE_DATA',
@@ -322,7 +352,7 @@ const PackageEditPage = () => {
         payload: menuTree
       });
     }
-  }, [result]);
+  }, [id, packageType, result]);
 
   const toggleGroup = (groupId: string) => {
     const featureGroup = state.featureGroups.map(g => (g.id === groupId ? { ...g, expanded: !g.expanded } : g));
@@ -421,7 +451,10 @@ const PackageEditPage = () => {
           </div>
           <Button
             loading={updateMun.isPending}
+            disabled={packageType === undefined}
             onClick={() => {
+              if (packageType === undefined) return;
+
               const packageItemListMap = new Map<string, { level: number; menuId: string; menuTitle: string }>();
               const addMenu = (menuId: string, menuTitle: string, level: number) => {
                 packageItemListMap.set(menuId, { menuId, menuTitle, level });
@@ -448,11 +481,12 @@ const PackageEditPage = () => {
               const packageItemList = Array.from(packageItemListMap.values());
               console.log(packageItemList);
 
-              const data: PackageItem = {
+              const data: PackageMutationPayload = {
                 ...state.packageData,
                 ...state.priceSettings,
                 status: state.status,
-                packageItemList
+                packageItemList,
+                bizCode: packageType
               };
               if (state.packageData.id) {
                 updateMun.mutate(data);
@@ -468,7 +502,9 @@ const PackageEditPage = () => {
         {/* Package Info Header */}
         <div className="grid grid-cols-4 bg-muted/50 border-b border-border">
           <div className="p-4 font-medium text-center border-r border-border">套餐名稱</div>
-          <div className="p-4 font-medium text-center border-r border-border">最大單位數量</div>
+          <div className="p-4 font-medium text-center border-r border-border">
+            {packageType === 'hr' ? '最大員工數量' : '最大單位數量'}
+          </div>
           <div className="p-4 font-medium text-center border-r border-border">套餐狀態</div>
           <div className="p-4 font-medium text-center">套餐價格</div>
         </div>
@@ -492,7 +528,7 @@ const PackageEditPage = () => {
 
           <div className="p-4 flex justify-center items-center border-r border-border">
             <Input
-              placeholder="輸入最大單位數量"
+              placeholder={packageType === 'hr' ? '輸入最大員工數量' : '輸入最大單位數量'}
               className="w-32 text-center"
               value={state.packageData.unitCount}
               onChange={e => {
@@ -532,6 +568,31 @@ const PackageEditPage = () => {
                 }
               }}
             />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 border-b border-border">
+          <div className="p-4 font-medium flex items-center justify-center bg-muted/30 border-r border-border">
+            套餐類型
+          </div>
+          <div className="p-4 flex justify-center">
+            <Select
+              value={packageType}
+              disabled={packageType === undefined}
+              onValueChange={value => {
+                if (value === 'hr' || value === 'pms') {
+                  setPackageType(value);
+                }
+              }}
+            >
+              <SelectTrigger className="w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="hr">hr</SelectItem>
+                <SelectItem value="pms">pms</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
@@ -618,118 +679,122 @@ const PackageEditPage = () => {
           </div>
         </div>
 
-        {/* Addon Features Label */}
-        <div className="grid grid-cols-1 border-b border-border">
-          <div className="p-4 font-medium text-center bg-muted/30 border-r border-border">附加功能</div>
-        </div>
+        {packageType === 'pms' && (
+          <>
+            {/* Addon Features Label */}
+            <div className="grid grid-cols-1 border-b border-border">
+              <div className="p-4 font-medium text-center bg-muted/30 border-r border-border">附加功能</div>
+            </div>
 
-        {/* Addon Prices */}
-        <div className="grid grid-cols-2 border-b border-border">
-          <div className="p-4 font-medium text-center bg-muted/30 border-r border-border">
-            {getValueAddedServiceName('addUnitPrice')}價格
-          </div>
-          <div className="p-4 flex justify-center">
-            <Input
-              placeholder="輸入價格"
-              className="w-32 text-center"
-              value={state.priceSettings.addUnitPrice}
-              onChange={e => {
-                if (e.target.value) {
-                  dispatch({
-                    type: 'UPDATE_PRICE_SETTING',
-                    field: 'addUnitPrice',
-                    value: Number.parseFloat(e.target.value)
-                  });
-                }
-              }}
-            />
-          </div>
-        </div>
-        <div className="grid grid-cols-2 border-b border-border">
-          <div className="p-4 font-medium text-center bg-muted/30 border-r border-border">
-            {getValueAddedServiceName('rentSysPrice')}價格
-          </div>
-          <div className="p-4 flex justify-center">
-            <Input
-              placeholder="輸入價格"
-              className="w-32 text-center"
-              value={state.priceSettings.rentSysPrice}
-              onChange={e => {
-                if (e.target.value) {
-                  dispatch({
-                    type: 'UPDATE_PRICE_SETTING',
-                    field: 'rentSysPrice',
-                    value: Number.parseFloat(e.target.value)
-                  });
-                }
-              }}
-            />
-          </div>
-        </div>
-        <div className="grid grid-cols-2 border-b border-border">
-          <div className="p-4 font-medium text-center bg-muted/30 border-r border-border">
-            {getValueAddedServiceName('venueSysPrice')}價格
-          </div>
-          <div className="p-4 flex justify-center">
-            <Input
-              placeholder="輸入價格"
-              className="w-32 text-center"
-              value={state.priceSettings.venueSysPrice}
-              onChange={e => {
-                if (e.target.value) {
-                  dispatch({
-                    type: 'UPDATE_PRICE_SETTING',
-                    field: 'venueSysPrice',
-                    value: Number.parseFloat(e.target.value)
-                  });
-                }
-              }}
-            />
-          </div>
-        </div>
-        <div className="grid grid-cols-2 border-b border-border">
-          <div className="p-4 font-medium text-center bg-muted/30 border-r border-border">
-            {getValueAddedServiceName('accountingSysPrice')}價格
-          </div>
-          <div className="p-4 flex justify-center">
-            <Input
-              placeholder="輸入價格"
-              className="w-32 text-center"
-              value={state.priceSettings.accountingSysPrice}
-              onChange={e => {
-                if (e.target.value) {
-                  dispatch({
-                    type: 'UPDATE_PRICE_SETTING',
-                    field: 'accountingSysPrice',
-                    value: Number.parseFloat(e.target.value)
-                  });
-                }
-              }}
-            />
-          </div>
-        </div>
-        <div className="grid grid-cols-2">
-          <div className="p-4 font-medium text-center bg-muted/30 border-r border-border">
-            {getValueAddedServiceName('custServiceSysPrice')}價格
-          </div>
-          <div className="p-4 flex justify-center">
-            <Input
-              placeholder="輸入價格"
-              className="w-32 text-center"
-              type="number"
-              value={state.priceSettings.custServiceSysPrice}
-              onChange={e => {
-                if (e.target.value) {
-                  dispatch({
-                    type: 'UPDATE_PRICE_SETTING',
-                    field: 'custServiceSysPrice',
-                    value: Number.parseFloat(e.target.value)
-                  });
-                }
-              }}
-            />
-          </div>
-        </div>
+            {/* Addon Prices */}
+            <div className="grid grid-cols-2 border-b border-border">
+              <div className="p-4 font-medium text-center bg-muted/30 border-r border-border">
+                {getValueAddedServiceName('addUnitPrice')}價格
+              </div>
+              <div className="p-4 flex justify-center">
+                <Input
+                  placeholder="輸入價格"
+                  className="w-32 text-center"
+                  value={state.priceSettings.addUnitPrice}
+                  onChange={e => {
+                    if (e.target.value) {
+                      dispatch({
+                        type: 'UPDATE_PRICE_SETTING',
+                        field: 'addUnitPrice',
+                        value: Number.parseFloat(e.target.value)
+                      });
+                    }
+                  }}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 border-b border-border">
+              <div className="p-4 font-medium text-center bg-muted/30 border-r border-border">
+                {getValueAddedServiceName('rentSysPrice')}價格
+              </div>
+              <div className="p-4 flex justify-center">
+                <Input
+                  placeholder="輸入價格"
+                  className="w-32 text-center"
+                  value={state.priceSettings.rentSysPrice}
+                  onChange={e => {
+                    if (e.target.value) {
+                      dispatch({
+                        type: 'UPDATE_PRICE_SETTING',
+                        field: 'rentSysPrice',
+                        value: Number.parseFloat(e.target.value)
+                      });
+                    }
+                  }}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 border-b border-border">
+              <div className="p-4 font-medium text-center bg-muted/30 border-r border-border">
+                {getValueAddedServiceName('venueSysPrice')}價格
+              </div>
+              <div className="p-4 flex justify-center">
+                <Input
+                  placeholder="輸入價格"
+                  className="w-32 text-center"
+                  value={state.priceSettings.venueSysPrice}
+                  onChange={e => {
+                    if (e.target.value) {
+                      dispatch({
+                        type: 'UPDATE_PRICE_SETTING',
+                        field: 'venueSysPrice',
+                        value: Number.parseFloat(e.target.value)
+                      });
+                    }
+                  }}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 border-b border-border">
+              <div className="p-4 font-medium text-center bg-muted/30 border-r border-border">
+                {getValueAddedServiceName('accountingSysPrice')}價格
+              </div>
+              <div className="p-4 flex justify-center">
+                <Input
+                  placeholder="輸入價格"
+                  className="w-32 text-center"
+                  value={state.priceSettings.accountingSysPrice}
+                  onChange={e => {
+                    if (e.target.value) {
+                      dispatch({
+                        type: 'UPDATE_PRICE_SETTING',
+                        field: 'accountingSysPrice',
+                        value: Number.parseFloat(e.target.value)
+                      });
+                    }
+                  }}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2">
+              <div className="p-4 font-medium text-center bg-muted/30 border-r border-border">
+                {getValueAddedServiceName('custServiceSysPrice')}價格
+              </div>
+              <div className="p-4 flex justify-center">
+                <Input
+                  placeholder="輸入價格"
+                  className="w-32 text-center"
+                  type="number"
+                  value={state.priceSettings.custServiceSysPrice}
+                  onChange={e => {
+                    if (e.target.value) {
+                      dispatch({
+                        type: 'UPDATE_PRICE_SETTING',
+                        field: 'custServiceSysPrice',
+                        value: Number.parseFloat(e.target.value)
+                      });
+                    }
+                  }}
+                />
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

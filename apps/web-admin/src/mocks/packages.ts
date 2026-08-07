@@ -1,6 +1,7 @@
 export interface PackageItem {
   accountingSysPrice?: number;
   addUnitPrice?: number;
+  bizCode: 'hr' | 'pms';
   custServiceSysPrice?: number;
   id?: number;
   packageItemList: any[];
