@@ -7,8 +7,10 @@ export default class Time extends EventEmitter {
   start: number;
   private rafId: number = 0;
   private stopped = false;
+  private readonly minFrameInterval: number;
+  private nextFrameTime: number;
 
-  constructor() {
+  constructor(targetFps: number | null = null) {
     super();
 
     // Setup
@@ -16,6 +18,8 @@ export default class Time extends EventEmitter {
     this.current = this.start;
     this.elapsed = 0;
     this.delta = 16;
+    this.minFrameInterval = targetFps ? 1000 / targetFps : 0;
+    this.nextFrameTime = this.start + this.minFrameInterval;
 
     this.rafId = window.requestAnimationFrame(() => {
       this.tick();
@@ -26,11 +30,18 @@ export default class Time extends EventEmitter {
     if (this.stopped) return;
 
     const currentTime = Date.now();
-    this.delta = currentTime - this.current;
-    this.current = currentTime;
-    this.elapsed = this.current - this.start;
+    if (this.minFrameInterval === 0 || currentTime >= this.nextFrameTime) {
+      this.delta = currentTime - this.current;
+      this.current = currentTime;
+      this.elapsed = this.current - this.start;
+      this.trigger('tick');
 
-    this.trigger('tick');
+      if (this.minFrameInterval > 0) {
+        while (this.nextFrameTime <= currentTime) {
+          this.nextFrameTime += this.minFrameInterval;
+        }
+      }
+    }
 
     this.rafId = window.requestAnimationFrame(() => {
       this.tick();

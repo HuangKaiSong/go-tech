@@ -90,10 +90,10 @@ export default class LensFlare {
       mouseLerpSpeed: 0.1, // 鼠标跟随插值速度（0-1，值越大跟随越快）
       animated: true, // 动画旋转
       anamorphic: false, // 变形镜头效果
-      secondaryGhosts: true, // 次级幽灵
-      starBurst: true, // 星爆效果（性能消耗大）
+      secondaryGhosts: this.experience.quality.lensFlare.secondaryGhosts, // 次级幽灵
+      starBurst: this.experience.quality.lensFlare.starBurst, // 星爆效果（性能消耗大）
       ghostScale: 0.3, // 幽灵缩放
-      aditionalStreaks: true, // 额外条纹
+      aditionalStreaks: this.experience.quality.lensFlare.aditionalStreaks, // 额外条纹
       followMouse: true // 跟随鼠标
     };
 

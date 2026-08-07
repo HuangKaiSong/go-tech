@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 
 import Camera from './camera';
+import { type NebulaQualityPreference, type NebulaQualityProfile, resolveNebulaQuality } from './quality';
 import Renderer from './renderer';
 import sources from './sources';
 import Debug from './utils/debug';
@@ -11,6 +12,10 @@ import Stats from './utils/stats';
 import Time from './utils/time';
 import PhysicsWorld from './world/physics-world';
 import World from './world/world';
+
+export interface ExperienceOptions {
+  quality?: NebulaQualityPreference;
+}
 
 let instance: Experience | null = null;
 
@@ -27,7 +32,8 @@ export default class Experience {
   physics!: PhysicsWorld;
   iMouse!: IMouse;
   world!: World;
-  constructor(canvas?: HTMLCanvasElement) {
+  quality!: NebulaQualityProfile;
+  constructor(canvas?: HTMLCanvasElement, options: ExperienceOptions = {}) {
     // Singleton
     if (instance) {
       // oxlint-disable-next-line no-constructor-return
@@ -44,12 +50,14 @@ export default class Experience {
       throw new Error('Experience requires an HTMLCanvasElement.');
     }
     this.canvas = resolvedCanvas;
+    this.quality = resolveNebulaQuality(options.quality);
+    this.canvas.dataset.nebulaQuality = this.quality.tier;
 
     // Panel
     this.debug = new Debug();
     this.stats = new Stats();
-    this.sizes = new Sizes();
-    this.time = new Time();
+    this.sizes = new Sizes(this.quality);
+    this.time = new Time(this.quality.targetFps);
     this.scene = new THREE.Scene();
     this.camera = new Camera();
     this.renderer = new Renderer();

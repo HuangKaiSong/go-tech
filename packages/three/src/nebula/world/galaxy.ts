@@ -49,7 +49,7 @@ export default class Galaxy {
     // Point Params
     this.parameters = {
       size: 55,
-      count: 140000,
+      count: this.experience.quality.galaxyCount,
       radius: 5,
       branches: 10,
       spin: 1,

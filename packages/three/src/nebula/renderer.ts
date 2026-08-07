@@ -23,12 +23,13 @@ export default class Renderer {
   setInstance() {
     this.instance = new THREE.WebGLRenderer({
       canvas: this.canvas,
-      antialias: true
+      antialias: this.experience.quality.antialias,
+      powerPreference: 'high-performance'
       // powerPreference: 'high-performance',
     });
     this.instance.toneMapping = THREE.ACESFilmicToneMapping;
     this.instance.toneMappingExposure = 1.5;
-    this.instance.shadowMap.enabled = true;
+    this.instance.shadowMap.enabled = this.experience.quality.tier === 'high';
     this.instance.shadowMap.type = THREE.PCFSoftShadowMap;
     this.instance.setClearColor('#000012');
     this.instance.setPixelRatio(this.sizes.pixelRatio);

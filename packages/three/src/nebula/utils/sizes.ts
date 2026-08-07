@@ -1,3 +1,4 @@
+import type { NebulaQualityProfile } from '../quality';
 import EventEmitter from './event-emitter.js';
 
 export default class Sizes extends EventEmitter {
@@ -9,13 +10,13 @@ export default class Sizes extends EventEmitter {
   minPixelRatio: number;
   maxRenderPixels: number;
 
-  constructor() {
+  constructor(quality: NebulaQualityProfile) {
     super();
 
     // Setup
-    this.maxPixelRatio = 1.25;
-    this.minPixelRatio = 1;
-    this.maxRenderPixels = 6000000;
+    this.maxPixelRatio = quality.maxPixelRatio;
+    this.minPixelRatio = quality.minPixelRatio;
+    this.maxRenderPixels = quality.maxRenderPixels;
     this.width = 0;
     this.height = 0;
     this.aspect = 1;
@@ -33,7 +34,7 @@ export default class Sizes extends EventEmitter {
 
   update() {
     this.width = window.innerWidth;
-    this.height = window.innerHeight + 252;
+    this.height = window.innerHeight;
     this.aspect = this.width / this.height;
     this.pixelRatio = this.getPixelRatio();
   }
