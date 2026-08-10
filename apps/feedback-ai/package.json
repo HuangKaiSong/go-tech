@@ -1,0 +1,19 @@
+{
+  "name": "feedback-ai",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "uv run python -m compileall -q src",
+    "chat": "uv run feedback-ai chat",
+    "dev": "uv run uvicorn feedback_ai.main:app --reload --host 0.0.0.0 --port 8100",
+    "format": "uv run ruff format .",
+    "ingest": "uv run feedback-ai ingest",
+    "install:python": "uv sync",
+    "lint": "uv run ruff check .",
+    "start": "uv run uvicorn feedback_ai.main:app --host 0.0.0.0 --port 8100",
+    "sync": "uv run feedback-ai sync",
+    "sync:watch": "uv run feedback-ai sync --watch",
+    "test": "uv run pytest",
+    "type-check": "uv run mypy src tests"
+  }
+}

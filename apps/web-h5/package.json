@@ -18,7 +18,6 @@
     "@go-tech/color": "workspace:*",
     "@go-tech/core-http": "workspace:*",
     "@go-tech/core-state": "workspace:*",
-    "@go-tech/feedback-ai": "workspace:*",
     "@go-tech/hooks": "workspace:*",
     "@go-tech/types": "workspace:*",
     "@go-tech/web-ui": "workspace:*",

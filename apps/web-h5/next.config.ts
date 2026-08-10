@@ -8,7 +8,6 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   reactStrictMode: false,
   cleanDistDir: true,
-  transpilePackages: ['@go-tech/feedback-ai'],
   allowedDevOrigins: ['localhost', '192.168.0.168', '192.168.0.202', 'admin.go-techs.com'],
   async rewrites() {
     const proxy: Rewrite[] = [

@@ -523,6 +523,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
+  apps/feedback-ai: {}
+
   apps/hr-pc-manager:
     dependencies:
       '@hookform/resolvers':
@@ -1420,6 +1422,9 @@ importers:
       react-hook-form:
         specifier: 'catalog:'
         version: 7.71.1(react@19.2.7)
+      react-markdown:
+        specifier: ^10.1.0
+        version: 10.1.0(@types/react@19.2.8)(react@19.2.7)
       react-resizable-panels:
         specifier: 'catalog:'
         version: 2.1.9(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -1429,6 +1434,9 @@ importers:
       recharts:
         specifier: 'catalog:'
         version: 2.15.4(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      remark-gfm:
+        specifier: ^4.0.1
+        version: 4.0.1
       sonner:
         specifier: 'catalog:'
         version: 1.7.4(react-dom@19.2.7(react@19.2.7))(react@19.2.7)

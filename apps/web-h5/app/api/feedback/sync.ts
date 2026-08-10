@@ -1,6 +1,6 @@
-import { processPendingSyncJobs } from '@go-tech/feedback-ai';
 import { sql } from 'drizzle-orm';
 import { after } from 'next/server';
+import { fetchFeedbackAi } from '@/app/api/feedback/ai-client';
 import { db } from '@/db';
 import { fbAideSyncJob } from '@/db/scheam';
 
@@ -27,7 +27,13 @@ export function scheduleFeedbackSync() {
     try {
       for (let batch = 0; batch < 5; batch += 1) {
         // oxlint-disable-next-line no-await-in-loop
-        const result = await processPendingSyncJobs({ limit: 10 });
+        const response = await fetchFeedbackAi('/v1/sync/process', {
+          body: JSON.stringify({ limit: 10 }),
+          method: 'POST'
+        });
+        if (!response.ok) throw new Error(`Feedback AI sync returned HTTP ${response.status}`);
+        // oxlint-disable-next-line no-await-in-loop
+        const result = (await response.json()) as { processed: number };
         if (result.processed === 0) break;
       }
     } catch (error) {
