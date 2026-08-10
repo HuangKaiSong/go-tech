@@ -23,7 +23,6 @@ def mysql_connection_options(database_url: str) -> dict[str, object]:
         "password": unquote(parsed.password or ""),
         "db": unquote(parsed.path.lstrip("/")),
         "charset": "utf8mb4",
-        "cursorclass": DictCursor,
     }
 
 
@@ -45,7 +44,7 @@ class MySQLSource:
         feature_condition = "" if feature_id is None else "AND f.id = %s"
         connection = await self.connect()
         try:
-            async with connection.cursor() as cursor:
+            async with connection.cursor(DictCursor) as cursor:
                 await cursor.execute(
                     f"""
                     SELECT
@@ -139,7 +138,7 @@ class MySQLSource:
         connection = await self.connect()
         try:
             await connection.begin()
-            async with connection.cursor() as cursor:
+            async with connection.cursor(DictCursor) as cursor:
                 await cursor.execute(
                     """
                     SELECT feature_id, revision, attempts
@@ -177,7 +176,7 @@ class MySQLSource:
     async def complete_sync_job(self, job: SyncJob) -> None:
         connection = await self.connect()
         try:
-            async with connection.cursor() as cursor:
+            async with connection.cursor(DictCursor) as cursor:
                 await cursor.execute(
                     "DELETE FROM fb_aide_sync_job WHERE feature_id = %s AND revision = %s",
                     (job.feature_id, job.revision),
@@ -196,7 +195,7 @@ class MySQLSource:
         delay_seconds = min(2 ** min(attempts, 10) * 15, 3600)
         connection = await self.connect()
         try:
-            async with connection.cursor() as cursor:
+            async with connection.cursor(DictCursor) as cursor:
                 await cursor.execute(
                     """
                     UPDATE fb_aide_sync_job

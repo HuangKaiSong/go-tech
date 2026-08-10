@@ -8,7 +8,7 @@ from feedback_ai.mysql_source import MySQLSource, mysql_connection_options
 
 
 def test_settings_supports_legacy_mysql_url_and_requires_secrets() -> None:
-    settings = Settings(database_url="mysql://legacy/db")
+    settings = Settings(database_url="mysql://legacy/db", _env_file=None)
 
     assert settings.require_mysql_url() == "mysql://legacy/db"
     with pytest.raises(RuntimeError, match="POSTGRES_URL"):
@@ -32,6 +32,7 @@ def test_mysql_connection_options_parses_and_decodes_url() -> None:
     assert options["user"] == "user@example"
     assert options["password"] == "p@ss"
     assert options["db"] == "feedback"
+    assert "cursorclass" not in options
 
 
 @pytest.mark.parametrize("url", ["postgresql://localhost/db", "mysql://localhost"])
