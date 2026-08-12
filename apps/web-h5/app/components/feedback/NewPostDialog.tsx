@@ -14,7 +14,7 @@ import {
   SelectValue,
   Textarea
 } from '@go-tech-frontend/ui';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { DynamicText } from '@/app/components/DynamicI18nText.client';
@@ -22,6 +22,7 @@ import { SERIF } from '@/app/feedback/data';
 import type { Feature } from '@/app/feedback/useFeedbackFeatures';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 import { useAuth } from '@/contexts/AuthContext';
+import { releaseSubmissionLock, tryAcquireSubmissionLock } from './submission-lock';
 import Turnstile from './turnstile';
 
 interface Props {
@@ -57,6 +58,7 @@ const NewPostDialog = ({ categories, defaultCategory, defaultSubCategory, onCrea
   const [submitting, setSubmitting] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState('');
   const [turnstileResetKey, setTurnstileResetKey] = useState(0);
+  const submittingRef = useRef(false);
 
   const pickCat = (c: string) => {
     setCat(c);
@@ -92,6 +94,7 @@ const NewPostDialog = ({ categories, defaultCategory, defaultSubCategory, onCrea
       toast.warning(verificationRequired);
       return;
     }
+    if (!tryAcquireSubmissionLock(submittingRef)) return;
     setSubmitting(true);
     try {
       const response = await fetch('/api/feedback/features', {
@@ -115,10 +118,11 @@ const NewPostDialog = ({ categories, defaultCategory, defaultSubCategory, onCrea
       toast.success(postSuccess);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : postFailed);
-    } finally {
-      setSubmitting(false);
       setTurnstileToken('');
       setTurnstileResetKey(key => key + 1);
+    } finally {
+      releaseSubmissionLock(submittingRef);
+      setSubmitting(false);
     }
   };
 

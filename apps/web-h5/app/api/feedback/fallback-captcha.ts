@@ -1,6 +1,9 @@
 import { createHmac, randomBytes, randomInt, timingSafeEqual } from 'node:crypto';
+import { and, eq, gt, lt } from 'drizzle-orm';
 import { cookies } from 'next/headers';
 import _ from 'server-only';
+import { db } from '@/db';
+import { fbCaptchaChallenge } from '@/db/scheam';
 
 export type BotVerificationAction = 'feedback_comment' | 'feedback_post';
 
@@ -61,6 +64,11 @@ export const createFallbackCaptcha = async (action: BotVerificationAction) => {
   const token = Buffer.from(JSON.stringify(payload)).toString('base64url');
   const image = `data:image/svg+xml;base64,${Buffer.from(createSvg(answer)).toString('base64')}`;
 
+  await db.transaction(async tx => {
+    await tx.delete(fbCaptchaChallenge).where(lt(fbCaptchaChallenge.expiresAt, new Date()));
+    await tx.insert(fbCaptchaChallenge).values({ nonce, expiresAt: new Date(expiresAt) });
+  });
+
   const cookieStore = await cookies();
   cookieStore.set(captchaCookie, nonce, {
     httpOnly: true,
@@ -79,28 +87,36 @@ export const verifyFallbackCaptcha = async (token: string, answer: string, expec
   cookieStore.delete(captchaCookie);
   if (!captchaNonce || !token || !answer || !getSecret()) return false;
 
+  let payload: CaptchaPayload;
   try {
-    const payload = JSON.parse(Buffer.from(token, 'base64url').toString()) as Partial<CaptchaPayload>;
+    const decodedPayload = JSON.parse(Buffer.from(token, 'base64url').toString()) as Partial<CaptchaPayload>;
     if (
-      payload.action !== expectedAction ||
-      payload.nonce !== captchaNonce ||
-      typeof payload.expiresAt !== 'number' ||
-      payload.expiresAt < Date.now() ||
-      typeof payload.signature !== 'string'
+      decodedPayload.action !== expectedAction ||
+      decodedPayload.nonce !== captchaNonce ||
+      typeof decodedPayload.expiresAt !== 'number' ||
+      decodedPayload.expiresAt < Date.now() ||
+      typeof decodedPayload.signature !== 'string'
     ) {
       return false;
     }
 
-    const expectedSignature = signCaptcha({
-      action: expectedAction,
-      answer: answer.trim().toUpperCase(),
-      expiresAt: payload.expiresAt,
-      nonce: payload.nonce
-    });
-    const actualBuffer = Buffer.from(payload.signature, 'hex');
-    const expectedBuffer = Buffer.from(expectedSignature, 'hex');
-    return actualBuffer.length === expectedBuffer.length && timingSafeEqual(actualBuffer, expectedBuffer);
+    payload = decodedPayload as CaptchaPayload;
   } catch {
     return false;
   }
+
+  const result = await db
+    .delete(fbCaptchaChallenge)
+    .where(and(eq(fbCaptchaChallenge.nonce, payload.nonce), gt(fbCaptchaChallenge.expiresAt, new Date())));
+  if (result[0].affectedRows !== 1) return false;
+
+  const expectedSignature = signCaptcha({
+    action: expectedAction,
+    answer: answer.trim().toUpperCase(),
+    expiresAt: payload.expiresAt,
+    nonce: payload.nonce
+  });
+  const actualBuffer = Buffer.from(payload.signature, 'hex');
+  const expectedBuffer = Buffer.from(expectedSignature, 'hex');
+  return actualBuffer.length === expectedBuffer.length && timingSafeEqual(actualBuffer, expectedBuffer);
 };
