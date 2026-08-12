@@ -1,17 +1,8 @@
 // oxlint-disable-next-line import/no-unassigned-import
 import 'server-only';
 
+import { getBaseUrl } from '@/lib/http';
 import PricingSection from './PricingSection';
-
-function getBaseUrl(): string {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
-  if (!apiUrl) {
-    throw new Error('NEXT_PUBLIC_API_URL is not defined');
-  }
-
-  return apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
-}
 
 async function getFeaturedPackages(): Promise<Packages[]> {
   try {
