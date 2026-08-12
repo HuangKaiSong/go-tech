@@ -250,13 +250,7 @@ const ForgetPassword = () => {
   return (
     <div className="min-h-screen relative flex items-center justify-center p-4">
       {/* Background */}
-      <Image
-        src={authBgImg}
-        alt="Background"
-        loading="eager"
-        style={{ width: 'auto' }}
-        className="absolute inset-0 h-full object-cover"
-      />
+      <Image src={authBgImg} alt="Background" loading="eager" fill className="absolute inset-0 h-full object-cover" />
       <div className="absolute inset-0 bg-foreground/30 backdrop-blur-sm" />
 
       {/* Register Card */}
@@ -297,7 +291,7 @@ const ForgetPassword = () => {
               </div>
               <p className="text-xs text-gray-400 mt-2 ml-5 flex items-center gap-1">
                 <CircleAlert className="w-3.5 h-3.5" />
-                <DynamicText text="密碼需至少包含一個字母、一個數字和一個特殊字符" />
+                <DynamicText text="密碼至少需要6位字符，並至少包含一個字母、一個數字和一個特殊字符" />
               </p>
               <div className="flex items-center gap-2">
                 <span className="text-destructive">*</span>

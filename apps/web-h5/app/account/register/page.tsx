@@ -142,6 +142,14 @@ const Register = () => {
 
   const isCodeButtonDisabled = pending || countdown > 0 || !formData.email || emailChecking || emailExists;
   const isEmailAvailable = Boolean(formData.email) && checkedEmail === formData.email && !emailChecking && !emailExists;
+  const hasEmptyRequiredField = [
+    formData.name,
+    formData.email,
+    formData.phone,
+    formData.company,
+    formData.verificationCode
+  ].some(value => !value.trim());
+  const isNextStepDisabled = validatedPending || !acceptTerms || hasEmptyRequiredField;
 
   const checkEmailExists = async (email: string) => {
     if (!email) return false;
@@ -236,6 +244,8 @@ const Register = () => {
 
   const handlePrevSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (isNextStepDisabled) return;
 
     const result = signupSchema.safeParse(formData);
 
@@ -367,13 +377,7 @@ const Register = () => {
   return (
     <div className="min-h-screen relative flex items-center justify-center p-4">
       {/* Background */}
-      <Image
-        src={authBgImg}
-        alt="Background"
-        loading="eager"
-        style={{ width: 'auto' }}
-        className="absolute inset-0 w-full h-full object-cover"
-      />
+      <Image src={authBgImg} alt="Background" loading="eager" fill priority />
       <div className="absolute inset-0 bg-foreground/30 backdrop-blur-sm" />
       {/* Register Card */}
       <div className="relative bg-background rounded-2xl shadow-2xl w-full max-w-xl p-8 md:p-12 my-8 min-w-fit">
@@ -418,7 +422,7 @@ const Register = () => {
                 </div>
                 <p className="text-xs text-gray-400 mt-2 ml-5 flex items-center gap-1">
                   <CircleAlert className="w-3.5 h-3.5" />
-                  <DynamicText text="密碼需至少包含一個字母、一個數字和一個特殊字符" />
+                  <DynamicText text="密碼至少需要6位字符，並至少包含一個字母、一個數字和一個特殊字符" />
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -570,7 +574,7 @@ const Register = () => {
                 <Checkbox
                   id="terms"
                   checked={acceptTerms}
-                  onCheckedChange={checked => setAcceptTerms(checked as boolean)}
+                  onCheckedChange={checked => setAcceptTerms(checked === true)}
                 />
                 <label htmlFor="terms" className="text-sm text-muted-foreground">
                   {agreeText}
@@ -586,7 +590,7 @@ const Register = () => {
 
               <Button
                 type="submit"
-                disabled={validatedPending}
+                disabled={isNextStepDisabled}
                 className="w-full h-14 text-lg font-semibold bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
               >
                 {validatedPending ? processingText : nextStepText}
