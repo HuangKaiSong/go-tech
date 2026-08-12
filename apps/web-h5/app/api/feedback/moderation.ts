@@ -128,6 +128,8 @@ export const moderateFeedbackContent = async (contents: string[]): Promise<Moder
       input: prompt
     });
 
+    console.info('Feedback AI moderation response:', response.output_text);
+
     const aiReview = parseAIResponse(response.output_text);
     if (!aiReview) return { allowed: false, error: 'AI_REVIEW_FAILED' };
 
