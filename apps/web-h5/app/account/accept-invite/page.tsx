@@ -3,10 +3,11 @@
 // import LogoImg from "@/assets/Gotech_Logo.webp";
 import { Button } from '@go-tech/web-ui';
 import { LogIn, UserPlus, X } from 'lucide-react';
-import Image from 'next/image';
-import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
+import { useSearchParams } from 'next/navigation';
 import Link from '@/app/components/Link';
+import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import authBackground from '@/assets/auth-background.jpg';
 // import { useState } from "react";
 
@@ -23,7 +24,7 @@ const Logo = () => (
 const AcceptInvite = () => {
   const t = useTranslations('Account');
   const searchParams = useSearchParams();
-  const router = useRouter();
+  const router = useProgressRouter();
 
   // const token = searchParams.get("token");
   const email = searchParams.get('email') || '';

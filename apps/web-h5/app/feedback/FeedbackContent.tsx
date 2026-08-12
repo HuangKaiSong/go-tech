@@ -14,7 +14,6 @@ import {
   User
 } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { DynamicText } from '@/app/components/DynamicI18nText.client';
@@ -22,6 +21,7 @@ import { OfficialAvatar, SmallOfficialAvatar, SmallUserAvatar, UserAvatar } from
 import NewPostDialog from '@/app/components/feedback/NewPostDialog';
 import Turnstile from '@/app/components/feedback/turnstile';
 import Footer from '@/app/components/Footer';
+import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 import { useAuth } from '@/contexts/AuthContext';
 import type { FbFeature } from '@/db/scheam';
@@ -65,7 +65,7 @@ const resolveIcon = (iconName: string | null): React.ComponentType<{ className?:
 const FeedbackContent = ({ categoriesFromDB, featureCompleted, language }: Props) => {
   const { isLoggedIn, user } = useAuth();
   const currentUser = user?.nickname ?? '';
-  const router = useRouter();
+  const router = useProgressRouter();
   const commentFailed = useBatchTranslation('留言失敗');
   const contentRejected = useBatchTranslation('留言未通過安全審核，請修改後重試');
   const loginRequired = useBatchTranslation('請先登入後再操作');

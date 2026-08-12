@@ -1,7 +1,7 @@
 'use client';
 
 import { useLocale } from 'next-intl';
-import { useRouter } from 'next/navigation';
+import { useProgressRouter } from '@/app/hooks/use-progress-router';
 
 const options = [
   { code: 'zh-hk', label: '繁' },
@@ -11,7 +11,7 @@ const options = [
 
 export default function LocaleSwitcher() {
   const locale = useLocale();
-  const router = useRouter();
+  const router = useProgressRouter();
 
   async function switchTo(nextLocale: string) {
     if (nextLocale === locale) return;

@@ -1,9 +1,10 @@
 'use client';
 
 import { JotaiProvider } from '@go-tech/core-state';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { IframeProvider } from '@/contexts/IframeContext';
 import { WhatsappService } from './CustomerService';
+import { NavigationProgress } from './navigation-progress';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [hasIframe, setHasIframe] = useState<boolean>(false);
@@ -18,6 +19,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <JotaiProvider>
       <IframeProvider hasIframe={hasIframe}>
+        <Suspense fallback={null}>
+          <NavigationProgress />
+        </Suspense>
         <div className="bg-white dark:bg-gray-950 text-black dark:text-white antialiased" data-iframe={hasIframe}>
           {/* <Toaster theme="system" className="toaster group" position="top-right" richColors /> */}
           {children}

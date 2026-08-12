@@ -5,11 +5,11 @@ import { Button, Input, toast } from '@go-tech/web-ui';
 import { CircleAlert, X } from 'lucide-react';
 import { useLocale } from 'next-intl';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import z from 'zod';
 import { DynamicText } from '@/app/components/DynamicI18nText.client';
 import Link from '@/app/components/Link';
+import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 import { translateError } from '@/app/lib/translate-error';
 import authBgImg from '@/assets/background.webp';
@@ -22,7 +22,7 @@ const inputClassNames = {
 };
 
 const ForgetPassword = () => {
-  const router = useRouter();
+  const router = useProgressRouter();
   const [formData, setFormData] = useState({
     account: '',
     verificationCode: '',

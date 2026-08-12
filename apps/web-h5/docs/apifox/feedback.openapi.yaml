@@ -1,0 +1,1277 @@
+openapi: 3.0.3
+info:
+  title: GO-TECH 需求反馈接口
+  version: 1.1.0
+  description: |
+    GO-TECH 需求反馈模块接口，可直接导入 Apifox。
+
+    前台写操作使用 `GO_TECH_AUTH_TOKEN` Cookie 登录态；后台管理接口使用 Bearer JWT。
+    新增建议和评论还需要 Cloudflare Turnstile Token，或备用验证码组合 Token。
+
+    AI 助手的公开入口仍由 `web-h5` 提供：`web-h5` 完成管理员鉴权，并将请求代理到内部
+    Python `feedback-ai` 服务。浏览器不得直接访问 Python 服务，也不需要携带内部服务 Token。
+servers:
+  - url: http://localhost:3001
+    description: 本地 web-h5 开发环境
+tags:
+  - name: 反馈-公共
+    description: 无需登录即可调用的反馈查询及验证码接口
+  - name: 反馈-用户
+    description: 需要用户登录的新增建议、评论和点赞接口
+  - name: 反馈-后台
+    description: 需要后台管理员 Bearer Token 的反馈管理接口
+  - name: 反馈-AI助手
+    description: 需要后台管理员 Bearer Token，由 web-h5 代理到内部 Python 服务的流式反馈 AI 助手接口
+paths:
+  /api/feedback/captcha:
+    get:
+      tags: [反馈-公共]
+      summary: 获取备用验证码
+      description: 当 Turnstile 无法加载时生成一次性 SVG 验证码，同时写入 HttpOnly 校验 Cookie；验证码有效期为 5 分钟。
+      operationId: getFeedbackFallbackCaptcha
+      parameters:
+        - name: action
+          in: query
+          required: true
+          description: 验证场景；新增评论使用 feedback_comment，新增建议使用 feedback_post。
+          schema:
+            $ref: '#/components/schemas/BotVerificationAction'
+      responses:
+        '200':
+          description: 验证码生成成功
+          headers:
+            Set-Cookie:
+              description: 服务端写入的备用验证码随机数 Cookie，浏览器需自动保存并在提交时携带。
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaptchaResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /api/feedback/categories:
+    get:
+      tags: [反馈-公共]
+      summary: 获取反馈分类
+      description: 按排序值升序返回全部一级分类及其子分类。
+      operationId: getFeedbackCategories
+      responses:
+        '200':
+          description: 分类查询成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryListResponse'
+  /api/feedback/features:
+    get:
+      tags: [反馈-公共]
+      summary: 搜索反馈建议
+      description: 按标题或内容模糊搜索未删除建议，按创建时间倒序返回，最多 50 条；搜索词为空时返回空数组。
+      operationId: searchFeedbackFeatures
+      parameters:
+        - name: q
+          in: query
+          required: false
+          description: 标题或建议内容搜索关键词。
+          schema:
+            type: string
+            example: 发票
+      responses:
+        '200':
+          description: 建议搜索成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureListResponse'
+    post:
+      tags: [反馈-用户]
+      summary: 新增反馈建议
+      description: 新增建议并自动为提交人投 1 票；提交前执行机器人验证和内容安全审核。
+      operationId: createFeedbackFeature
+      security:
+        - UserCookieAuth: []
+      requestBody:
+        required: true
+        description: 新增建议所需的分类、标题、内容及机器人验证凭证。
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFeatureRequest'
+      responses:
+        '201':
+          description: 建议创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UserUnauthorized'
+        '422':
+          $ref: '#/components/responses/ContentRejected'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /api/feedback/features/{id}/comments:
+    post:
+      tags: [反馈-用户]
+      summary: 新增建议评论
+      description: 为指定建议新增一级评论；提交前执行机器人验证和内容安全审核。
+      operationId: createFeedbackComment
+      security:
+        - UserCookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/FeatureId'
+      requestBody:
+        required: true
+        description: 评论内容及机器人验证凭证。
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommentRequest'
+      responses:
+        '200':
+          description: 评论创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UserUnauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ContentRejected'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /api/feedback/features/{id}/vote:
+    post:
+      tags: [反馈-用户]
+      summary: 切换建议点赞状态
+      description: 未点赞时新增点赞，已点赞时取消点赞，并返回最新票数。
+      operationId: toggleFeedbackVote
+      security:
+        - UserCookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/FeatureId'
+      responses:
+        '200':
+          description: 点赞状态切换成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VoteResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UserUnauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/feedback/features/admin:
+    get:
+      tags: [反馈-后台]
+      summary: 获取后台建议列表
+      description: 分页查询进行中、已完成或回收站中的建议，支持状态和关键词筛选。
+      operationId: getAdminFeedbackFeatures
+      security:
+        - AdminBearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - name: view
+          in: query
+          required: false
+          description: 列表范围；active 为未完成且未删除，completed 为已完成，trash 为已删除。默认 active。
+          schema:
+            type: string
+            enum: [active, completed, trash]
+            default: active
+        - $ref: '#/components/parameters/FeatureStatusFilter'
+        - $ref: '#/components/parameters/AdminSearchKeyword'
+      responses:
+        '200':
+          description: 后台建议列表查询成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminFeaturePageResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/AdminUnauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/feedback/features/admin/counts:
+    get:
+      tags: [反馈-后台]
+      summary: 获取后台反馈统计
+      description: 返回已完成建议、已删除建议、已删除评论及回收站合计数量。
+      operationId: getAdminFeedbackCounts
+      security:
+        - AdminBearerAuth: []
+      responses:
+        '200':
+          description: 反馈统计查询成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCountsResponse'
+        '401':
+          $ref: '#/components/responses/AdminUnauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/feedback/features/admin/comments:
+    get:
+      tags: [反馈-后台]
+      summary: 获取后台评论列表
+      description: 分页查询全部评论或回收站评论，包含普通评论和官方回复。
+      operationId: getAdminFeedbackComments
+      security:
+        - AdminBearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - name: scope
+          in: query
+          required: false
+          description: 评论范围；all 为全部评论，trash 为已删除评论。默认 trash。
+          schema:
+            type: string
+            enum: [all, trash]
+            default: trash
+        - $ref: '#/components/parameters/FeatureStatusFilter'
+        - $ref: '#/components/parameters/AdminSearchKeyword'
+      responses:
+        '200':
+          description: 后台评论列表查询成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCommentPageResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/AdminUnauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/feedback/features/admin/{id}/comments:
+    get:
+      tags: [反馈-后台]
+      summary: 获取建议评论详情
+      description: 获取指定建议的普通评论、每条评论对应的官方回复，以及建议级官方回复。
+      operationId: getAdminFeedbackCommentDetail
+      security:
+        - AdminBearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/FeatureId'
+      responses:
+        '200':
+          description: 建议评论详情查询成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCommentDetailResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/AdminUnauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/feedback/features/admin/{id}/reply:
+    put:
+      tags: [反馈-后台]
+      summary: 新增或更新官方回复
+      description: parentId 为空时回复建议本身；有值时回复指定普通评论。同一目标仅保留一条官方回复，重复调用会更新原回复。
+      operationId: saveAdminOfficialReply
+      security:
+        - AdminBearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/FeatureId'
+      requestBody:
+        required: true
+        description: 官方回复内容及可选的被回复评论 ID。
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveOfficialReplyRequest'
+      responses:
+        '200':
+          description: 官方回复保存成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OfficialReplyResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/AdminUnauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/feedback/features/admin/{id}/status:
+    patch:
+      tags: [反馈-后台]
+      summary: 更新建议状态
+      description: 更新建议处理状态；设置为 shipped 时同时写入完成时间，切换为其他状态时清空完成时间。
+      operationId: updateAdminFeedbackStatus
+      security:
+        - AdminBearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/FeatureId'
+      requestBody:
+        required: true
+        description: 建议的新处理状态。
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateFeatureStatusRequest'
+      responses:
+        '200':
+          description: 建议状态更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateFeatureStatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/AdminUnauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/feedback/features/admin/{id}:
+    delete:
+      tags: [反馈-后台]
+      summary: 删除建议
+      description: 将指定建议软删除并同步反馈知识库。
+      operationId: deleteAdminFeedbackFeature
+      security:
+        - AdminBearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/FeatureId'
+      responses:
+        '200':
+          description: 建议删除成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteStateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/AdminUnauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/feedback/features/admin/{id}/restore:
+    post:
+      tags: [反馈-后台]
+      summary: 恢复建议
+      description: 从回收站恢复指定建议并同步反馈知识库。
+      operationId: restoreAdminFeedbackFeature
+      security:
+        - AdminBearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/FeatureId'
+      responses:
+        '200':
+          description: 建议恢复成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteStateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/AdminUnauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/feedback/features/admin/comments/{commentId}:
+    delete:
+      tags: [反馈-后台]
+      summary: 删除评论或官方回复
+      description: 软删除指定评论；删除普通评论时会同时删除其官方回复，并修正建议评论数。
+      operationId: deleteAdminFeedbackComment
+      security:
+        - AdminBearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CommentId'
+      responses:
+        '200':
+          description: 评论删除成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteStateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/AdminUnauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/feedback/features/admin/comments/{commentId}/restore:
+    post:
+      tags: [反馈-后台]
+      summary: 恢复评论或官方回复
+      description: 从回收站恢复指定评论；恢复普通评论时会同时恢复随其删除的官方回复，并修正建议评论数。
+      operationId: restoreAdminFeedbackComment
+      security:
+        - AdminBearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CommentId'
+      responses:
+        '200':
+          description: 评论恢复成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteStateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/AdminUnauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/feedback/features/admin/assistant/chat:
+    post:
+      tags: [反馈-AI助手]
+      summary: 与反馈 AI 助手对话
+      description: |
+        根据反馈知识库和可选对话历史流式生成回答。管理员身份由 `web-h5` 验证，验证成功后
+        `web-h5` 使用服务端内部凭证调用 Python `feedback-ai`，并将上游 SSE 原样转发给浏览器。
+
+        SSE 的每个 `data` 字段都是 JSON：`token` 携带增量文本，`done` 表示正常结束，`error`
+        表示流建立后生成失败。若 Python 服务不可达、配置缺失或在建立流之前返回失败，接口返回
+        HTTP 502；一旦返回 HTTP 200，后续生成错误通过 SSE `error` 事件表达。
+      operationId: chatWithFeedbackAssistant
+      security:
+        - AdminBearerAuth: []
+      requestBody:
+        required: true
+        description: 当前问题和最多 16 条历史对话。
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssistantChatRequest'
+      responses:
+        '200':
+          description: SSE 流式回答已建立
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: SSE 文本流，每个 data 字段都是包含 type、content 或 message 的 JSON 对象。
+              examples:
+                tokenAndDone:
+                  summary: 正常增量回答并结束
+                  value: |
+                    data: {"type":"token","content":"根据反馈数据"}
+
+                    data: {"type":"token","content":"，最受关注的是深色模式。"}
+
+                    data: {"type":"done"}
+
+                streamError:
+                  summary: 流建立后生成失败
+                  value: |
+                    data: {"type":"error","message":"AI 助手暫時無法回應，請稍後再試"}
+
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/AdminUnauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '502':
+          $ref: '#/components/responses/FeedbackAiBadGateway'
+components:
+  securitySchemes:
+    UserCookieAuth:
+      type: apiKey
+      in: cookie
+      name: GO_TECH_AUTH_TOKEN
+      description: web-h5 用户登录后由浏览器自动携带的 JWT Cookie。
+    AdminBearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: 后台管理员登录后取得的 HS512 JWT，放入 Authorization 请求头。
+  parameters:
+    FeatureId:
+      name: id
+      in: path
+      required: true
+      description: 反馈建议 ID，必须为大于 0 的整数。
+      schema:
+        type: string
+        pattern: '^[1-9][0-9]*$'
+        example: '1024'
+    CommentId:
+      name: commentId
+      in: path
+      required: true
+      description: 评论或官方回复 ID，必须为大于 0 的整数。
+      schema:
+        type: string
+        pattern: '^[1-9][0-9]*$'
+        example: '2048'
+    Page:
+      name: page
+      in: query
+      required: false
+      description: 页码，从 1 开始；无效值按 1 处理。
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    PageSize:
+      name: pageSize
+      in: query
+      required: false
+      description: 每页数量，默认 20，最大 100；无效值按默认值处理。
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    FeatureStatusFilter:
+      name: status
+      in: query
+      required: false
+      description: 按建议处理状态筛选；不传表示不限制状态。
+      schema:
+        $ref: '#/components/schemas/FeatureStatus'
+    AdminSearchKeyword:
+      name: q
+      in: query
+      required: false
+      description: 搜索标题、内容、客户姓名或邮箱；评论列表也支持搜索官方名称。
+      schema:
+        type: string
+        example: 发票
+  responses:
+    BadRequest:
+      description: 请求参数、请求体或机器人验证无效
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    UserUnauthorized:
+      description: 用户未登录或登录 Cookie 无效
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    AdminUnauthorized:
+      description: 缺少管理员凭证或管理员 Token 无效/过期
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: 管理员不存在、已停用或无权访问
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: 指定建议、评论或回复不存在或已移除
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ContentRejected:
+      description: 标题、建议内容或评论未通过内容安全审核
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ServiceUnavailable:
+      description: 机器人验证、备用验证码或内容审核服务暂时不可用
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    FeedbackAiBadGateway:
+      description: 内部 Python feedback-ai 服务不可达、配置缺失或未能建立 SSE 响应
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            message: AI 助手暫時無法回應，請稍後再試
+  schemas:
+    BotVerificationAction:
+      type: string
+      description: 机器人验证的业务场景。
+      enum: [feedback_comment, feedback_post]
+    FeatureStatus:
+      type: string
+      description: 建议处理状态；pending 为待评估，developing 为开发中，shipped 为已完成。
+      enum: [pending, developing, shipped]
+    ErrorResponse:
+      type: object
+      description: 接口调用失败时的统一响应。
+      required: [success, message]
+      properties:
+        success:
+          type: boolean
+          description: 请求是否成功，错误响应固定为 false。
+          example: false
+        code:
+          type: string
+          nullable: true
+          description: 可选的机器可读错误码，主要用于机器人验证和内容审核错误。
+          enum: [BOT_VERIFICATION_FAILED, BOT_VERIFICATION_UNAVAILABLE, CONTENT_MODERATION_FAILED, CONTENT_REJECTED]
+        message:
+          type: string
+          description: 面向用户或调用方的中文错误说明。
+          example: 请求参数无效
+    CaptchaResponse:
+      type: object
+      description: 备用验证码生成结果。
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+          description: 验证码是否生成成功。
+          example: true
+        data:
+          type: object
+          description: 备用验证码数据。
+          required: [image, token]
+          properties:
+            image:
+              type: string
+              description: Base64 编码的 SVG Data URL，可直接作为图片地址显示。
+              example: data:image/svg+xml;base64,PHN2ZyB4bWxucz0iLi4u
+            token:
+              type: string
+              description: 签名验证码 Token；提交时需和用户答案组合为 fallback:{token}:{answer}。
+              example: eyJhY3Rpb24iOiJmZWVkYmFja19wb3N0IiwiZXhwaXJlc0F0Ijox...
+    CategoryListResponse:
+      type: object
+      description: 反馈分类列表响应。
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+          description: 请求是否成功。
+          example: true
+        data:
+          type: array
+          description: 按 sortOrder 排序的一级分类数组。
+          items:
+            $ref: '#/components/schemas/FeedbackCategory'
+    FeedbackCategory:
+      type: object
+      description: 一级反馈分类。
+      required: [id, name, subCategories]
+      properties:
+        id:
+          type: integer
+          description: 一级分类数据库 ID。
+          example: 1
+        name:
+          type: string
+          description: 一级分类名称。
+          example: 系统功能
+        icon:
+          type: string
+          nullable: true
+          description: 分类图标名称或地址。
+          example: Settings
+        description:
+          type: string
+          nullable: true
+          description: 分类中文说明。
+          example: 与系统功能相关的需求建议
+        subCategories:
+          type: array
+          description: 当前一级分类下的子分类。
+          items:
+            $ref: '#/components/schemas/FeedbackSubCategory'
+    FeedbackSubCategory:
+      type: object
+      description: 反馈子分类。
+      required: [id, name, sortOrder]
+      properties:
+        id:
+          type: integer
+          description: 子分类数据库 ID。
+          example: 11
+        name:
+          type: string
+          description: 子分类名称。
+          example: 订单管理
+        sortOrder:
+          type: integer
+          description: 子分类排序值，数值越小越靠前。
+          example: 10
+    FeedbackComment:
+      type: object
+      description: 前台展示的普通评论或官方回复。
+      required: [id, author, content, createdAt, isOfficial]
+      properties:
+        id:
+          type: string
+          description: 评论 ID。
+          example: '2048'
+        author:
+          type: string
+          description: 评论作者名称；官方回复固定为 GO-TECH Manager。
+          example: GO-TECH Manager
+        content:
+          type: string
+          description: 评论或回复正文。
+          example: 该建议已进入评估阶段。
+        createdAt:
+          type: string
+          format: date-time
+          description: 评论创建时间，ISO 8601 格式。
+        isOfficial:
+          type: boolean
+          description: 是否为官方回复。
+          example: true
+        parentId:
+          type: string
+          nullable: true
+          description: 被回复的普通评论 ID；一级评论或建议级官方回复为 null。
+          example: '1025'
+    FeedbackFeature:
+      type: object
+      description: 前台反馈建议详情。
+      required: [id, title, description, author, category, likes, likedBy, comments, status, createdAt]
+      properties:
+        id:
+          type: string
+          description: 建议 ID。
+          example: '1024'
+        title:
+          type: string
+          description: 建议标题。
+          example: 增加批量导出发票功能
+        description:
+          type: string
+          description: 建议详细内容。
+          example: 希望订单页面可以按月份批量导出发票。
+        author:
+          type: string
+          description: 建议提交人名称。
+          example: 张先生
+        category:
+          type: string
+          description: 一级分类名称。
+          example: 系统功能
+        subCategory:
+          type: string
+          nullable: true
+          description: 子分类名称，未选择时为空。
+          example: 订单管理
+        likes:
+          type: integer
+          description: 当前建议票数。
+          example: 12
+        likedBy:
+          type: array
+          description: 已点赞用户名称列表。
+          items:
+            type: string
+            description: 已点赞用户名称。
+        comments:
+          type: array
+          description: 未删除且可见的评论和官方回复。
+          items:
+            $ref: '#/components/schemas/FeedbackComment'
+        status:
+          $ref: '#/components/schemas/FeatureStatus'
+        createdAt:
+          type: string
+          format: date-time
+          description: 建议创建时间，ISO 8601 格式。
+        shippedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: 建议完成时间；未完成时为空。
+        version:
+          type: string
+          nullable: true
+          description: 建议发布或完成时关联的产品版本号。
+          example: v2.3.0
+    FeatureListResponse:
+      type: object
+      description: 前台建议列表响应。
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+          description: 请求是否成功。
+          example: true
+        data:
+          type: array
+          description: 匹配的建议数组。
+          items:
+            $ref: '#/components/schemas/FeedbackFeature'
+    FeatureResponse:
+      type: object
+      description: 单条建议操作成功响应。
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+          description: 请求是否成功。
+          example: true
+        data:
+          $ref: '#/components/schemas/FeedbackFeature'
+    CreateFeatureRequest:
+      type: object
+      description: 新增反馈建议请求体。
+      required: [category, title, description, turnstileToken]
+      properties:
+        category:
+          type: string
+          minLength: 1
+          description: 已存在的一级分类名称。
+          example: 系统功能
+        subCategory:
+          type: string
+          nullable: true
+          description: 可选的子分类名称，必须属于所选一级分类。
+          example: 订单管理
+        title:
+          type: string
+          minLength: 1
+          maxLength: 160
+          description: 建议标题，去除首尾空格后长度不得超过 160。
+          example: 增加批量导出发票功能
+        description:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: 建议内容，去除首尾空格后长度不得超过 500。
+          example: 希望订单页面可以按月份批量导出发票。
+        turnstileToken:
+          type: string
+          minLength: 1
+          description: Turnstile Token；备用验证时格式为 fallback:{captchaToken}:{answer}。
+          example: 0.AbcDef...
+    CreateCommentRequest:
+      type: object
+      description: 新增建议评论请求体。
+      required: [content, turnstileToken]
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: 评论正文，去除首尾空格后长度不得超过 1000。
+          example: 我也需要这个功能。
+        turnstileToken:
+          type: string
+          minLength: 1
+          description: Turnstile Token；备用验证时格式为 fallback:{captchaToken}:{answer}。
+          example: 0.AbcDef...
+    CommentResponse:
+      type: object
+      description: 评论创建成功响应。
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+          description: 请求是否成功。
+          example: true
+        data:
+          $ref: '#/components/schemas/FeedbackComment'
+    VoteResponse:
+      type: object
+      description: 点赞状态切换响应。
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+          description: 请求是否成功。
+          example: true
+        data:
+          type: object
+          description: 最新点赞状态。
+          required: [liked, likes, userName]
+          properties:
+            liked:
+              type: boolean
+              description: 当前用户切换后是否已点赞。
+              example: true
+            likes:
+              type: integer
+              description: 切换后的总票数。
+              example: 13
+            userName:
+              type: string
+              description: 当前操作用户名称。
+              example: 张先生
+    AdminFeatureItem:
+      type: object
+      description: 后台建议列表项。
+      required: [id, title, description, author, email, status, commentCount, createdAt]
+      properties:
+        id:
+          type: string
+          description: 建议 ID。
+          example: '1024'
+        title:
+          type: string
+          description: 建议标题。
+        description:
+          type: string
+          description: 建议详细内容。
+        author:
+          type: string
+          description: 建议提交人名称，无法取得时为 Anonymous。
+        email:
+          type: string
+          description: 建议提交人邮箱，无法取得时为空字符串。
+        status:
+          $ref: '#/components/schemas/FeatureStatus'
+        commentCount:
+          type: integer
+          description: 建议下当前计入统计的评论和回复数量。
+          example: 4
+        createdAt:
+          type: string
+          format: date-time
+          description: 建议创建时间。
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: 建议软删除时间；未删除时为 null。
+    AdminCommentItem:
+      type: object
+      description: 后台评论列表项。
+      required: [id, featureId, featureTitle, author, content, isOfficial, createdAt]
+      properties:
+        id:
+          type: string
+          description: 评论或官方回复 ID。
+        featureId:
+          type: string
+          description: 所属建议 ID。
+        featureTitle:
+          type: string
+          description: 所属建议标题。
+        parentId:
+          type: string
+          nullable: true
+          description: 被回复的普通评论 ID；一级评论为 null。
+        author:
+          type: string
+          description: 作者名称；官方回复固定为 GO-TECH Manager。
+        content:
+          type: string
+          description: 评论或回复内容。
+        isOfficial:
+          type: boolean
+          description: 是否为官方回复。
+        createdAt:
+          type: string
+          format: date-time
+          description: 评论创建时间。
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: 评论软删除时间；未删除时为 null。
+    OfficialReply:
+      type: object
+      description: 官方回复详情。
+      required: [id, author, content, isOfficial, createdAt]
+      properties:
+        id:
+          type: string
+          description: 官方回复 ID。
+        author:
+          type: string
+          description: 官方作者名称，固定为 GO-TECH Manager。
+          example: GO-TECH Manager
+        content:
+          type: string
+          description: 官方回复正文。
+        isOfficial:
+          type: boolean
+          description: 是否为官方回复，固定为 true。
+          example: true
+        createdAt:
+          type: string
+          format: date-time
+          description: 官方回复创建时间。
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: 官方回复软删除时间；未删除时为 null。
+    AdminDetailComment:
+      type: object
+      description: 后台建议详情中的普通评论。
+      required: [id, author, content, isVisible, createdAt]
+      properties:
+        id:
+          type: string
+          description: 普通评论 ID。
+        author:
+          type: string
+          description: 普通评论作者名称。
+        content:
+          type: string
+          description: 普通评论正文。
+        isVisible:
+          type: boolean
+          description: 评论是否允许在前台显示。
+        createdAt:
+          type: string
+          format: date-time
+          description: 评论创建时间。
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: 评论软删除时间；未删除时为 null。
+        reply:
+          allOf:
+            - $ref: '#/components/schemas/OfficialReply'
+          nullable: true
+          description: 针对该普通评论的官方回复；尚未回复时为 null。
+    PaginationMeta:
+      type: object
+      description: 分页响应的页码和数量信息。
+      required: [page, pageSize, total]
+      properties:
+        page:
+          type: integer
+          description: 当前页码。
+          example: 1
+        pageSize:
+          type: integer
+          description: 当前每页数量。
+          example: 20
+        total:
+          type: integer
+          description: 符合条件的记录总数。
+          example: 135
+    AdminFeaturePageResponse:
+      type: object
+      description: 后台建议分页响应。
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+          description: 请求是否成功。
+          example: true
+        data:
+          allOf:
+            - $ref: '#/components/schemas/PaginationMeta'
+            - type: object
+              required: [items]
+              properties:
+                items:
+                  type: array
+                  description: 当前页建议列表。
+                  items:
+                    $ref: '#/components/schemas/AdminFeatureItem'
+    AdminCommentPageResponse:
+      type: object
+      description: 后台评论分页响应。
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+          description: 请求是否成功。
+          example: true
+        data:
+          allOf:
+            - $ref: '#/components/schemas/PaginationMeta'
+            - type: object
+              required: [items]
+              properties:
+                items:
+                  type: array
+                  description: 当前页评论及官方回复列表。
+                  items:
+                    $ref: '#/components/schemas/AdminCommentItem'
+    AdminCountsResponse:
+      type: object
+      description: 后台反馈统计响应。
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+          description: 请求是否成功。
+          example: true
+        data:
+          type: object
+          description: 后台反馈数量统计。
+          required: [completed, trash, deletedFeatures, deletedComments]
+          properties:
+            completed:
+              type: integer
+              description: 未删除且状态为已完成的建议数量。
+            trash:
+              type: integer
+              description: 已删除建议和已删除评论的合计数量。
+            deletedFeatures:
+              type: integer
+              description: 已软删除建议数量。
+            deletedComments:
+              type: integer
+              description: 已软删除普通评论和官方回复数量。
+    AdminCommentDetailResponse:
+      type: object
+      description: 后台建议评论详情响应。
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+          description: 请求是否成功。
+          example: true
+        data:
+          type: object
+          description: 建议级官方回复及普通评论明细。
+          required: [comments]
+          properties:
+            featureReply:
+              allOf:
+                - $ref: '#/components/schemas/OfficialReply'
+              nullable: true
+              description: 针对建议本身的官方回复；尚未回复时为 null。
+            comments:
+              type: array
+              description: 普通评论及其官方回复。
+              items:
+                $ref: '#/components/schemas/AdminDetailComment'
+    SaveOfficialReplyRequest:
+      type: object
+      description: 新增或更新官方回复请求体。
+      required: [content]
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: 官方回复正文，去除首尾空格后长度不得超过 1000。
+          example: 感谢建议，该功能已进入开发计划。
+        parentId:
+          oneOf:
+            - type: string
+              pattern: '^[1-9][0-9]*$'
+            - type: integer
+              minimum: 1
+          nullable: true
+          description: 被回复的普通评论 ID；为空或不传时表示回复建议本身。
+          example: '2048'
+    OfficialReplyResponse:
+      type: object
+      description: 官方回复保存成功响应。
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+          description: 请求是否成功。
+          example: true
+        data:
+          $ref: '#/components/schemas/OfficialReply'
+    UpdateFeatureStatusRequest:
+      type: object
+      description: 更新建议状态请求体。
+      required: [status]
+      properties:
+        status:
+          $ref: '#/components/schemas/FeatureStatus'
+    UpdateFeatureStatusResponse:
+      type: object
+      description: 建议状态更新成功响应。
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+          description: 请求是否成功。
+          example: true
+        data:
+          type: object
+          description: 更新后的建议状态。
+          required: [id, status]
+          properties:
+            id:
+              type: string
+              description: 建议 ID。
+            status:
+              $ref: '#/components/schemas/FeatureStatus'
+    DeleteStateResponse:
+      type: object
+      description: 建议或评论删除/恢复成功响应。
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+          description: 请求是否成功。
+          example: true
+        data:
+          type: object
+          description: 目标资源及其最新删除状态。
+          required: [id, deleted]
+          properties:
+            id:
+              type: string
+              description: 被操作的建议、评论或回复 ID。
+            deleted:
+              type: boolean
+              description: 操作后是否处于已删除状态；删除为 true，恢复为 false。
+    AssistantHistoryMessage:
+      type: object
+      description: AI 助手的一条历史对话消息。
+      required: [role, content]
+      properties:
+        role:
+          type: string
+          enum: [assistant, user]
+          description: 消息角色；user 为管理员问题，assistant 为 AI 历史回答。
+        content:
+          type: string
+          minLength: 1
+          maxLength: 12000
+          description: 历史消息正文，去除首尾空格后长度不得超过 12000。
+    AssistantChatRequest:
+      type: object
+      description: |
+        反馈 AI 助手对话请求体。管理员用户标识由服务端根据 Bearer Token 生成，客户端不能传入
+        `user_id`，也不能传入 Python 服务使用的内部认证 Token。
+      required: [question]
+      properties:
+        question:
+          type: string
+          minLength: 1
+          maxLength: 4000
+          description: 管理员当前问题，去除首尾空格后长度不得超过 4000。
+          example: 最近用户最关注哪些功能？
+        history:
+          type: array
+          maxItems: 16
+          default: []
+          description: 可选的历史对话上下文，最多 16 条；不传时按空数组处理。
+          items:
+            $ref: '#/components/schemas/AssistantHistoryMessage'

@@ -14,11 +14,11 @@ import dayjs from 'dayjs';
 import { Minus, Plus } from 'lucide-react';
 import { useLocale } from 'next-intl';
 import dynamic from 'next/dynamic';
-import { useRouter } from 'next/navigation';
 import { type FC, useEffect, useState } from 'react';
+import { useProgressRouter } from '@/app/hooks/use-progress-router';
+import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 import { translateError } from '@/app/lib/translate-error';
 import { useAuth } from '@/contexts/AuthContext';
-import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 import { DynamicText } from '../components/DynamicI18nText.client';
 import valueAddedServices, { type SpecificValueAddedServicesId } from '../constants/addedServices';
 import { type OrderItemInfoType, OrderItemTypeEnum, OrderTypeEnum } from '../constants/order';
@@ -51,7 +51,7 @@ export const AddService: FC<AddServiceProps> = ({
   const currentOrder = data;
 
   const { token } = useAuth();
-  const router = useRouter();
+  const router = useProgressRouter();
   const locale = useLocale();
   const [selectedServices, setSelectedServices] = useState<Record<string, number>>({});
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);

@@ -18,8 +18,8 @@ import {
   SheetTrigger
 } from '@go-tech-frontend/ui';
 import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
+import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIframeContext } from '@/contexts/IframeContext';
 import { DynamicText } from './DynamicI18nText';
@@ -27,7 +27,7 @@ import LocaleSwitcher from './LocaleSwitcher';
 import { type PageBlock } from './PageBlocks';
 
 const SelectTenant = ({ generateCallback }: { generateCallback: (uri: string) => void }) => {
-  const router = useRouter();
+  const router = useProgressRouter();
   const t = useTranslations();
   const { hasIframe } = useIframeContext();
   const { isLoggedIn, tenants, token } = useAuth();
@@ -104,7 +104,7 @@ const resolveAction = (value: unknown) => {
 
 const Header = ({ heroBg, initialBlocks }: { heroBg?: string | StaticImageData; initialBlocks?: PageBlock[] }) => {
   const t = useTranslations();
-  const router = useRouter();
+  const router = useProgressRouter();
   const { hasIframe } = useIframeContext();
   const { isLoggedIn, logout, tenants, token, user } = useAuth();
   const [isSheetOpen, setIsSheetOpen] = useState(false);

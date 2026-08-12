@@ -7,8 +7,9 @@ import dayjs from 'dayjs';
 import { ArrowRight, Building, Calendar, CheckCircle2, Clock, Package, ShieldCheck, Users } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useTheme } from 'next-themes';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useEffect, useRef } from 'react';
+import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import servicePlanBg from '@/assets/service-plan-bg.jpg';
 import { useAuth } from '@/contexts/AuthContext';
 import ThemeSchemaToggler from '../components/ThemeSchemaToggler';
@@ -31,7 +32,7 @@ const SelectAccount = () => {
   const fromHeader = from && from === 'header';
   const { refetchTenants, tenants, token } = useAuth();
   const { resolvedTheme } = useTheme();
-  const router = useRouter();
+  const router = useProgressRouter();
 
   const accountGridBackground = resolvedTheme === 'dark' ? accountGridGradient.dark : accountGridGradient.light;
   const pm2Window = useRef<Window | null>(null);

@@ -7,8 +7,9 @@ import Link from '@/app/components/Link';
 
 import { Eye, EyeOff, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import z from 'zod';
+import { useProgressRouter } from '@/app/hooks/use-progress-router';
 // import Logo from "@/assets/Gotech_Logo.webp";
 import authBgImg from '@/assets/background.webp';
 import { useAuth } from '@/contexts/AuthContext';
@@ -27,7 +28,7 @@ const Login = () => {
   const redirect = searchParams.get('redirect');
 
   const t = useTranslations('Account');
-  const router = useRouter();
+  const router = useProgressRouter();
   const { refetchTenants, setToken, setUser } = useAuth();
   const [account, setAccount] = useState(email || '');
   const [password, setPassword] = useState('');

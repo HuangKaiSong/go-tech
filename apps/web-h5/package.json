@@ -34,6 +34,7 @@
     "jotai": "catalog:core",
     "lru-cache": "^11.5.2",
     "lucide-react": "catalog:",
+    "motion": "catalog:ui-shared",
     "mysql2": "^3.23.2",
     "next": "16.2.9",
     "next-intl": "^4.13.0",

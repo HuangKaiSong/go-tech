@@ -3,12 +3,12 @@
 import { Button } from '@go-tech-frontend/ui';
 import { useAtom, useSetAtom } from 'jotai';
 import { Check, Minus, Plus } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { DynamicText } from '@/app/components/DynamicI18nText.client';
 import Footer from '@/app/components/Footer';
 import Header from '@/app/components/Header';
 import valueAddedServices from '@/app/constants/addedServices';
+import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import servicePlanBg from '@/assets/service-plan-bg.jpg';
 import { needAddonsAtom, selectedMonthsAtom, selectedServicesAtom } from '@/contexts/Order.jotai';
 
@@ -33,7 +33,7 @@ const computeServiceTotal = (priceEach: number, qty: number, months: number) => 
 };
 
 const SelectPlan = ({ plan }: { plan: Packages }) => {
-  const router = useRouter();
+  const router = useProgressRouter();
   const [needAddons, setNeedAddons] = useAtom(needAddonsAtom);
   const [hasMounted, setHasMounted] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState('1');

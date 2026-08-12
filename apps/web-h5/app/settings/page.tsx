@@ -15,17 +15,17 @@ import {
   toast
 } from '@go-tech-frontend/ui';
 import { ArrowLeft, Eye, EyeOff, Lock, User } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import Footer from '@/app/components/Footer';
 import Header from '@/app/components/Header';
+import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { DynamicText } from '../components/DynamicI18nText.client';
 import { useBatchTranslation } from '../hooks/useBatchTranslation';
 
 const Settings = ({ token, user }: any) => {
   const { setUser } = useAuth();
-  const router = useRouter();
+  const router = useProgressRouter();
 
   // 個人資料狀態
   const [profileData, setProfileData] = useState({

@@ -2,15 +2,15 @@
 
 import { Button, Input } from '@go-tech-frontend/ui';
 import { CheckCircle } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import Footer from '@/app/components/Footer';
 import Header from '@/app/components/Header';
+import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { DynamicText } from '../components/DynamicI18nText.client';
 import { useBatchTranslation } from '../hooks/useBatchTranslation';
 
 const FreeTrial = () => {
-  const router = useRouter();
+  const router = useProgressRouter();
   const [formData, setFormData] = useState({
     name: '',
     email: '',

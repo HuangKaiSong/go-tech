@@ -3,7 +3,6 @@
 import { Badge, Button, Card, CardContent, CardHeader, Separator, toast } from '@go-tech-frontend/ui';
 import { ArrowLeft, CheckCircle, CreditCard, Download, Package, RefreshCw, Settings, XCircle } from 'lucide-react';
 import { useLocale } from 'next-intl';
-import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { DynamicText } from '@/app/components/DynamicI18nText.client';
 import Footer from '@/app/components/Footer';
@@ -19,6 +18,7 @@ import {
   peekWebManagedCashier,
   stashWebManagedCashier
 } from '@/app/constants/payment';
+import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 import { translateError } from '@/app/lib/translate-error';
 import { useAuth } from '@/contexts/AuthContext';
@@ -53,7 +53,7 @@ const goToThirdPartyPay = (data: OrderAddResponse) => {
 
 // oxlint-disable-next-line complexity
 const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
-  const router = useRouter();
+  const router = useProgressRouter();
   const { token } = useAuth();
   const locale = useLocale();
 

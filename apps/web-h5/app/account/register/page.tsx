@@ -5,11 +5,11 @@ import { Button, Checkbox, Input, toast } from '@go-tech/web-ui';
 import { CircleAlert, X } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import z from 'zod';
 import { DynamicText } from '@/app/components/DynamicI18nText.client';
 import Link from '@/app/components/Link';
+import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 import { translateError } from '@/app/lib/translate-error';
 // import Logo from "@/assets/Gotech_Logo.webp";
@@ -30,7 +30,7 @@ const parseEmailExists = (result: any) => {
 };
 
 const Register = () => {
-  const router = useRouter();
+  const router = useProgressRouter();
   const t = useTranslations('Account');
   const locale = useLocale();
   const existingEmailMessage = t('emailExists');

@@ -17,11 +17,11 @@ import { useAsyncEffect } from 'ahooks';
 import { ArrowUpCircle, Eye, Package, RefreshCw, Settings, ShoppingCart } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
-import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import Footer from '@/app/components/Footer';
 import Header from '@/app/components/Header';
 import Link from '@/app/components/Link';
+import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { translateError } from '@/app/lib/translate-error';
 import { useAuth } from '@/contexts/AuthContext';
 import { type OrderItemInfoType, OrderStatusEnum } from '../constants/order';
@@ -50,7 +50,7 @@ const getStatusColor = (status: OrderStatusEnum) => {
 
 const MyOrders = () => {
   const { token } = useAuth();
-  const router = useRouter();
+  const router = useProgressRouter();
   const t = useTranslations('Order');
   const locale = useLocale();
 

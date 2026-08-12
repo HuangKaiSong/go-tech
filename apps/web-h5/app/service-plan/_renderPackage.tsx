@@ -2,7 +2,7 @@
 
 import { Button, Card, CardContent, CardHeader } from '@go-tech-frontend/ui';
 import { Settings } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { DynamicText } from '../components/DynamicI18nText.client';
 
 type ExtendedPackages = Packages & {
@@ -20,7 +20,7 @@ const getIconHref = (value: string) => {
 };
 
 export default function Page({ packages }: { packages: ExtendedPackages[] }) {
-  const router = useRouter();
+  const router = useProgressRouter();
 
   const handleSelectPlan = (plan: ExtendedPackages) => {
     const price = plan.price;

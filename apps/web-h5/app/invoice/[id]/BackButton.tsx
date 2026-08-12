@@ -1,11 +1,11 @@
 'use client';
 
 import { ArrowLeft } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { DynamicText } from '@/app/components/DynamicI18nText.client';
+import { useProgressRouter } from '@/app/hooks/use-progress-router';
 
 const BackButton = () => {
-  const router = useRouter();
+  const router = useProgressRouter();
 
   const handleBack = () => {
     if (window.history.length > 1) {

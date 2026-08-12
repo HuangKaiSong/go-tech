@@ -6,14 +6,14 @@ import { useAtom, useAtomValue } from 'jotai';
 import { FileCheck } from 'lucide-react';
 import { useLocale } from 'next-intl';
 import dynamic from 'next/dynamic';
-import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { DynamicText } from '@/app/components/DynamicI18nText.client';
-import { translateError } from '@/app/lib/translate-error';
 import valueAddedServices from '@/app/constants/addedServices';
 import { type PromotionOption } from '@/app/constants/promotion';
+import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 import { usePromotions } from '@/app/hooks/usePromotions';
+import { translateError } from '@/app/lib/translate-error';
 import servicePlanBg from '@/assets/service-plan-bg.jpg';
 import { useAuth } from '@/contexts/AuthContext';
 import { needAddonsAtom, selectedMonthsAtom, selectedServicesAtom } from '@/contexts/Order.jotai';
@@ -65,7 +65,7 @@ const ConfirmOrder = ({
   planId?: string;
   promotions?: PromotionOption[];
 }) => {
-  const router = useRouter();
+  const router = useProgressRouter();
   const { planId } = { planId: planIdFromQuery };
   const { token, user } = useAuth();
   const locale = useLocale();

@@ -2,7 +2,6 @@
 
 import { Button, Input } from '@go-tech-frontend/ui';
 import { ArrowLeft, ArrowUp, CheckCircle2, ChevronDown, LoaderCircle, MessageCircle, Plus, Search } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { DynamicText } from '@/app/components/DynamicI18nText.client';
@@ -11,6 +10,7 @@ import NewPostDialog from '@/app/components/feedback/NewPostDialog';
 import Turnstile from '@/app/components/feedback/turnstile';
 import Footer from '@/app/components/Footer';
 import Header from '@/app/components/Header';
+import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 import { useAuth } from '@/contexts/AuthContext';
 import { SERIF, statusMeta } from '../data';
@@ -27,7 +27,7 @@ interface Props {
 }
 
 const CategoryContent = ({ activeCat, categoriesForPage, featuresFromDB, language, shippedFromDB }: Props) => {
-  const router = useRouter();
+  const router = useProgressRouter();
   const { addComment, addFeature, features, requireLogin, toggleLike } = useFeedbackFeatures(activeCat, featuresFromDB);
   const { user } = useAuth();
 

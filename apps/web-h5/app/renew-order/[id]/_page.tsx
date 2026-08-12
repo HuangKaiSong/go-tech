@@ -18,18 +18,18 @@ import dayjs from 'dayjs';
 import { ArrowLeft, CheckCircle, Clock, CreditCard, Package, RefreshCw, Settings } from 'lucide-react';
 import { useLocale } from 'next-intl';
 import dynamic from 'next/dynamic';
-import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { DynamicText } from '@/app/components/DynamicI18nText.client';
-import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
-import { translateError } from '@/app/lib/translate-error';
 import Footer from '@/app/components/Footer';
 import Header from '@/app/components/Header';
 import Link from '@/app/components/Link';
 import { type OrderItemInfoType, OrderItemTypeEnum, OrderTypeEnum } from '@/app/constants/order';
 import { DAYSPERMONTH, PayTypeEnum, stashWebManagedCashier } from '@/app/constants/payment';
 import { type PromotionOption, getPromotionDiscount } from '@/app/constants/promotion';
+import { useProgressRouter } from '@/app/hooks/use-progress-router';
+import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 import { usePromotions } from '@/app/hooks/usePromotions';
+import { translateError } from '@/app/lib/translate-error';
 import { useAuth } from '@/contexts/AuthContext';
 
 const PaymentPanel = dynamic(() => import('@/app/components/payment/Panel'), {
@@ -157,7 +157,7 @@ const RenewOrder = ({
   id: string;
   promotions?: PromotionOption[];
 }) => {
-  const router = useRouter();
+  const router = useProgressRouter();
   const order = detail;
   const { token } = useAuth();
   const locale = useLocale();
