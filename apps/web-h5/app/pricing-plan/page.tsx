@@ -5,7 +5,7 @@ import { Check, Minus } from 'lucide-react';
 import Footer from '@/app/components/Footer';
 import Header from '@/app/components/Header';
 import { DynamicText } from '../components/DynamicI18nText.client';
-import { type PricingPlanData } from './layout';
+import type { PricingPlanData } from './types';
 
 const getIconHref = (value: string) => {
   const normalized = value

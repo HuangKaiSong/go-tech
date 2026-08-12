@@ -1,27 +1,14 @@
 import { getBaseUrl } from '@/lib/http';
 import PageClient from './page';
+import type { PricingPlanData } from './types';
 
-const pricingData = {
+const pricingData: PricingPlanData = {
   plans: [
     // { name: "普通版", price: "$1,000", units: "25", extra: "$150/5個" },
     // { name: "升級版", price: "$3,200", units: "100", extra: "$130/5個" },
     // { name: "豪華版", price: "$12,000", units: "400", extra: "$100/5個" },
-  ] as {
-    extra: string;
-    id?: number;
-    name: string;
-    price: string;
-    units: string;
-  }[],
-  categories: [] as {
-    features: {
-      icon?: string;
-      name: string;
-      plans: boolean[];
-      type: string;
-    }[];
-    name: string;
-  }[],
+  ],
+  categories: [],
   addons: [
     {
       name: '升級營舖模組',
@@ -49,8 +36,6 @@ const pricingData = {
     }
   ]
 };
-
-export type PricingPlanData = typeof pricingData;
 
 // 定义addon key的联合类型
 type AddonKey = 'accountingSysPrice' | 'custServiceSysPrice' | 'rentSysPrice' | 'venueSysPrice';
