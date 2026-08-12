@@ -30,9 +30,11 @@ const SelectAccount = () => {
   const searchParams = useSearchParams();
   const from = searchParams.get('from');
   const fromHeader = from && from === 'header';
-  const { refetchTenants, tenants, token } = useAuth();
+  const { refetchTenants, tenants, tenantsStatus, token } = useAuth();
   const { resolvedTheme } = useTheme();
   const router = useProgressRouter();
+  const isTenantListPending = (tenantsStatus === 'idle' || tenantsStatus === 'loading') && tenants.length === 0;
+  const shouldShowTenantList = tenants.length > 0 || tenantsStatus === 'success';
 
   const accountGridBackground = resolvedTheme === 'dark' ? accountGridGradient.dark : accountGridGradient.light;
   const pm2Window = useRef<Window | null>(null);
@@ -170,7 +172,25 @@ const SelectAccount = () => {
       {/* Account grid */}
       <section className="flex-1 py-12" style={{ backgroundImage: accountGridBackground }}>
         <div className="container mx-auto px-4 max-w-6xl">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {isTenantListPending ? (
+            <div aria-live="polite" className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" role="status">
+              {[0, 1, 2].map(item => (
+                <div className="h-[280px] animate-pulse rounded-2xl border-2 border-border bg-card/70" key={item} />
+              ))}
+              <span className="sr-only">{t('tenantsLoading')}</span>
+            </div>
+          ) : null}
+
+          {tenantsStatus === 'error' && tenants.length === 0 ? (
+            <div className="rounded-2xl border border-destructive/30 bg-card p-8 text-center">
+              <p className="mb-4 text-sm text-muted-foreground">{t('tenantsLoadFailed')}</p>
+              <Button onClick={() => token && refetchTenants(token, { force: true })}>{t('retry')}</Button>
+            </div>
+          ) : null}
+
+          <div
+            className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ${shouldShowTenantList ? '' : 'hidden'}`}
+          >
             {tenants.map(acc => {
               const isActive = dayjs(acc.expireDate).isAfter(dayjs());
               const statusLabel = isActive ? t('inUse') : t('expired');
