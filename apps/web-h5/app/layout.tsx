@@ -100,14 +100,6 @@ export default async function RootLayout({
             </ThemeProvider>
           </DynamicI18nProvider>
         </NextIntlClientProvider>
-        {/* <!-- Cloudflare Web Analytics --> */}
-        <script
-          type="module"
-          src="https://static.cloudflareinsights.com/beacon.min.js"
-          data-cf-beacon='{"token": "6a34f8df413a45c28cdcc71f8bc2d939"}'
-          async
-        />
-        {/* <!-- End Cloudflare Web Analytics --> */}
       </body>
     </html>
   );
