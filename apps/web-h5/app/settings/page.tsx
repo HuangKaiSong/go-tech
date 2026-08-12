@@ -56,6 +56,12 @@ const Settings = ({ token, user }: any) => {
   const passwordsMismatch = useBatchTranslation('兩次輸入的新密碼不一致');
   const apiNotFound = useBatchTranslation('接口 /go-tech/platform/platformCustomer/updatePwd 未定义');
   const passwordChanged = useBatchTranslation('密碼修改成功');
+  const namePlaceholder = useBatchTranslation('請輸入您的姓名');
+  const emailPlaceholder = useBatchTranslation('請輸入您的電子郵箱');
+  const phonePlaceholder = useBatchTranslation('請輸入您的聯繫電話');
+  const companyPlaceholder = useBatchTranslation('請輸入您的公司名稱');
+  const newPasswordPlaceholder = useBatchTranslation('請輸入新密碼（至少6個字符）');
+  const confirmPasswordPlaceholder = useBatchTranslation('請再次輸入新密碼');
 
   const handleProfileChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setProfileData(prev => ({ ...prev, [field]: e.target.value }));
@@ -240,7 +246,7 @@ const Settings = ({ token, user }: any) => {
                         </label>
                         <Input
                           type="text"
-                          placeholder={useBatchTranslation('請輸入您的姓名')}
+                          placeholder={namePlaceholder}
                           value={profileData.custName}
                           onChange={handleProfileChange('custName')}
                           className="h-12"
@@ -254,7 +260,7 @@ const Settings = ({ token, user }: any) => {
                         </label>
                         <Input
                           type="email"
-                          placeholder={useBatchTranslation('請輸入您的電子郵箱')}
+                          placeholder={emailPlaceholder}
                           value={profileData.email}
                           onChange={handleProfileChange('email')}
                           className="h-12"
@@ -268,7 +274,7 @@ const Settings = ({ token, user }: any) => {
                         </label>
                         <Input
                           type="tel"
-                          placeholder={useBatchTranslation('請輸入您的聯繫電話')}
+                          placeholder={phonePlaceholder}
                           value={profileData.phone}
                           onChange={handleProfileChange('phone')}
                           className="h-12"
@@ -281,7 +287,7 @@ const Settings = ({ token, user }: any) => {
                         </label>
                         <Input
                           type="text"
-                          placeholder={useBatchTranslation('請輸入您的公司名稱')}
+                          placeholder={companyPlaceholder}
                           value={profileData.companyName}
                           onChange={handleProfileChange('companyName')}
                           className="h-12"
@@ -317,7 +323,7 @@ const Settings = ({ token, user }: any) => {
                         <div className="relative">
                           <Input
                             type={showCurrentPassword ? 'text' : 'password'}
-                            placeholder={useBatchTranslation('請輸入當前密碼')}
+                            placeholder={enterCurrentPassword}
                             value={passwordData.currentPassword}
                             onChange={handlePasswordChange('currentPassword')}
                             className="h-12 pr-12"
@@ -340,7 +346,7 @@ const Settings = ({ token, user }: any) => {
                         <div className="relative">
                           <Input
                             type={showNewPassword ? 'text' : 'password'}
-                            placeholder={useBatchTranslation('請輸入新密碼（至少6個字符）')}
+                            placeholder={newPasswordPlaceholder}
                             value={passwordData.newPassword}
                             onChange={handlePasswordChange('newPassword')}
                             className="h-12 pr-12"
@@ -363,7 +369,7 @@ const Settings = ({ token, user }: any) => {
                         <div className="relative">
                           <Input
                             type={showConfirmPassword ? 'text' : 'password'}
-                            placeholder={useBatchTranslation('請再次輸入新密碼')}
+                            placeholder={confirmPasswordPlaceholder}
                             value={passwordData.confirmPassword}
                             onChange={handlePasswordChange('confirmPassword')}
                             className="h-12 pr-12"

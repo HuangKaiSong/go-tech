@@ -7,11 +7,14 @@ interface DynamicTextClientProps {
 }
 
 export function DynamicText({ text }: DynamicTextClientProps) {
-  if (!text) {
-    return text;
+  if (!text.trim()) {
+    return '';
   }
 
-  // oxlint-disable-next-line react-hooks/rules-of-hooks
+  return <TranslatedText text={text} />;
+}
+
+function TranslatedText({ text }: DynamicTextClientProps) {
   const translated = useBatchTranslation(text);
 
   return <span>{translated}</span>;

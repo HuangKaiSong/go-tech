@@ -99,6 +99,7 @@ const ConfirmOrder = ({
   const evidenceSubmitted = useBatchTranslation('支付憑證已提交，我們將在確認後為您開通服務');
   const redirectingToCashier = useBatchTranslation('正在跳转至收银台');
   const addServiceOrderFailed = useBatchTranslation('創建增值服務訂單失敗，請稍後重試');
+  const invoiceNamePlaceholder = useBatchTranslation('請輸入公司或個人名稱');
 
   useEffect(() => {
     setHasMounted(true);
@@ -484,7 +485,7 @@ const ConfirmOrder = ({
               </div>
               <Switch checked={needInvoice} onCheckedChange={setNeedInvoice} />
             </div>
-            {needInvoice && (
+            {Boolean(needInvoice) && (
               <div className="mt-4 space-y-1">
                 <Label className="text-sm text-muted-foreground">
                   <DynamicText text="發票抬頭（公司或個人名稱）" />
@@ -492,8 +493,7 @@ const ConfirmOrder = ({
                 <Input
                   value={invoiceName}
                   onChange={e => setInvoiceName(e.target.value)}
-                  // oxlint-disable-next-line react-hooks/rules-of-hooks
-                  placeholder={useBatchTranslation('請輸入公司或個人名稱')}
+                  placeholder={invoiceNamePlaceholder}
                   className="h-9"
                 />
               </div>

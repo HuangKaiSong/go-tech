@@ -28,6 +28,8 @@ export const PromotionSection: FC<PromotionSectionProps> = ({
   promotions,
   selectedPromotionId
 }) => {
+  const codePlaceholder = useBatchTranslation('輸入優惠碼');
+
   return (
     <div className="rounded-lg border border-border p-3">
       <p className="font-medium mb-3">
@@ -97,7 +99,7 @@ export const PromotionSection: FC<PromotionSectionProps> = ({
         <Input
           value={code}
           onChange={e => onCodeChange(e.target.value)}
-          placeholder={useBatchTranslation('輸入優惠碼')}
+          placeholder={codePlaceholder}
           className="h-10 flex-1"
           onKeyDown={e => {
             if (e.key === 'Enter') {

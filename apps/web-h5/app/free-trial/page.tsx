@@ -17,6 +17,10 @@ const FreeTrial = () => {
     phone: '',
     company: ''
   });
+  const namePlaceholder = useBatchTranslation('請輸入您的姓名');
+  const emailPlaceholder = useBatchTranslation('請輸入您的電子郵箱');
+  const phonePlaceholder = useBatchTranslation('請輸入您的聯繫電話');
+  const companyPlaceholder = useBatchTranslation('請輸入您的公司名稱（選填）');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,7 +82,7 @@ const FreeTrial = () => {
                       name="name"
                       value={formData.name}
                       onChange={handleChange}
-                      placeholder={useBatchTranslation('請輸入您的姓名')}
+                      placeholder={namePlaceholder}
                       required
                       className="h-11"
                     />
@@ -93,7 +97,7 @@ const FreeTrial = () => {
                       type="email"
                       value={formData.email}
                       onChange={handleChange}
-                      placeholder={useBatchTranslation('請輸入您的電子郵箱')}
+                      placeholder={emailPlaceholder}
                       required
                       className="h-11"
                     />
@@ -108,7 +112,7 @@ const FreeTrial = () => {
                       type="tel"
                       value={formData.phone}
                       onChange={handleChange}
-                      placeholder={useBatchTranslation('請輸入您的聯繫電話')}
+                      placeholder={phonePlaceholder}
                       required
                       className="h-11"
                     />
@@ -122,7 +126,7 @@ const FreeTrial = () => {
                       name="company"
                       value={formData.company}
                       onChange={handleChange}
-                      placeholder={useBatchTranslation('請輸入您的公司名稱（選填）')}
+                      placeholder={companyPlaceholder}
                       className="h-11"
                     />
                   </div>

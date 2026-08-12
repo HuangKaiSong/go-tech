@@ -18,7 +18,7 @@ import dayjs from 'dayjs';
 import { ArrowLeft, CheckCircle, Clock, CreditCard, Package, RefreshCw, Settings } from 'lucide-react';
 import { useLocale } from 'next-intl';
 import dynamic from 'next/dynamic';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { DynamicText } from '@/app/components/DynamicI18nText.client';
 import Footer from '@/app/components/Footer';
 import Header from '@/app/components/Header';
@@ -42,6 +42,35 @@ const renewalOptions = [
   { id: '3month', label: '續費3个月', months: 3, discount: 0 },
   { id: 'custom', label: '自定义月数', months: 6, discount: 0 }
 ];
+
+type OrderPackage = OrderItemInfoType['platformPackageDto'];
+
+/** 优惠价格 1个月-2个月 -> price 3个月-5个月 -> priceA 6个月-11个月 -> priceB 12个月及以上 -> priceC */
+const getRenewalDiscount = (orderPackage: OrderPackage | undefined, months: number) => {
+  let recursePrice = orderPackage?.price;
+  if (months >= 12) {
+    recursePrice = orderPackage?.priceC || recursePrice;
+  }
+  if (months >= 6 && months < 12) {
+    recursePrice = orderPackage?.priceB || recursePrice;
+  }
+  if (months >= 3 && months < 6) {
+    recursePrice = orderPackage?.priceA || recursePrice;
+  }
+
+  return Math.max(0, Math.max(0, (orderPackage?.price || 0) - (recursePrice || 0)) * months);
+};
+
+const getRenewalOrderPricing = (order: OrderItemInfoType, months: number) => {
+  const orderPackage = order?.platformPackageDto;
+  const addService = order?.orderItems?.filter(item => item.itemType === OrderItemTypeEnum.ADDITION) ?? [];
+  const yearlyPrice = orderPackage?.price || 0;
+  const originalPrice = yearlyPrice * months;
+  const discountAmount = getRenewalDiscount(orderPackage, months);
+  const addServicePrice = addService.reduce((acc, item) => acc + item.price! * item.count! * months, 0);
+
+  return { addService, addServicePrice, discountAmount, orderPackage, originalPrice, yearlyPrice };
+};
 
 interface RenewPromotionCardProps {
   applying: boolean;
@@ -148,15 +177,12 @@ const RenewPromotionCard = ({
   );
 };
 
-const RenewOrder = ({
-  detail,
-  id: _id,
-  promotions = []
-}: {
+interface RenewOrderContentProps {
   detail: OrderItemInfoType;
-  id: string;
-  promotions?: PromotionOption[];
-}) => {
+  promotions: PromotionOption[];
+}
+
+const RenewOrderContent = ({ detail, promotions }: RenewOrderContentProps) => {
   const router = useProgressRouter();
   const order = detail;
   const { token } = useAuth();
@@ -173,66 +199,16 @@ const RenewOrder = ({
   const [customMonths, setCustomMonths] = useState(6);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
 
-  if (!order) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <section className="pt-32 pb-16">
-          <div className="container mx-auto px-4 text-center">
-            <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h1 className="text-2xl font-bold mb-4">
-              <DynamicText text="找不到訂單" />
-            </h1>
-            <p className="text-muted-foreground mb-6">
-              <DynamicText text="該訂單不存在或已被刪除" />
-            </p>
-            <Link href="/my-orders">
-              <Button>
-                <DynamicText text="返回我的訂單" />
-              </Button>
-            </Link>
-          </div>
-        </section>
-        <Footer />
-      </div>
-    );
-  }
-
-  const addService = order.orderItems.filter(item => item.itemType === OrderItemTypeEnum.ADDITION);
-
   const selectedOption = renewalOptions.find(opt => opt.id === selectedPeriod)!;
   const selectedMonths = selectedOption.id === 'custom' ? customMonths : selectedOption.months;
-  const yearlyPrice = order.platformPackageDto?.price || 0;
   const months = selectedMonths;
-  const originalPrice = yearlyPrice * months;
-
-  /** 优惠价格 1个月-2个月 -> price 3个月-5个月 -> priceA 6个月-11个月 -> priceB 12个月及以上 -> priceC */
-  // oxlint-disable react-hooks/rules-of-hooks
-  const discountAmount = useMemo<number>(() => {
-    // 原价
-    let recursePrice = order.platformPackageDto?.price;
-    if (months >= 12) {
-      recursePrice = order.platformPackageDto?.priceC || recursePrice;
-    }
-    if (months >= 6 && months < 12) {
-      recursePrice = order.platformPackageDto?.priceB || recursePrice;
-    }
-    if (months >= 3 && months < 6) {
-      recursePrice = order.platformPackageDto?.priceA || recursePrice;
-    }
-
-    const diffPrice = Math.max(0, (order.platformPackageDto?.price || 0) - (recursePrice || 0)) * months;
-
-    return Math.max(0, diffPrice);
-    // oxlint-disable react-hooks/exhaustive-deps
-  }, [months]);
-
-  const addServicePrice = addService.reduce((acc, item) => acc + item.price! * item.count! * months, 0);
+  const { addService, addServicePrice, discountAmount, orderPackage, originalPrice, yearlyPrice } =
+    getRenewalOrderPricing(order, months);
 
   // ---------------------------------------------------------------------------
   // 优惠活动 / 优惠码
   // ---------------------------------------------------------------------------
-  const packageId = order.platformPackageDto?.id;
+  const packageId = orderPackage?.id;
 
   /** 优惠前的应付金额（套餐费 + 增值服务 - 时长折扣） */
   const promotionBaseAmount = Math.max(0, addServicePrice + originalPrice - discountAmount);
@@ -687,6 +663,43 @@ const RenewOrder = ({
       <Footer />
     </div>
   );
+};
+
+interface RenewOrderProps {
+  detail: OrderItemInfoType | null;
+  id: string;
+  promotions?: PromotionOption[];
+}
+
+const RenewOrderNotFound = () => (
+  <div className="min-h-screen bg-background">
+    <Header />
+    <section className="pt-32 pb-16">
+      <div className="container mx-auto px-4 text-center">
+        <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+        <h1 className="text-2xl font-bold mb-4">
+          <DynamicText text="找不到訂單" />
+        </h1>
+        <p className="text-muted-foreground mb-6">
+          <DynamicText text="該訂單不存在或已被刪除" />
+        </p>
+        <Link href="/my-orders">
+          <Button>
+            <DynamicText text="返回我的訂單" />
+          </Button>
+        </Link>
+      </div>
+    </section>
+    <Footer />
+  </div>
+);
+
+const RenewOrder = ({ detail, promotions = [] }: RenewOrderProps) => {
+  if (!detail) {
+    return <RenewOrderNotFound />;
+  }
+
+  return <RenewOrderContent detail={detail} promotions={promotions} />;
 };
 
 export default RenewOrder;

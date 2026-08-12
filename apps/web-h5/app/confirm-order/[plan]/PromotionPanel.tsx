@@ -25,6 +25,8 @@ export const PromotionPanel = ({
   promotions,
   selectedPromotionId
 }: PromotionPanelProps) => {
+  const codePlaceholder = useBatchTranslation('輸入優惠碼');
+
   return (
     <div className="bg-white rounded-lg border border-border p-6 mb-6">
       <div className="flex items-center gap-3 mb-4">
@@ -97,7 +99,7 @@ export const PromotionPanel = ({
         <Input
           value={code}
           onChange={e => onCodeChange(e.target.value)}
-          placeholder={useBatchTranslation('輸入優惠碼')}
+          placeholder={codePlaceholder}
           className="h-10 flex-1"
           onKeyDown={e => {
             if (e.key === 'Enter') {

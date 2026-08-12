@@ -20,6 +20,10 @@ const Page = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [pending, setPending] = useState(false);
   const locale = useLocale();
+  const namePlaceholder = useBatchTranslation('請輸入您的姓名');
+  const emailPlaceholder = useBatchTranslation('請輸入您的電子郵箱');
+  const phonePlaceholder = useBatchTranslation('請輸入您的聯繫電話');
+  const messagePlaceholder = useBatchTranslation('請輸入您想對我們說的');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,7 +83,7 @@ const Page = () => {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder={useBatchTranslation('請輸入您的姓名')}
+                  placeholder={namePlaceholder}
                   required
                   className="h-12 border-gray-300"
                 />
@@ -94,7 +98,7 @@ const Page = () => {
                   type="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder={useBatchTranslation('請輸入您的電子郵箱')}
+                  placeholder={emailPlaceholder}
                   required
                   className="h-12 border-gray-300"
                 />
@@ -109,7 +113,7 @@ const Page = () => {
                   type="tel"
                   value={formData.phone}
                   onChange={handleChange}
-                  placeholder={useBatchTranslation('請輸入您的聯繫電話')}
+                  placeholder={phonePlaceholder}
                   required
                   className="h-12 border-gray-300"
                 />
@@ -123,7 +127,7 @@ const Page = () => {
                   name="message"
                   value={formData.message}
                   onChange={handleChange}
-                  placeholder={useBatchTranslation('請輸入您想對我們說的')}
+                  placeholder={messagePlaceholder}
                   required
                   className="min-h-30 border-gray-300 resize-none"
                 />
