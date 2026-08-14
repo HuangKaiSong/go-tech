@@ -155,6 +155,9 @@ const Settings = ({ token, user }: any) => {
         const statusCode = response.status;
         if (statusCode === 404) {
           toast.error(apiNotFound);
+        } else if (statusCode === 400) {
+          const result = await response.json();
+          toast.error(result.msg || result.message);
         } else {
           throw new Error(`API request failed: ${statusCode} ${response.statusText}`);
         }
