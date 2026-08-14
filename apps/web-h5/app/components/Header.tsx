@@ -18,10 +18,12 @@ import {
   SheetTrigger
 } from '@go-tech-frontend/ui';
 import { useTranslations } from 'next-intl';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { useProgressRouter } from '@/app/hooks/use-progress-router';
+import { goNow, startFreeTrial } from '@/app/lib/go-now';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIframeContext } from '@/contexts/IframeContext';
+import { useTrialWindow } from '@/contexts/TrialWindowContext';
 import { DynamicText } from './DynamicI18nText';
 import LocaleSwitcher from './LocaleSwitcher';
 import { type PageBlock } from './PageBlocks';
@@ -92,20 +94,11 @@ const SelectTenant = ({ generateCallback }: { generateCallback: (uri: string) =>
   );
 };
 
-const resolveAction = (value: unknown) => {
-  if (typeof value !== 'string') return null;
-  const normalized = value.toLowerCase();
-  if (normalized.includes('service-plan')) return 'service-plan';
-  if (normalized.includes('trial-env')) return 'trial-env';
-  if (normalized.includes('order')) return 'order';
-
-  return null;
-};
-
 const Header = ({ heroBg, initialBlocks }: { heroBg?: string | StaticImageData; initialBlocks?: PageBlock[] }) => {
   const t = useTranslations();
   const router = useProgressRouter();
   const { hasIframe } = useIframeContext();
+  const { openPmsCallback: generateCallback } = useTrialWindow();
   const { isLoggedIn, logout, tenants, token, user } = useAuth();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const defaultLogoSrc = '/images/Gotech_Logo.webp';
@@ -117,102 +110,10 @@ const Header = ({ heroBg, initialBlocks }: { heroBg?: string | StaticImageData; 
   } = block?.values || {};
 
   const hasTenant = tenants && tenants.length > 0;
-  const pm2Window = useRef<Window | null>(null);
 
   const handleLogout = async () => {
     setIsSheetOpen(false);
     logout();
-  };
-
-  function cleanup() {
-    window.removeEventListener('message', handleMessage);
-    window.removeEventListener('pm2Window', handleCustomEvent as EventListener);
-  }
-
-  const generateCallback = (uri: string) => {
-    const taialHost = process.env.NEXT_PUBLIC_TRIAL_HOST;
-
-    pm2Window.current = window.open(`${taialHost}/oauth/${uri}`, '_blank');
-  };
-
-  const tryOut = async () => {
-    const response = await fetch('/go-tech/platform/platformCustomer/trialCode', {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-        'User-type': 'platform_customer'
-      }
-    });
-    if (response.ok) {
-      const result = await response.json();
-      if (result.code === 200) {
-        const uri = `tryCallback?code=${result.data}`;
-        generateCallback(uri);
-      }
-    }
-  };
-
-  function applyAction(action: 'order' | 'service-plan' | 'trial-env') {
-    if (action === 'trial-env') {
-      tryOut();
-      return;
-    }
-    if (action === 'service-plan') {
-      pm2Window.current = window.open(`/service-plan`, '_blank');
-      router.replace('/service-plan');
-      return;
-    }
-    if (action === 'order') {
-      pm2Window.current = window.open(`/my-orders`, '_blank');
-      router.replace('/my-orders');
-      return;
-    }
-    if (pm2Window.current) {
-      pm2Window.current?.close();
-    }
-    cleanup();
-    window.focus();
-  }
-
-  function handleMessage(event: MessageEvent) {
-    const action = resolveAction(event.data?.command ?? event.data?.action ?? event.data?.type);
-    if (!action) return;
-    applyAction(action);
-  }
-
-  function handleCustomEvent(event: Event) {
-    const detail = (event as CustomEvent).detail;
-    const action = resolveAction(detail?.command ?? detail?.action ?? detail?.type);
-    if (!action) return;
-    applyAction(action);
-  }
-
-  useEffect(() => {
-    window.addEventListener('message', handleMessage);
-    window.addEventListener('pm2Window', handleCustomEvent as EventListener);
-
-    return () => {
-      window.removeEventListener('message', handleMessage);
-      window.removeEventListener('pm2Window', handleCustomEvent as EventListener);
-    };
-    // oxlint-disable react-hook/exhaustive-deps
-  }, []);
-
-  const goNow = async () => {
-    if (tenants.length === 0) return;
-    // 不管有多少个租户, 直接选择倒数第一个跳转
-    const tenant = tenants.at(-1);
-    const response = await fetch(`/go-tech/platform/platformCustomer/gotoPmsCode?tenantId=${tenant!.tenantId}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-        'User-type': 'platform_customer'
-      }
-    }).then(res => res.json());
-    if (response.code === 200) {
-      const uri = `tenantCallback?code=${response.data}`;
-      generateCallback(uri);
-    }
   };
 
   return (
@@ -371,7 +272,7 @@ const Header = ({ heroBg, initialBlocks }: { heroBg?: string | StaticImageData; 
                     size="sm"
                     disabled={!isLoggedIn}
                     className="shadow-primary shadow-2xl"
-                    onClick={() => goNow()}
+                    onClick={() => goNow({ generateCallback, tenants, token })}
                   >
                     {t('Nav.goNow')}
                   </Button>
@@ -395,7 +296,7 @@ const Header = ({ heroBg, initialBlocks }: { heroBg?: string | StaticImageData; 
                     size="sm"
                     disabled={!isLoggedIn}
                     className="shadow-primary shadow-2xl"
-                    onClick={() => tryOut()}
+                    onClick={() => startFreeTrial({ generateCallback, token })}
                   >
                     {t('Nav.freeTrial')}
                   </Button>

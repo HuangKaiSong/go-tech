@@ -1,11 +1,26 @@
 import { Button, Card, CardContent, CardFooter, CardHeader } from '@go-tech-frontend/ui';
+import { decodeJwt } from 'jose';
 import { ChevronRight } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { cookies } from 'next/headers';
 import Link from '@/app/components/Link';
 import { DynamicText } from './DynamicI18nText.client';
+import { TrialAction } from './trial-action';
 
-const PricingSection = ({ packages }: { packages: Packages[] }) => {
-  const t = useTranslations('Common');
+const PricingSection = async ({ packages }: { packages: Packages[] }) => {
+  // 获取用户消息
+  const cookiesStore = await cookies();
+  let user: User | null = null;
+  const token = cookiesStore.get('GO_TECH_AUTH_TOKEN')?.value;
+
+  if (token) {
+    user = decodeJwt(token) as User;
+    // 验证过期时间
+    const exp = user.exp;
+    if (exp && exp * 1000 < Date.now()) {
+      cookiesStore.delete('GO_TECH_AUTH_TOKEN');
+      user = null;
+    }
+  }
 
   return (
     <section className="py-16 bg-background">
@@ -38,7 +53,9 @@ const PricingSection = ({ packages }: { packages: Packages[] }) => {
                       <span className="text-sm text-muted-foreground">HKD</span>
                     </>
                   ) : (
-                    <div className="text-3xl font-bold text-primary">{t('stayTuned')}</div>
+                    <div className="text-3xl font-bold text-primary">
+                      <DynamicText text="敬請期待" />
+                    </div>
                   )}
                 </div>
                 <div className="text-xs text-muted-foreground flex flex-row flex-nowrap justify-center">
@@ -76,11 +93,17 @@ const PricingSection = ({ packages }: { packages: Packages[] }) => {
           <Link href="/pricing-plan" className="text-base font-bold text-foreground hover:text-primary underline block">
             <DynamicText text="查看完整的定價方案" />
           </Link>
-          <Link href="/free-trial">
-            <Button>
+          {user ? (
+            <TrialAction appearance="button">
               <DynamicText text="立即開始14天免費試用" />
-            </Button>
-          </Link>
+            </TrialAction>
+          ) : (
+            <Link href="/free-trial">
+              <Button>
+                <DynamicText text="立即開始14天免費試用" />
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
     </section>

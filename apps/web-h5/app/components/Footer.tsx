@@ -1,6 +1,7 @@
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import Link from 'next/link';
+import { TrialAction } from './trial-action';
 
 const Footer = () => {
   const t = useTranslations('Footer');
@@ -63,9 +64,7 @@ const Footer = () => {
           <div>
             <ul className="space-y-2 text-sm text-white/80">
               <li>
-                <Link href="/free-trial" className="hover:text-primary transition-colors">
-                  {t('tryNow')}
-                </Link>
+                <TrialAction className="hover:text-primary transition-colors">{t('tryNow')}</TrialAction>
               </li>
             </ul>
           </div>

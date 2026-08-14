@@ -8,22 +8,13 @@ import { ArrowRight, Building, Calendar, CheckCircle2, Clock, Package, ShieldChe
 import { useTranslations } from 'next-intl';
 import { useTheme } from 'next-themes';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import servicePlanBg from '@/assets/service-plan-bg.jpg';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTrialWindow } from '@/contexts/TrialWindowContext';
 import ThemeSchemaToggler from '../components/ThemeSchemaToggler';
 import { accountGridGradient } from './account-grid-theme';
-
-const resolveAction = (value: unknown) => {
-  if (typeof value !== 'string') return null;
-  const normalized = value.toLowerCase();
-  if (normalized.includes('service-plan')) return 'service-plan';
-  if (normalized.includes('trial-env')) return 'trial-env';
-  if (normalized.includes('order')) return 'order';
-
-  return null;
-};
 
 const SelectAccount = () => {
   const t = useTranslations('Account');
@@ -31,18 +22,13 @@ const SelectAccount = () => {
   const from = searchParams.get('from');
   const fromHeader = from && from === 'header';
   const { refetchTenants, tenants, tenantsStatus, token } = useAuth();
+  const { openPmsCallback: generateCallback } = useTrialWindow();
   const { resolvedTheme } = useTheme();
   const router = useProgressRouter();
   const isTenantListPending = (tenantsStatus === 'idle' || tenantsStatus === 'loading') && tenants.length === 0;
   const shouldShowTenantList = tenants.length > 0 || tenantsStatus === 'success';
 
   const accountGridBackground = resolvedTheme === 'dark' ? accountGridGradient.dark : accountGridGradient.light;
-  const pm2Window = useRef<Window | null>(null);
-
-  function cleanup() {
-    window.removeEventListener('message', handleMessage);
-    window.removeEventListener('pm2Window', handleCustomEvent as EventListener);
-  }
 
   // 跳转续费
   const toRenew = (tenant: Tenant) => {
@@ -52,12 +38,6 @@ const SelectAccount = () => {
     }
 
     toast.error(t('noOrderId'));
-  };
-
-  const generateCallback = (uri: string) => {
-    const taialHost = process.env.NEXT_PUBLIC_TRIAL_HOST;
-
-    pm2Window.current = window.open(`${taialHost}/oauth/${uri}`, '_blank');
   };
 
   const handleEnter = async (tenant: Tenant) => {
@@ -84,69 +64,10 @@ const SelectAccount = () => {
     toRenew(tenant);
   };
 
-  const tryOut = async () => {
-    const response = await fetch('/go-tech/platform/platformCustomer/trialCode', {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-        'User-type': 'platform_customer'
-      }
-    });
-    if (response.ok) {
-      const result = await response.json();
-      if (result.code === 200) {
-        const uri = `tryCallback?code=${result.data}`;
-        generateCallback(uri);
-      }
-    }
-  };
-
-  function applyAction(action: 'order' | 'service-plan' | 'trial-env') {
-    if (action === 'trial-env') {
-      tryOut();
-      return;
-    }
-    if (action === 'service-plan') {
-      pm2Window.current = window.open(`/service-plan`, '_blank');
-      router.replace('/service-plan');
-      return;
-    }
-    if (action === 'order') {
-      pm2Window.current = window.open(`/my-orders`, '_blank');
-      router.replace('/my-orders');
-      return;
-    }
-    if (pm2Window.current) {
-      pm2Window.current?.close();
-    }
-    cleanup();
-    window.focus();
-  }
-
-  function handleMessage(event: MessageEvent) {
-    const action = resolveAction(event.data?.command ?? event.data?.action ?? event.data?.type);
-    if (!action) return;
-    applyAction(action);
-  }
-
-  function handleCustomEvent(event: Event) {
-    const detail = (event as CustomEvent).detail;
-    const action = resolveAction(detail?.command ?? detail?.action ?? detail?.type);
-    if (!action) return;
-    applyAction(action);
-  }
-
   useEffect(() => {
-    window.addEventListener('message', handleMessage);
-    window.addEventListener('pm2Window', handleCustomEvent as EventListener);
     if (token) {
       refetchTenants(token);
     }
-
-    return () => {
-      window.removeEventListener('message', handleMessage);
-      window.removeEventListener('pm2Window', handleCustomEvent as EventListener);
-    };
     // oxlint-disable react-hook/exhaustive-deps
   }, [token]);
 
@@ -199,6 +120,7 @@ const SelectAccount = () => {
                 <Badge.Ribbon
                   classNames={{ indicator: 'top-4!' }}
                   color={isActive ? '#5ee5b5' : '#737b8c'}
+                  key={acc.tenantId}
                   text={
                     <div className="flex items-center text-sm px-2.5 py-0.5">
                       {isActive ? <CheckCircle2 className="w-3 h-3 mr-1" /> : <Clock className="w-3 h-3 mr-1" />}
