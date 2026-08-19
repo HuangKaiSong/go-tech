@@ -13,6 +13,8 @@
     "db:migrate": "drizzle-kit migrate"
   },
   "dependencies": {
+    "@file-viewer/preset-office": "^2.2.9",
+    "@file-viewer/react": "^2.2.9",
     "@go-tech-frontend/styles": "workspace:*",
     "@go-tech-frontend/ui": "workspace:*",
     "@go-tech/color": "workspace:*",
