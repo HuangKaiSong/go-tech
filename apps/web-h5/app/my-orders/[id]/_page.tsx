@@ -1,6 +1,7 @@
 'use client';
 
-import { Badge, Button, Card, CardContent, CardHeader, Separator, toast } from '@go-tech-frontend/ui';
+import { Badge, Card, CardContent, CardHeader, Separator } from '@go-tech-frontend/ui';
+import { Button, toast } from '@go-tech/web-ui';
 import { ArrowLeft, CheckCircle, CreditCard, Download, Package, RefreshCw, Settings, XCircle } from 'lucide-react';
 import { useLocale } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';
@@ -69,6 +70,7 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
   const orderCancelledStatus = useBatchTranslation('已取消');
   const cancelOrderFailed = useBatchTranslation('取消訂單失敗');
   const cancelOrderRetry = useBatchTranslation('取消訂單失敗，請稍後重試');
+  const interfaceNotYet = useBatchTranslation('接口尚未實現，請聯繫開發人員');
   const [isPolling, setIsPolling] = useState(false);
   const [pendingCashier, setPendingCashier] = useState<OrderAddResponse | null>(null);
 
@@ -150,15 +152,23 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
     if (!token) return;
     const toastId = toast.loading(fetchingPaymentInfo);
     try {
-      const res = await fetch(`/go-tech/platform/packageOrder/repay/${_orderId}`, {
+      const response = await fetch(`/go-tech/platform/packageOrder/repay?id=${_orderId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'User-Type': 'platform_customer',
           Authorization: `Bearer ${token}`
         }
-      }).then(r => r.json());
+      });
 
+      if (!response.ok) {
+        if (response.status === 404) {
+          toast.error(interfaceNotYet, { id: toastId });
+          return;
+        }
+      }
+
+      const res = await response.json();
       if (res.code === 200 && res.data) {
         toast.success(redirectingToPay, { id: toastId });
         stashWebManagedCashier(res.data);
@@ -179,15 +189,23 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
     if (!token) return;
     const toastId = toast.loading(cancellingOrder);
     try {
-      const res = await fetch(`/go-tech/platform/packageOrder/cancel/${_orderId}`, {
+      const response = await fetch(`/go-tech/platform/packageOrder/cancel?id=${_orderId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'User-Type': 'platform_customer',
           Authorization: `Bearer ${token}`
         }
-      }).then(r => r.json());
+      });
 
+      if (!response.ok) {
+        if (response.status === 404) {
+          toast.error(interfaceNotYet, { id: toastId });
+          return;
+        }
+      }
+
+      const res = await response.json();
       if (res.code === 200) {
         toast.success(orderCancelled, { id: toastId });
         setOrder((prev: any) => ({
@@ -418,6 +436,7 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
 
             {/* 待付款訂單操作按鈕（未過期才顯示） */}
             {order.orderStatus === OrderStatusEnum.WAIT_PAY && !isExpired && (
+              // {order.orderStatus === OrderStatusEnum.WAIT_PAY && (
               <div className="flex flex-col sm:flex-row gap-4 justify-end">
                 <Button variant="outline" className="gap-2" onClick={handleCancelOrder}>
                   <XCircle className="w-4 h-4" />
