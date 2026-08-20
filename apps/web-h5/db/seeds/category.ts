@@ -19,7 +19,7 @@ const subCategoryNames: Record<string, string[]> = {
   其他: ['使用體驗', '效能', '其他建議']
 };
 
-async function seed() {
+export async function seedCategories() {
   // 插入分類並記錄實際 ID（自增 ID 不一定是 1-6）
   const catResults = await Promise.all(categories.map(c => db.insert(fbCategory).values(c)));
   const catIds = catResults.map(r => Number(r[0].insertId));
@@ -38,7 +38,4 @@ async function seed() {
   }
 
   console.log(`Seed categories done. (${catIds.length} categories, ${subValues.length} subcategories)`);
-  process.exit(0);
 }
-
-seed();

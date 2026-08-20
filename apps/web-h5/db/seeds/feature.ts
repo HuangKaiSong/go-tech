@@ -630,7 +630,7 @@ const features: FeatureSeed[] = [
 const randomPick = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 /* ========== 导入逻辑 ========== */
 
-async function seed() {
+export async function seedFeatures() {
   // 查詢所有用戶
   const allUsers = await db.select().from(platformCustomer);
   const userByName = new Map(allUsers.map(u => [u.custName, u.id]));
@@ -716,7 +716,4 @@ async function seed() {
   }
 
   console.log(`Seed features done. (${featureValues.length} features, ${featureCommentValues.length} comments)`);
-  process.exit(0);
 }
-
-seed();
