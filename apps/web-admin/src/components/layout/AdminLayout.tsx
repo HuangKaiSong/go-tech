@@ -1,6 +1,6 @@
+import { toast } from '@go-tech-frontend/ui';
 import { useLayoutEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
 import { useAuth } from '@/hooks/use-auth';
 import AdminHeader from './AdminHeader';
 import AdminSidebar from './AdminSidebar';

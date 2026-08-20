@@ -13,13 +13,13 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow
+  TableRow,
+  toast
 } from '@go-tech-frontend/ui';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useToggle } from 'ahooks';
 import { Eye, EyeOff, Plus, Users } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
-import { toast } from 'sonner';
 
 interface User {
   email: string;
