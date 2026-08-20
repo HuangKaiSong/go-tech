@@ -109,7 +109,7 @@ const Login = () => {
       if (!account || !password) {
         throw new Error('請填寫所有欄位');
       }
-      const response = await fetch(`${import.meta.env.VITE_PROXY_PREFIX}/go-tech/platform/platformAdmin/login`, {
+      const response = await fetch(`${import.meta.env.VITE_PROXY_PREFIX}/go-tech/platform/admin//login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
