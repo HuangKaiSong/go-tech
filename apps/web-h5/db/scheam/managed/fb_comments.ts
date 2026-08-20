@@ -19,7 +19,7 @@ export const fbComment = mysqlTable(
       .references(() => fbFeature.id, { onDelete: 'cascade' }),
     /** 回覆的上層留言；NULL 表示一級留言 */
     parentId: bigint('parent_id', { mode: 'number', unsigned: true }),
-    /** 普通留言指向 platform_customer；官方回复指向 ums_admin，由 is_official 区分。 */
+    /** 普通留言指向 platform_customer；官方回复指向 platform_admin is_official 区分。 */
     authorId: bigint('author_id', { mode: 'number', unsigned: true }).notNull(),
     content: text('content').notNull(),
     /** 官方回覆（深色氣泡） */
