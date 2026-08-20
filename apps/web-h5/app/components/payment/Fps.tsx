@@ -55,7 +55,7 @@ export default function Fps({
   price
 }: {
   handleBackToPaymentMethods: () => void;
-  handleFpsPaymentConfirm: (voucherFile: UploadedFile) => void;
+  handleFpsPaymentConfirm: (voucherFile: UploadedFile) => Promise<void> | void;
   price: number;
 }) {
   const t = useTranslations('Payment');
@@ -65,6 +65,8 @@ export default function Fps({
   const uploadEvidenceMsg = useBatchTranslation('請上傳支付憑證');
   const { token } = useAuth();
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const isSubmittingRef = useRef(false);
 
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const timeoutRefs = useRef<{ [key: string]: NodeJS.Timeout | null }>({});
@@ -155,12 +157,22 @@ export default function Fps({
     handleBackToPaymentMethods();
   };
 
-  const confirmPayment = () => {
-    if (!uploadedFile) {
-      toast.error(uploadEvidenceMsg);
+  const confirmPayment = async () => {
+    if (!uploadedFile || isSubmittingRef.current) {
+      if (!uploadedFile) {
+        toast.error(uploadEvidenceMsg);
+      }
       return;
     }
-    handleFpsPaymentConfirm(uploadedFile);
+
+    isSubmittingRef.current = true;
+    setIsSubmitting(true);
+    try {
+      await handleFpsPaymentConfirm(uploadedFile);
+    } finally {
+      isSubmittingRef.current = false;
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -272,7 +284,12 @@ export default function Fps({
         <Button variant="outline" onClick={cancelPayment} className="flex-1">
           {t('return')}
         </Button>
-        <Button onClick={confirmPayment} className="flex-1" disabled={!uploadedFile}>
+        <Button
+          onClick={confirmPayment}
+          className="flex-1"
+          loading={isSubmitting}
+          disabled={!uploadedFile || isSubmitting}
+        >
           {t('confirm')}
         </Button>
       </div>

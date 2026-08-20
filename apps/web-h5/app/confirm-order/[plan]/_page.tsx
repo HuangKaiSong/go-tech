@@ -250,7 +250,7 @@ const ConfirmOrder = ({
         });
       if (orderResponse.code === 200) {
         toast.success(orderCreated, { id: toastId });
-        const orderId = orderResponse.data;
+        const orderId = orderResponse.data?.orderId;
         if (orderInfo.payType === PayTypeEnum.FPS) {
           // 上传凭证
           await fetch('/go-tech/platform/packageOrder/payEvidence', {
