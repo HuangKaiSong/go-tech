@@ -32,6 +32,13 @@ const computeServiceTotal = (priceEach: number, qty: number, months: number) => 
   return priceEach * qty * months;
 };
 
+const getPlanUnitPrice = (plan: Packages, months: number) => {
+  if (months >= 12) return plan.priceC ?? plan.price;
+  if (months >= 6) return plan.priceB ?? plan.price;
+  if (months >= 3) return plan.priceA ?? plan.price;
+  return plan.price;
+};
+
 const SelectPlan = ({ plan }: { plan: Packages }) => {
   const router = useProgressRouter();
   const [needAddons, setNeedAddons] = useAtom(needAddonsAtom);
@@ -46,7 +53,7 @@ const SelectPlan = ({ plan }: { plan: Packages }) => {
     setStoredMonths(selectedMonths);
   }, [selectedMonths, setStoredMonths]);
 
-  const planTotal = plan.price * selectedMonths;
+  const planTotal = getPlanUnitPrice(plan, selectedMonths) * selectedMonths;
 
   const [selectedServices, setSelectedServices] = useAtom(selectedServicesAtom);
   useEffect(() => {
