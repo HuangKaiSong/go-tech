@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
+    "db:seed": "tsx --env-file=apps/web-h5/.env apps/web-h5/db/seeds/index.ts",
     "lint": "oxlint",
     "format": "oxfmt .",
     "format:check": "oxfmt --check .",
@@ -38,6 +39,7 @@
     "oxlint": "catalog:dev",
     "rimraf": "catalog:dev",
     "tsdown": "catalog:dev",
+    "tsx": "catalog:dev",
     "turbo": "catalog:dev",
     "typescript": "catalog:core"
   },
