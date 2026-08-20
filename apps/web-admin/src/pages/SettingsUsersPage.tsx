@@ -54,7 +54,7 @@ const ResetPasswordDialog = ({
         throw new Error('密碼長度至少6位');
       }
       const response = await fetch(
-        `${import.meta.env.VITE_PROXY_PREFIX}/go-tech/platform/admin/resetPwd?id=${userId}&password=${password}`,
+        `${import.meta.env.VITE_PROXY_PREFIX}/go-tech/platform/platformAdmin/resetPwd?id=${userId}&password=${password}`,
         {
           method: 'POST'
         }
@@ -131,9 +131,9 @@ const EditUserDialog = ({
       );
       let url = `${import.meta.env.VITE_PROXY_PREFIX}`;
       if (filteredData.id) {
-        url += `/go-tech/platform/admin/update`;
+        url += `/go-tech/platform/platformAdmin/update`;
       } else {
-        url += `/go-tech/platform/admin/add`;
+        url += `/go-tech/platform/platformAdmin/add`;
       }
 
       filteredData.roleIds = [1];
@@ -247,7 +247,7 @@ const SettingsUsersPage = () => {
   const query = useQuery({
     queryKey: ['platform/admin/list'],
     queryFn: async () => {
-      const res = await fetch(`${import.meta.env.VITE_PROXY_PREFIX}/go-tech/platform/admin/list`);
+      const res = await fetch(`${import.meta.env.VITE_PROXY_PREFIX}/go-tech/platform/platformAdmin/list`);
       return res.json();
     }
   });
@@ -256,7 +256,7 @@ const SettingsUsersPage = () => {
     mutationFn: async (data: { id: string; status: number }) => {
       const { id, status } = data;
       const res = await fetch(
-        `${import.meta.env.VITE_PROXY_PREFIX}/go-tech/platform/admin/updateStatus/${id}?status=${status}`,
+        `${import.meta.env.VITE_PROXY_PREFIX}/go-tech/platform/platformAdmin/updateStatus/${id}?status=${status}`,
         {
           method: 'POST'
         }
