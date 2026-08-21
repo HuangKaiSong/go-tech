@@ -413,7 +413,7 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
                       <span className="text-muted-foreground">
                         <DynamicText text="交易編號" />
                       </span>
-                      <span className="font-mono text-xs">{order.transactionId || '-'}</span>
+                      <span className="font-mono text-xs">{order.payOrderNo || '-'}</span>
                     </div>
                   </div>
                   <div className="space-y-3">
