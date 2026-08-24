@@ -7,7 +7,7 @@ interface DynamicTextClientProps {
 }
 
 export function DynamicText({ text }: DynamicTextClientProps) {
-  if (!text.trim()) {
+  if (!text || !text.trim()) {
     return '';
   }
 
