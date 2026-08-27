@@ -1,14 +1,20 @@
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import type { Metadata } from 'next';
 import { hasLocale } from 'next-intl';
 import { ThemeProvider } from 'next-themes';
 import { headers } from 'next/headers';
 import { Suspense } from 'react';
 import { routing } from '@/i18n/routing';
+import { siteUrl } from '@/lib/seo';
 import { createSvgSpriteHtml } from '@/plugins/createSvgIcons';
 import { NavigationProgress } from './components/navigation-progress';
 // oxlint-disable import/no-unassigned-import
 import './globals.css';
+
+export const metadata: Metadata = {
+  metadataBase: siteUrl
+};
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const locale = (await headers()).get('x-next-intl-locale');

@@ -2,12 +2,13 @@ import { Sonner, TooltipProvider } from '@go-tech/web-ui';
 import { decodeJwt } from 'jose';
 import type { Metadata } from 'next';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { AuthProvider } from '@/contexts/AuthContext';
 import type { Locale } from '@/i18n/config';
 import { routing } from '@/i18n/routing';
 import { getBaseUrl } from '@/lib/http';
+import { getLocalizedAlternates } from '@/lib/seo';
 import { DynamicI18nProvider } from '../components/DynamicI18nProvider';
 import { HtmlLangSync } from '../components/html-lang-sync';
 import Layout from '../components/Layout';
@@ -46,11 +47,13 @@ function resolveLocale(value: string): Locale {
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const locale = resolveLocale((await params).locale);
+  const requestPathname = (await headers()).get('x-go-tech-pathname');
 
   return {
     title: metadata[locale].title,
     keywords: metadata[locale].keywords,
     description: metadata[locale].description,
+    alternates: getLocalizedAlternates(locale, requestPathname),
     icons: [{ rel: 'icon', url: '/favicon.svg' }]
   };
 }
