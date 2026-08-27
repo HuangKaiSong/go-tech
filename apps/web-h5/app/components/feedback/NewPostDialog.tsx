@@ -17,9 +17,9 @@ import {
 import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 
+import { SERIF } from '@/app/[locale]/feedback/data';
+import type { Feature } from '@/app/[locale]/feedback/useFeedbackFeatures';
 import { DynamicText } from '@/app/components/DynamicI18nText.client';
-import { SERIF } from '@/app/feedback/data';
-import type { Feature } from '@/app/feedback/useFeedbackFeatures';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 import { useAuth } from '@/contexts/AuthContext';
 import { releaseSubmissionLock, tryAcquireSubmissionLock } from './submission-lock';

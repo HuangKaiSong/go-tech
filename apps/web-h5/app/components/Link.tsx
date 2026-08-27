@@ -1,17 +1,24 @@
 'use client';
 
-import BaseLink, { type LinkProps } from 'next/link';
-import { type ReactNode } from 'react';
+import { useSelectedLayoutSegment } from 'next/navigation';
+import { type ComponentProps, type ReactNode } from 'react';
 import { useIframeContext } from '@/contexts/IframeContext';
+import type { Locale } from '@/i18n/config';
+import { Link as BaseLink } from '@/i18n/navigation';
 
-type RestrictedLinkProps = LinkProps & {
+type RestrictedLinkProps = ComponentProps<typeof BaseLink> & {
   children: ReactNode;
   className?: string;
+  locale?: Locale;
   onClick?: () => void;
 };
 
 export const Link: React.FC<RestrictedLinkProps> = ({ children, className = '', href, onClick, ...rest }) => {
   const { hasIframe } = useIframeContext();
+
+  const selectedLayoutSegment = useSelectedLayoutSegment();
+  const pathname = selectedLayoutSegment ? `/${selectedLayoutSegment}` : '/';
+  const isActive = pathname === href;
 
   const handleClick = (e: React.MouseEvent) => {
     if (hasIframe) {
@@ -33,7 +40,13 @@ export const Link: React.FC<RestrictedLinkProps> = ({ children, className = '', 
   }
 
   return (
-    <BaseLink href={href} onClick={handleClick} className={className} {...rest}>
+    <BaseLink
+      aria-current={isActive ? 'page' : undefined}
+      href={href}
+      onClick={handleClick}
+      className={className}
+      {...rest}
+    >
       {children}
     </BaseLink>
   );
