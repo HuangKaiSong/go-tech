@@ -1,7 +1,7 @@
 'use client';
 
 import { useSelectedLayoutSegment } from 'next/navigation';
-import { type ComponentProps, type ReactNode } from 'react';
+import { type ComponentProps, type ReactNode, useEffect, useState } from 'react';
 import { useIframeContext } from '@/contexts/IframeContext';
 import type { Locale } from '@/i18n/config';
 import { Link as BaseLink } from '@/i18n/navigation';
@@ -15,15 +15,21 @@ type RestrictedLinkProps = ComponentProps<typeof BaseLink> & {
 
 export const Link: React.FC<RestrictedLinkProps> = ({ children, className = '', href, onClick, ...rest }) => {
   const { hasIframe } = useIframeContext();
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   const selectedLayoutSegment = useSelectedLayoutSegment();
   const pathname = selectedLayoutSegment ? `/${selectedLayoutSegment}` : '/';
   const isActive = pathname === href;
+  const isIframeRestricted = isHydrated && hasIframe;
 
   const handleClick = (e: React.MouseEvent) => {
     if (hasIframe) {
       e.preventDefault();
-      return false;
+      return;
     }
 
     if (onClick) {
@@ -31,21 +37,16 @@ export const Link: React.FC<RestrictedLinkProps> = ({ children, className = '', 
     }
   };
 
-  if (hasIframe) {
-    return (
-      <span className={`${className} cursor-not-allowed opacity-60`} title="在 iframe 中不可用">
-        {children}
-      </span>
-    );
-  }
-
   return (
     <BaseLink
       aria-current={isActive ? 'page' : undefined}
+      aria-disabled={isIframeRestricted || undefined}
       href={href}
       onClick={handleClick}
-      className={className}
       {...rest}
+      className={`${className}${isIframeRestricted ? ' cursor-not-allowed opacity-60' : ''}`}
+      tabIndex={isIframeRestricted ? -1 : rest.tabIndex}
+      title={isIframeRestricted ? '在 iframe 中不可用' : rest.title}
     >
       {children}
     </BaseLink>

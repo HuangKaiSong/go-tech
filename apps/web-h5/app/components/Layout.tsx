@@ -1,20 +1,17 @@
 'use client';
 
 import { JotaiProvider } from '@go-tech/core-state';
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 import { IframeProvider } from '@/contexts/IframeContext';
 import { TrialWindowProvider } from '@/contexts/TrialWindowContext';
 import { WhatsappService } from './CustomerService';
 
-export default function Layout({ children }: { children: React.ReactNode }) {
-  const [hasIframe, setHasIframe] = useState<boolean>(false);
+const subscribeToIframeState = () => () => {};
+const getIframeSnapshot = () => window.parent !== window;
+const getServerIframeSnapshot = () => false;
 
-  useEffect(() => {
-    // 判断是否有 iframe 嵌套, 如果有, 路由功能不可用, 按钮不可用
-    if (window.parent !== window) {
-      setHasIframe(true);
-    }
-  }, []);
+export default function Layout({ children }: { children: React.ReactNode }) {
+  const hasIframe = useSyncExternalStore(subscribeToIframeState, getIframeSnapshot, getServerIframeSnapshot);
 
   return (
     <TrialWindowProvider>

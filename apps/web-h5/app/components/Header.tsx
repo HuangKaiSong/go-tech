@@ -3,6 +3,7 @@
 // import Logo from "@/assets/Gotech_Logo.webp";
 import { Crown, LogOut, Mail, Package, Phone, Settings, User } from 'lucide-react';
 import Image, { type StaticImageData } from 'next/image';
+import { useSearchParams } from 'next/navigation';
 import Link from '@/app/components/Link';
 
 import {
@@ -18,7 +19,7 @@ import {
   SheetTrigger
 } from '@go-tech-frontend/ui';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { goNow, startFreeTrial } from '@/app/lib/go-now';
 import { useAuth } from '@/contexts/AuthContext';
@@ -27,6 +28,94 @@ import { useTrialWindow } from '@/contexts/TrialWindowContext';
 import { DynamicText } from './DynamicI18nText';
 import LocaleSwitcher from './LocaleSwitcher';
 import { type PageBlock } from './PageBlocks';
+import { type HeroBlock, type HeroProduct, type HeroProductKey } from './PageBlocks/Hero';
+
+const emptyHeroProducts: HeroProduct[] = [];
+
+const resolveProductKey = (
+  requested: string | null | undefined,
+  products: HeroProduct[],
+  fallback?: HeroProductKey
+): HeroProductKey => {
+  if ((requested === 'hr' || requested === 'pms') && products.some(product => product.key === requested)) {
+    return requested;
+  }
+  if (fallback && products.some(product => product.key === fallback)) return fallback;
+  return products[0]?.key || 'pms';
+};
+
+const HeaderHeroBackground = ({
+  configuredHeroBlock,
+  hasIframe,
+  heroBg
+}: {
+  configuredHeroBlock?: HeroBlock;
+  hasIframe: boolean;
+  heroBg?: string | StaticImageData;
+}) => {
+  const searchParams = useSearchParams();
+  const [previewHeroBlock, setPreviewHeroBlock] = useState<HeroBlock | undefined>(configuredHeroBlock);
+  const [previewProductKey, setPreviewProductKey] = useState<HeroProductKey>();
+  const heroBlock = hasIframe ? previewHeroBlock : configuredHeroBlock;
+  const heroProducts =
+    heroBlock?.variant === 'product-switcher' ? heroBlock.products || emptyHeroProducts : emptyHeroProducts;
+  const activeProductKey = resolveProductKey(
+    previewProductKey || searchParams.get('product'),
+    heroProducts,
+    heroBlock?.defaultProduct
+  );
+
+  useEffect(() => {
+    setPreviewHeroBlock(configuredHeroBlock);
+  }, [configuredHeroBlock]);
+
+  useEffect(() => {
+    if (!hasIframe) return;
+
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'SET_HERO_PRODUCT') {
+        if (event.data.blockId !== heroBlock?.id) return;
+        const nextProductKey = event.data.productKey;
+        if (nextProductKey === 'hr' || nextProductKey === 'pms') setPreviewProductKey(nextProductKey);
+        return;
+      }
+
+      if (event.data?.type !== 'SET_PAGE_BLOCKS' || !Array.isArray(event.data.blocks)) return;
+      const nextHeroBlock = (event.data.blocks as PageBlock[]).find(nextBlock => nextBlock.type === 'hero');
+      setPreviewHeroBlock(nextHeroBlock);
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [hasIframe, heroBlock?.id]);
+
+  if (heroProducts.length === 0) {
+    return heroBg ? (
+      <Image
+        src={heroBg}
+        alt=""
+        aria-hidden="true"
+        fill
+        loading="eager"
+        className="w-full h-150 absolute inset-0 -z-10 object-cover"
+      />
+    ) : null;
+  }
+
+  return heroProducts.map(product => (
+    <Image
+      key={product.key}
+      src={product.backgroundImage}
+      alt=""
+      aria-hidden="true"
+      fill
+      loading="eager"
+      className={`w-full h-150 absolute inset-0 -z-10 object-cover transition-opacity duration-300 ${
+        product.key === activeProductKey ? 'opacity-100' : 'opacity-0'
+      }`}
+    />
+  ));
+};
 
 const SelectTenant = ({ generateCallback }: { generateCallback: (uri: string) => void }) => {
   const router = useProgressRouter();
@@ -101,6 +190,7 @@ const Header = ({ heroBg, initialBlocks }: { heroBg?: string | StaticImageData; 
   const { openPmsCallback: generateCallback } = useTrialWindow();
   const { isLoggedIn, logout, tenants, token, user } = useAuth();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const configuredHeroBlock = initialBlocks?.find(block => block.type === 'hero');
   const defaultLogoSrc = '/images/Gotech_Logo.webp';
   const block = initialBlocks?.find(bloc => bloc.type === 'common');
   const {
@@ -118,15 +208,7 @@ const Header = ({ heroBg, initialBlocks }: { heroBg?: string | StaticImageData; 
 
   return (
     <div className="h-44 min-w-[1280px] backdrop-blur-xl bg-black/70 text-white/70 overflow-hidden relative select-none">
-      {heroBg && (
-        <Image
-          src={heroBg}
-          alt="logo"
-          fill
-          loading="eager"
-          className="w-full h-150 absolute inset-0 -z-10 object-cover"
-        />
-      )}
+      <HeaderHeroBackground configuredHeroBlock={configuredHeroBlock} hasIframe={hasIframe} heroBg={heroBg} />
       <div className="w-full h-full backdrop-blur-xl">
         <div className="mx-auto flex h-full w-[1280px] min-w-[1280px] max-w-[1280px] flex-row items-center gap-10">
           {/* logo */}

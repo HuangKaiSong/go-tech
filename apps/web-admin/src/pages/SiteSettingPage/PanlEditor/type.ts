@@ -38,13 +38,31 @@ export type CommonBlock = AdminBlockBase & {
   values?: Record<string, string>;
 };
 
+export type HeroProductKey = 'hr' | 'pms';
+
+export type AdminHeroProduct = {
+  backgroundImage: string;
+  backgroundImageAlt?: string;
+  detailButtonLink: string;
+  detailButtonText: string;
+  key: HeroProductKey;
+  label: string;
+  subtitle: string;
+  title: string;
+  titleSecondary: string;
+  trialButtonLink: string;
+  trialButtonText: string;
+};
+
 export type AdminHeroBlock = AdminBlockBase & {
   backgroundImage: string;
   buttonLink?: string;
   buttonStyle?: string;
   buttonText?: string;
   contentStyle?: CSSProperties;
+  defaultProduct?: HeroProductKey;
   overlayGradient?: string;
+  products?: AdminHeroProduct[];
   sectionStyle?: CSSProperties;
   subtitle: string;
   subtitleStyle?: CSSProperties;
@@ -53,6 +71,7 @@ export type AdminHeroBlock = AdminBlockBase & {
   titleSecondaryStyle?: CSSProperties;
   titleStyle?: CSSProperties;
   type: BlockType.Hero;
+  variant?: 'default' | 'product-switcher';
 };
 
 export type AdminTextBlock = AdminBlockBase & {

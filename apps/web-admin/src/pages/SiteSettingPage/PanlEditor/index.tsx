@@ -1,10 +1,19 @@
 import { Button } from '@go-tech-frontend/ui';
 import { type RefObject, useEffect, useRef, useState } from 'react';
 import Common from './Common';
-import Hero from './Hero';
+import LegacyHero from './Hero';
 import Home from './page/Home';
+import ProductHero from './ProductHero';
 import { type AdminBlock, type AdminHeroBlock, BlockType, type CommonBlock, PageKey } from './type';
 import { createElementFromOuterHTML } from './utils';
+
+const pageNames: Record<PageKey, string> = {
+  [PageKey.Common]: '通用页面',
+  [PageKey.CoreAdvantages]: '核心优势',
+  [PageKey.Home]: '首页',
+  [PageKey.SystemFeatures]: '查看系统功能',
+  [PageKey.TargetAudience]: '适合人群'
+};
 
 export default function PanlEditor({ iframeRef }: { iframeRef: RefObject<HTMLIFrameElement> }) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -71,20 +80,28 @@ export default function PanlEditor({ iframeRef }: { iframeRef: RefObject<HTMLIFr
   };
 
   const handlePatchHeroBlock = (blockId: string, blockSeq: number | undefined, patch: Partial<AdminHeroBlock>) => {
-    setBlocks(prev => {
-      if (blockSeq !== undefined && blockSeq >= 0 && blockSeq < prev.length) {
-        const block = prev[blockSeq];
-        if (block?.type === BlockType.Hero) {
-          const next = [...prev];
-          next[blockSeq] = { ...block, ...patch } as AdminBlock;
-          return next;
-        }
-      }
+    const currentBlocks = blocksRef.current;
+    let nextBlocks = currentBlocks;
 
-      return prev.map(block => {
+    if (blockSeq !== undefined && blockSeq >= 0 && blockSeq < currentBlocks.length) {
+      const block = currentBlocks[blockSeq];
+      if (block?.type === BlockType.Hero) {
+        nextBlocks = [...currentBlocks];
+        nextBlocks[blockSeq] = { ...block, ...patch } as AdminBlock;
+      }
+    } else {
+      nextBlocks = currentBlocks.map(block => {
         if (block.id !== blockId || block.type !== BlockType.Hero) return block;
         return { ...block, ...patch } as AdminBlock;
       });
+    }
+
+    blocksRef.current = nextBlocks;
+    setBlocks(nextBlocks);
+    postToIframe({
+      type: 'SET_PAGE_BLOCKS',
+      page: pageKey,
+      blocks: nextBlocks
     });
   };
 
@@ -225,13 +242,29 @@ export default function PanlEditor({ iframeRef }: { iframeRef: RefObject<HTMLIFr
     reader.readAsText(file);
   };
 
+  const selectedHeroNode = messageEl
+    ? messageEl.matches('[data-block-id][data-block-seq]')
+      ? messageEl
+      : (messageEl.querySelector('[data-block-id][data-block-seq]') as HTMLElement | null)
+    : null;
+  const selectedHeroSeq = selectedHeroNode?.dataset.blockSeq ? Number(selectedHeroNode.dataset.blockSeq) : undefined;
+  const selectedHeroBlock =
+    selectedHeroSeq !== undefined && blocks[selectedHeroSeq]?.type === BlockType.Hero
+      ? (blocks[selectedHeroSeq] as AdminHeroBlock)
+      : (blocks.find(block => block.type === BlockType.Hero && block.id === selectedHeroNode?.dataset.blockId) as
+          | AdminHeroBlock
+          | undefined) ||
+        (blocks.find(block => block.type === BlockType.Hero && block.variant === 'product-switcher') as
+          | AdminHeroBlock
+          | undefined);
+
   return (
     <div className="h-full overflow-y-auto space-y-4 pr-1">
       <div className="rounded-2xl border border-border bg-linear-to-br from-background to-muted/30 p-4 shadow-sm">
         <div className="flex items-start justify-between gap-3">
           <div>
             <div className="text-xs uppercase tracking-wide text-muted-foreground">页面编辑器</div>
-            <div className="text-lg font-semibold text-foreground">首页 / 组件组装</div>
+            <div className="text-lg font-semibold text-foreground">{pageNames[pageKey]} / 组件组装</div>
             <div className="text-xs text-muted-foreground mt-1">同步后会实时更新左侧预览。</div>
           </div>
           <div className="rounded-full bg-primary/10 text-primary px-2 py-1 text-xs">预览中</div>
@@ -263,8 +296,16 @@ export default function PanlEditor({ iframeRef }: { iframeRef: RefObject<HTMLIFr
         />
       </div>
 
-      {showHero && (
-        <Hero
+      {selectedHeroBlock?.variant === 'product-switcher' ? (
+        <ProductHero
+          block={selectedHeroBlock}
+          blockSeq={selectedHeroSeq}
+          sync={postToIframe}
+          onPatchBlock={handlePatchHeroBlock}
+        />
+      ) : null}
+      {showHero && selectedHeroBlock?.variant !== 'product-switcher' ? (
+        <LegacyHero
           element={messageEl!}
           sync={postToIframe}
           onPatchBlock={handlePatchHeroBlock}
@@ -272,7 +313,7 @@ export default function PanlEditor({ iframeRef }: { iframeRef: RefObject<HTMLIFr
           onRemoveHero={handleRemoveHero}
           onMoveHero={handleMoveHero}
         />
-      )}
+      ) : null}
       {showCommon && <Common element={messageEl!} sync={postToIframe} onPatchBlock={handlePatchCommonBlock} />}
       {showHome && (
         <Home

@@ -27,20 +27,10 @@ const FeatureGridSection = ({ initialBlocks, page = 'home' }: { initialBlocks?: 
 
     window.addEventListener('message', handleMessage);
 
-    window.parent.postMessage(
-      {
-        type: 'PAGE_BLOCKS_SYNC',
-        page,
-        blocks
-      },
-      '*'
-    );
-
     return () => {
       window.removeEventListener('message', handleMessage);
     };
-    // oxlint-disable react-hooks/exhaustive-deps
-  }, [hasIframe, blocks]);
+  }, [hasIframe, page]);
 
   return <PageBlocks blocks={blocks} hasIframe={hasIframe} />;
 };

@@ -11,6 +11,37 @@ export const defaultHomeBlocks: PageBlock[] = [
   {
     id: 'home-hero',
     type: 'hero',
+    variant: 'product-switcher',
+    defaultProduct: 'pms',
+    overlayGradient: 'linear-gradient(to right, rgba(41, 48, 61, 0.8), rgba(41, 48, 61, 0.5), transparent)',
+    products: [
+      {
+        key: 'pms',
+        label: 'PMS 租務系統',
+        backgroundImage: '/images/hero-house.jpg',
+        backgroundImageAlt: '夕陽下的物業',
+        title: '越多物業，\n越易管理！',
+        titleSecondary: 'GO-TECH租務系統',
+        subtitle: '繳費·分配差餉·查帳·維修確認·租期通知',
+        detailButtonText: '了解 PMS 系統',
+        detailButtonLink: '/system-features?product=pms',
+        trialButtonText: '立即開始14天免費試用',
+        trialButtonLink: '/free-trial'
+      },
+      {
+        key: 'hr',
+        label: 'HR 人力資源系統',
+        backgroundImage: '/images/hero-hr.jpg',
+        backgroundImageAlt: '現代化辦公室團隊協作',
+        title: '越多員工，\n越要高效管理！',
+        titleSecondary: 'GO-TECH HR 人力資源管理系統',
+        subtitle: '一站式處理員工資料、入職離職、考勤假期、薪資績效及培訓管理，讓 HR 工作更簡單、更準確、更高效。',
+        detailButtonText: '了解 HR 系統',
+        detailButtonLink: '/system-features?product=hr',
+        trialButtonText: '立即開始14天免費試用',
+        trialButtonLink: '/free-trial'
+      }
+    ],
     title: '越多物業，\n越易管理！',
     titleSecondary: 'GO-TECH租務系統',
     subtitle: '專注 分間單位、套房、簡樸房 租務系統。',
@@ -45,6 +76,37 @@ export const defaultSystemFeaturesBlocks: PageBlock[] = [
   {
     id: 'hero',
     type: 'hero',
+    variant: 'product-switcher',
+    defaultProduct: 'pms',
+    overlayGradient: 'linear-gradient(to right, rgba(26, 32, 44, 0.82), rgba(26, 32, 44, 0.48), transparent)',
+    products: [
+      {
+        key: 'pms',
+        label: 'PMS 租務系統',
+        backgroundImage: 'https://go-techs.com/go-tech/2026/02/11/system-features.webp',
+        backgroundImageAlt: 'GO-PMS 系統功能',
+        title: 'GO-PMS功能',
+        titleSecondary: '',
+        subtitle: '探索GO-PMS 的一系列功能，旨在簡化您的租務需求。',
+        detailButtonText: '',
+        detailButtonLink: '',
+        trialButtonText: '立即開始14天免費試用',
+        trialButtonLink: '/account/register'
+      },
+      {
+        key: 'hr',
+        label: 'HR 人力資源系統',
+        backgroundImage: '/images/hero-hr.jpg',
+        backgroundImageAlt: 'GO-HR 系統功能',
+        title: 'GO-HR功能',
+        titleSecondary: '',
+        subtitle: '覆蓋人事、考勤、薪資、審批、績效、培訓與報表分析，助企業建立標準化、數碼化的人力資源管理流程。',
+        detailButtonText: '',
+        detailButtonLink: '',
+        trialButtonText: '立即開始14天免費試用',
+        trialButtonLink: '/account/register'
+      }
+    ],
     title: 'GO-PMS功能',
     titleSecondary: '',
     subtitle: '探索GO-PMS 的一系列功能，旨在簡化您的租務需求。',
@@ -89,6 +151,37 @@ export const defaultCoreAdvantages: PageBlock[] = [
   {
     id: 'core-advantages-hero',
     type: 'hero',
+    variant: 'product-switcher',
+    defaultProduct: 'pms',
+    overlayGradient: 'linear-gradient(to right, rgba(20, 26, 38, 0.78), rgba(20, 26, 38, 0.38), transparent)',
+    products: [
+      {
+        key: 'pms',
+        label: 'PMS 租務系統',
+        backgroundImage: 'https://go-techs.com/go-tech/2026/02/11/core-hero.jpg',
+        backgroundImageAlt: 'GO-PMS 核心優勢',
+        title: 'GO - PMS',
+        titleSecondary: '',
+        subtitle: '',
+        detailButtonText: '',
+        detailButtonLink: '',
+        trialButtonText: '',
+        trialButtonLink: ''
+      },
+      {
+        key: 'hr',
+        label: 'HR 人力資源系統',
+        backgroundImage: '/images/hero-hr.jpg',
+        backgroundImageAlt: 'GO-HR 核心優勢',
+        title: 'GO - HR',
+        titleSecondary: '',
+        subtitle: '',
+        detailButtonText: '',
+        detailButtonLink: '',
+        trialButtonText: '',
+        trialButtonLink: ''
+      }
+    ],
     title: 'GO - PMS',
     titleStyle: {
       fontSize: '3rem',
@@ -115,6 +208,37 @@ export const defaultTargetAudience: PageBlock[] = [
   {
     id: 'target-audience-hero',
     type: 'hero',
+    variant: 'product-switcher',
+    defaultProduct: 'pms',
+    overlayGradient: 'linear-gradient(to right, rgba(35, 39, 48, 0.76), rgba(35, 39, 48, 0.45), transparent)',
+    products: [
+      {
+        key: 'pms',
+        label: 'GO-PMS 物業系統',
+        backgroundImage: 'https://go-techs.com/go-tech/2026/02/11/audience-banner.jpg',
+        backgroundImageAlt: 'GO-PMS 適合人群',
+        title: '適合人群',
+        titleSecondary: '',
+        subtitle: 'Target audience',
+        detailButtonText: '',
+        detailButtonLink: '',
+        trialButtonText: '',
+        trialButtonLink: ''
+      },
+      {
+        key: 'hr',
+        label: 'GO-HR 人力資源',
+        backgroundImage: '/images/hero-hr.jpg',
+        backgroundImageAlt: 'GO-HR 適合人群',
+        title: '適合人群',
+        titleSecondary: '',
+        subtitle: 'Target audience',
+        detailButtonText: '',
+        detailButtonLink: '',
+        trialButtonText: '',
+        trialButtonLink: ''
+      }
+    ],
     title: '適合人群',
     titleSecondary: '',
     titleStyle: {
