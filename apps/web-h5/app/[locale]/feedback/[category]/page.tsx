@@ -2,7 +2,7 @@ import { and, asc, count, desc, eq, inArray, isNull, ne } from 'drizzle-orm';
 import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { db } from '@/db';
-import { fbCategory, fbComment, fbFeature } from '@/db/scheam';
+import { fbCategory, fbComment, fbFeature, fbSubCategory } from '@/db/scheam';
 import type { Feature } from '../useFeedbackFeatures';
 import CategoryContent from './CategoryContent';
 
@@ -23,12 +23,17 @@ const FeedbackCategoryPage = async ({ params }: { params: Promise<{ category: st
 
   // 1. 查询所有分类（含子分类，按排序）
   const allCats = await db.query.fbCategory.findMany({
-    with: { subCategories: { orderBy: [asc(fbCategory.sortOrder)] } },
+    with: { subCategories: { orderBy: [asc(fbSubCategory.sortOrder)] } },
     orderBy: [asc(fbCategory.sortOrder)]
   });
 
-  // 2. 每个分类的需求数量（排除已完成的）
-  const catIds = allCats.map(c => c.id);
+  // 2. 校验当前分类，并只保留同一系统的可切换分类
+  const currentCat = allCats.find(c => c.name === activeCat);
+  if (!currentCat) notFound();
+  const systemCats = allCats.filter(c => c.system === currentCat.system);
+
+  // 3. 每个同系统分类的需求数量（排除已完成的）
+  const catIds = systemCats.map(c => c.id);
   let countByCatId: Map<number, number> = new Map();
 
   if (catIds.length > 0) {
@@ -41,7 +46,7 @@ const FeedbackCategoryPage = async ({ params }: { params: Promise<{ category: st
     countByCatId = new Map(countRows.map(r => [r.categoryId, r.cnt]));
   }
 
-  const categoriesForPage: CategoryForPage[] = allCats.map(c => ({
+  const categoriesForPage: CategoryForPage[] = systemCats.map(c => ({
     description: c.description,
     featureCount: countByCatId.get(c.id) || 0,
     icon: c.icon,
@@ -49,10 +54,6 @@ const FeedbackCategoryPage = async ({ params }: { params: Promise<{ category: st
     name: c.name,
     subCategories: c.subCategories.map(s => ({ id: s.id, name: s.name, sortOrder: s.sortOrder }))
   }));
-
-  // 3. 校验当前分类是否存在
-  const currentCat = allCats.find(c => c.name === activeCat);
-  if (!currentCat) notFound();
 
   // 4. 查询当前分类下的所有需求（含 author、subCategory、comments(含author)、votes(含user)）
   const dbFeatures = await db.query.fbFeature.findMany({

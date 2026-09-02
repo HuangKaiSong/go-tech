@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, isNull, like, or } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNull, like, or } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 import { enqueueFeedbackSync, scheduleFeedbackSync } from '@/app/api/feedback/sync';
 import { db } from '@/db';
@@ -81,9 +81,24 @@ export async function GET(req: NextRequest) {
   if (!q) {
     return NextResponse.json({ success: true, data: [] });
   }
+  const requestedSystem = req.nextUrl.searchParams.get('system');
+  const system = requestedSystem === 'pms' || requestedSystem === 'hr' ? requestedSystem : null;
+  const systemCategoryIds = system
+    ? (await db.select({ id: fbCategory.id }).from(fbCategory).where(eq(fbCategory.system, system))).map(
+        category => category.id
+      )
+    : null;
+
+  if (systemCategoryIds?.length === 0) {
+    return NextResponse.json({ success: true, data: [] });
+  }
+
+  const textSearch = or(like(fbFeature.title, `%${q}%`), like(fbFeature.description, `%${q}%`));
 
   const rows = await db.query.fbFeature.findMany({
-    where: and(isNull(fbFeature.deletedAt), or(like(fbFeature.title, `%${q}%`), like(fbFeature.description, `%${q}%`))),
+    where: systemCategoryIds
+      ? and(isNull(fbFeature.deletedAt), inArray(fbFeature.categoryId, systemCategoryIds), textSearch)
+      : and(isNull(fbFeature.deletedAt), textSearch),
     with: {
       author: { columns: { custName: true } },
       category: { columns: { name: true } },

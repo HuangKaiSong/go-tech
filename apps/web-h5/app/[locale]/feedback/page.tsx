@@ -21,7 +21,7 @@ export default async function FeedbackPage() {
       }
     },
     orderBy: [asc(fbCategory.sortOrder)],
-    columns: { id: true, name: true, icon: true, description: true }
+    columns: { id: true, name: true, icon: true, description: true, system: true }
   });
 
   // 查询每个分类下未完成的需求数量

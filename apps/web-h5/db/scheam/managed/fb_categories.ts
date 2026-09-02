@@ -1,11 +1,15 @@
 import { sql } from 'drizzle-orm';
-import { datetime, int, mysqlTable, uniqueIndex, varchar } from 'drizzle-orm/mysql-core';
+import { datetime, int, mysqlEnum, mysqlTable, uniqueIndex, varchar } from 'drizzle-orm/mysql-core';
 
-/** 主題分類（租務部 / 場務部 / 會計部 / 客服 / 系統設定 / 其他） */
+export const feedbackSystems = ['pms', 'hr'] as const;
+export type FeedbackSystem = (typeof feedbackSystems)[number];
+
+/** 主題分類（按 GO-PMS / GO-HR 系統分組） */
 export const fbCategory = mysqlTable(
   'fb_category',
   {
     id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    system: mysqlEnum('system', feedbackSystems).notNull().default('pms'),
     name: varchar('name', { length: 32 }).notNull(),
     description: varchar('description', { length: 255 }).notNull().default(''),
     /** Lucide icon 名稱 */

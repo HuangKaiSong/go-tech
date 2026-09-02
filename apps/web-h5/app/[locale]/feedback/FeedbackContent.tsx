@@ -24,7 +24,7 @@ import Footer from '@/app/components/Footer';
 import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 import { useAuth } from '@/contexts/AuthContext';
-import type { FbFeature } from '@/db/scheam';
+import type { FbFeature, FeedbackSystem } from '@/db/scheam';
 import { SERIF, statusMeta } from './data';
 import { formatDate, maskName, orderCommentsByThread } from './useFeedbackFeatures';
 import type { Feature } from './useFeedbackFeatures';
@@ -37,6 +37,7 @@ interface CategoryFromDB {
   id: number;
   name: string;
   subCategories: { id: number; name: string; sortOrder: number }[];
+  system: FeedbackSystem;
 }
 
 interface Props {
@@ -45,11 +46,14 @@ interface Props {
   language: string;
 }
 
+const systemTabs: { description: string; id: FeedbackSystem; label: string }[] = [
+  { id: 'pms', label: 'GO-PMS 物業管理', description: '租務、場務、會計與客服相關需求' },
+  { id: 'hr', label: 'GO-HR 人力資源', description: '人事、考勤、薪資、績效與培訓相關需求' }
+];
+
 /** Kebab-case → PascalCase: building-2 → Building2 */
 const kebabToPascal = (name: string) =>
-  name
-    .replace(/(^|-)([a-z])/g, (_m: string, _sep: string, char: string) => char.toUpperCase())
-    .replace(/-(\d)/g, (_m: string, _sep: string, digit: string) => digit);
+  name.replace(/(^|-)([a-z])/g, (_m: string, _sep: string, char: string) => char.toUpperCase()).replace(/-(\d)/g, '$1');
 
 /** API icon 字符串 → Lucide 组件（动态查找，不存在则用 Sparkles） */
 const resolveIcon = (iconName: string | null): React.ComponentType<{ className?: string; strokeWidth?: number }> => {
@@ -73,6 +77,7 @@ const FeedbackContent = ({ categoriesFromDB, featureCompleted, language }: Props
   const replyText = useBatchTranslation('回覆');
   const searchPlaceholder = useBatchTranslation('搜尋需求…');
   const verificationRequired = useBatchTranslation('請先完成人機驗證');
+  const [activeSystem, setActiveSystem] = useState<FeedbackSystem>('pms');
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, { wait: 500 });
   const isSearching = search !== debouncedSearch;
@@ -104,7 +109,7 @@ const FeedbackContent = ({ categoriesFromDB, featureCompleted, language }: Props
     abortRef.current = controller;
     setApiLoading(true);
 
-    fetch(`/api/feedback/features?q=${encodeURIComponent(q)}`, { signal: controller.signal })
+    fetch(`/api/feedback/features?q=${encodeURIComponent(q)}&system=${activeSystem}`, { signal: controller.signal })
       .then(res => res.json())
       .then(json => {
         if (!controller.signal.aborted) {
@@ -119,7 +124,7 @@ const FeedbackContent = ({ categoriesFromDB, featureCompleted, language }: Props
       });
 
     return () => controller.abort();
-  }, [debouncedSearch]);
+  }, [activeSystem, debouncedSearch]);
 
   const requireLogin = () => {
     if (isLoggedIn) return true;
@@ -198,13 +203,20 @@ const FeedbackContent = ({ categoriesFromDB, featureCompleted, language }: Props
   };
 
   /** 将服务端数据转为组件使用的 categoryMeta */
-  const categoryMeta = categoriesFromDB.map(c => ({
-    desc: c.description ?? '',
-    featureCount: c.featureCount,
-    icon: resolveIcon(c.icon),
-    name: c.name,
-    subs: c.subCategories.map(s => s.name)
-  }));
+  const categoryMeta = categoriesFromDB
+    .filter(c => c.system === activeSystem)
+    .map(c => ({
+      desc: c.description ?? '',
+      featureCount: c.featureCount,
+      icon: resolveIcon(c.icon),
+      id: c.id,
+      name: c.name,
+      subs: c.subCategories.map(s => s.name)
+    }));
+
+  const activeSystemMeta = systemTabs.find(system => system.id === activeSystem) ?? systemTabs[0];
+  const activeCategoryIds = new Set(categoryMeta.map(category => category.id));
+  const featureCompletedForSystem = featureCompleted.filter(feature => activeCategoryIds.has(feature.categoryId));
 
   /** 传给 NewPostDialog 的分类数据 */
   const dialogCategories = categoryMeta.map(c => ({ name: c.name, subNames: c.subs }));
@@ -392,7 +404,38 @@ const FeedbackContent = ({ categoriesFromDB, featureCompleted, language }: Props
             </h1>
           </div>
           <p className="text-stone-500 leading-relaxed max-w-2xl mb-7">
-            <DynamicText text="先選擇一個主題,再瀏覽或張貼該主題下的細化需求。高票需求將被優先開發。" />
+            <DynamicText text="先選擇系統與主題,再瀏覽或張貼該主題下的細化需求。高票需求將被優先開發。" />
+          </p>
+          <div
+            className="inline-flex items-center gap-1 rounded-full bg-white border border-stone-200 p-1 mb-6"
+            aria-label="GO-TECH 系統"
+          >
+            {systemTabs.map(system => {
+              const active = system.id === activeSystem;
+              return (
+                <button
+                  key={system.id}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => {
+                    setActiveSystem(system.id);
+                    setSearch('');
+                    setSearchResults([]);
+                    setShowHistory(false);
+                  }}
+                  className={`px-5 py-2 rounded-full text-sm font-medium transition-colors ${
+                    active
+                      ? 'bg-stone-900 text-white'
+                      : 'text-stone-500 hover:text-stone-900 focus-visible:text-stone-900'
+                  }`}
+                >
+                  <DynamicText text={system.label} />
+                </button>
+              );
+            })}
+          </div>
+          <p className="text-sm text-stone-400 mb-6">
+            <DynamicText text={activeSystemMeta.description} />
           </p>
           <div className="relative max-w-2xl">
             <Search className="w-4 h-4 text-stone-400 absolute left-4 top-1/2 -translate-y-1/2" />
@@ -524,7 +567,7 @@ const FeedbackContent = ({ categoriesFromDB, featureCompleted, language }: Props
                 <h2 style={SERIF} className="text-3xl text-stone-900">
                   <DynamicText text="已完成需求" />
                 </h2>
-                {featureCompleted.map(f => (
+                {featureCompletedForSystem.map(f => (
                   <div key={f.id} className="flex gap-5 items-start">
                     <OfficialAvatar />
                     <div className="flex-1 min-w-0">

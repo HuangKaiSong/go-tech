@@ -56,7 +56,7 @@ paths:
     get:
       tags: [反馈-公共]
       summary: 获取反馈分类
-      description: 按排序值升序返回全部一级分类及其子分类。
+      description: 按所属系统和排序值返回全部一级分类及其子分类。
       operationId: getFeedbackCategories
       responses:
         '200':
@@ -79,6 +79,14 @@ paths:
           schema:
             type: string
             example: 发票
+        - name: system
+          in: query
+          required: false
+          description: 按所属系统筛选搜索结果；省略时搜索全部系统。
+          schema:
+            type: string
+            enum: [pms, hr]
+            example: pms
       responses:
         '200':
           description: 建议搜索成功
@@ -683,12 +691,17 @@ components:
     FeedbackCategory:
       type: object
       description: 一级反馈分类。
-      required: [id, name, subCategories]
+      required: [id, system, name, subCategories]
       properties:
         id:
           type: integer
           description: 一级分类数据库 ID。
           example: 1
+        system:
+          type: string
+          enum: [pms, hr]
+          description: 分类所属的 GO-TECH 系统。
+          example: pms
         name:
           type: string
           description: 一级分类名称。

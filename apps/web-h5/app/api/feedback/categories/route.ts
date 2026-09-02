@@ -20,7 +20,8 @@ export async function GET(_req: NextRequest) {
       id: true,
       name: true,
       icon: true,
-      description: true
+      description: true,
+      system: true
     }
   });
 
