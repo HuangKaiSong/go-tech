@@ -5,6 +5,7 @@ import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { cookies, headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { ProductSelectionProvider } from '@/contexts/ProductSelectionContext';
 import type { Locale } from '@/i18n/config';
 import { routing } from '@/i18n/routing';
 import { getBaseUrl } from '@/lib/http';
@@ -96,14 +97,16 @@ export default async function LocaleLayout({
   return (
     <NextIntlClientProvider>
       <HtmlLangSync locale={locale} />
-      <DynamicI18nProvider messages={dynamicMessages}>
-        <TooltipProvider>
-          <AuthProvider _tenants={tenants} initialUser={user} _token={token}>
-            <Layout>{children}</Layout>
-          </AuthProvider>
-          <Sonner className="toaster group" position="top-right" richColors />
-        </TooltipProvider>
-      </DynamicI18nProvider>
+      <ProductSelectionProvider>
+        <DynamicI18nProvider messages={dynamicMessages}>
+          <TooltipProvider>
+            <AuthProvider _tenants={tenants} initialUser={user} _token={token}>
+              <Layout>{children}</Layout>
+            </AuthProvider>
+            <Sonner className="toaster group" position="top-right" richColors />
+          </TooltipProvider>
+        </DynamicI18nProvider>
+      </ProductSelectionProvider>
     </NextIntlClientProvider>
   );
 }

@@ -1,4 +1,18 @@
-import { Settings, Shield, TrendingUp } from 'lucide-react';
+import type { PackageBizCode } from '@go-tech/types';
+import {
+  BarChart3,
+  Bell,
+  Coins,
+  Fingerprint,
+  GraduationCap,
+  IdCard,
+  Settings,
+  Shield,
+  Smartphone,
+  Target,
+  TrendingUp,
+  Users
+} from 'lucide-react';
 import Image from 'next/image';
 import Footer from '@/app/components/Footer';
 import Header from '@/app/components/Header';
@@ -10,159 +24,253 @@ import advantage5 from '@/assets/advantage-5.jpg';
 import advantage6 from '@/assets/advantage-6.jpg';
 import advantageIntro from '@/assets/advantage-intro.jpg';
 import coreOffice from '@/assets/core-office.jpg';
+import heroHr from '@/assets/hero-hr.jpg';
+import homeOffice from '@/assets/home-office.jpg';
 import { defaultCoreAdvantages } from '../../components/blockDefaults';
 import { DynamicText } from '../../components/DynamicI18nText';
 import HeroSection from '../../components/HeroSection';
 import { loadPageBlocks } from '../../lib/pageBlocks';
 
-export default async function Page() {
+const content = {
+  pms: {
+    introHeading: '租賃管理系統介紹',
+    introTitle: '租賃管理系統',
+    introLead: '一個專為業主、物業管理公司和新客設計的創新收租平台。',
+    introQuote: '「簡化租賃管理流程，提升效率」',
+    introImage: coreOffice,
+    introFooter: '選擇租賃管理系統，將為您的租務管理帶來全新的體驗和更高的效率。',
+    introCards: [
+      {
+        icon: Settings,
+        title: '核心功能',
+        desc: '物業與單位建檔、租約管理、租金財務、維修跟進與到期通知等完整工具鏈。'
+      },
+      {
+        icon: TrendingUp,
+        title: '提升效率',
+        desc: '自動出單、自動催繳與批量通知，大幅減少人手重複操作與出錯機會。'
+      },
+      {
+        icon: Shield,
+        title: '全面服務',
+        desc: '由開戶、資料導入到日常支援，專人跟進，讓系統真正落地使用。'
+      }
+    ],
+    advIntroHeading: '優勢介紹',
+    advIntroImage: advantageIntro,
+    advIntroTitle: '租務管理系統的優勢',
+    advIntroLead: '租務管理系統在現代租賃市場中具有顯著的優勢，相比傳統的人手書面管理：',
+    advIntroPoints: [
+      {
+        title: '精準出租定價',
+        desc: '結合區域行情與歷史成交分析，找出合適的租金定價，最大化投資回報率。'
+      },
+      {
+        title: '靈活性',
+        desc: '無論是管理單個物業，還是整個物業組合，都能彈性配置，隨業務規模成長。'
+      },
+      {
+        title: '多功能性',
+        desc: '租務、財務、維修與客服在同一平台完成，減少跨系統切換與資料重複輸入。'
+      }
+    ],
+    gridHeading: '我們的優勢',
+    advantages: [
+      {
+        image: advantage1,
+        title: '多樣化的租賃服務',
+        description:
+          '無論您是管理住宅、商業大廈還是工廈、單位、車位、倉庫、儲物位、廣告位、天台等等，我們的系統都能滿足您的需求。',
+        subDescription: '從房產登記、租戶管理到自動化帳單計算，一站式完整銜接。'
+      },
+      {
+        image: advantage2,
+        title: '提高管理效率',
+        description: '自動收租、自動產生賬單和催繳功能，已成為最廣泛使用的租賃管理工具。',
+        subDescription: '管理多處物業只需按幾個鍵，節省大量工時。'
+      },
+      {
+        image: advantage3,
+        title: '加強財務透明度',
+        description: '精確而全面的數據報表，幫助投資者進行細緻入微的投資和財務分析。',
+        subDescription: '內設報告功能，讓物業表現分析更加簡潔清晰。'
+      },
+      {
+        image: advantage4,
+        title: '極簡學習曲線',
+        description: '介面直觀，無需專業訓練即可上手操作。',
+        subDescription: '客戶服務隨時提供快速技術支援，以及業界趨勢洞察。'
+      },
+      {
+        image: advantage5,
+        title: '數據分析與決策支持',
+        description: '市場趨勢分析，理解工商、住宅等產業發展趨勢，協助策略制定。',
+        subDescription: '由平台數據展示到詳細報告，協助用戶做出最明智的決策。'
+      },
+      {
+        image: advantage6,
+        title: '優質客服協助',
+        description: '可靠的系統功能配合優質客服團隊，為用戶提供更多輔助工具。',
+        subDescription: '無論您有什麼問題，團隊會在 24 小時內回覆並積極提供解決方案。'
+      }
+    ]
+  },
+  hr: {
+    introHeading: '人力資源管理系統介紹',
+    introTitle: '人力資源管理系統',
+    introLead: '一站式 SaaS 人事平台，覆蓋人事、考勤、薪資、審批、績效、培訓與報表分析。',
+    introQuote: '「建立標準化、數碼化的人力資源管理流程」',
+    introImage: homeOffice,
+    introFooter: '由入職到離職、由打卡到出糧，GO-HR 讓人事行政真正一站完成，準確又高效。',
+    introCards: [
+      {
+        icon: IdCard,
+        title: '核心功能',
+        desc: '員工資料、入職離職、組織架構、部門職位、打卡假期、薪資發放、績效培訓全模組覆蓋。'
+      },
+      {
+        icon: Fingerprint,
+        title: '考勤自動化',
+        desc: '排班輪更、手機定位打卡、補卡與請假審批，考勤數據直接帶入薪資計算。'
+      },
+      {
+        icon: Shield,
+        title: '薪酬保密可控',
+        desc: '分層權限管控，薪資與個人敏感資料只有授權人員可查看，操作全程留痕。'
+      }
+    ],
+    advIntroHeading: '優勢介紹',
+    advIntroImage: heroHr,
+    advIntroTitle: 'GO-HR 人力資源系統的優勢',
+    advIntroLead: '相比 Excel 與人手處理，GO-HR 讓中小企、連鎖店、服務業及多部門企業的人事管理更準確、更省時：',
+    advIntroPoints: [
+      {
+        title: '按員工人數彈性開通',
+        desc: '依實際員工人數訂閱，人數增減隨時調整，中小企也能低成本用上完整人事系統。'
+      },
+      {
+        title: '全流程數碼留痕',
+        desc: '入職、調崗、加薪、離職與審批全部有紀錄可追溯，勞資爭議時有據可依。'
+      },
+      {
+        title: '考勤薪資自動貫通',
+        desc: '打卡、假期、獎金罰款自動帶入薪資計算，出糧不再人手對數，減少出錯。'
+      }
+    ],
+    gridHeading: '我們的優勢',
+    advantages: [
+      {
+        icon: IdCard,
+        title: '人事檔案集中管理',
+        description: '員工資料、合約文件、證件到期、家庭聯絡人統一建檔，入職離職流程標準化。',
+        subDescription: '人員異動與檔案變更全程留痕，隨時查閱歷史紀錄。'
+      },
+      {
+        icon: Users,
+        title: '組織架構清晰可視',
+        description: '部門管理、職位管理與職位架構圖形化呈現，匯報關係一目瞭然。',
+        subDescription: '多部門企業亦可依架構設定審批層級與資料權限。'
+      },
+      {
+        icon: Fingerprint,
+        title: '考勤假期一站處理',
+        description: '支援排班輪更、外勤定位打卡、補卡申請，假期規則與結餘自訂。',
+        subDescription: '打卡記錄與異常出勤即時統計，主管手機即可審批。'
+      },
+      {
+        icon: Coins,
+        title: '薪資計算自動準確',
+        description: '薪資方案彈性設定，考勤、獎金與罰款自動帶入，一鍵生成薪資單。',
+        subDescription: '發薪記錄完整存檔，支援強積金與稅務相關報表匯出。'
+      },
+      {
+        icon: Target,
+        title: '績效與培訓並重',
+        description: '自訂考核方案與週期，員工自評、主管覆核，評估結果與晉升掛鈎。',
+        subDescription: '培訓計劃與培訓記錄完整存檔，助人才持續成長。'
+      },
+      {
+        icon: BarChart3,
+        title: '報表分析支援決策',
+        description: '人力結構、離職率、出勤異常與薪酬成本多維報表，一頁看盡。',
+        subDescription: '支援匯出分享，為管理層人力規劃提供數據依據。'
+      }
+    ],
+    extraHighlights: [
+      { icon: Bell, title: '消息通知', desc: '入職提醒、合約到期、生日祝賀與待辦審批即時推送。' },
+      { icon: Smartphone, title: '員工自助', desc: '手機自助打卡、請假、查看薪資單與假期結餘。' },
+      { icon: GraduationCap, title: '培訓管理', desc: '培訓計劃安排、出席記錄與成效回顧完整閉環。' }
+    ]
+  }
+} as const;
+
+export default async function Page({ searchParams }: { searchParams: Promise<{ product?: string | string[] }> }) {
   const blocks = await loadPageBlocks('core-advantages', defaultCoreAdvantages);
+
+  const productParam = (await searchParams).product;
+  const requestedProduct = Array.isArray(productParam) ? productParam[0] : productParam;
+  const product: PackageBizCode = requestedProduct === 'hr' ? 'hr' : 'pms';
+
+  const c = content[product];
 
   const hasIframe = false;
 
-  const advantages = [
-    {
-      image: advantage1,
-      title: '多樣化的租賃服務',
-      description:
-        '無論您是管理住宅、商業大廈還是工廠地產、單位、車位、倉庫、儲物位、廣告位、天台等等，我們的系統都能滿足您的需求。',
-      subDescription: '從房產登記、租戶管理到自動化帳單計算的所有需求，我們的方案在完整租賃管理解決方案中無縫銜接。'
-    },
-    {
-      image: advantage2,
-      title: '提高管理效率',
-      description: '自動收租、自動產生賬單和催繳功能，已成為最廣泛使用的租賃管理工具。',
-      subDescription: '管理多處物業: 只需按幾個鍵，節省大量工時。它能幫業主簡化收租和催繳過程。'
-    },
-    {
-      image: advantage3,
-      title: '加強財務透明度',
-      description: '精確而全面數據：包括巧帳計計劃表，幫助投資者進行細緻入微的投資和財務分析。',
-      subDescription: '精確分析物業表現：內設的報告標準功能，讓分析更加簡潔。'
-    },
-    {
-      image: advantage4,
-      title: '極簡學習曲線',
-      description: '無需專業：無論的在地即可操作，讓你簡單上手。',
-      subDescription: '客戶服務：隨時享受到快速的技術支持,以及業界洞察分析趨勢。'
-    },
-    {
-      image: advantage5,
-      title: '數據分析與決策支持',
-      description: '市場趨勢分析：理解未來工商、住宅等產業發展趨勢及策略制定。',
-      subDescription: '數據分析表：內有平台的數據展示到詳細的數據報告，協助用戶做出最明智的決策。'
-    },
-    {
-      image: advantage6,
-      title: '優質客服協助中',
-      description: '我們的人工智能,包含了可靠的系統功能來支持, 優質客服團隊，讓您用戶通用更多的輔助工具。',
-      subDescription: '無論您有什麼問題，我們的API團隊會在24小時回覆內，並積極提供解決方案。'
-    }
-  ];
-
-  const heroBackground = blocks?.find(block => block.type === 'hero')?.backgroundImage || '';
-
   return (
     <div className="min-h-screen bg-background">
-      <Header heroBg={heroBackground} initialBlocks={blocks} />
+      <Header initialBlocks={blocks} />
 
       {/* Hero Section */}
       <HeroSection initialBlocks={blocks} page="core-advantages" />
-      {/* <section
-        className={`relative min-h-[60vh] flex items-center ${hasIframe ? "cursor-editor" : ""}`}
-      >
-        <div className="absolute inset-0">
-          <Image
-            src={coreHero}
-            alt="Core advantages hero"
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-linear-to-r from-foreground/70 to-transparent" />
-        </div>
-        <div className="container mx-auto px-4 relative z-10 pt-32">
-          <h1 className="text-5xl md:text-7xl font-bold text-white tracking-wider">
-            GO - PMS
-          </h1>
-        </div>
-      </section> */}
 
       {/* System Introduction Section */}
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-primary mb-16">
-            <DynamicText text="租賃管理系統介紹" />
-          </h2>
+          <div key={product} className="animate-fade-in">
+            <h2 className="text-3xl md:text-4xl font-bold text-center text-primary mb-16">
+              <DynamicText text={c.introHeading} />
+            </h2>
 
-          <div className={`grid md:grid-cols-2 gap-12 items-start ${hasIframe ? 'cursor-editor' : ''}`}>
-            {/* Left Column */}
-            <div>
-              <h3 className="text-2xl font-bold text-foreground mb-4">
-                <DynamicText text="租賃管理系統" />
-              </h3>
-              <p className="text-muted-foreground mb-6">
-                <DynamicText text="一個專為業主、物業管理公司和新客設計的創新收租平台。" />
-              </p>
-              <p className="text-primary font-medium mb-8">
-                <DynamicText text="「簡化租賃管理流程，提升效率」" />
-              </p>
+            <div className={`grid md:grid-cols-2 gap-12 items-start ${hasIframe ? 'cursor-editor' : ''}`}>
+              {/* Left Column */}
+              <div>
+                <h3 className="text-2xl font-bold text-foreground mb-4">
+                  <DynamicText text={c.introTitle} />
+                </h3>
+                <p className="text-muted-foreground mb-6">
+                  <DynamicText text={c.introLead} />
+                </p>
+                <p className="text-primary font-medium mb-8">
+                  <DynamicText text={c.introQuote} />
+                </p>
 
-              <div className="rounded-lg overflow-hidden mb-6">
-                <Image src={coreOffice} alt="Modern office" className="w-full h-64 object-cover" />
+                <div className="rounded-lg overflow-hidden mb-6">
+                  <Image src={c.introImage} alt={c.introTitle} className="w-full h-64 object-cover" />
+                </div>
+
+                <p className="text-primary">
+                  <DynamicText text={c.introFooter} />
+                </p>
               </div>
 
-              <p className="text-primary">
-                <DynamicText text="選擇租賃管理系統，將為您的租務管理帶來全新的體驗和更高的效率。" />
-              </p>
-            </div>
-
-            {/* Right Column - Feature Cards */}
-            <div className="space-y-6">
-              <div className="bg-card p-6 rounded-lg border border-border shadow-sm">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                    <Settings className="w-6 h-6 text-primary" />
+              {/* Right Column - Feature Cards */}
+              <div className="space-y-6">
+                {c.introCards.map(card => (
+                  <div className="bg-card p-6 rounded-lg border border-border shadow-sm" key={card.title}>
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                        <card.icon className="w-6 h-6 text-primary" />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-foreground mb-2">
+                          <DynamicText text={card.title} />
+                        </h4>
+                        <p className="text-sm text-muted-foreground">
+                          <DynamicText text={card.desc} />
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-bold text-foreground mb-2">
-                      <DynamicText text="核心功能" />
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      <DynamicText text="除可按需要設定收租與維修管理外，系統亦提供數據管理、租約管理、財務管理、維修維護、通知提醒等常用工具，支援日常營運的一站式管理。" />
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-card p-6 rounded-lg border border-border shadow-sm">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                    <TrendingUp className="w-6 h-6 text-primary" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-foreground mb-2">
-                      <DynamicText text="提升效率" />
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      <DynamicText text="透過標準化流程與統一資料管理，協助快速統計與查核，減少手工記錄與重複輸入，令對賬、跟進與報表整理更省時、更準確。" />
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-card p-6 rounded-lg border border-border shadow-sm">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                    <Shield className="w-6 h-6 text-primary" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-foreground mb-2">
-                      <DynamicText text="全面服務" />
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      <DynamicText text="提供多維度報表與管理視圖，提升透明度與可追溯性；並可按管理需要設定定期檢視與跟進安排，方便持續優化租務與物業表現。" />
-                    </p>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
@@ -173,60 +281,38 @@ export default async function Page() {
       <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-center text-primary mb-16">
-            <DynamicText text="優勢介紹" />
+            <DynamicText text={c.advIntroHeading} />
           </h2>
 
           <div className={`grid md:grid-cols-2 gap-12 items-center ${hasIframe ? 'cursor-editor' : ''}`}>
             {/* Left - Image */}
             <div className="rounded-lg overflow-hidden">
-              <Image src={advantageIntro} alt="Advantage introduction" className="w-full h-125 object-cover" />
+              <Image src={c.advIntroImage} alt={c.advIntroTitle} className="w-full h-125 object-cover" />
             </div>
 
             {/* Right - Content */}
             <div>
               <h3 className="text-2xl font-bold text-foreground mb-6">
-                <DynamicText text="租務管理系統的優勢" />
+                <DynamicText text={c.advIntroTitle} />
               </h3>
               <p className="text-muted-foreground mb-8">
-                <DynamicText text="租務管理系統在現代租賃市場中具有顯著的優勢，它和您物的傳統的書面管理系統：" />
+                <DynamicText text={c.advIntroLead} />
               </p>
 
               <div className="space-y-8">
-                <div className="flex gap-4">
-                  <span className="text-primary font-bold text-xl">01</span>
-                  <div>
-                    <h4 className="font-bold text-foreground mb-2">
-                      <DynamicText text="精準出租定價" />
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      <DynamicText text="結合周邊配套（如交通、學校、商圈）與歷史租賃表現等資料作參考，協助制定更合理的租金策略，提升出租成功率與回報表現。" />
-                    </p>
+                {c.advIntroPoints.map((point, i) => (
+                  <div key={point.title} className="flex gap-4">
+                    <span className="text-primary font-bold text-xl">{String(i + 1).padStart(2, '0')}</span>
+                    <div>
+                      <h4 className="font-bold text-foreground mb-2">
+                        <DynamicText text={point.title} />
+                      </h4>
+                      <p className="text-sm text-muted-foreground">
+                        <DynamicText text={point.desc} />
+                      </p>
+                    </div>
                   </div>
-                </div>
-
-                <div className="flex gap-4">
-                  <span className="text-primary font-bold text-xl">02</span>
-                  <div>
-                    <h4 className="font-bold text-foreground mb-2">
-                      <DynamicText text="靈活擴展" />
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      <DynamicText text="不論管理單一物業或多個物業組合，皆可用同一套管理架構統一處理；有助於規劃租務安排與回報目標，支援不同成長階段的需要。" />
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-4">
-                  <span className="text-primary font-bold text-xl">03</span>
-                  <div>
-                    <h4 className="font-bold text-foreground mb-2">
-                      <DynamicText text="多功能整合" />
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      <DynamicText text="將招租、租約、收租、維修、財務與文件等工作集中管理，減少人手記錄與跨平台往返；同時保留完整紀錄，讓跟進更有條理、管理更專業。" />
-                    </p>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
@@ -237,22 +323,33 @@ export default async function Page() {
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-center text-primary mb-16">
-            <DynamicText text="我們的優勢" />
+            <DynamicText text={c.gridHeading} />
           </h2>
 
           <div className={`grid md:grid-cols-2 lg:grid-cols-3 gap-10 ${hasIframe ? 'cursor-editor' : ''}`}>
-            {advantages.map((advantage, index) => (
+            {c.advantages.map(advantage => (
               <div
-                key={index}
+                key={advantage.title}
                 className="group bg-card rounded-xl overflow-hidden shadow-lg border border-border hover:shadow-xl transition-shadow duration-300"
               >
-                <div className="overflow-hidden">
-                  <Image
-                    src={advantage.image}
-                    alt={advantage.title}
-                    className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
+                {'image' in advantage && advantage.image ? (
+                  <div className="overflow-hidden">
+                    <Image
+                      src={advantage.image}
+                      alt={advantage.title}
+                      className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                ) : (
+                  <div className="h-56 flex items-center justify-center bg-primary/5">
+                    {'icon' in advantage && advantage.icon && (
+                      <advantage.icon
+                        className="w-24 h-24 text-primary group-hover:scale-110 transition-transform duration-300"
+                        strokeWidth={1.4}
+                      />
+                    )}
+                  </div>
+                )}
                 <div className="p-6">
                   <h3 className="font-bold text-lg text-foreground mb-3">
                     <DynamicText text={advantage.title} />
@@ -267,6 +364,27 @@ export default async function Page() {
               </div>
             ))}
           </div>
+          {'extraHighlights' in c && (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10 mt-10">
+              {c.extraHighlights.map(h => (
+                <div
+                  key={h.title}
+                  className="group bg-card rounded-xl overflow-hidden shadow-lg border border-border hover:shadow-xl hover:border-primary/40 transition-all duration-300"
+                >
+                  <div className="h-56 flex items-center justify-center bg-primary/5">
+                    <h.icon
+                      className="w-24 h-24 text-primary group-hover:scale-110 transition-transform duration-300"
+                      strokeWidth={1.4}
+                    />
+                  </div>
+                  <div className="p-6">
+                    <h3 className="font-bold text-lg text-foreground mb-3">{h.title}</h3>
+                    <p className="text-sm text-muted-foreground">{h.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

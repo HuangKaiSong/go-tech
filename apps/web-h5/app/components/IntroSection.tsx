@@ -1,40 +1,75 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useIframeContext } from '@/contexts/IframeContext';
+import { useOptionalProductSelection } from '@/contexts/ProductSelectionContext';
 import { DynamicText } from './DynamicI18nText.client';
+import { type PageBlock, type SectionBlock } from './PageBlocks';
 
-const IntroSection = ({ initialBlocks }: { initialBlocks?: any[] }) => {
-  let intro = '簡化流程，提高效率，讓您的租務管理更輕鬆！\n隨時隨地掌握租務動態，安心管理，省心生活。',
-    introStyle = {},
-    lineStyle = {},
-    title = '租務管理系統，一站式解決方案！',
-    titleStyle = {};
-  const { hasIframe } = useIframeContext();
-  const block = initialBlocks?.find(bloc => bloc.type === 'section' && bloc.id === 'home-section');
-
-  try {
-    if (!block) {
-      throw new Error('home-section block not found');
-    }
-
-    title = block.title ?? title;
-    titleStyle = block.titleStyle ?? titleStyle;
-    lineStyle = block.lineStyle ?? lineStyle;
-    intro = block.intro ?? intro;
-    introStyle = block.introStyle ?? introStyle;
-  } catch {
-    // Keep the defaults defined above when block lookup/parsing fails.
+const defaultContent = {
+  pms: {
+    title: '租務管理系統，一站式解決方案！',
+    intro: '簡化繳費、帳單及收款，通過分類輕鬆管理查詢、自動提醒及批量通知到期，省心管理、協心合作。'
+  },
+  hr: {
+    title: '人力資源管理系統，一站式 SaaS 解決方案！',
+    intro: '覆蓋人事、考勤、薪資、審批、績效、培訓與報表分析，助企業建立標準化、數碼化的人力資源管理流程。'
   }
+};
+
+const resolveSectionContent = (blocks: PageBlock[], productKey: 'hr' | 'pms') => {
+  const block = blocks.find(
+    (candidate): candidate is SectionBlock => candidate.type === 'section' && candidate.id === 'home-section'
+  );
+  const productContent = block?.products?.find(product => product.key === productKey);
+  const fallback = defaultContent[productKey];
+  const legacyTitle = productKey === 'pms' ? block?.title : undefined;
+  const legacyIntro = productKey === 'pms' ? block?.intro : undefined;
+
+  return {
+    intro: productContent?.intro ?? legacyIntro ?? fallback.intro,
+    introStyle: block?.introStyle || {},
+    lineStyle: block?.lineStyle || {},
+    title: productContent?.title ?? legacyTitle ?? fallback.title,
+    titleStyle: block?.titleStyle || {}
+  };
+};
+
+const IntroSection = ({ initialBlocks }: { initialBlocks?: PageBlock[] }) => {
+  const { hasIframe } = useIframeContext();
+  const productSelection = useOptionalProductSelection();
+  const [blocks, setBlocks] = useState<PageBlock[]>(initialBlocks || []);
+
+  useEffect(() => {
+    setBlocks(initialBlocks || []);
+  }, [initialBlocks]);
+
+  useEffect(() => {
+    if (!hasIframe) return;
+
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type !== 'SET_PAGE_BLOCKS' || event.data.page !== 'home') return;
+      if (!Array.isArray(event.data.blocks)) return;
+      setBlocks(event.data.blocks as PageBlock[]);
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [hasIframe]);
+
+  const productKey = productSelection?.product || 'pms';
+  const { intro, introStyle, lineStyle, title, titleStyle } = resolveSectionContent(blocks, productKey);
 
   return (
-    <section className="py-25 bg-background">
+    <section className="py-16 bg-background">
       <div
         data-block-id="home-section"
         data-block-role="section"
-        className={`container mx-auto px-4 flex flex-col gap-10 items-center ${hasIframe ? 'cursor-editor' : ''}`}
+        data-product-key={productKey}
+        className={`container mx-auto px-4 flex flex-col gap-4 items-center ${hasIframe ? 'cursor-editor' : ''}`}
       >
-        <h2 className="text-4xl font-bold text-foreground mb-4 relative w-fit">
-          <span data-block-id="home-section" data-block-role="title" style={titleStyle}>
+        <h2 className="text-2xl font-bold text-foreground mb-4 relative w-fit">
+          <span data-block-id="home-section" data-block-role="title" data-product-key={productKey} style={titleStyle}>
             <DynamicText text={title} />
           </span>
           <div
@@ -46,9 +81,10 @@ const IntroSection = ({ initialBlocks }: { initialBlocks?: any[] }) => {
         </h2>
 
         <div
-          className="text-foreground text-[30px] max-w-2xl mx-auto leading-relaxed whitespace-pre-wrap"
+          className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-center"
           data-block-id="home-section"
           data-block-role="intro"
+          data-product-key={productKey}
           style={introStyle}
         >
           <DynamicText text={intro} />

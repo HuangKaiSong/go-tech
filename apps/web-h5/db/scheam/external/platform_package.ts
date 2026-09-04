@@ -5,6 +5,7 @@ export const platformPackage = mysqlTable(
   'platform_package',
   {
     id: bigint({ mode: 'number' }).autoincrement().notNull(),
+    bizCode: varchar('biz_code', { length: 10 }).notNull(),
     packageName: varchar('package_name', { length: 20 }).notNull(),
     unitCount: int('unit_count').notNull(),
     price: decimal({ precision: 10, scale: 2 }).notNull(),

@@ -2,19 +2,49 @@
 
 import { Button } from '@go-tech-frontend/ui';
 import Image from 'next/image';
-import { audiences } from '@/app/components/blockDefaults';
+import { useEffect, useState } from 'react';
+import { audienceProducts } from '@/app/components/blockDefaults';
 import Link from '@/app/components/Link';
 import { useIframeContext } from '@/contexts/IframeContext';
+import { useOptionalProductSelection } from '@/contexts/ProductSelectionContext';
 import { DynamicText } from './DynamicI18nText.client';
+import { type AudienceBlock, type AudienceItem, type PageBlock } from './PageBlocks';
 
-const TargetAudienceSection = ({ initialBlocks }: { initialBlocks?: any[] }) => {
+const resolveAudiences = (blocks: PageBlock[], productKey: 'hr' | 'pms') => {
+  const block = blocks.find(
+    (candidate): candidate is AudienceBlock => candidate.type === 'audiences' && candidate.id === 'home-audiences'
+  );
+  const configuredProduct = block?.products?.find(product => product.key === productKey);
+  const legacyAudiences = productKey === 'pms' ? block?.audiences : undefined;
+  const defaults = audienceProducts.find(product => product.key === productKey)?.audiences || [];
+
+  return configuredProduct?.audiences || legacyAudiences || defaults;
+};
+
+const TargetAudienceSection = ({ initialBlocks }: { initialBlocks?: PageBlock[] }) => {
   const { hasIframe } = useIframeContext();
+  const productSelection = useOptionalProductSelection();
+  const [blocks, setBlocks] = useState<PageBlock[]>(initialBlocks || []);
 
-  const blocks = initialBlocks?.find(item => item.type === 'audiences' && item.id === 'home-audiences');
-  const dynamicAudiences = blocks?.audiences?.map((item: any) => ({
-    ...item,
-    image: item.initialSrc
-  }));
+  useEffect(() => {
+    setBlocks(initialBlocks || []);
+  }, [initialBlocks]);
+
+  useEffect(() => {
+    if (!hasIframe) return;
+
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type !== 'SET_PAGE_BLOCKS' || event.data.page !== 'home') return;
+      if (!Array.isArray(event.data.blocks)) return;
+      setBlocks(event.data.blocks as PageBlock[]);
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [hasIframe]);
+
+  const productKey = productSelection?.product || 'pms';
+  const activeAudiences = resolveAudiences(blocks, productKey);
 
   return (
     <section className="py-16 bg-secondary">
@@ -32,13 +62,15 @@ const TargetAudienceSection = ({ initialBlocks }: { initialBlocks?: any[] }) => 
           className={`space-y-8 ${hasIframe ? 'cursor-editor' : ''}`}
           data-block-id="audiences"
           data-block-role="Target Audience"
+          data-product-key={productKey}
         >
-          {(dynamicAudiences || audiences).map((audience: any, index: number) => (
+          {activeAudiences.map((audience: AudienceItem, index: number) => (
             <div
-              key={index}
+              key={`${productKey}-${audience.sort}`}
               data-block-id="home-audiences"
               data-block-role="audiences"
               data-block-seq={audience.sort}
+              data-product-key={productKey}
               className={`flex flex-col ${
                 index % 2 === 1 ? 'md:flex-row-reverse' : 'md:flex-row'
               } gap-6 items-center bg-background rounded-xl overflow-hidden shadow-sm`}
@@ -48,7 +80,7 @@ const TargetAudienceSection = ({ initialBlocks }: { initialBlocks?: any[] }) => 
                   data-block-id="home-audiences"
                   data-block-role="img"
                   data-block-seq={audience.sort}
-                  src={audience.image}
+                  src={audience.initialSrc || audience.image || '/images/hero-hr.jpg'}
                   alt={audience.title}
                   fill
                   className="w-full h-full object-cover"

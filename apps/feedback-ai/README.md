@@ -2,6 +2,9 @@
 
 `feedback-ai` 是 monorepo 内的独立 Python 服务。pnpm/Turborepo 负责统一命令编排，Python 版本和依赖由 uv 与 `pyproject.toml` 管理；前端应用不直接导入 Python 代码。
 
+需求从 MySQL 进入 pgvector，再由管理后台发起 RAG 问答的完整链路，参见
+[`docs/feedback-to-ai-question-flow.md`](docs/feedback-to-ai-question-flow.md)。
+
 ```text
 web-admin -> web-h5 (管理员鉴权、SSE 代理) -> feedback-ai (RAG/LLM)
                                                    |-> MySQL（反馈与 Outbox）

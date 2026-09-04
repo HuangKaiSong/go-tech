@@ -19,9 +19,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
   const { product } = await searchParams;
   const requestedProduct = Array.isArray(product) ? product[0] : product;
   const heroBlock = blocks.find(block => block.type === 'hero');
-  const productKey =
-    requestedProduct === 'hr' || requestedProduct === 'pms' ? requestedProduct : heroBlock?.defaultProduct;
-  const productBackground = heroBlock?.products?.find(item => item.key === productKey)?.backgroundImage;
+  const initialProduct =
+    requestedProduct === 'hr' || requestedProduct === 'pms' ? requestedProduct : heroBlock?.defaultProduct || 'pms';
+  const productBackground = heroBlock?.products?.find(item => item.key === initialProduct)?.backgroundImage;
 
   const heroBackground = productBackground || heroBlock?.backgroundImage || '';
 

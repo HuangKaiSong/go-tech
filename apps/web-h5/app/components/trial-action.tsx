@@ -1,11 +1,11 @@
 'use client';
 
 import { buttonVariants } from '@go-tech-frontend/ui';
-import Link from 'next/link';
 import type { ComponentProps, MouseEvent } from 'react';
 import { enterOrStartTrial } from '@/app/lib/go-now';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTrialWindow } from '@/contexts/TrialWindowContext';
+import Link from './Link';
 
 type TrialActionProps = Omit<ComponentProps<typeof Link>, 'href' | 'onClick'> & {
   appearance?: 'button' | 'link';

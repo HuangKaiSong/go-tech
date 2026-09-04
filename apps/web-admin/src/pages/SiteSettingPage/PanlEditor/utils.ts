@@ -157,12 +157,19 @@ export async function fetchAndConvertToFile(rawUrl: string, fileName: string = '
   const h5SiteUrl = import.meta.env.VITE_H5_SITE_URL;
   let url = rawUrl;
 
-  // Use admin dev proxy to avoid cross-origin preflight for H5 assets.
-  if (rawUrl.startsWith('http')) {
-    url = rawUrl;
-  }
-  if (rawUrl.startsWith('/')) {
-    url = `${h5SiteUrl}${rawUrl}`;
+  // Use the admin-side H5 proxy so image blobs can be read without cross-origin restrictions.
+  if (rawUrl.startsWith('/') && !rawUrl.startsWith('/h5-hook')) {
+    url = `/h5-hook${rawUrl}`;
+  } else if (rawUrl.startsWith('http')) {
+    try {
+      const imageUrl = new URL(rawUrl);
+      const h5Url = new URL(h5SiteUrl);
+      if (imageUrl.origin === h5Url.origin) {
+        url = `/h5-hook${imageUrl.pathname}${imageUrl.search}`;
+      }
+    } catch {
+      url = rawUrl;
+    }
   }
 
   const response = await fetch(url);

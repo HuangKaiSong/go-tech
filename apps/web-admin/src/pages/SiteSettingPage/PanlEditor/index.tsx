@@ -1,10 +1,19 @@
-import { Button } from '@go-tech-frontend/ui';
+import { Button, Tabs, TabsList, TabsTrigger } from '@go-tech-frontend/ui';
 import { type RefObject, useEffect, useRef, useState } from 'react';
 import Common from './Common';
 import LegacyHero from './Hero';
 import Home from './page/Home';
 import ProductHero from './ProductHero';
-import { type AdminBlock, type AdminHeroBlock, BlockType, type CommonBlock, PageKey } from './type';
+import {
+  type AdminAudienceBlock,
+  type AdminBlock,
+  type AdminHeroBlock,
+  type AdminSectionBlock,
+  BlockType,
+  type CommonBlock,
+  type HeroProductKey,
+  PageKey
+} from './type';
 import { createElementFromOuterHTML } from './utils';
 
 const pageNames: Record<PageKey, string> = {
@@ -17,6 +26,7 @@ const pageNames: Record<PageKey, string> = {
 
 export default function PanlEditor({ iframeRef }: { iframeRef: RefObject<HTMLIFrameElement> }) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const hasInitializedSelectionRef = useRef(false);
   const [messageEl, setMessageEl] = useState<HTMLElement | null>(null);
 
   const [blocks, setBlocks] = useState<AdminBlock[]>([]);
@@ -25,10 +35,28 @@ export default function PanlEditor({ iframeRef }: { iframeRef: RefObject<HTMLIFr
   const [showHero, setShowHero] = useState<boolean>(false);
   const [showCommon, setShowCommon] = useState<boolean>(false);
   const [showHome, setShowHome] = useState<boolean>(false);
+  const [activeProduct, setActiveProduct] = useState<HeroProductKey>('pms');
 
   useEffect(() => {
     blocksRef.current = blocks;
   }, [blocks]);
+
+  useEffect(() => {
+    if (hasInitializedSelectionRef.current || blocks.length === 0) return;
+
+    const heroIndex = blocks.findIndex(block => block.type === BlockType.Hero);
+    const hero = blocks[heroIndex];
+    if (!hero) return;
+
+    hasInitializedSelectionRef.current = true;
+    iframeRef.current?.contentWindow?.postMessage(
+      {
+        type: 'SELECT_BLOCK',
+        block: { id: hero.id, role: 'hero', seq: heroIndex }
+      },
+      import.meta.env.VITE_H5_SITE_URL
+    );
+  }, [blocks, iframeRef]);
 
   const handleMessage = async (event: MessageEvent) => {
     if (event.origin !== import.meta.env.VITE_H5_SITE_URL) {
@@ -41,18 +69,19 @@ export default function PanlEditor({ iframeRef }: { iframeRef: RefObject<HTMLIFr
       if (!clickedElement?.id) return;
       // 根据传输的 outerHTML 创建 DOM 元素
       const element = createElementFromOuterHTML(clickedElement.outerHTML);
+      const clickedProduct = clickedElement.dataset?.productKey || element.dataset.productKey;
+      if (clickedProduct === 'hr' || clickedProduct === 'pms') setActiveProduct(clickedProduct);
 
       setMessageEl(element);
       // 根据 element 子元素的 data-block-id 属性判断是什么类型的块
-      const temBlocks = clickedElement.outerHTML ? element.querySelectorAll('[data-block-id]') : [element];
-      const heroFlag = Array.prototype.some.call(temBlocks, node => {
-        return node.dataset.blockId.includes('hero');
-      });
-      const commonFlag = Array.prototype.some.call(temBlocks, node => {
-        return node.dataset.blockId.includes('common');
-      });
-      const homeFlag = Array.prototype.some.call(temBlocks, node => {
-        return node.dataset.blockId.includes('home');
+      const blockNodes = [element, ...Array.from(element.querySelectorAll<HTMLElement>('[data-block-id]'))];
+      const heroFlag = blockNodes.some(
+        node => node.dataset.blockRole === 'hero' || node.dataset.blockId?.includes('hero')
+      );
+      const commonFlag = blockNodes.some(node => node.dataset.blockId?.includes('common'));
+      const homeFlag = blockNodes.some(node => {
+        const blockId = node.dataset.blockId || '';
+        return blockId.includes('section') || blockId.includes('audiences') || blockId.includes('testimonial');
       });
 
       setShowHero(heroFlag);
@@ -77,6 +106,21 @@ export default function PanlEditor({ iframeRef }: { iframeRef: RefObject<HTMLIFr
 
   const postToIframe = (payload: Record<string, unknown>) => {
     iframeRef.current?.contentWindow?.postMessage(payload, import.meta.env.VITE_H5_SITE_URL);
+  };
+
+  const productHeroBlock = blocks.find(
+    (block): block is AdminHeroBlock => block.type === BlockType.Hero && block.variant === 'product-switcher'
+  );
+
+  const handleActiveProductChange = (productKey: HeroProductKey) => {
+    setActiveProduct(productKey);
+    if (!productHeroBlock) return;
+
+    postToIframe({
+      type: 'SET_HERO_PRODUCT',
+      blockId: productHeroBlock.id,
+      productKey
+    });
   };
 
   const handlePatchHeroBlock = (blockId: string, blockSeq: number | undefined, patch: Partial<AdminHeroBlock>) => {
@@ -110,34 +154,39 @@ export default function PanlEditor({ iframeRef }: { iframeRef: RefObject<HTMLIFr
     blockId: string,
     _blockSeq: number | undefined,
     patch: Partial<CommonBlock>,
-    type: BlockType = BlockType.Common
+    type: BlockType | string = BlockType.Common
   ) => {
-    setBlocks(prev => {
-      const existingIndex = prev.findIndex(block => block.type === type && block.id === blockId);
+    const currentBlocks = blocksRef.current;
+    const existingIndex = currentBlocks.findIndex(block => block.type === type && block.id === blockId);
+    const nextBlocks = [...currentBlocks];
 
-      if (existingIndex === -1) {
-        return [
-          ...prev,
-          {
-            id: blockId,
-            type,
-            ...patch
-          } as AdminBlock
-        ];
-      }
-
-      const next = [...prev];
-      const current = next[existingIndex] as CommonBlock;
-      const nextValues = {
-        ...(current.values || {}),
-        ...(patch.values || {})
-      };
-      next[existingIndex] = {
+    if (existingIndex === -1) {
+      nextBlocks.push({
+        id: blockId,
+        type,
+        ...patch
+      } as AdminBlock);
+    } else {
+      const current = nextBlocks[existingIndex] as CommonBlock;
+      const nextBlock = {
         ...current,
-        ...patch,
-        values: nextValues
-      } as AdminBlock;
-      return next;
+        ...patch
+      };
+      if (current.values || patch.values) {
+        nextBlock.values = {
+          ...(current.values || {}),
+          ...(patch.values || {})
+        };
+      }
+      nextBlocks[existingIndex] = nextBlock as AdminBlock;
+    }
+
+    blocksRef.current = nextBlocks;
+    setBlocks(nextBlocks);
+    postToIframe({
+      type: 'SET_PAGE_BLOCKS',
+      page: pageKey,
+      blocks: nextBlocks
     });
   };
 
@@ -184,6 +233,10 @@ export default function PanlEditor({ iframeRef }: { iframeRef: RefObject<HTMLIFr
   };
 
   const clearSelection = () => {
+    setMessageEl(null);
+    setShowHero(false);
+    setShowCommon(false);
+    setShowHome(false);
     postToIframe({ type: 'CLEAR_SELECTION' });
   };
 
@@ -242,25 +295,28 @@ export default function PanlEditor({ iframeRef }: { iframeRef: RefObject<HTMLIFr
     reader.readAsText(file);
   };
 
-  const selectedHeroNode = messageEl
-    ? messageEl.matches('[data-block-id][data-block-seq]')
-      ? messageEl
-      : (messageEl.querySelector('[data-block-id][data-block-seq]') as HTMLElement | null)
-    : null;
+  let selectedHeroNode: HTMLElement | null = null;
+  if (messageEl?.matches('[data-block-id][data-block-seq]')) {
+    selectedHeroNode = messageEl;
+  } else if (messageEl) {
+    selectedHeroNode = messageEl.querySelector('[data-block-id][data-block-seq]');
+  }
   const selectedHeroSeq = selectedHeroNode?.dataset.blockSeq ? Number(selectedHeroNode.dataset.blockSeq) : undefined;
   const selectedHeroBlock =
     selectedHeroSeq !== undefined && blocks[selectedHeroSeq]?.type === BlockType.Hero
       ? (blocks[selectedHeroSeq] as AdminHeroBlock)
       : (blocks.find(block => block.type === BlockType.Hero && block.id === selectedHeroNode?.dataset.blockId) as
           | AdminHeroBlock
-          | undefined) ||
-        (blocks.find(block => block.type === BlockType.Hero && block.variant === 'product-switcher') as
-          | AdminHeroBlock
           | undefined);
+  const selectedHomeBlock = blocks.find(block => {
+    if (block.type !== BlockType.Section && block.type !== BlockType.Audiences) return false;
+    if (block.id === messageEl?.dataset.blockId) return true;
+    return Boolean(messageEl?.querySelector(`[data-block-id="${block.id}"]`));
+  }) as AdminAudienceBlock | AdminSectionBlock | undefined;
 
   return (
     <div className="h-full overflow-y-auto space-y-4 pr-1">
-      <div className="rounded-2xl border border-border bg-linear-to-br from-background to-muted/30 p-4 shadow-sm">
+      <div className="sticky top-0 z-20 rounded-2xl border border-border bg-background bg-linear-to-br from-background to-muted/30 p-4 shadow-sm">
         <div className="flex items-start justify-between gap-3">
           <div>
             <div className="text-xs uppercase tracking-wide text-muted-foreground">页面编辑器</div>
@@ -271,7 +327,7 @@ export default function PanlEditor({ iframeRef }: { iframeRef: RefObject<HTMLIFr
         </div>
         <div className="mt-3 flex gap-2">
           <Button size="sm" onClick={applyBlocksToPreview}>
-            同步到预览
+            保存并同步
           </Button>
           <Button size="sm" variant="outline" onClick={handleExportJson}>
             导出 JSON
@@ -283,6 +339,17 @@ export default function PanlEditor({ iframeRef }: { iframeRef: RefObject<HTMLIFr
             清除选中
           </Button>
         </div>
+        {productHeroBlock ? (
+          <div className="mt-3 flex items-center gap-3 border-t border-border pt-3">
+            <div className="shrink-0 text-xs font-medium text-muted-foreground">编辑产品</div>
+            <Tabs value={activeProduct} onValueChange={value => handleActiveProductChange(value as HeroProductKey)}>
+              <TabsList className="grid w-48 grid-cols-2">
+                <TabsTrigger value="pms">PMS</TabsTrigger>
+                <TabsTrigger value="hr">HR</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+        ) : null}
         <input
           ref={fileInputRef}
           type="file"
@@ -296,11 +363,11 @@ export default function PanlEditor({ iframeRef }: { iframeRef: RefObject<HTMLIFr
         />
       </div>
 
-      {selectedHeroBlock?.variant === 'product-switcher' ? (
+      {showHero && selectedHeroBlock?.variant === 'product-switcher' ? (
         <ProductHero
+          activeProduct={activeProduct}
           block={selectedHeroBlock}
           blockSeq={selectedHeroSeq}
-          sync={postToIframe}
           onPatchBlock={handlePatchHeroBlock}
         />
       ) : null}
@@ -318,6 +385,8 @@ export default function PanlEditor({ iframeRef }: { iframeRef: RefObject<HTMLIFr
       {showHome && (
         <Home
           key={messageEl!.outerHTML}
+          activeProduct={activeProduct}
+          block={selectedHomeBlock}
           element={messageEl!}
           sync={postToIframe}
           onPatchBlock={handlePatchCommonBlock}

@@ -15,6 +15,14 @@ export * from './app/union-key';
 export type { HttpBaseResponse } from './http';
 export * from './locales/i18n';
 export type { MenuType } from './menu';
-export type { PackageItem, Packages } from './package';
+export type {
+  PackageBillingMode,
+  PackageBizCode,
+  PackageCapacityMetric,
+  PackageDisplayConfig,
+  PackageItem,
+  PackageKind,
+  Packages
+} from './package';
 
 export type { Tenant, User } from './user';

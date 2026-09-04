@@ -1,120 +1,125 @@
+import type { PackageBizCode, Packages } from '@go-tech/types';
+import { buildPackageCatalog } from '@/app/lib/package-catalog';
 import { getBaseUrl } from '@/lib/http';
 import PageClient from './page';
 import type { PricingPlanData } from './types';
 
-const pricingData: PricingPlanData = {
-  plans: [
-    // { name: "普通版", price: "$1,000", units: "25", extra: "$150/5個" },
-    // { name: "升級版", price: "$3,200", units: "100", extra: "$130/5個" },
-    // { name: "豪華版", price: "$12,000", units: "400", extra: "$100/5個" },
-  ],
-  categories: [],
-  addons: [
-    {
-      name: '升級營舖模組',
-      features: ['商舖列表', '營銷列表'],
-      key: 'rentSysPrice',
-      prices: ['+$20 each', '+$15 each', '0']
-    },
-    {
-      name: '升級場地管理',
-      features: ['手機版', '列印跟進單'],
-      key: 'venueSysPrice',
-      prices: ['+$20 each', '+$15 each', '0']
-    },
-    {
-      name: '升級會計',
-      features: [],
-      key: 'accountingSysPrice',
-      prices: ['+$50 each', '+$25 each', '+$15 each']
-    },
-    {
-      name: '客服',
-      key: 'custServiceSysPrice',
-      features: ['客服列表', '租客portal'],
-      prices: ['+$20 each', '+$20 each', '0']
-    }
-  ]
-};
-
-// 定义addon key的联合类型
 type AddonKey = 'accountingSysPrice' | 'custServiceSysPrice' | 'rentSysPrice' | 'venueSysPrice';
 
-export default async function Page() {
-  const baseUrl = getBaseUrl();
-  let packages: Packages[] = [];
+const pmsAddonDefinitions: Array<{
+  features: string[];
+  key: AddonKey;
+  name: string;
+}> = [
+  { name: '升級營舖模組', features: ['商舖列表', '營銷列表'], key: 'rentSysPrice' },
+  { name: '升級場地管理', features: ['手機版', '列印跟進單'], key: 'venueSysPrice' },
+  { name: '升級會計', features: [], key: 'accountingSysPrice' },
+  { name: '客服', features: ['客服列表', '租客portal'], key: 'custServiceSysPrice' }
+];
 
+const emptyPricingData = (): PricingPlanData => ({ addons: [], categories: [], plans: [] });
+
+const formatPrice = (value: number) => `$${value.toLocaleString('zh-Hans-CN')}`;
+
+const buildCategories = (menus: MenuType[], packages: Packages[]): PricingPlanData['categories'] =>
+  menus.map(menu => ({
+    name: menu.title,
+    features:
+      menu.children?.map(child => ({
+        name: child.title,
+        type: child.desc,
+        icon: child.icon,
+        plans: packages.map(plan => plan.packageItemList?.some(item => item.menuId === child.id) || false)
+      })) || []
+  }));
+
+const buildPmsAddons = (packages: Packages[]): PricingPlanData['addons'] =>
+  pmsAddonDefinitions.map(addon => ({
+    ...addon,
+    prices: packages.map(plan => {
+      const price = plan[addon.key];
+      if (typeof price !== 'number') return '—';
+      return price === 0 ? '已包含' : `${formatPrice(price)} each`;
+    })
+  }));
+
+const buildHrAddons = (packages: Packages[], plans: Packages[]): PricingPlanData['addons'] => {
+  const addonGroups = new Map<string, Packages[]>();
+
+  packages
+    .filter(plan => plan.packageKind === 'addon')
+    .forEach(addon => {
+      const groupKey = addon.addonCode || addon.packageCode || addon.packageName;
+      addonGroups.set(groupKey, [...(addonGroups.get(groupKey) || []), addon]);
+    });
+
+  return Array.from(addonGroups.values()).map(addons => {
+    const firstAddon = addons[0];
+    const features = Array.from(
+      new Set(
+        addons.flatMap(addon => addon.displayFeatures || addon.packageItemList?.map(item => item.menuTitle) || [])
+      )
+    );
+
+    return {
+      name: firstAddon.packageName,
+      features,
+      key: firstAddon.addonCode || firstAddon.packageCode || String(firstAddon.id),
+      prices: plans.map(plan => {
+        const addon = addons.find(candidate => candidate.parentId === plan.id);
+        if (!addon || typeof addon.price !== 'number') return '—';
+        return addon.price === 0 ? '已包含' : formatPrice(addon.price);
+      })
+    };
+  });
+};
+
+const buildPricingData = (product: PackageBizCode, packages: Packages[], menus: MenuType[]): PricingPlanData => {
+  const plans = packages.filter(plan => (plan.packageKind || 'plan') === 'plan');
+  if (plans.length === 0) return emptyPricingData();
+
+  return {
+    plans: plans.map(plan => ({
+      id: plan.id,
+      name: plan.packageName,
+      price: typeof plan.price === 'number' ? formatPrice(plan.price) : '敬請期待',
+      units: plan.unitCount?.toLocaleString('zh-Hans-CN') || '—',
+      extra:
+        plan.addUnitPrice > 0
+          ? `${formatPrice(plan.addUnitPrice)}/${plan.overageStep || 1}${product === 'hr' ? '名' : '個'}`
+          : '無'
+    })),
+    categories: buildCategories(menus, plans),
+    addons: product === 'hr' ? buildHrAddons(packages, plans) : buildPmsAddons(plans)
+  };
+};
+
+const fetchData = async (url: string): Promise<unknown> => {
   try {
-    const menus = (await fetch(`${baseUrl}/go-tech/platform/platformPackage/menuTree`).then(res =>
-      res.json()
-    )) as HttpBaseResponse<MenuType[]>;
-
-    const packagesData = (await fetch(`${baseUrl}/go-tech/platform/platformPackage/enabledList`).then(res =>
-      res.json()
-    )) as HttpBaseResponse<Packages[]>;
-
-    if (packagesData?.data && Array.isArray(packagesData?.data)) {
-      packages = (packagesData?.data || [])?.slice(0, 3) || [];
-    } else {
-      packages = [];
-    }
-
-    if (packages.length) {
-      pricingData.plans = packages.map(pack => ({
-        id: pack.id,
-        name: pack.packageName,
-        price: pack.price ? `$${pack.price.toLocaleString('zh-Hans-CN')}` : '敬請期待',
-        units: pack.unitCount.toLocaleString('zh-Hans-CN'),
-        extra: '無'
-      }));
-
-      pricingData.addons = pricingData.addons.map(addon => {
-        const prices = pricingData.plans.map(plan => {
-          const packageItem = packages.find(p => p.id === plan.id);
-          if (packageItem) {
-            // 使用类型断言确保类型安全
-            const addonKey = addon.key as AddonKey;
-            const priceValue = packageItem[addonKey];
-            if (priceValue && priceValue !== undefined) {
-              return `$${priceValue.toLocaleString('zh-Hans-CN')} each`;
-            }
-          }
-          return '0';
-        });
-
-        return {
-          ...addon,
-          prices
-        };
-      });
-
-      if (menus.data?.length) {
-        pricingData.categories = menus.data.map(menu => {
-          const features =
-            menu.children?.map(child => {
-              // 根据每个套餐的 packageItemList 动态设置 plans
-              const plans = pricingData.plans.map(plan => {
-                const packageItem = packages.find(p => p.id === plan.id);
-                return packageItem?.packageItemList.some(item => item.menuId === child.id) || false;
-              });
-              return {
-                name: child.title,
-                type: child.desc,
-                icon: child.icon,
-                plans
-              };
-            }) || [];
-          return {
-            name: menu.title,
-            features
-          };
-        });
-      }
-    }
-  } catch (error) {
-    console.log(error);
+    const response = await fetch(url);
+    return response.ok ? response.json() : undefined;
+  } catch {
+    return undefined;
   }
-  // 在缓存函数外部获取认证token
+};
 
-  return <PageClient pricingData={pricingData} />;
+export default async function Layout() {
+  const baseUrl = getBaseUrl();
+  const [packageResponse, pmsMenuResponse, hrMenuResponse] = await Promise.all([
+    fetchData(`${baseUrl}/go-tech/platform/platformPackage/enabledList`),
+    fetchData(`${baseUrl}/go-tech/platform/platformPackage/menuTree?bizCode=pms`),
+    fetchData(`${baseUrl}/go-tech/platform/platformPackage/menuTree?bizCode=hr`)
+  ]);
+  const catalog = buildPackageCatalog(packageResponse);
+  const pmsMenus = (pmsMenuResponse as HttpBaseResponse<MenuType[]> | undefined)?.data || [];
+  const hrMenus = (hrMenuResponse as HttpBaseResponse<MenuType[]> | undefined)?.data || [];
+
+  return (
+    <PageClient
+      pricingCatalog={{
+        pms: buildPricingData('pms', catalog.pms, pmsMenus),
+        hr: buildPricingData('hr', catalog.hr, hrMenus)
+      }}
+    />
+  );
 }

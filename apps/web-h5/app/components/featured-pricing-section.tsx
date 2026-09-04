@@ -1,34 +1,37 @@
 // oxlint-disable-next-line import/no-unassigned-import
 import 'server-only';
 
+import { type PackageCatalog, buildPackageCatalog } from '@/app/lib/package-catalog';
 import { getBaseUrl } from '@/lib/http';
 import PricingSection from './PricingSection';
 
-async function getFeaturedPackages(): Promise<Packages[]> {
+const emptyCatalog = (): PackageCatalog => ({ hr: [], pms: [] });
+
+async function getPackageCatalog(): Promise<PackageCatalog> {
   try {
     const response = await fetch(`${getBaseUrl()}/go-tech/platform/platformPackage/enabledList`);
 
     if (!response.ok) {
       console.error(`Package API request failed with status ${response.status}`);
-      return [];
+      return emptyCatalog();
     }
 
-    const packagesData = (await response.json()) as HttpBaseResponse<Packages[]>;
+    const packagesData = (await response.json()) as unknown;
+    const catalog = buildPackageCatalog(packagesData);
 
-    if (!packagesData || typeof packagesData !== 'object' || !Array.isArray(packagesData.data)) {
-      console.warn('Unexpected package API response format:', packagesData);
-      return [];
+    if (catalog.pms.length === 0 && catalog.hr.length === 0) {
+      console.warn('Package API returned no supported PMS/HR packages');
     }
 
-    return packagesData.data.slice(0, 3);
+    return catalog;
   } catch (error) {
     console.error('Error fetching featured packages:', error);
-    return [];
+    return emptyCatalog();
   }
 }
 
 export default async function FeaturedPricingSection() {
-  const packages = await getFeaturedPackages();
+  const catalog = await getPackageCatalog();
 
-  return <PricingSection packages={packages} />;
+  return <PricingSection catalog={catalog} />;
 }

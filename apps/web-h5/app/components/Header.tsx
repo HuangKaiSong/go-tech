@@ -24,6 +24,7 @@ import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { goNow, startFreeTrial } from '@/app/lib/go-now';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIframeContext } from '@/contexts/IframeContext';
+import { useOptionalProductSelection } from '@/contexts/ProductSelectionContext';
 import { useTrialWindow } from '@/contexts/TrialWindowContext';
 import { DynamicText } from './DynamicI18nText';
 import LocaleSwitcher from './LocaleSwitcher';
@@ -54,13 +55,14 @@ const HeaderHeroBackground = ({
   heroBg?: string | StaticImageData;
 }) => {
   const searchParams = useSearchParams();
+  const productSelection = useOptionalProductSelection();
   const [previewHeroBlock, setPreviewHeroBlock] = useState<HeroBlock | undefined>(configuredHeroBlock);
   const [previewProductKey, setPreviewProductKey] = useState<HeroProductKey>();
   const heroBlock = hasIframe ? previewHeroBlock : configuredHeroBlock;
   const heroProducts =
     heroBlock?.variant === 'product-switcher' ? heroBlock.products || emptyHeroProducts : emptyHeroProducts;
   const activeProductKey = resolveProductKey(
-    previewProductKey || searchParams.get('product'),
+    previewProductKey || productSelection?.product || searchParams.get('product'),
     heroProducts,
     heroBlock?.defaultProduct
   );

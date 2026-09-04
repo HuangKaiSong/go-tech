@@ -24,6 +24,7 @@ import Footer from '@/app/components/Footer';
 import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 import { useAuth } from '@/contexts/AuthContext';
+import { useProductSelection } from '@/contexts/ProductSelectionContext';
 import type { FbFeature, FeedbackSystem } from '@/db/scheam';
 import { SERIF, statusMeta } from './data';
 import { formatDate, maskName, orderCommentsByThread } from './useFeedbackFeatures';
@@ -77,7 +78,7 @@ const FeedbackContent = ({ categoriesFromDB, featureCompleted, language }: Props
   const replyText = useBatchTranslation('回覆');
   const searchPlaceholder = useBatchTranslation('搜尋需求…');
   const verificationRequired = useBatchTranslation('請先完成人機驗證');
-  const [activeSystem, setActiveSystem] = useState<FeedbackSystem>('pms');
+  const { product: activeSystem, selectProduct: setActiveSystem } = useProductSelection();
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, { wait: 500 });
   const isSearching = search !== debouncedSearch;

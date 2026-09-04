@@ -27,13 +27,39 @@ type BlockBase = {
   type: string;
 };
 
-type SectionBlock = BlockBase & {
+export type SectionProduct = {
+  intro: string;
+  key: 'hr' | 'pms';
+  title: string;
+};
+
+export type SectionBlock = BlockBase & {
   intro: string;
   introStyle?: CSSProperties;
   lineStyle?: CSSProperties;
+  products?: SectionProduct[];
   title: string;
   titleStyle?: CSSProperties;
   type: 'section';
+};
+
+export type AudienceItem = {
+  description: string;
+  image?: string;
+  initialSrc?: string;
+  sort: number | string;
+  title: string;
+};
+
+export type AudienceProduct = {
+  audiences: AudienceItem[];
+  key: 'hr' | 'pms';
+};
+
+export type AudienceBlock = BlockBase & {
+  audiences?: AudienceItem[];
+  products?: AudienceProduct[];
+  type: 'audiences';
 };
 
 type CommonBlock = BlockBase & {
@@ -70,6 +96,7 @@ type ImageBlock = BlockBase & {
 
 export type PageBlock =
   | SectionBlock
+  | AudienceBlock
   | CommonBlock
   | HeroBlock
   | FeatureGridBlock

@@ -7,10 +7,6 @@ import {
   FileUpload,
   Input,
   Label,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
   Textarea,
   type UploadedFile
 } from '@go-tech-frontend/ui';
@@ -55,6 +51,63 @@ const resolvePreviewUrl = (url: string) => {
   if (!url.startsWith('/')) return url;
   return `${import.meta.env.VITE_H5_SITE_URL}${url}`;
 };
+
+type OverlayGradientColors = {
+  middleColor: string;
+  middleOpacity: number;
+  startColor: string;
+  startOpacity: number;
+};
+
+const defaultOverlayGradientColors: OverlayGradientColors = {
+  middleColor: '#29303d',
+  middleOpacity: 0.5,
+  startColor: '#29303d',
+  startOpacity: 0.8
+};
+
+const parseCssColor = (value?: string) => {
+  if (!value) return null;
+
+  const hex = value.match(/^#([\da-f]{6})$/i);
+  if (hex) return { color: `#${hex[1].toLowerCase()}`, opacity: 1 };
+
+  const rgb = value.match(/^rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})(?:\s*,\s*(0|1|0?\.\d+))?\s*\)$/i);
+  if (!rgb) return null;
+
+  const color = `#${rgb
+    .slice(1, 4)
+    .map(channel => Math.min(255, Number(channel)).toString(16).padStart(2, '0'))
+    .join('')}`;
+
+  return {
+    color,
+    opacity: rgb[4] === undefined ? 1 : Number(rgb[4])
+  };
+};
+
+const parseOverlayGradient = (gradient?: string): OverlayGradientColors => {
+  const colorStops = gradient?.match(/rgba?\([^)]*\)|#[\da-f]{6}/gi) || [];
+  const start = parseCssColor(colorStops[0]);
+  const middle = parseCssColor(colorStops[1]);
+
+  return {
+    startColor: start?.color || defaultOverlayGradientColors.startColor,
+    startOpacity: start?.opacity ?? defaultOverlayGradientColors.startOpacity,
+    middleColor: middle?.color || start?.color || defaultOverlayGradientColors.middleColor,
+    middleOpacity: middle?.opacity ?? defaultOverlayGradientColors.middleOpacity
+  };
+};
+
+const toRgba = (color: string, opacity: number) => {
+  const red = Number.parseInt(color.slice(1, 3), 16);
+  const green = Number.parseInt(color.slice(3, 5), 16);
+  const blue = Number.parseInt(color.slice(5, 7), 16);
+  return `rgba(${red}, ${green}, ${blue}, ${opacity})`;
+};
+
+const createOverlayGradient = (colors: OverlayGradientColors) =>
+  `linear-gradient(to right, ${toRgba(colors.startColor, colors.startOpacity)}, ${toRgba(colors.middleColor, colors.middleOpacity)}, transparent)`;
 
 function ProductForm({
   onApply,
@@ -209,24 +262,24 @@ function ProductForm({
 }
 
 export default function ProductHero({
+  activeProduct,
   block,
   blockSeq,
-  onPatchBlock,
-  sync
+  onPatchBlock
 }: {
+  activeProduct: HeroProductKey;
   block: AdminHeroBlock;
   blockSeq?: number;
   onPatchBlock: (blockId: string, blockSeq: number | undefined, patch: Partial<AdminHeroBlock>) => void;
-  sync: (payload: Record<string, unknown>) => void;
 }) {
-  const [activeProduct, setActiveProduct] = useState<HeroProductKey>(block.defaultProduct || 'pms');
   const [defaultProduct, setDefaultProduct] = useState<HeroProductKey>(block.defaultProduct || 'pms');
-  const [overlayGradient, setOverlayGradient] = useState(block.overlayGradient || '');
+  const [overlayColors, setOverlayColors] = useState(() => parseOverlayGradient(block.overlayGradient));
   const [products, setProducts] = useState(() => normalizeProducts(block.products));
+  const overlayGradient = createOverlayGradient(overlayColors);
 
   useEffect(() => {
     setDefaultProduct(block.defaultProduct || 'pms');
-    setOverlayGradient(block.overlayGradient || '');
+    setOverlayColors(parseOverlayGradient(block.overlayGradient));
     setProducts(normalizeProducts(block.products));
   }, [block.defaultProduct, block.overlayGradient, block.products]);
 
@@ -257,13 +310,40 @@ export default function ProductHero({
               <option value="hr">HR</option>
             </select>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="hero-overlay-gradient">遮罩渐变</Label>
-            <Input
-              id="hero-overlay-gradient"
-              value={overlayGradient}
-              onChange={event => setOverlayGradient(event.target.value)}
+          <div className="space-y-3">
+            <Label>遮罩渐变颜色</Label>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="hero-overlay-start-color" className="text-xs text-muted-foreground">
+                  起始色
+                </Label>
+                <Input
+                  id="hero-overlay-start-color"
+                  type="color"
+                  value={overlayColors.startColor}
+                  onChange={event => setOverlayColors(current => ({ ...current, startColor: event.target.value }))}
+                  className="h-10 cursor-pointer p-1"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="hero-overlay-middle-color" className="text-xs text-muted-foreground">
+                  过渡色
+                </Label>
+                <Input
+                  id="hero-overlay-middle-color"
+                  type="color"
+                  value={overlayColors.middleColor}
+                  onChange={event => setOverlayColors(current => ({ ...current, middleColor: event.target.value }))}
+                  className="h-10 cursor-pointer p-1"
+                />
+              </div>
+            </div>
+            <div
+              aria-label="遮罩渐变预览"
+              className="h-10 rounded-md border border-border"
+              style={{ background: overlayGradient }}
             />
+            <p className="text-xs text-muted-foreground">颜色会保留当前透明度，并向右渐变至透明。</p>
           </div>
           <Button
             className="w-full"
@@ -274,24 +354,11 @@ export default function ProductHero({
         </CardContent>
       </Card>
 
-      <Tabs
-        value={activeProduct}
-        onValueChange={value => {
-          const productKey = value as HeroProductKey;
-          setActiveProduct(productKey);
-          sync({ type: 'SET_HERO_PRODUCT', blockId: block.id, productKey });
-        }}
-      >
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="pms">PMS</TabsTrigger>
-          <TabsTrigger value="hr">HR</TabsTrigger>
-        </TabsList>
-        {products.map(product => (
-          <TabsContent key={product.key} value={product.key}>
-            <ProductForm product={product} onChange={updateProduct} onApply={applyProduct} />
-          </TabsContent>
-        ))}
-      </Tabs>
+      <ProductForm
+        product={products.find(product => product.key === activeProduct) || fallbackProducts[activeProduct]}
+        onChange={updateProduct}
+        onApply={applyProduct}
+      />
     </div>
   );
 }
