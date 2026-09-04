@@ -1,4 +1,5 @@
 import { resolve } from 'node:path';
+import process from 'node:process';
 import react from '@vitejs/plugin-react';
 import { defineConfig, loadEnv } from 'vite';
 import glsl from 'vite-plugin-glsl';
@@ -19,30 +20,33 @@ export default defineConfig(({ mode }) => {
         applyToEnvironment: e => e.name === 'client'
       })),
       VitePWA({
-        injectRegister: 'auto',
-        registerType: 'prompt',
-        devOptions: { enabled: false },
-        workbox: {
-          cleanupOutdatedCaches: true,
-          navigateFallback: '/index.html',
-          runtimeCaching: [
-            {
-              urlPattern: /\/api\//,
-              handler: 'NetworkFirst',
-              options: {
-                cacheName: 'go-techs-admin-v1-api'
-              }
-            },
-            {
-              urlPattern: /^https:\/\/cdnjs\.cloudflare\.com\//,
-              handler: 'NetworkFirst',
-              options: {
-                cacheName: 'go-techs-admin-v1-cdn'
-              }
-            }
-          ]
-        }
+        selfDestroying: true
       })
+      // VitePWA({
+      //   injectRegister: 'auto',
+      //   registerType: 'prompt',
+      //   devOptions: { enabled: true },
+      //   workbox: {
+      //     cleanupOutdatedCaches: true,
+      //     navigateFallback: '/index.html',
+      //     runtimeCaching: [
+      //       {
+      //         urlPattern: /\/api\//,
+      //         handler: 'NetworkFirst',
+      //         options: {
+      //           cacheName: 'go-techs-admin-v1-api'
+      //         }
+      //       },
+      //       {
+      //         urlPattern: /^https:\/\/cdnjs\.cloudflare\.com\//,
+      //         handler: 'NetworkFirst',
+      //         options: {
+      //           cacheName: 'go-techs-admin-v1-cdn'
+      //         }
+      //       }
+      //     ]
+      //   }
+      // })
     ],
     resolve: {
       // 确保整个应用（含 workspace 依赖 @go-tech-frontend/ui）只使用同一份 React，
