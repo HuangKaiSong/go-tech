@@ -1,31 +1,27 @@
 from typing import cast
 
 import pytest
+from langchain_core.documents import Document
 
-from feedback_ai.config import Settings
-from feedback_ai.documents import Document
-from feedback_ai.retrieval import build_context, should_remember, split_documents
-from feedback_ai.vector_store import TrashResult, VectorStore
+from feedback_ai.modules.feedback.config import FeedbackSettings
+from feedback_ai.modules.feedback.repository import FeedbackRepository, TrashResult
+from feedback_ai.modules.feedback.retrieval import build_context, should_remember, split_documents
 
 
-class FakeVectorStore:
-    async def similarity_search(
-        self,
-        collection: str,
-        query: str,
-        limit: int,
-        metadata_filter: dict[str, object] | None = None,
-    ) -> list[Document]:
-        del query, limit, metadata_filter
-        if collection == "aide_long_term_memory":
-            return [Document("用户偏好简短回答", {"source": "memory"})]
-        return [Document("需求 A", {"feature_id": 1})]
+class FakeFeedbackRepository:
+    async def similarity_search_knowledge(self, query: str, limit: int) -> list[Document]:
+        del query, limit
+        return [Document(page_content="需求 A", metadata={"feature_id": 1})]
+
+    async def similarity_search_memory(self, query: str, user_id: str, limit: int) -> list[Document]:
+        del query, user_id, limit
+        return [Document(page_content="用户偏好简短回答", metadata={"source": "memory"})]
 
     async def find_by_numeric_field(self, field: str, minimum: int, inclusive: bool = False) -> list[Document]:
-        return [Document(f"{field}={minimum}, inclusive={inclusive}", {"feature_id": 2})]
+        return [Document(page_content=f"{field}={minimum}, inclusive={inclusive}", metadata={"feature_id": 2})]
 
     async def find_trash(self) -> TrashResult:
-        return TrashResult(1, 2, [Document("已删除需求", {"feature_id": 3})])
+        return TrashResult(1, 2, [Document(page_content="已删除需求", metadata={"feature_id": 3})])
 
 
 @pytest.mark.anyio
@@ -33,8 +29,8 @@ async def test_context_uses_exact_numeric_filters_and_memory() -> None:
     context = await build_context(
         "点赞至少 10 且评论数大于 2 的需求",
         "admin:1",
-        cast(VectorStore, FakeVectorStore()),
-        Settings(),
+        cast(FeedbackRepository, FakeFeedbackRepository()),
+        FeedbackSettings(),
     )
 
     assert "like_count >= 10" in context
@@ -47,8 +43,8 @@ async def test_context_uses_trash_query_instead_of_semantic_knowledge() -> None:
     context = await build_context(
         "回收站里有什么？",
         "admin:1",
-        cast(VectorStore, FakeVectorStore()),
-        Settings(),
+        cast(FeedbackRepository, FakeFeedbackRepository()),
+        FeedbackSettings(),
     )
 
     assert "被删除需求 2 条" in context
@@ -58,12 +54,12 @@ async def test_context_uses_trash_query_instead_of_semantic_knowledge() -> None:
 
 def test_split_documents_adds_sync_metadata() -> None:
     chunks = split_documents(
-        [Document("abcdefghij", {"feature_id": 9})],
-        Settings(rag_chunk_size=6, rag_chunk_overlap=2),
+        [Document(page_content="abcdefghij", metadata={"feature_id": 9})],
+        FeedbackSettings(rag_chunk_size=6, rag_chunk_overlap=2),
         "sync-1",
     )
 
-    assert [chunk.text for chunk in chunks] == ["abcdef", "efghij"]
+    assert [chunk.page_content for chunk in chunks] == ["abcdef", "efghij"]
     assert chunks[1].metadata == {
         "chunk_index": 1,
         "feature_id": 9,

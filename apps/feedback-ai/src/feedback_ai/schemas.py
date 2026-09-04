@@ -14,6 +14,12 @@ class ChatRequest(BaseModel):
     user_id: str = Field(min_length=1, max_length=200)
 
 
+class ModuleInfo(BaseModel):
+    id: str
+    name: str
+    capabilities: list[str]
+
+
 class SyncRequest(BaseModel):
     limit: int = Field(default=10, ge=1, le=50)
 

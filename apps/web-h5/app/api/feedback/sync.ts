@@ -27,7 +27,7 @@ export function scheduleFeedbackSync() {
     try {
       for (let batch = 0; batch < 5; batch += 1) {
         // oxlint-disable-next-line no-await-in-loop
-        const response = await fetchFeedbackAi('/v1/sync/process', {
+        const response = await fetchFeedbackAi('/v1/modules/feedback/sync/process', {
           body: JSON.stringify({ limit: 10 }),
           method: 'POST'
         });

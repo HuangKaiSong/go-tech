@@ -1,3 +1,5 @@
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+
 SYSTEM_PROMPT = """你是产品反馈知识库助手。请使用繁体中文或用户当前使用的语言回答。
 
 工作规则：
@@ -10,3 +12,14 @@ SYSTEM_PROMPT = """你是产品反馈知识库助手。请使用繁体中文或�
 7. 回答保持简洁，先给结论，再补充必要依据。
 8. 多条结果使用结构清晰的 Markdown；只有适合横向比较时才使用表格。
 """
+
+ANSWER_PROMPT = ChatPromptTemplate.from_messages(
+    [
+        ("system", SYSTEM_PROMPT),
+        MessagesPlaceholder("history", optional=True),
+        (
+            "human",
+            "<retrieved-context>\n{context}\n</retrieved-context>\n\n<user-question>\n{question}\n</user-question>",
+        ),
+    ]
+)

@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import Depends, Header, HTTPException, status
 
 from feedback_ai.config import Settings, get_settings
-from feedback_ai.service import FeedbackService
+from feedback_ai.service import AssistantService
 
 SettingsDep = Annotated[Settings, Depends(get_settings)]
 
@@ -23,9 +23,9 @@ def require_internal_token(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid internal token")
 
 
-def get_feedback_service(settings: SettingsDep) -> FeedbackService:
-    return FeedbackService(settings)
+def get_assistant_service() -> AssistantService:
+    return AssistantService()
 
 
-FeedbackServiceDep = Annotated[FeedbackService, Depends(get_feedback_service)]
+AssistantServiceDep = Annotated[AssistantService, Depends(get_assistant_service)]
 InternalAuthDep = Annotated[None, Depends(require_internal_token)]

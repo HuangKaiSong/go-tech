@@ -12,7 +12,7 @@ def create_app() -> FastAPI:
     async def health() -> dict[str, str]:
         return {"service": "feedback-ai", "status": "ok"}
 
-    app.include_router(router, prefix="/v1", tags=["feedback-ai"])
+    app.include_router(router, prefix="/v1", tags=["assistant-modules"])
     return app
 
 

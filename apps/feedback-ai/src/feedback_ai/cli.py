@@ -4,20 +4,19 @@ from collections.abc import Sequence
 
 import uvicorn
 
-from feedback_ai.config import get_settings
 from feedback_ai.schemas import ChatMessage
-from feedback_ai.service import FeedbackService
+from feedback_ai.service import DEFAULT_MODULE_ID, AssistantService
 
 
 async def ingest() -> None:
-    result = await FeedbackService(get_settings()).ingest()
+    result = await AssistantService().ingest(DEFAULT_MODULE_ID)
     print(f"知识库同步完成：{result['document_count']} 篇文档，{result['chunk_count']} 个切片")
 
 
 async def sync(limit: int, watch: bool, interval: float) -> None:
-    service = FeedbackService(get_settings())
+    service = AssistantService()
     while True:
-        result = await service.process_pending_sync_jobs(limit)
+        result = await service.process_pending_sync_jobs(DEFAULT_MODULE_ID, limit)
         if result["processed"]:
             print(f"增量同步完成：处理 {result['processed']}，成功 {result['succeeded']}，失败 {result['failed']}")
         if not watch:
@@ -26,7 +25,7 @@ async def sync(limit: int, watch: bool, interval: float) -> None:
 
 
 async def chat(user_id: str) -> None:
-    service = FeedbackService(get_settings())
+    service = AssistantService()
     history: list[ChatMessage] = []
     print(f"Feedback AI 已启动（user={user_id}）。输入 /clear 清空短期记忆，/exit 退出。")
     while True:
@@ -42,7 +41,7 @@ async def chat(user_id: str) -> None:
 
         print("Feedback AI：", end="", flush=True)
         answer = ""
-        async for token in service.stream_answer(question, user_id, history):
+        async for token in service.stream_answer(DEFAULT_MODULE_ID, question, user_id, history):
             answer += token
             print(token, end="", flush=True)
         print()

@@ -1,72 +1,62 @@
 from collections.abc import AsyncIterator
 
-from openai import AsyncOpenAI
-from openai.types.chat import ChatCompletionMessageParam
-
-from feedback_ai.config import Settings
-from feedback_ai.mysql_source import MySQLSource
-from feedback_ai.prompt import SYSTEM_PROMPT
-from feedback_ai.retrieval import build_context, should_remember
+from feedback_ai.modules import AssistantModule, ModuleDescriptor, create_modules
+from feedback_ai.modules.base import UnsupportedModuleCapabilityError
 from feedback_ai.schemas import ChatMessage
-from feedback_ai.sync import FeedbackSyncService
-from feedback_ai.vector_store import VectorStore
+
+DEFAULT_MODULE_ID = "feedback"
 
 
-class FeedbackService:
-    def __init__(self, settings: Settings) -> None:
-        self.settings = settings
+class UnknownModuleError(LookupError):
+    def __init__(self, module_id: str) -> None:
+        super().__init__(f"Unknown assistant module: {module_id}")
+        self.module_id = module_id
 
-    def vector_store(self) -> VectorStore:
-        return VectorStore(self.settings)
 
-    def sync_service(self) -> FeedbackSyncService:
-        return FeedbackSyncService(self.settings, MySQLSource(self.settings), self.vector_store())
+class AssistantService:
+    def __init__(self, modules: list[AssistantModule] | None = None) -> None:
+        registered_modules = modules if modules is not None else create_modules()
+        self._modules: dict[str, AssistantModule] = {}
+        for module in registered_modules:
+            module_id = module.descriptor.id
+            if module_id in self._modules:
+                raise ValueError(f"Duplicate assistant module: {module_id}")
+            self._modules[module_id] = module
 
-    async def stream_answer(
+    def list_modules(self) -> list[ModuleDescriptor]:
+        return [module.descriptor for module in self._modules.values()]
+
+    def require_module(self, module_id: str) -> AssistantModule:
+        try:
+            return self._modules[module_id]
+        except KeyError as error:
+            raise UnknownModuleError(module_id) from error
+
+    def stream_answer(
         self,
+        module_id: str,
         question: str,
         user_id: str,
         history: list[ChatMessage],
     ) -> AsyncIterator[str]:
-        store = self.vector_store()
-        await store.ensure_schema()
-        context = await build_context(question, user_id, store, self.settings)
-        if should_remember(question):
-            await store.remember(user_id, question)
+        module = self.require_module(module_id)
+        module.require_capability("chat")
+        return module.stream_answer(question, user_id, history)
 
-        messages: list[ChatCompletionMessageParam] = [{"role": "system", "content": SYSTEM_PROMPT}]
-        for message in history:
-            if message.role == "user":
-                messages.append({"role": "user", "content": message.content})
-            else:
-                messages.append({"role": "assistant", "content": message.content})
-        messages.append(
-            {
-                "role": "user",
-                "content": (
-                    f"<retrieved-context>\n{context}\n</retrieved-context>\n\n"
-                    f"<user-question>\n{question}\n</user-question>"
-                ),
-            }
-        )
+    async def ingest(self, module_id: str) -> dict[str, int]:
+        module = self.require_module(module_id)
+        module.require_capability("ingest")
+        return await module.ingest()
 
-        client = AsyncOpenAI(
-            api_key=self.settings.require_chat_api_key(),
-            base_url=self.settings.deepseek_base_url,
-        )
-        stream = await client.chat.completions.create(
-            model=self.settings.deepseek_model,
-            messages=messages,
-            temperature=0,
-            stream=True,
-        )
-        async for chunk in stream:
-            content = chunk.choices[0].delta.content if chunk.choices else None
-            if content:
-                yield content
+    async def process_pending_sync_jobs(self, module_id: str, limit: int) -> dict[str, int]:
+        module = self.require_module(module_id)
+        module.require_capability("sync")
+        return await module.process_pending_sync_jobs(limit)
 
-    async def ingest(self) -> dict[str, int]:
-        return await self.sync_service().ingest()
 
-    async def process_pending_sync_jobs(self, limit: int) -> dict[str, int]:
-        return await self.sync_service().process_pending_jobs(limit)
+__all__ = [
+    "DEFAULT_MODULE_ID",
+    "AssistantService",
+    "UnknownModuleError",
+    "UnsupportedModuleCapabilityError",
+]

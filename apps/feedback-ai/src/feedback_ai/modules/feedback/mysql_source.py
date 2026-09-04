@@ -5,9 +5,9 @@ from urllib.parse import unquote, urlsplit
 
 import asyncmy
 from asyncmy.cursors import DictCursor
+from langchain_core.documents import Document
 
-from feedback_ai.config import Settings
-from feedback_ai.documents import Document
+from feedback_ai.modules.feedback.config import FeedbackSettings
 
 
 def mysql_connection_options(database_url: str) -> dict[str, object]:
@@ -34,7 +34,7 @@ class SyncJob:
 
 
 class MySQLSource:
-    def __init__(self, settings: Settings) -> None:
+    def __init__(self, settings: FeedbackSettings) -> None:
         self.connection_options = mysql_connection_options(settings.require_mysql_url())
 
     async def connect(self) -> asyncmy.Connection:
@@ -118,7 +118,7 @@ class MySQLSource:
             lines.append(f"回收站評論：{row['deleted_comments']}")
 
         return Document(
-            text="\n".join(lines),
+            page_content="\n".join(lines),
             metadata={
                 "feature_id": int(cast(int, row["id"])),
                 "category": row["category_name"],

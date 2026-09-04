@@ -1,6 +1,9 @@
 # Feedback AI
 
-`feedback-ai` 是 monorepo 内的独立 Python 服务。pnpm/Turborepo 负责统一命令编排，Python 版本和依赖由 uv 与 `pyproject.toml` 管理；前端应用不直接导入 Python 代码。
+`feedback-ai` 是 monorepo 内的独立、模块化 Python AI 服务。pnpm/Turborepo 负责统一命令编排，Python 版本和依赖由 uv 与 `pyproject.toml` 管理；前端应用不直接导入 Python 代码。
+
+服务使用 LangChain 统一模型、Prompt、流式 Runnable、Embedding 和文本切片。目前注册了 `feedback`
+（需求反馈）模块；后续业务模块通过同一注册入口接入，不需要把业务提示词、数据源或检索逻辑放回服务顶层。
 
 需求从 MySQL 进入 pgvector，再由管理后台发起 RAG 问答的完整链路，参见
 [`docs/feedback-to-ai-question-flow.md`](docs/feedback-to-ai-question-flow.md)。
@@ -65,11 +68,36 @@ pnpm --filter feedback-ai chat -- --user user-001
 ## HTTP 契约
 
 - `GET /health`：健康检查，无需内部 token。
-- `POST /v1/chat`：SSE 聊天流。
-- `POST /v1/sync/process`：消费 MySQL `fb_aide_sync_job`。
-- `POST /v1/ingest`：全量重建反馈知识切片。
+- `GET /v1/modules`：列出已注册模块及其能力。
+- `POST /v1/modules/feedback/chat`：需求反馈模块的 SSE 聊天流。
+- `POST /v1/modules/feedback/sync/process`：消费 MySQL `fb_aide_sync_job`。
+- `POST /v1/modules/feedback/ingest`：全量重建反馈知识切片。
+- `POST /v1/chat`、`POST /v1/sync/process`、`POST /v1/ingest`：兼容现有调用，转发到 `feedback` 模块。
 
 除健康检查外，请求必须携带 `X-Feedback-AI-Token`。外部浏览器仍只访问 `web-h5` 的管理员 API，不直接访问 Python 服务。
+
+## 模块结构
+
+```text
+src/feedback_ai/
+  api.py                      # 通用模块路由和旧接口兼容层
+  service.py                  # 模块注册、发现和分发
+  vector_store.py             # 共享 LangChain Document/Embedding 存储基础设施
+  modules/
+    base.py                   # 模块契约与能力声明
+    feedback/
+      module.py               # 需求反馈模块组合根和 LangChain 回答链
+      config.py               # 模块配置
+      mysql_source.py         # MySQL 事实来源和 Outbox
+      repository.py           # 模块集合及精确 pgvector 查询
+      retrieval.py            # 意图路由、上下文组装和 LangChain 切片
+      sync.py                 # 全量/增量同步
+      prompt.py               # ChatPromptTemplate
+```
+
+新增模块时，实现 `AssistantModule`、声明 `ModuleDescriptor`，把业务文件放进独立目录，并在
+`feedback_ai.modules.create_modules()` 注册。模块只暴露自己支持的 `chat`、`ingest`、`sync` 能力；未注册模块返回
+`404`，不支持的能力返回 `405`。
 
 首次使用增量同步前，仍需执行：
 

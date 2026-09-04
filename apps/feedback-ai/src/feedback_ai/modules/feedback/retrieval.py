@@ -2,9 +2,11 @@ import asyncio
 import re
 from collections.abc import Iterable
 
-from feedback_ai.config import Settings
-from feedback_ai.documents import Document
-from feedback_ai.vector_store import VectorStore
+from langchain_core.documents import Document
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+from feedback_ai.modules.feedback.config import FeedbackSettings
+from feedback_ai.modules.feedback.repository import SOURCE_NAME, FeedbackRepository
 
 LIKE_PATTERN = re.compile(
     r"(?:like_count|点赞|點讚|赞数|讚數|讚好數)[^\d<>]{0,10}"
@@ -20,6 +22,8 @@ TRASH_PATTERN = re.compile(r"回收站|垃圾桶|已刪除|已删除|被刪除|�
 COMMENT_RANKING_PATTERN = re.compile(r"评论数|評論數|comment_count|评论排行|評論排行", re.I)
 REMEMBER_PATTERN = re.compile(r"请记住|請記住|帮我记住|幫我記住|记住这个|記住這個", re.I)
 SENSITIVE_PATTERN = re.compile(r"password|passwd|api[ _-]?key|token|密钥|密碼|密码|银行卡|銀行卡", re.I)
+
+TEXT_SEPARATORS = ["\n\n", "\n", "。", "．", ".", "！", "？", "；", "，", "、", ",", " ", ""]
 
 
 def extract_numeric_filter(question: str, field: str) -> tuple[int, bool] | None:
@@ -43,35 +47,43 @@ def should_remember(question: str) -> bool:
     return REMEMBER_PATTERN.search(question) is not None and SENSITIVE_PATTERN.search(question) is None
 
 
-def split_text(text: str, chunk_size: int, chunk_overlap: int) -> list[str]:
+def create_text_splitter(chunk_size: int, chunk_overlap: int) -> RecursiveCharacterTextSplitter:
     if chunk_size <= 0:
         raise ValueError("chunk_size must be positive")
     if chunk_overlap < 0 or chunk_overlap >= chunk_size:
         raise ValueError("chunk_overlap must be non-negative and smaller than chunk_size")
+    return RecursiveCharacterTextSplitter(
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
+        length_function=len,
+        separators=TEXT_SEPARATORS,
+        is_separator_regex=False,
+    )
+
+
+def split_text(text: str, chunk_size: int, chunk_overlap: int) -> list[str]:
     normalized = text.strip()
     if not normalized:
         return []
-
-    step = chunk_size - chunk_overlap
-    chunks: list[str] = []
-    for start in range(0, len(normalized), step):
-        chunks.append(normalized[start : start + chunk_size])
-        if start + chunk_size >= len(normalized):
-            break
-    return chunks
+    return create_text_splitter(chunk_size, chunk_overlap).split_text(normalized)
 
 
-def split_documents(documents: Iterable[Document], settings: Settings, sync_version: str) -> list[Document]:
+def split_documents(
+    documents: Iterable[Document],
+    settings: FeedbackSettings,
+    sync_version: str,
+) -> list[Document]:
+    splitter = create_text_splitter(settings.rag_chunk_size, settings.rag_chunk_overlap)
     chunks: list[Document] = []
     for document in documents:
-        for index, text in enumerate(split_text(document.text, settings.rag_chunk_size, settings.rag_chunk_overlap)):
+        for index, chunk in enumerate(splitter.split_documents([document])):
             chunks.append(
                 Document(
-                    text=text,
+                    page_content=chunk.page_content,
                     metadata={
-                        **document.metadata,
+                        **chunk.metadata,
                         "chunk_index": index,
-                        "source": "mysql_feature",
+                        "source": SOURCE_NAME,
                         "sync_version": sync_version,
                     },
                 )
@@ -85,39 +97,35 @@ def format_documents(title: str, documents: list[Document]) -> str:
     items = []
     for index, document in enumerate(documents, start=1):
         source = document.metadata.get("feature_id", document.metadata.get("source", "unknown"))
-        items.append(f"[{index}] (feature_id={source})\n{document.text}")
+        items.append(f"[{index}] (feature_id={source})\n{document.page_content}")
     return f"{title}：\n" + "\n\n".join(items)
 
 
-async def build_context(question: str, user_id: str, store: VectorStore, settings: Settings) -> str:
+async def build_context(
+    question: str,
+    user_id: str,
+    repository: FeedbackRepository,
+    settings: FeedbackSettings,
+) -> str:
     like_filter = extract_numeric_filter(question, "like_count")
     comment_filter = extract_numeric_filter(question, "comment_count")
     trash_intent = asks_about_trash(question)
     comment_ranking = asks_for_comment_ranking(question)
 
     knowledge_task = (
-        asyncio.create_task(
-            store.similarity_search(
-                "aide_knowledge",
-                question,
-                settings.rag_knowledge_limit,
-                {"is_deleted": False},
-            )
-        )
+        asyncio.create_task(repository.similarity_search_knowledge(question, settings.rag_knowledge_limit))
         if not trash_intent
         else None
     )
-    memory_task = asyncio.create_task(
-        store.similarity_search("aide_long_term_memory", question, settings.rag_memory_limit, {"user_id": user_id})
-    )
+    memory_task = asyncio.create_task(repository.similarity_search_memory(question, user_id, settings.rag_memory_limit))
     likes_task = (
-        asyncio.create_task(store.find_by_numeric_field("like_count", like_filter[0], like_filter[1]))
+        asyncio.create_task(repository.find_by_numeric_field("like_count", like_filter[0], like_filter[1]))
         if like_filter
         else None
     )
     comments_task = (
         asyncio.create_task(
-            store.find_by_numeric_field(
+            repository.find_by_numeric_field(
                 "comment_count",
                 comment_filter[0] if comment_filter else 0,
                 comment_filter[1] if comment_filter else False,
@@ -126,7 +134,7 @@ async def build_context(question: str, user_id: str, store: VectorStore, setting
         if comment_filter or comment_ranking
         else None
     )
-    trash_task = asyncio.create_task(store.find_trash()) if trash_intent else None
+    trash_task = asyncio.create_task(repository.find_trash()) if trash_intent else None
 
     knowledge = await knowledge_task if knowledge_task else []
     memories = await memory_task

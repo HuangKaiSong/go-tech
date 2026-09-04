@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, message: '問題或對話上下文格式無效' }, { status: 400 });
   }
 
-  const upstream = await fetchFeedbackAi('/v1/chat', {
+  const upstream = await fetchFeedbackAi('/v1/modules/feedback/chat', {
     body: JSON.stringify({
       history: result.data.history ?? [],
       question: result.data.question,

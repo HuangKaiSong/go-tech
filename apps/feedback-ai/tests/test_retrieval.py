@@ -1,6 +1,6 @@
 import pytest
 
-from feedback_ai.retrieval import extract_numeric_filter, split_text
+from feedback_ai.modules.feedback.retrieval import extract_numeric_filter, split_text
 
 
 @pytest.mark.parametrize(

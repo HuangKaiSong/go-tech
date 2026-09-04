@@ -3,12 +3,12 @@ from datetime import UTC, datetime
 import pytest
 from pydantic import ValidationError
 
-from feedback_ai.config import Settings
-from feedback_ai.mysql_source import MySQLSource, mysql_connection_options
+from feedback_ai.modules.feedback.config import FeedbackSettings
+from feedback_ai.modules.feedback.mysql_source import MySQLSource, mysql_connection_options
 
 
 def test_settings_supports_legacy_mysql_url_and_requires_secrets() -> None:
-    settings = Settings(database_url="mysql://legacy/db", _env_file=None)
+    settings = FeedbackSettings(database_url="mysql://legacy/db", _env_file=None)
 
     assert settings.require_mysql_url() == "mysql://legacy/db"
     with pytest.raises(RuntimeError, match="POSTGRES_URL"):
@@ -21,7 +21,7 @@ def test_settings_supports_legacy_mysql_url_and_requires_secrets() -> None:
 
 def test_settings_rejects_invalid_chunk_overlap() -> None:
     with pytest.raises(ValidationError, match="RAG_CHUNK_OVERLAP"):
-        Settings(rag_chunk_size=10, rag_chunk_overlap=10)
+        FeedbackSettings(rag_chunk_size=10, rag_chunk_overlap=10)
 
 
 def test_mysql_connection_options_parses_and_decodes_url() -> None:
@@ -42,7 +42,7 @@ def test_mysql_connection_options_rejects_invalid_url(url: str) -> None:
 
 
 def test_mysql_row_is_rendered_as_feedback_document() -> None:
-    source = MySQLSource(Settings(mysql_database_url="mysql://user:password@localhost/feedback"))
+    source = MySQLSource(FeedbackSettings(mysql_database_url="mysql://user:password@localhost/feedback"))
     deleted_at = datetime(2026, 1, 2, tzinfo=UTC)
     document = source._to_document(
         {
@@ -63,7 +63,7 @@ def test_mysql_row_is_rendered_as_feedback_document() -> None:
         }
     )
 
-    assert "標題：深色模式" in document.text
-    assert "資料狀態：已移至回收站" in document.text
+    assert "標題：深色模式" in document.page_content
+    assert "資料狀態：已移至回收站" in document.page_content
     assert document.metadata["feature_id"] == 7
     assert document.metadata["is_deleted"] is True

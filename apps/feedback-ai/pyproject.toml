@@ -1,13 +1,16 @@
 [project]
 name = "go-tech-feedback-ai"
 version = "0.1.0"
-description = "Product feedback RAG service for the GO-TECH monorepo"
+description = "Modular LangChain AI service for the GO-TECH monorepo"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
   "asyncmy>=0.2.10",
   "fastapi>=0.116.0",
-  "openai>=1.68.0",
+  "langchain>=1.0.0,<2.0.0",
+  "langchain-deepseek>=1.0.0,<2.0.0",
+  "langchain-openai>=1.0.0,<2.0.0",
+  "langchain-text-splitters>=1.0.0,<2.0.0",
   "pgvector>=0.3.6",
   "psycopg[binary,pool]>=3.2.6",
   "pydantic-settings>=2.8.1",
@@ -18,13 +21,7 @@ dependencies = [
 feedback-ai = "feedback_ai.cli:main"
 
 [dependency-groups]
-dev = [
-  "httpx>=0.28.1",
-  "mypy>=1.15.0",
-  "pytest>=8.3.5",
-  "pytest-cov>=6.0.0",
-  "ruff>=0.11.0"
-]
+dev = ["httpx>=0.28.1", "mypy>=1.15.0", "pytest>=8.3.5", "pytest-cov>=6.0.0", "ruff>=0.11.0"]
 
 [build-system]
 requires = ["hatchling"]
