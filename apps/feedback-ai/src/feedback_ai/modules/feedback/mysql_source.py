@@ -60,8 +60,9 @@ class MySQLSource:
                 await cursor.execute(
                     f"""
                     SELECT
-                      f.id, f.title, f.description, f.status, f.like_count, f.deleted_at, f.shipped_at, f.version,
-                      c.name AS category_name, sc.name AS sub_category_name,
+                      f.id, f.title, f.description, f.status, f.like_count, f.deleted_at,
+                      f.shipped_at, f.version, f.created_at,
+                      c.system, c.name AS category_name, sc.name AS sub_category_name,
                       (
                         SELECT COUNT(*) FROM fb_comment visible_comment
                         WHERE visible_comment.feature_id = f.id
@@ -105,8 +106,10 @@ class MySQLSource:
         """把数据库聚合行渲染为可检索文本和可精确过滤的 metadata。"""
 
         status_map = {"pending": "待評估", "developing": "開發中", "shipped": "已完成"}
+        created_at = cast(datetime, row["created_at"])
         deleted_at = cast(datetime | None, row["deleted_at"])
         shipped_at = cast(datetime | None, row["shipped_at"])
+        group = str(row["system"] or "").lower()
         status = str(row["status"])
         category = str(row["category_name"] or "")
         sub_category = str(row["sub_category_name"] or "")
@@ -117,6 +120,8 @@ class MySQLSource:
             f"點讚數：{row['like_count']}",
             f"評論數：{row['comment_count']}",
             f"資料狀態：{'已移至回收站（被刪除）' if deleted_at else '有效資料'}",
+            f"歸屬系統：{group or '未設置'}",
+            f"創建時間：{created_at.isoformat()}",
         ]
         if deleted_at:
             lines.append(f"刪除時間：{deleted_at.isoformat()}")
@@ -134,6 +139,8 @@ class MySQLSource:
         return Document(
             page_content="\n".join(lines),
             metadata={
+                "system": group,
+                "created_at": created_at.isoformat(),
                 "feature_id": int(cast(int, row["id"])),
                 "category": row["category_name"],
                 "comment_count": int(cast(int, row["comment_count"])),

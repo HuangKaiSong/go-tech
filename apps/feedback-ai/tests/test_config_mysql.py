@@ -48,6 +48,7 @@ def test_mysql_row_is_rendered_as_feedback_document() -> None:
         {
             "category_name": "产品",
             "comment_count": 4,
+            "created_at": datetime(2025, 12, 1, 8, 30, tzinfo=UTC),
             "deleted_at": deleted_at,
             "deleted_comment_count": 1,
             "deleted_comments": "旧评论",
@@ -58,6 +59,7 @@ def test_mysql_row_is_rendered_as_feedback_document() -> None:
             "shipped_at": None,
             "status": "pending",
             "sub_category_name": "移动端",
+            "system": "HR",
             "title": "深色模式",
             "version": "2.0",
         }
@@ -65,5 +67,9 @@ def test_mysql_row_is_rendered_as_feedback_document() -> None:
 
     assert "標題：深色模式" in document.page_content
     assert "資料狀態：已移至回收站" in document.page_content
+    assert "創建時間：2025-12-01T08:30:00+00:00" in document.page_content
+    assert "歸屬系統：hr" in document.page_content
+    assert document.metadata["created_at"] == "2025-12-01T08:30:00+00:00"
     assert document.metadata["feature_id"] == 7
     assert document.metadata["is_deleted"] is True
+    assert document.metadata["system"] == "hr"

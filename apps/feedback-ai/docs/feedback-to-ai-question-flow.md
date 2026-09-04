@@ -171,7 +171,8 @@ FOR UPDATE SKIP LOCKED
 
 - 需求标题与描述
 - 分类和子分类
-- 状态、版本、上线时间
+- 状态、版本、创建时间、上线时间
+- 归属系统（`pms` / `hr`）
 - 点赞数
 - 当前可见评论数
 - 当前可见的官方回复
@@ -187,6 +188,8 @@ FOR UPDATE SKIP LOCKED
 點讚數：12
 評論數：4
 資料狀態：有效資料
+歸屬系統：hr
+創建時間：2026-09-01T09:30:00
 回收站評論數：1
 描述：希望支持深色模式
 官方回覆：已列入評估
@@ -195,12 +198,12 @@ FOR UPDATE SKIP LOCKED
 同时保留结构化 metadata：
 
 ```text
-feature_id, category, sub_category, status, version,
+feature_id, system, category, sub_category, status, version, created_at,
 like_count, comment_count, is_deleted, deleted_at,
 deleted_comment_count, shipped_at
 ```
 
-文本用于语义检索和模型上下文；metadata 用于点赞数、评论数、回收站等精确查询。
+文本用于语义检索和模型上下文；metadata 用于系统归属、创建时间、点赞数、评论数、回收站等精确查询。
 
 ### 4.2 切片和 Embedding
 
@@ -373,18 +376,21 @@ Content-Type: application/json
 
 ### 6.1 检索分支
 
-| 问题类型           | 检索方式                                    | 数据范围                                  |
-| ------------------ | ------------------------------------------- | ----------------------------------------- |
-| 普通语义问题       | 问题 Embedding + pgvector 相似度            | `aide_knowledge`，仅 `is_deleted = false` |
-| “点赞大于/至少 N”  | metadata 中的 `like_count` 精确 SQL 过滤    | 未删除需求，最多 100 条                   |
-| “评论大于/至少 N”  | metadata 中的 `comment_count` 精确 SQL 过滤 | 未删除需求，最多 100 条                   |
-| 评论排行           | 按 `comment_count` 精确降序                 | 未删除需求，最多 100 条                   |
-| 回收站、已删除问题 | metadata 精确查询                           | 已删除需求或包含已删除评论的需求          |
-| 用户长期记忆       | 问题 Embedding + `user_id` metadata 过滤    | `aide_long_term_memory`                   |
+| 问题类型                   | 检索方式                                       | 数据范围                                  |
+| -------------------------- | ---------------------------------------------- | ----------------------------------------- |
+| 普通语义问题               | 问题 Embedding + pgvector 相似度               | `aide_knowledge`，仅 `is_deleted = false` |
+| PMS/HR 系统筛选或统计      | metadata 中的 `system` 精确 SQL 过滤与分组计数 | 未删除需求，展示最多 100 条               |
+| 创建日期、时间范围、最新等 | `created_at` 时间范围过滤及升降序              | 未删除需求，展示最多 100 条               |
+| “点赞大于/至少 N”          | metadata 中的 `like_count` 精确 SQL 过滤       | 未删除需求，最多 100 条                   |
+| “评论大于/至少 N”          | metadata 中的 `comment_count` 精确 SQL 过滤    | 未删除需求，最多 100 条                   |
+| 评论排行                   | 按 `comment_count` 精确降序                    | 未删除需求，最多 100 条                   |
+| 回收站、已删除问题         | metadata 精确查询                              | 已删除需求或包含已删除评论的需求          |
+| 用户长期记忆               | 问题 Embedding + `user_id` metadata 过滤       | `aide_long_term_memory`                   |
 
 普通问题会执行语义检索；明确询问回收站时跳过普通有效知识检索，改走回收站精确查询。
 
-点赞数、评论数和回收站问题必须使用 metadata 精确查询结果，而不是让模型从相似文本中猜测数值。
+系统归属、创建时间、点赞数、评论数和回收站问题必须使用 metadata 精确查询结果，而不是让模型从相似文本中猜测。
+当系统或创建时间与点赞/评论条件同时出现时，条件会组合到同一条精确查询中；统计总数不受最多展示 100 条文档的限制。
 
 ### 6.2 短期历史与长期记忆
 

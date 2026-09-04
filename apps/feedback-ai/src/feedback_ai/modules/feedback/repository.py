@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Literal, cast
 
 from langchain_core.documents import Document
@@ -8,6 +9,31 @@ from feedback_ai.vector_store import COLLECTION_TABLE_NAME, TABLE_NAME, PgVector
 KNOWLEDGE_COLLECTION = "aide_knowledge"
 MEMORY_COLLECTION = "aide_long_term_memory"
 SOURCE_NAME = "mysql_feature"
+FeedbackSystem = Literal["pms", "hr"]
+FeedbackSortField = Literal["created_at", "like_count", "comment_count"]
+
+
+@dataclass(frozen=True, slots=True)
+class FeedbackQuery:
+    """由检索意图转换而来的需求 metadata 精确查询条件。"""
+
+    systems: tuple[FeedbackSystem, ...] = ()
+    created_from: datetime | None = None
+    created_to: datetime | None = None
+    like_filter: tuple[int, bool] | None = None
+    comment_filter: tuple[int, bool] | None = None
+    sort_by: FeedbackSortField = "created_at"
+    descending: bool = True
+
+
+@dataclass(slots=True)
+class FeedbackQueryResult:
+    """精确查询结果及不受展示条数限制的统计值。"""
+
+    documents: list[Document]
+    total: int
+    pms_count: int
+    hr_count: int
 
 
 @dataclass(slots=True)
@@ -95,11 +121,64 @@ class FeedbackRepository:
     ) -> list[Document]:
         """使用 metadata SQL 精确筛选点赞数或评论数，并按数值倒序返回。"""
 
-        comparator = ">=" if inclusive else ">"
+        query = FeedbackQuery(
+            like_filter=(minimum, inclusive) if field == "like_count" else None,
+            comment_filter=(minimum, inclusive) if field == "comment_count" else None,
+            sort_by=field,
+        )
+        return (await self.find_by_query(query, limit)).documents
+
+    async def find_by_query(self, query: FeedbackQuery, limit: int = 100) -> FeedbackQueryResult:
+        """组合系统、创建时间和数值条件，并返回精确结果与系统分组计数。"""
+
         safe_limit = min(max(limit, 1), 100)
+        conditions: list[str] = []
+        params: list[object] = [KNOWLEDGE_COLLECTION]
+        created_at_sql = (
+            "CASE WHEN vectors.metadata->>'created_at' ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}' "
+            "THEN (vectors.metadata->>'created_at')::timestamp END"
+        )
+
+        if query.systems:
+            placeholders = ", ".join(["%s"] * len(query.systems))
+            conditions.append(f"LOWER(vectors.metadata->>'system') IN ({placeholders})")
+            params.extend(query.systems)
+        if query.created_from:
+            conditions.append(f"{created_at_sql} >= %s")
+            params.append(query.created_from)
+        if query.created_to:
+            conditions.append(f"{created_at_sql} < %s")
+            params.append(query.created_to)
+        for field, numeric_filter in (
+            ("like_count", query.like_filter),
+            ("comment_count", query.comment_filter),
+        ):
+            if numeric_filter is None:
+                continue
+            minimum, inclusive = numeric_filter
+            comparator = ">=" if inclusive else ">"
+            conditions.extend(
+                [
+                    f"vectors.metadata->>'{field}' ~ '^[0-9]+$'",
+                    f"(vectors.metadata->>'{field}')::integer {comparator} %s",
+                ]
+            )
+            params.append(minimum)
+
+        where_sql = "".join(f"\n                          AND {condition}" for condition in conditions)
+        sort_expressions = {
+            "created_at": (
+                "CASE WHEN metadata->>'created_at' ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}' "
+                "THEN (metadata->>'created_at')::timestamp END"
+            ),
+            "like_count": "COALESCE((metadata->>'like_count')::integer, 0)",
+            "comment_count": "COALESCE((metadata->>'comment_count')::integer, 0)",
+        }
+        order_direction = "DESC" if query.descending else "ASC"
+        params.append(safe_limit)
+
         connection = await self.store.connect()
         async with connection:
-            # 每个 feature 只取第一个切片，避免切片数量影响排行和统计结果。
             rows = await (
                 await connection.execute(
                     f"""
@@ -109,22 +188,32 @@ class FeedbackRepository:
                         INNER JOIN {COLLECTION_TABLE_NAME} collections ON collections.uuid = vectors.collection_id
                         WHERE collections.name = %s
                           AND COALESCE((vectors.metadata->>'is_deleted')::boolean, false) = false
-                          AND vectors.metadata->>%s ~ '^[0-9]+$'
-                          AND (vectors.metadata->>%s)::integer {comparator} %s
+                          {where_sql}
                         ORDER BY
                           vectors.metadata->>'feature_id',
                           COALESCE((vectors.metadata->>'chunk_index')::integer, 0)
                     )
-                    SELECT text, metadata FROM matched
-                    ORDER BY (metadata->>%s)::integer DESC
+                    SELECT text, metadata,
+                      COUNT(*) OVER () AS total_count,
+                      COUNT(*) FILTER (WHERE LOWER(metadata->>'system') = 'pms') OVER () AS pms_count,
+                      COUNT(*) FILTER (WHERE LOWER(metadata->>'system') = 'hr') OVER () AS hr_count
+                    FROM matched
+                    ORDER BY {sort_expressions[query.sort_by]} {order_direction} NULLS LAST,
+                      metadata->>'feature_id'
                     LIMIT %s
                     """,
-                    (KNOWLEDGE_COLLECTION, field, field, minimum, field, safe_limit),
+                    params,
                 )
             ).fetchall()
-        return [
-            Document(page_content=str(row["text"]), metadata=cast(dict[str, object], row["metadata"])) for row in rows
-        ]
+        return FeedbackQueryResult(
+            documents=[
+                Document(page_content=str(row["text"]), metadata=cast(dict[str, object], row["metadata"]))
+                for row in rows
+            ],
+            total=int(cast(int | str, rows[0]["total_count"])) if rows else 0,
+            pms_count=int(cast(int | str, rows[0]["pms_count"])) if rows else 0,
+            hr_count=int(cast(int | str, rows[0]["hr_count"])) if rows else 0,
+        )
 
     async def find_trash(self, limit: int = 100) -> TrashResult:
         """精确统计已删除需求和已删除评论，并返回对应需求文档。"""
