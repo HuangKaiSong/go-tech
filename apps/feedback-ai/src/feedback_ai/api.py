@@ -15,22 +15,29 @@ router = APIRouter()
 
 
 def encode_sse(event: dict[str, object]) -> str:
+    """将事件编码为浏览器可逐块解析的 SSE data 帧。"""
+
     return f"data: {json.dumps(event, ensure_ascii=False, separators=(',', ':'))}\n\n"
 
 
 def module_http_error(error: UnknownModuleError | UnsupportedModuleCapabilityError) -> HTTPException:
+    """把模块域错误转换为稳定的 HTTP 状态码。"""
+
     if isinstance(error, UnknownModuleError):
         return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error))
     return HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED, detail=str(error))
 
 
 def chat_response(module_id: str, payload: ChatRequest, service: AssistantService) -> StreamingResponse:
+    """在建立 SSE 前完成模块校验，再将回答流包装为统一事件协议。"""
+
     try:
         stream = service.stream_answer(module_id, payload.question, payload.user_id, payload.history)
     except (UnknownModuleError, UnsupportedModuleCapabilityError) as error:
         raise module_http_error(error) from error
 
     async def events() -> AsyncIterator[str]:
+        # HTTP 响应一旦开始发送便不能再修改状态码，后续异常必须作为流内 error 事件返回。
         try:
             async for token in stream:
                 yield encode_sse({"type": "token", "content": token})
@@ -48,6 +55,8 @@ def chat_response(module_id: str, payload: ChatRequest, service: AssistantServic
 
 @router.get("/modules", response_model=list[ModuleInfo])
 async def list_modules(service: AssistantServiceDep, _auth: InternalAuthDep) -> list[ModuleInfo]:
+    """列出当前已启用的模块和能力。"""
+
     return [
         ModuleInfo(id=item.id, name=item.name, capabilities=sorted(item.capabilities))
         for item in service.list_modules()
@@ -61,15 +70,21 @@ async def module_chat(
     service: AssistantServiceDep,
     _auth: InternalAuthDep,
 ) -> StreamingResponse:
+    """调用指定模块的聊天能力。"""
+
     return chat_response(module_id, payload, service)
 
 
 @router.post("/chat", deprecated=True)
 async def chat(payload: ChatRequest, service: AssistantServiceDep, _auth: InternalAuthDep) -> StreamingResponse:
+    """兼容旧调用，将聊天请求转发到默认的需求反馈模块。"""
+
     return chat_response(DEFAULT_MODULE_ID, payload, service)
 
 
 async def process_module_sync(module_id: str, limit: int, service: AssistantService) -> SyncResult:
+    """执行模块同步并统一转换响应模型和域错误。"""
+
     try:
         result = await service.process_pending_sync_jobs(module_id, limit)
     except (UnknownModuleError, UnsupportedModuleCapabilityError) as error:
@@ -78,6 +93,8 @@ async def process_module_sync(module_id: str, limit: int, service: AssistantServ
 
 
 async def ingest_module(module_id: str, service: AssistantService) -> IngestResult:
+    """执行模块全量导入并统一转换响应模型和域错误。"""
+
     try:
         result = await service.ingest(module_id)
     except (UnknownModuleError, UnsupportedModuleCapabilityError) as error:
@@ -92,6 +109,8 @@ async def module_process_sync(
     service: AssistantServiceDep,
     _auth: InternalAuthDep,
 ) -> SyncResult:
+    """消费指定模块的增量同步任务。"""
+
     return await process_module_sync(module_id, payload.limit, service)
 
 
@@ -101,6 +120,8 @@ async def module_ingest(
     service: AssistantServiceDep,
     _auth: InternalAuthDep,
 ) -> IngestResult:
+    """重建指定模块的知识索引。"""
+
     return await ingest_module(module_id, service)
 
 
@@ -110,9 +131,13 @@ async def process_sync(
     service: AssistantServiceDep,
     _auth: InternalAuthDep,
 ) -> SyncResult:
+    """兼容旧调用，将同步请求转发到默认的需求反馈模块。"""
+
     return await process_module_sync(DEFAULT_MODULE_ID, payload.limit, service)
 
 
 @router.post("/ingest", response_model=IngestResult)
 async def ingest(service: AssistantServiceDep, _auth: InternalAuthDep) -> IngestResult:
+    """兼容旧调用，将全量导入转发到默认的需求反馈模块。"""
+
     return await ingest_module(DEFAULT_MODULE_ID, service)

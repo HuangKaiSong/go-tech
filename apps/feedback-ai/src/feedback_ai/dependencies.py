@@ -13,6 +13,8 @@ def require_internal_token(
     settings: SettingsDep,
     token: Annotated[str | None, Header(alias="X-Feedback-AI-Token")] = None,
 ) -> None:
+    """使用常量时间比较校验来自 web-h5 的内部服务令牌。"""
+
     expected = settings.feedback_ai_internal_token.get_secret_value()
     if not expected:
         raise HTTPException(
@@ -24,6 +26,8 @@ def require_internal_token(
 
 
 def get_assistant_service() -> AssistantService:
+    """为请求创建轻量分发服务，模块内部资源仍按需初始化。"""
+
     return AssistantService()
 
 

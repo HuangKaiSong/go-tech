@@ -18,16 +18,22 @@ class PgVectorStore:
     """Shared LangChain document storage backed by the service's existing pgvector schema."""
 
     def __init__(self, postgres_url: str, embeddings: Embeddings) -> None:
+        """注入数据库地址和 LangChain Embeddings 实现。"""
+
         self.postgres_url = postgres_url
         self.embeddings = embeddings
 
     async def connect(self, *, register_vector: bool = True) -> psycopg.AsyncConnection[dict[str, object]]:
+        """建立异步 PostgreSQL 连接，并按需注册 pgvector 类型。"""
+
         connection = await psycopg.AsyncConnection.connect(self.postgres_url, row_factory=dict_row)
         if register_vector:
             await register_vector_async(connection)
         return connection
 
     async def ensure_schema(self) -> None:
+        """幂等创建兼容现有数据的向量表和集合表。"""
+
         connection = await self.connect(register_vector=False)
         async with connection:
             await connection.execute("CREATE EXTENSION IF NOT EXISTS vector")
@@ -58,6 +64,8 @@ class PgVectorStore:
             await connection.execute(f"ALTER TABLE {TABLE_NAME} ADD COLUMN IF NOT EXISTS collection_id uuid")
 
     async def collection_id(self, connection: psycopg.AsyncConnection[dict[str, object]], name: str) -> object:
+        """获取集合 UUID；集合不存在时在当前连接内创建。"""
+
         row = await (
             await connection.execute(f"SELECT uuid FROM {COLLECTION_TABLE_NAME} WHERE name = %s LIMIT 1", (name,))
         ).fetchone()
@@ -71,8 +79,11 @@ class PgVectorStore:
         return row["uuid"]
 
     async def add_documents(self, collection: str, documents: Sequence[Document]) -> None:
+        """批量生成 Embedding，并把 LangChain 文档写入指定集合。"""
+
         if not documents:
             return
+        # Embedding 在开启数据库事务前完成，避免外部 API 延迟长时间占用数据库连接。
         embeddings = await self.embeddings.aembed_documents([document.page_content for document in documents])
         connection = await self.connect()
         async with connection:
@@ -100,6 +111,8 @@ class PgVectorStore:
         limit: int,
         metadata_filter: dict[str, object] | None = None,
     ) -> list[Document]:
+        """按余弦距离检索文档，并支持 JSON metadata 包含过滤。"""
+
         query_embedding = await self.embeddings.aembed_query(query)
         filter_sql = "AND vectors.metadata @> %s" if metadata_filter else ""
         params: list[object] = [collection]
@@ -132,6 +145,8 @@ class PgVectorStore:
         metadata_filter: dict[str, object],
         except_filter: dict[str, object] | None = None,
     ) -> int:
+        """删除符合 metadata 的文档，可排除一个需要保留的版本。"""
+
         exclusion_sql = "AND NOT vectors.metadata @> %s" if except_filter else ""
         params: list[object] = [collection, Jsonb(metadata_filter)]
         if except_filter:

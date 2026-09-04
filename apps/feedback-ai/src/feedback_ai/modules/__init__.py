@@ -5,4 +5,6 @@ __all__ = ["AssistantModule", "FeedbackModule", "ModuleDescriptor", "create_modu
 
 
 def create_modules() -> list[AssistantModule]:
+    """组合应用内启用的模块；新增模块只需要在此注册。"""
+
     return [FeedbackModule(get_feedback_settings())]

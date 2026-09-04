@@ -11,6 +11,8 @@ from feedback_ai.modules.feedback.config import FeedbackSettings
 
 
 def mysql_connection_options(database_url: str) -> dict[str, object]:
+    """把 SQLAlchemy 风格 URL 转成 asyncmy 连接参数。"""
+
     parsed = urlsplit(database_url)
     if parsed.scheme not in {"mysql", "mysql+asyncmy"}:
         raise ValueError("MYSQL_DATABASE_URL must use the mysql scheme")
@@ -28,19 +30,29 @@ def mysql_connection_options(database_url: str) -> dict[str, object]:
 
 @dataclass(slots=True)
 class SyncJob:
+    """从 MySQL Outbox 领取的一条版本化同步任务。"""
+
     attempts: int
     feature_id: int
     revision: int
 
 
 class MySQLSource:
+    """需求反馈的 MySQL 事实来源及 Outbox 操作封装。"""
+
     def __init__(self, settings: FeedbackSettings) -> None:
+        """在模块创建数据源时尽早校验 MySQL 地址。"""
+
         self.connection_options = mysql_connection_options(settings.require_mysql_url())
 
     async def connect(self) -> asyncmy.Connection:
+        """建立一个由调用方负责关闭的异步 MySQL 连接。"""
+
         return await asyncmy.connect(**self.connection_options)
 
     async def load_documents(self, feature_id: int | None = None) -> list[Document]:
+        """读取需求及其聚合字段，并转换为 LangChain 文档。"""
+
         feature_condition = "" if feature_id is None else "AND f.id = %s"
         connection = await self.connect()
         try:
@@ -90,6 +102,8 @@ class MySQLSource:
         return [self._to_document(row) for row in rows]
 
     def _to_document(self, row: dict[str, object]) -> Document:
+        """把数据库聚合行渲染为可检索文本和可精确过滤的 metadata。"""
+
         status_map = {"pending": "待評估", "developing": "開發中", "shipped": "已完成"}
         deleted_at = cast(datetime | None, row["deleted_at"])
         shipped_at = cast(datetime | None, row["shipped_at"])
@@ -135,6 +149,8 @@ class MySQLSource:
         )
 
     async def claim_sync_jobs(self, limit: int) -> list[SyncJob]:
+        """使用行锁跳过已领取任务，并为本消费者标记锁定时间。"""
+
         connection = await self.connect()
         try:
             await connection.begin()
@@ -152,6 +168,7 @@ class MySQLSource:
                     (limit,),
                 )
                 rows = cast(list[dict[str, object]], await cursor.fetchall())
+                # 领取与 locked_at 更新位于同一事务，防止其他消费者拿到相同 revision。
                 for row in rows:
                     await cursor.execute(
                         "UPDATE fb_aide_sync_job SET locked_at = CURRENT_TIMESTAMP "
@@ -174,6 +191,8 @@ class MySQLSource:
         ]
 
     async def complete_sync_job(self, job: SyncJob) -> None:
+        """仅完成仍为同一 revision 的任务，保留同步期间产生的新版本。"""
+
         connection = await self.connect()
         try:
             async with connection.cursor(DictCursor) as cursor:
@@ -182,6 +201,7 @@ class MySQLSource:
                     (job.feature_id, job.revision),
                 )
                 if cursor.rowcount == 0:
+                    # revision 已变化说明有更新入队，只释放新任务的旧锁而不删除它。
                     await cursor.execute(
                         "UPDATE fb_aide_sync_job SET locked_at = NULL WHERE feature_id = %s AND revision <> %s",
                         (job.feature_id, job.revision),
@@ -191,6 +211,8 @@ class MySQLSource:
             connection.close()
 
     async def fail_sync_job(self, job: SyncJob, error: Exception) -> None:
+        """记录失败并按指数退避重新开放当前 revision。"""
+
         attempts = job.attempts + 1
         delay_seconds = min(2 ** min(attempts, 10) * 15, 3600)
         connection = await self.connect()
@@ -208,6 +230,7 @@ class MySQLSource:
                     (attempts, delay_seconds, str(error)[:2000], job.feature_id, job.revision),
                 )
                 if cursor.rowcount == 0:
+                    # 失败期间若产生新 revision，同样不能覆盖新任务的重试状态。
                     await cursor.execute(
                         "UPDATE fb_aide_sync_job SET locked_at = NULL WHERE feature_id = %s AND revision <> %s",
                         (job.feature_id, job.revision),

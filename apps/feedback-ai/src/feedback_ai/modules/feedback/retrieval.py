@@ -27,6 +27,8 @@ TEXT_SEPARATORS = ["\n\n", "\n", "。", "．", ".", "！", "？", "；", "，", 
 
 
 def extract_numeric_filter(question: str, field: str) -> tuple[int, bool] | None:
+    """从自然语言问题中提取点赞数或评论数的阈值条件。"""
+
     pattern = LIKE_PATTERN if field == "like_count" else COMMENT_PATTERN
     match = pattern.search(question)
     if match is None:
@@ -36,18 +38,26 @@ def extract_numeric_filter(question: str, field: str) -> tuple[int, bool] | None
 
 
 def asks_about_trash(question: str) -> bool:
+    """判断用户是否明确询问回收站或已删除内容。"""
+
     return TRASH_PATTERN.search(question) is not None
 
 
 def asks_for_comment_ranking(question: str) -> bool:
+    """判断用户是否要求按评论数进行排行。"""
+
     return COMMENT_RANKING_PATTERN.search(question) is not None
 
 
 def should_remember(question: str) -> bool:
+    """只接受显式记忆意图，并阻止敏感凭据进入长期记忆。"""
+
     return REMEMBER_PATTERN.search(question) is not None and SENSITIVE_PATTERN.search(question) is None
 
 
 def create_text_splitter(chunk_size: int, chunk_overlap: int) -> RecursiveCharacterTextSplitter:
+    """创建包含中英文标点分隔符的 LangChain 递归分片器。"""
+
     if chunk_size <= 0:
         raise ValueError("chunk_size must be positive")
     if chunk_overlap < 0 or chunk_overlap >= chunk_size:
@@ -62,6 +72,8 @@ def create_text_splitter(chunk_size: int, chunk_overlap: int) -> RecursiveCharac
 
 
 def split_text(text: str, chunk_size: int, chunk_overlap: int) -> list[str]:
+    """切分单段文本，空白输入不产生切片。"""
+
     normalized = text.strip()
     if not normalized:
         return []
@@ -73,6 +85,8 @@ def split_documents(
     settings: FeedbackSettings,
     sync_version: str,
 ) -> list[Document]:
+    """切分文档并附加可用于增量替换的来源、序号和同步版本。"""
+
     splitter = create_text_splitter(settings.rag_chunk_size, settings.rag_chunk_overlap)
     chunks: list[Document] = []
     for document in documents:
@@ -92,6 +106,8 @@ def split_documents(
 
 
 def format_documents(title: str, documents: list[Document]) -> str:
+    """把检索文档格式化为带 feature_id 的模型上下文片段。"""
+
     if not documents:
         return f"{title}：无"
     items = []
@@ -107,11 +123,14 @@ async def build_context(
     repository: FeedbackRepository,
     settings: FeedbackSettings,
 ) -> str:
+    """根据问题意图并行组合语义检索、精确查询和用户记忆。"""
+
     like_filter = extract_numeric_filter(question, "like_count")
     comment_filter = extract_numeric_filter(question, "comment_count")
     trash_intent = asks_about_trash(question)
     comment_ranking = asks_for_comment_ranking(question)
 
+    # 语义检索、长期记忆和适用的精确查询互不依赖，可以并行降低首 token 延迟。
     knowledge_task = (
         asyncio.create_task(repository.similarity_search_knowledge(question, settings.rag_knowledge_limit))
         if not trash_intent
@@ -136,6 +155,7 @@ async def build_context(
     )
     trash_task = asyncio.create_task(repository.find_trash()) if trash_intent else None
 
+    # 统一在此等待任务，后续仅负责将结果组织成稳定的 Prompt 上下文。
     knowledge = await knowledge_task if knowledge_task else []
     memories = await memory_task
     likes = await likes_task if likes_task else []

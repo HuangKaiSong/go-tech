@@ -1,5 +1,6 @@
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
+# Prompt 属于需求反馈模块，避免后续新增模块时共享或覆盖业务规则。
 SYSTEM_PROMPT = """你是产品反馈知识库助手。请使用繁体中文或用户当前使用的语言回答。
 
 工作规则：

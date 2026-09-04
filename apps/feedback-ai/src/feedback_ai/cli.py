@@ -9,11 +9,15 @@ from feedback_ai.service import DEFAULT_MODULE_ID, AssistantService
 
 
 async def ingest() -> None:
+    """从命令行触发默认需求反馈模块的全量导入。"""
+
     result = await AssistantService().ingest(DEFAULT_MODULE_ID)
     print(f"知识库同步完成：{result['document_count']} 篇文档，{result['chunk_count']} 个切片")
 
 
 async def sync(limit: int, watch: bool, interval: float) -> None:
+    """单次或持续消费默认需求反馈模块的 Outbox。"""
+
     service = AssistantService()
     while True:
         result = await service.process_pending_sync_jobs(DEFAULT_MODULE_ID, limit)
@@ -25,6 +29,8 @@ async def sync(limit: int, watch: bool, interval: float) -> None:
 
 
 async def chat(user_id: str) -> None:
+    """启动使用同一模块分发和 LangChain 链的本地交互会话。"""
+
     service = AssistantService()
     history: list[ChatMessage] = []
     print(f"Feedback AI 已启动（user={user_id}）。输入 /clear 清空短期记忆，/exit 退出。")
@@ -51,6 +57,8 @@ async def chat(user_id: str) -> None:
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
+    """解析服务、导入、同步和本地聊天命令。"""
+
     parser = argparse.ArgumentParser(prog="feedback-ai")
     subparsers = parser.add_subparsers(dest="command", required=True)
     subparsers.add_parser("ingest")
@@ -70,6 +78,8 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 
 
 def main(argv: Sequence[str] | None = None) -> None:
+    """根据子命令进入同步或异步执行入口。"""
+
     args = parse_args(argv)
     if args.command == "serve":
         uvicorn.run("feedback_ai.main:app", host=args.host, port=args.port)
