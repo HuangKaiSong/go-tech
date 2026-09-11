@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams, useNavigate } from "react-router-dom";
-import { getEmployeeById, updateEmployee, EmployeeUpdatePayload } from "@/api/employee";
+import { getEmployeeById, updateEmployee, type EmployeeUpdatePayload } from "@/api/employee";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";

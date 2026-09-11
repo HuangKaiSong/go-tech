@@ -14,10 +14,10 @@ import {
   CheckCircle2, Circle, Clock, Monitor, Building2, Handshake,
   User, Loader2, AlertCircle, RotateCcw, Upload, Paperclip, X, File, MessagesSquare,
 } from "lucide-react";
-import { deleteTaskAttach, LifecycleTask, TaskAttach } from "@/api/onboarding";
+import { deleteTaskAttach, type LifecycleTask, type TaskAttach } from "@/api/onboarding";
 import {
   getOffboardingById, toggleOffboardingTask, uploadOffboardingTaskAttach,
-  OffboardingDetailData,
+  type OffboardingDetailData,
 } from "@/api/offboarding";
 
 /** 檔案大小展示：位元組 → KB/MB */

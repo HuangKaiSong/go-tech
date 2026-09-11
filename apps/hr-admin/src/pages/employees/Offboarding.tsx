@@ -31,7 +31,7 @@ import { DataPagination } from "@/components/common/DataPagination";
 import type { PendingEmployee } from "@/api/onboarding";
 import {
   getOffboardingList, getOffboardingStatusCount, getActiveEmployees, createOffboarding,
-  OffboardingItem,
+  type OffboardingItem,
 } from "@/api/offboarding";
 
 const statusConfig: Record<string, { color: string; dot: string }> = {
@@ -112,7 +112,7 @@ function AddOffboardingDialog({ open, onOpenChange, onSuccess, presetEmployeeId 
         })
         .catch(() => setActiveList([]));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // oxlint-disable-next-line react/exhaustive-deps
   }, [open, presetEmployeeId]);
 
   const handleNext = () => {
@@ -435,7 +435,7 @@ export default function Offboarding() {
       setAddOpen(true);
       navigate(location.pathname, { replace: true, state: null });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // oxlint-disable-next-line react/exhaustive-deps
   }, [location.state]);
 
   // Debounce search

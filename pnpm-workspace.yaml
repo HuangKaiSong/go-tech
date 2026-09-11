@@ -134,6 +134,7 @@ catalogs:
     vitest: ^4.0.18
   i18n:
     i18next: 25.7.2
+    opencc-js: ^1.4.1
     react-i18next: 16.4.0
   react18:
     '@types/react': ^18.3.23
@@ -174,6 +175,8 @@ catalogs:
     zod: ^4.1.13
   vite-hr:
     '@vitejs/plugin-react-swc': ^4.3.0
+    date-fns: ^3.6.0
+    tailwindcss: ^3.4.17
   web:
     '@better-scroll/core': ^2.5.1
     '@svgr/core': ^8.1.0

@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import type { ReactElement } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { isLoggedIn } from "@/lib/auth";
 import Login from "./pages/Login";
@@ -56,7 +57,7 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 /** 登录守卫：未登录跳转登录页 */
-function RequireAuth({ children }: { children: JSX.Element }) {
+function RequireAuth({ children }: { children: ReactElement }) {
   return isLoggedIn() ? children : <Navigate to="/login" replace />;
 }
 

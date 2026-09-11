@@ -267,11 +267,11 @@ export default function PerformancePlanDetail() {
                 <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">{t("未設定考核指標")}</TableCell></TableRow>
               ) : data.indicators.map(c => (
                 <TableRow key={c.id}>
-                  <TableCell><Badge variant="outline" className="text-xs">{t(c.categoryText)}</Badge></TableCell>
+                  <TableCell><Badge variant="outline" className="text-xs">{t(c.categoryText ?? "")}</Badge></TableCell>
                   <TableCell className="font-medium">{c.name}</TableCell>
                   <TableCell className="text-center font-semibold">{c.weight}%</TableCell>
                   <TableCell className="text-center">{c.maxScore}</TableCell>
-                  <TableCell className="text-sm">{t(c.scoringTypeText)}</TableCell>
+                  <TableCell className="text-sm">{t(c.scoringTypeText ?? "")}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import {
   getOnboardingById, toggleOnboardingTask, uploadTaskAttach, deleteTaskAttach,
-  OnboardingDetailData, LifecycleTask, TaskAttach,
+  type OnboardingDetailData, type LifecycleTask, type TaskAttach,
 } from "@/api/onboarding";
 
 /** 檔案大小展示：位元組 → KB/MB */

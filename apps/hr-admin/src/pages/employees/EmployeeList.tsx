@@ -16,7 +16,7 @@ import { DataPagination } from "@/components/common/DataPagination";
 import { AddEmployeeDialog } from "@/components/employees/AddEmployeeDialog";
 import { ExcelImportDialog } from "@/components/employees/ExcelImportDialog";
 import { HRCompleteDialog } from "@/components/employees/HRCompleteDialog";
-import { getEmployeeList, getEmployeeStatusCount, exportEmployee, submitEmployee, resendInvite, Employee } from "@/api/employee";
+import { getEmployeeList, getEmployeeStatusCount, exportEmployee, submitEmployee, resendInvite, type Employee } from "@/api/employee";
 import { hasPerm } from "@/lib/auth";
 import { EMP_PERM } from "@/lib/perms";
 import { useTranslation } from "react-i18next";

@@ -10,7 +10,7 @@ import {
   User, Phone, AlertTriangle, GraduationCap, Landmark,
   FileText, CheckCircle2, Upload, Loader2, XCircle, Paperclip, X,
 } from "lucide-react";
-import { getInviteInfo, submitInvite, uploadInviteFile, EmployeeInviteSubmitPayload } from "@/api/employee";
+import { getInviteInfo, submitInvite, uploadInviteFile, type EmployeeInviteSubmitPayload } from "@/api/employee";
 
 function FieldRow({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (

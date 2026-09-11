@@ -32,7 +32,7 @@ import { toast } from "sonner";
 import { DataPagination } from "@/components/common/DataPagination";
 import {
   getOnboardingList, getOnboardingStatusCount, getPendingEmployees, createOnboarding,
-  OnboardingItem, PendingEmployee,
+  type OnboardingItem, type PendingEmployee,
 } from "@/api/onboarding";
 
 const statusConfig: Record<string, { color: string; dot: string }> = {
@@ -102,7 +102,7 @@ function AddOnboardingDialog({ open, onOpenChange, onSuccess, presetEmployeeId }
         .catch(() => setTemplates([]))
         .finally(() => setTemplatesLoading(false));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // oxlint-disable-next-line react/exhaustive-deps
   }, [open, presetEmployeeId]);
 
   // 啟用項按 sort 排序後按分類分組（保持分類首次出現的順序）
@@ -372,7 +372,7 @@ export default function Onboarding() {
       setAddOpen(true);
       navigate(location.pathname, { replace: true, state: null });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // oxlint-disable-next-line react/exhaustive-deps
   }, [location.state]);
 
   // Debounce search

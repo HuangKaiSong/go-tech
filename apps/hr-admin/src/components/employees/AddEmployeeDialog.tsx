@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserPlus, Send, Minus, Plus, Loader2, Copy, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
-import { submitEmployee, inviteEmployee, EmployeeSavePayload } from "@/api/employee";
+import { submitEmployee, inviteEmployee, type EmployeeSavePayload } from "@/api/employee";
 import { useOrgOptions } from "@/hooks/useOrgOptions";
 import type { DepartmentOption } from "@/api/department";
 import type { PositionOption } from "@/api/position";

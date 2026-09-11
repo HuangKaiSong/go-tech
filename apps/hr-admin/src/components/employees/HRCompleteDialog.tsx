@@ -15,8 +15,8 @@ import { UserCheck, CheckCircle2, Loader2, Check, ChevronsUpDown } from "lucide-
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import {
-  updateEmployee, EmployeeUpdatePayload, Employee,
-  getActiveEmployeeOptions, EmployeeOption, getEmployeeById,
+  updateEmployee, type EmployeeUpdatePayload, type Employee,
+  getActiveEmployeeOptions, type EmployeeOption, getEmployeeById,
 } from "@/api/employee";
 import { getUser } from "@/lib/auth";
 import { useOrgOptions } from "@/hooks/useOrgOptions";

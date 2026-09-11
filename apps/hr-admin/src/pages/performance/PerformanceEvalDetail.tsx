@@ -161,7 +161,10 @@ export default function PerformanceEvalDetail() {
   };
 
   const setScore = (id: string, patch: Partial<ScoreState>) =>
-    setScores(prev => ({ ...prev, [id]: { score: "", comment: "", ...prev[id], ...patch } }));
+    setScores(prev => ({
+      ...prev,
+      [id]: prev[id] ? { ...prev[id], ...patch } : { score: "", comment: "", ...patch },
+    }));
 
   const { selfWeight: wSelf, peerWeight: wPeer, managerWeight: wMgr } = data;
 
@@ -316,7 +319,9 @@ export default function PerformanceEvalDetail() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-base">{t("我的評分（{{type}}）", { type: t(data.myReviewerTypeText) })}</CardTitle>
+                <CardTitle className="text-base">
+                  {t("我的評分（{{type}}）", { type: t(data.myReviewerTypeText ?? "") })}
+                </CardTitle>
                 <CardDescription>
                   {data.mySubmitted ? t("您已提交，以下為評分記錄") : t("為每個指標打分，分數區間為 0~該指標滿分")}
                 </CardDescription>

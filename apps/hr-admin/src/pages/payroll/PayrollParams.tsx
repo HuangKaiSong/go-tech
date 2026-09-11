@@ -27,7 +27,7 @@ export default function PayrollParams() {
 
   useEffect(() => {
     if (configData) setConfig({ ...emptyConfig, ...configData });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // oxlint-disable-next-line react/exhaustive-deps
   }, [configData]);
 
   const saveMutation = useMutation({

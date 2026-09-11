@@ -90,7 +90,7 @@ export function NewApplicationDialog({ open, onOpenChange, defaultType }: NewApp
 
   useEffect(() => {
     if (open) resetForm();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // oxlint-disable-next-line react/exhaustive-deps
   }, [open, defaultType]);
 
   // 起訖日變動自動算天數（用戶仍可手動改，如半天）
