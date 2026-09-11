@@ -1,5 +1,6 @@
 import _ from 'server-only';
 import { type BotVerificationAction, verifyFallbackCaptcha } from './fallback-captcha';
+import { classifyTurnstileFailure } from './turnstile-policy';
 
 interface SiteverifyResponse {
   action?: string;
@@ -37,7 +38,7 @@ const verifyTurnstileToken = async (
         errorCodes,
         expectedAction
       });
-      return { reason: errorCodes.includes('internal-error') ? 'unavailable' : 'invalid', success: false };
+      return { reason: classifyTurnstileFailure(errorCodes), success: false };
     }
     if (!isTestKey && result.action !== expectedAction) {
       console.warn('Turnstile action mismatch:', { actualAction: result.action, expectedAction });

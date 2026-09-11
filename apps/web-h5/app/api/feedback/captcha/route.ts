@@ -1,9 +1,15 @@
 import { type NextRequest, NextResponse } from 'next/server';
+import { getFeedbackUser } from '../auth';
 import { type BotVerificationAction, createFallbackCaptcha } from '../fallback-captcha';
 
 const validActions: BotVerificationAction[] = ['feedback_comment', 'feedback_post'];
 
 export async function GET(req: NextRequest) {
+  const user = await getFeedbackUser();
+  if (!user) {
+    return NextResponse.json({ success: false, message: '請先登入後再操作' }, { status: 401 });
+  }
+
   const action = req.nextUrl.searchParams.get('action') as BotVerificationAction | null;
   if (!action || !validActions.includes(action)) {
     return NextResponse.json({ success: false, message: '無效的驗證場景' }, { status: 400 });

@@ -1,7 +1,10 @@
 export interface User {
+  exp: number;
   nickname: string;
   sub: string;
+  tenantId: string;
   userId: number;
+  username: string;
 }
 
 export interface Tenant {

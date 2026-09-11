@@ -1,4 +1,5 @@
 export * from './fb_aide_sync_jobs';
+export * from './fb_captcha_challenges';
 export * from './fb_categories';
 export * from './fb_comments';
 export * from './fb_feature';

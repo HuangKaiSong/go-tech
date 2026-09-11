@@ -10,7 +10,7 @@ const Fps = dynamic(() => import('./Fps'), { ssr: false });
 
 type PanelProps = {
   handleBackToPaymentMethods: () => void;
-  handleFpsPaymentConfirm: (voucherFile: UploadedFile) => void;
+  handleFpsPaymentConfirm: (voucherFile: UploadedFile) => Promise<void> | void;
   /** 线上支付：由父组件先创建业务订单（packageOrder/add 或 reAdd，payType=Online）， 再生成 KPay 全托管收银台并跳转。Panel 仅负责触发与 loading 态。 */
   handleOnlinePaymentConfirm: () => Promise<void> | void;
   onOpenChange: (open: boolean) => void;

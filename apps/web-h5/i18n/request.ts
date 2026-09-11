@@ -1,19 +1,17 @@
+import { hasLocale } from 'next-intl';
 import { getRequestConfig } from 'next-intl/server';
-import { cookies } from 'next/headers';
+import { notFound } from 'next/navigation';
 import { loadLocale } from '../locales';
+import { routing } from './routing';
 
-export default getRequestConfig(async ({ locale }) => {
-  const store = await cookies();
+export default getRequestConfig(async ({ locale, requestLocale }) => {
+  const resolvedLocale = locale ?? (await requestLocale);
+  if (!hasLocale(routing.locales, resolvedLocale)) notFound();
 
-  const lang =
-    locale ??
-    store.get('GO_TECH_LANGUAGE')?.value ??
-    'zh-hk';
-
-  const messages = loadLocale(lang);
+  const messages = loadLocale(resolvedLocale);
 
   return {
-    locale: lang,
+    locale: resolvedLocale,
     messages
   };
 });

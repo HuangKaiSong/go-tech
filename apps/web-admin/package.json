@@ -15,6 +15,7 @@
     "@go-tech-frontend/styles": "workspace:*",
     "@go-tech-frontend/three": "workspace:*",
     "@go-tech-frontend/ui": "workspace:*",
+    "@go-tech/package-ui": "workspace:*",
     "@go-tech/utils": "workspace:*",
     "@hookform/resolvers": "catalog:",
     "@tanstack/react-query": "catalog:core",
@@ -45,6 +46,7 @@
   },
   "devDependencies": {
     "@go-tech/tsconfig": "workspace:*",
+    "@go-tech/types": "workspace:*",
     "@tailwindcss/postcss": "catalog:",
     "@tailwindcss/typography": "catalog:",
     "@types/node": "^24.10.1",

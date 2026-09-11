@@ -1,0 +1,431 @@
+'use client';
+
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  Separator,
+  type UploadedFile,
+  toast
+} from '@go-tech-frontend/ui';
+import dayjs from 'dayjs';
+import { Minus, Plus } from 'lucide-react';
+import { useLocale } from 'next-intl';
+import dynamic from 'next/dynamic';
+import { type FC, useEffect, useState } from 'react';
+import { useProgressRouter } from '@/app/hooks/use-progress-router';
+import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
+import { getCreatedOrderId } from '@/app/lib/order-id';
+import { translateError } from '@/app/lib/translate-error';
+import { useAuth } from '@/contexts/AuthContext';
+import { DynamicText } from '../../components/DynamicI18nText.client';
+import { OrderItemTypeEnum, OrderTypeEnum } from '../../constants/order';
+import type { MyOrder } from '../../constants/order-response';
+import { DAYSPERMONTH, PayTypeEnum, stashWebManagedCashier } from '../../constants/payment';
+import { type PromotionOption, fetchPromotions } from '../../constants/promotion';
+import { usePromotions } from '../../hooks/usePromotions';
+import { PromotionSection } from './PromotionSection';
+const PaymentPanel = dynamic(() => import('../../components/payment/Panel'), {
+  ssr: false
+});
+
+type AddServiceProps = {
+  data: MyOrder;
+  onOpenChangeAction: (open: boolean) => void;
+  open: boolean;
+};
+
+function fmt(num: number) {
+  return num.toLocaleString('en-HK', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
+export const AddService: FC<AddServiceProps> = ({
+  data,
+  onOpenChangeAction: setShowAddonsDialog,
+  open: showAddonsDialog
+}) => {
+  const currentOrder = data;
+  const valueAddedServices = (data.packageDetail?.additionalItems ?? []).map(item => ({
+    id: String(item.id),
+    name: item.itemName,
+    price: item.price,
+    packageCode: item.packageCode
+  }));
+
+  const { token } = useAuth();
+  const router = useProgressRouter();
+  const locale = useLocale();
+  const [selectedServices, setSelectedServices] = useState<Record<string, number>>({});
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [promotions, setPromotions] = useState<PromotionOption[]>([]);
+
+  // i18n messages
+  const addServiceOrderCreating = useBatchTranslation('創建增值服務訂單中...');
+  const addServiceOrderCreated = useBatchTranslation('增值服務訂單創建成功');
+  const addServiceEvidenceSubmitted = useBatchTranslation('支付憑證已提交，我們將在確認後為您增加增值服務');
+  const orderCreatedRedirecting = useBatchTranslation('訂單創建成功，正在跳转...');
+  const addServiceOrderFailed = useBatchTranslation('創建增值服務訂單失敗，請稍後重試');
+
+  const packageId = currentOrder?.packageDetail?.id;
+
+  // 拉取当前套餐可用的优惠活动
+  useEffect(() => {
+    let active = true;
+    fetchPromotions(packageId, token).then(list => {
+      if (active) setPromotions(list);
+    });
+    return () => {
+      active = false;
+    };
+  }, [packageId, token]);
+
+  const toggleService = (serviceId: string) => {
+    setSelectedServices(prev => {
+      if (prev[serviceId]) {
+        const { [serviceId]: _, ...rest } = prev;
+        return rest;
+      }
+      return { ...prev, [serviceId]: 1 };
+    });
+  };
+
+  const updateQuantity = (serviceId: string, delta: number) => {
+    setSelectedServices(prev => {
+      const current = prev[serviceId] || 0;
+      const newQty = Math.max(0, current + delta);
+      if (newQty === 0) {
+        const { [serviceId]: _, ...rest } = prev;
+        return rest;
+      }
+      return { ...prev, [serviceId]: newQty };
+    });
+  };
+
+  // 計算到當前訂單到期日剩餘的天數與按比例係數（按月度價格折算）
+  const getProrationInfo = () => {
+    const order = data;
+    if (!order) return { daysRemaining: 0, ratio: 0, count: 0, expiryDate: '' };
+    const orderPackageInfo = order.orderItems.find(item => item.itemType === OrderItemTypeEnum.PACKAGE);
+    if (!orderPackageInfo) return { daysRemaining: 0, ratio: 0, count: 0, expiryDate: '' };
+
+    const expiry = dayjs(new Date(order.expireDate!));
+
+    // const totalDay =
+    //   orderPackageInfo.days || orderPackageInfo.count! * DAYSPERMONTH || 0;
+    const totalDay = expiry.diff(dayjs(new Date(order.activateDate || order.payTime! || order.createTime)), 'day') + 1;
+    const count = orderPackageInfo?.count || 0;
+    const today = dayjs();
+    // 剩余天数
+    const daysRemaining = expiry.diff(today, 'day') + 1;
+
+    const ratio = daysRemaining / totalDay;
+
+    return { daysRemaining, ratio, count, expiryDate: order.expireDate };
+  };
+
+  const calculateAddonsTotal = () => {
+    const { daysRemaining, ratio } = getProrationInfo();
+
+    return Object.entries(selectedServices).reduce((sum, [id, qty]) => {
+      const service = valueAddedServices.find(s => s.id === id);
+      let price = 0;
+      if (service) {
+        price = service.price;
+      }
+      const subTotal = service ? Math.floor((price / DAYSPERMONTH) * daysRemaining * ratio * qty * 100) / 100 : 0;
+      // 計算增值服務金額
+      return sum + subTotal;
+    }, 0);
+  };
+
+  // 优惠前应付金额
+  const addonsBaseAmount = calculateAddonsTotal();
+
+  const {
+    applyingCode,
+    availablePromotions,
+    handleApplyCode,
+    promotionCode,
+    promotionDiscount,
+    selectedPromotion,
+    selectedPromotionId,
+    setPromotionCode,
+    setSelectedPromotionId
+  } = usePromotions({ baseAmount: addonsBaseAmount, packageId, promotions, token, locale });
+
+  // 优惠后实付金额
+  const finalTotal = Math.max(0, addonsBaseAmount - promotionDiscount);
+
+  const handleConfirmAddons = () => {
+    setShowPaymentDialog(true);
+  };
+
+  const handleBackToPaymentMethods = () => {
+    setShowPaymentDialog(false);
+  };
+
+  const requestHeaders = () =>
+    new Headers({
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+      'User-Type': 'platform_customer'
+    });
+
+  /** 构建增值服务订单数据（FPS 与线上支付一致，仅 payType 不同） */
+  const buildOrderInfo = (payType: PayTypeEnum) => {
+    const orderInfo: any = {
+      orderType: OrderTypeEnum.ADDITION,
+      payType,
+      originalOrder: currentOrder.orderNo,
+      orderItems: []
+    };
+
+    Object.entries(selectedServices).map(([serviceId, quantity]) => {
+      const service = valueAddedServices.find(s => s.id === serviceId);
+      if (!service) return null;
+      const serviceTotalPrice = service.price;
+
+      orderInfo.orderItems.push({
+        itemType: OrderItemTypeEnum.ADDITION,
+        count: quantity,
+        price: serviceTotalPrice,
+        packageId: data.packageDetail?.id,
+        itemName: service.name,
+        itemCode: service.packageCode,
+        packageItemId: Number(service.id)
+      });
+      return null;
+    });
+
+    // 优惠活动 / 优惠码
+    if (selectedPromotion) {
+      orderInfo.promotionId = selectedPromotion.promotionId;
+    }
+    return orderInfo;
+  };
+
+  const handleFpsPaymentConfirm = async (voucherFile: UploadedFile) => {
+    toast.dismiss();
+    const toastId = toast.loading(addServiceOrderCreating);
+    const headers = requestHeaders();
+    const orderInfo = buildOrderInfo(PayTypeEnum.FPS);
+
+    try {
+      // 创建订单
+      const orderResponse = await fetch('/go-tech/platform/packageOrder/add', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(orderInfo)
+      })
+        .then(res => res.json())
+        .catch(err => {
+          throw err;
+        });
+      if (orderResponse.code === 200) {
+        toast.success(addServiceOrderCreated, { id: toastId });
+        const orderId = getCreatedOrderId(orderResponse.data);
+        // 上传凭证
+        await fetch('/go-tech/platform/packageOrder/payEvidence', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            id: orderId,
+            payEvidence: voucherFile.url
+          })
+        })
+          .catch(err => {
+            throw err;
+          })
+          .then(res => res.json());
+
+        router.push(`/my-orders/${orderId}`);
+
+        setShowPaymentDialog(false);
+        toast.success(addServiceEvidenceSubmitted);
+      } else {
+        toast.error((await translateError(orderResponse.message, locale)) || orderResponse.message, { id: toastId });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  /** 线上支付：先创建增值服务订单（payType=Online），再生成全托管收银台并跳转 */
+  const handleOnlinePaymentConfirm = async () => {
+    toast.dismiss();
+    const toastId = toast.loading(addServiceOrderCreating);
+    const orderInfo = buildOrderInfo(PayTypeEnum.Online);
+
+    try {
+      const orderResponse = await fetch('/go-tech/platform/packageOrder/add', {
+        method: 'POST',
+        headers: requestHeaders(),
+        body: JSON.stringify(orderInfo)
+      }).then(res => res.json());
+
+      if (orderResponse.code !== 200) {
+        toast.error((await translateError(orderResponse.message, locale)) || orderResponse.message, { id: toastId });
+        return;
+      }
+
+      // 后端返回 OrderAddResponse（含签名等参数）；先跳转订单详情，再由详情页唤起第三方支付
+      toast.success(orderCreatedRedirecting, { id: toastId });
+      setShowPaymentDialog(false);
+      const orderId = getCreatedOrderId(orderResponse.data);
+      stashWebManagedCashier(orderResponse.data);
+      router.push(`/my-orders/${orderId}`);
+    } catch (error) {
+      console.log(error);
+      toast.error(addServiceOrderFailed, { id: toastId });
+    }
+  };
+
+  return (
+    <>
+      <Dialog open={showAddonsDialog} onOpenChange={setShowAddonsDialog}>
+        <DialogContent className="sm:max-w-lg max-h-[calc(100dvh-2rem)] flex flex-col overflow-hidden">
+          <DialogHeader>
+            <DialogTitle>
+              <DynamicText text="購買增值服務" />
+            </DialogTitle>
+          </DialogHeader>
+          {(() => {
+            const { daysRemaining, expiryDate, ratio } = getProrationInfo();
+            return (
+              <div className="space-y-4 mt-4 flex-1 min-h-0 overflow-y-auto pr-1 scroll-on-hover">
+                <div className="p-3 rounded-lg bg-[#FFF8F5] border text-sm text-muted-foreground">
+                  <DynamicText text="按當前訂單剩餘" />{' '}
+                  <span className="font-medium text-foreground">{daysRemaining}</span>
+                  <DynamicText
+                    text={`天計費（至 ${expiryDate} 到期），費用按單價 x ${(ratio * 100).toFixed(2)}% 折算。`}
+                  />
+                </div>
+                {valueAddedServices.map(service => {
+                  const isSelected = selectedServices[service.id] !== undefined;
+                  const quantity = selectedServices[service.id] || 0;
+                  const price = service.price;
+
+                  return (
+                    <div
+                      key={service.id}
+                      className={`p-4 rounded-lg border transition-colors ${
+                        isSelected ? 'border-primary bg-primary/5' : 'border-border'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => toggleService(service.id)}
+                            className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary"
+                          />
+                          <div>
+                            <p className="font-medium">{service.name}</p>
+                            <p className="text-sm text-muted-foreground">
+                              +${price} HKD Each / <DynamicText text="月" />
+                            </p>
+                          </div>
+                        </div>
+
+                        {isSelected && (
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => updateQuantity(service.id, -1)}
+                              className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-muted transition-colors"
+                            >
+                              <Minus className="w-4 h-4" />
+                            </button>
+                            <span className="w-8 text-center font-medium">{quantity}</span>
+                            <button
+                              onClick={() => updateQuantity(service.id, 1)}
+                              className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-muted transition-colors"
+                            >
+                              <Plus className="w-4 h-4" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      {isSelected && quantity > 0 && (
+                        <div className="mt-2 pt-2 border-t text-right text-sm text-muted-foreground">
+                          <DynamicText text="小計：" />
+                          <span className="font-medium text-foreground">
+                            ${Math.floor((price / DAYSPERMONTH) * daysRemaining * ratio * quantity * 100) / 100} HKD
+                          </span>
+                          <span className="ml-2 text-xs">
+                            <DynamicText text="（單價" /> ${((price / DAYSPERMONTH) * daysRemaining).toLocaleString()} x{' '}
+                            {(ratio * 100).toFixed(2)}%）
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {/* 優惠活動 */}
+                <PromotionSection
+                  promotions={availablePromotions}
+                  selectedPromotionId={selectedPromotionId}
+                  onSelect={setSelectedPromotionId}
+                  baseAmount={addonsBaseAmount}
+                  code={promotionCode}
+                  onCodeChange={setPromotionCode}
+                  applying={applyingCode}
+                  onApply={handleApplyCode}
+                />
+
+                <Separator />
+
+                <div className="flex justify-between items-center text-sm text-muted-foreground">
+                  <span>
+                    <DynamicText text="小計" />
+                  </span>
+                  <span>${fmt(addonsBaseAmount)} HKD</span>
+                </div>
+                {promotionDiscount > 0 && (
+                  <div className="flex justify-between items-center text-sm text-green-600">
+                    <span>
+                      <DynamicText text="活動優惠" />
+                    </span>
+                    <span>-${fmt(promotionDiscount)} HKD</span>
+                  </div>
+                )}
+                <div className="flex justify-between items-center text-lg font-bold">
+                  <span>
+                    <DynamicText text="總計" />
+                  </span>
+                  <span className="text-primary">${fmt(finalTotal)} HKD</span>
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <Button variant="outline" className="flex-1" onClick={() => setShowAddonsDialog(false)}>
+                    <DynamicText text="取消" />
+                  </Button>
+                  <Button className="flex-1" disabled={addonsBaseAmount === 0} onClick={handleConfirmAddons}>
+                    <DynamicText text="確認購買" />
+                  </Button>
+                </div>
+              </div>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
+
+      {/* 支付弹框 */}
+      <PaymentPanel
+        open={showPaymentDialog}
+        onOpenChange={setShowPaymentDialog}
+        price={finalTotal}
+        handleBackToPaymentMethods={handleBackToPaymentMethods}
+        handleFpsPaymentConfirm={handleFpsPaymentConfirm}
+        handleOnlinePaymentConfirm={handleOnlinePaymentConfirm}
+      />
+    </>
+  );
+};

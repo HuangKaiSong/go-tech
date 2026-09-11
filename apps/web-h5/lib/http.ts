@@ -4,7 +4,7 @@ import { HttpClient, type HttpAdapter } from '@go-tech/core-http';
 import { cookies } from 'next/headers';
 
 export function getBaseUrl(): string {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const apiUrl = process.env.API_INTERNAL_URL ?? process.env.NEXT_PUBLIC_API_URL;
 
   if (!apiUrl) {
     throw new Error('NEXT_PUBLIC_API_URL is not defined');
@@ -14,9 +14,8 @@ export function getBaseUrl(): string {
 }
 
 /**
- * Next.js (server-only) adapter for the platform-agnostic HTTP kernel.
- * Reads the auth token from the request cookie and tags requests as a
- * platform customer.
+ * Next.js (server-only) adapter for the platform-agnostic HTTP kernel. Reads the auth token from the request cookie and
+ * tags requests as a platform customer.
  */
 const nextAdapter: HttpAdapter = {
   getBaseUrl,

@@ -15,7 +15,7 @@ interface TurnstileApi {
     options: {
       action: string;
       callback: (token: string) => void;
-      'error-callback': () => void;
+      'error-callback': (errorCode: string) => boolean;
       'expired-callback': () => void;
       language: 'en' | 'zh-cn' | 'zh-tw';
       sitekey: string;
@@ -137,7 +137,6 @@ const TurnstileWidget = ({ action, language, onVerify, resetKey }: Props & { lan
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
   const [fallbackMode, setFallbackMode] = useState(false);
-  const [scriptReady, setScriptReady] = useState(false);
   const [turnstileVerified, setTurnstileVerified] = useState(false);
   const siteKey =
     process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || (process.env.NODE_ENV === 'development' ? testSiteKey : '');
@@ -145,14 +144,21 @@ const TurnstileWidget = ({ action, language, onVerify, resetKey }: Props & { lan
   const renderWidget = () => {
     if (!siteKey || !containerRef.current || !window.turnstile || widgetIdRef.current) return;
 
-    setScriptReady(true);
     widgetIdRef.current = window.turnstile.render(containerRef.current, {
       action,
       callback: token => {
         setTurnstileVerified(true);
         onVerify(token);
       },
-      'error-callback': () => setFallbackMode(true),
+      'error-callback': errorCode => {
+        console.warn('Turnstile client verification failed:', { action, errorCode });
+        const widgetId = widgetIdRef.current;
+        if (widgetId) window.turnstile?.remove(widgetId);
+        widgetIdRef.current = null;
+        setFallbackMode(true);
+        onVerify('');
+        return true;
+      },
       'expired-callback': () => {
         setTurnstileVerified(false);
         onVerify('');
@@ -174,7 +180,7 @@ const TurnstileWidget = ({ action, language, onVerify, resetKey }: Props & { lan
   };
 
   useEffect(() => {
-    if (!siteKey || scriptReady || fallbackMode) return;
+    if (!siteKey || fallbackMode || turnstileVerified) return;
     const timeout = window.setTimeout(() => {
       const widgetId = widgetIdRef.current;
       if (widgetId) window.turnstile?.remove(widgetId);
@@ -183,7 +189,7 @@ const TurnstileWidget = ({ action, language, onVerify, resetKey }: Props & { lan
       onVerify('');
     }, 8000);
     return () => window.clearTimeout(timeout);
-  }, [fallbackMode, onVerify, scriptReady, siteKey]);
+  }, [fallbackMode, onVerify, siteKey, turnstileVerified]);
 
   useEffect(() => {
     const widgetId = widgetIdRef.current;

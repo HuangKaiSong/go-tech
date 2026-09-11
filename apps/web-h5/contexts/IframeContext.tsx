@@ -135,34 +135,36 @@ export const IframeProvider: React.FC<{
     element.style.outlineOffset = '2px';
   };
 
+  const selectEditorElement = (element: HTMLElement) => {
+    const id = ensureElementId(element);
+    applySelectedStyle(element);
+    selectedIdRef.current = id;
+
+    window.parent.postMessage(
+      {
+        type: 'ELEMENT_CLICKED',
+        element: {
+          tagName: element.tagName.toLowerCase(),
+          className: element.className || '',
+          rect: element.getBoundingClientRect(),
+          innerHTML: element.innerHTML || '',
+          outerHTML: buildSnapshotOuterHtml(element),
+          styles: snapshotComputedStyles(element),
+          dataset: { ...element.dataset },
+          id,
+          timestamp: Date.now()
+        }
+      },
+      '*'
+    );
+  };
+
   const handleClick = (e: Event) => {
     const target = e.target as HTMLElement;
 
     const elementWithCursorEditor = target.closest('.cursor-editor');
-    if (elementWithCursorEditor) {
-      const id = ensureElementId(elementWithCursorEditor as HTMLElement);
-      selectedIdRef.current = id;
-      applySelectedStyle(elementWithCursorEditor as HTMLElement);
-      const tagName = elementWithCursorEditor.tagName.toLowerCase();
-
-      const elementInfo = {
-        tagName,
-        className: elementWithCursorEditor.className || '',
-        rect: elementWithCursorEditor.getBoundingClientRect(),
-        innerHTML: elementWithCursorEditor.innerHTML || '',
-        outerHTML: buildSnapshotOuterHtml(elementWithCursorEditor as HTMLElement),
-        styles: snapshotComputedStyles(elementWithCursorEditor as HTMLElement),
-        dataset: { ...(elementWithCursorEditor as HTMLElement).dataset },
-        id,
-        timestamp: Date.now()
-      };
-      window.parent.postMessage(
-        {
-          type: 'ELEMENT_CLICKED',
-          element: elementInfo
-        },
-        '*'
-      );
+    if (elementWithCursorEditor instanceof HTMLElement) {
+      selectEditorElement(elementWithCursorEditor);
       return;
     }
 
@@ -242,6 +244,11 @@ export const IframeProvider: React.FC<{
       }
       case 'CLEAR_SELECTION': {
         clearAllSelections();
+        break;
+      }
+      case 'SELECT_BLOCK': {
+        const el = findTarget(event.data);
+        if (el) selectEditorElement(el);
         break;
       }
       default:

@@ -22,6 +22,27 @@
       "when": 1786001734668,
       "tag": "0002_familiar_dark_beast",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1786519049334,
+      "tag": "0003_smiling_network",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1788316473934,
+      "tag": "0004_panoramic_randall",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1788490881985,
+      "tag": "0005_add_feedback_table_comments",
+      "breakpoints": true
     }
   ]
 }

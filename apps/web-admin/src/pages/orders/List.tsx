@@ -413,14 +413,14 @@ const OrdersPage = () => {
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div>
                 <span className="text-muted-foreground">訂單編號：</span>
-                <span className="font-medium">{selectedOrder.id}</span>
+                <span className="font-medium">{selectedOrder.orderNo}</span>
               </div>
               <div>
                 <span className="text-muted-foreground">客戶名稱：</span>
                 <span className="font-medium">{selectedOrder.custName}</span>
               </div>
               <div>
-                <span className="text-muted-foreground">套餐類型：</span>
+                <span className="text-muted-foreground">订单類型：</span>
                 <span className="font-medium">{OrderTypeLabel[selectedOrder.orderType]}</span>
               </div>
               <div>
@@ -433,7 +433,7 @@ const OrdersPage = () => {
               </div>
               <div>
                 <span className="text-muted-foreground">提交時間：</span>
-                <span className="font-medium">{selectedOrder.payTime}</span>
+                <span className="font-medium">{selectedOrder.createTime}</span>
               </div>
             </div>
 

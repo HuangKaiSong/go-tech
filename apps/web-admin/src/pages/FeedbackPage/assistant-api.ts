@@ -5,17 +5,39 @@ export interface AssistantHistoryMessage {
   role: 'assistant' | 'user';
 }
 
+export interface AssistantConversation {
+  created_at: string;
+  id: string;
+  message_count: number;
+  title: string;
+  updated_at: string;
+}
+
+export interface AssistantConversationDetail extends AssistantConversation {
+  messages: AssistantHistoryMessage[];
+}
+
 interface AssistantStreamEvent {
   content?: string;
+  conversation_id?: string;
   message?: string;
-  type: 'done' | 'error' | 'token';
+  title?: string;
+  type: 'conversation' | 'done' | 'error' | 'token';
 }
 
 interface StreamAssistantOptions {
+  conversationId?: string;
   history: AssistantHistoryMessage[];
+  onConversation: (conversation: { id: string; title: string }) => void;
   onToken: (token: string) => void;
   question: string;
   signal: AbortSignal;
+}
+
+interface ApiResponse<T> {
+  data?: T;
+  message?: string;
+  success: boolean;
 }
 
 function readMessage(value: unknown) {
@@ -23,9 +45,39 @@ function readMessage(value: unknown) {
   return typeof value.message === 'string' ? value.message : undefined;
 }
 
-export async function streamAssistantAnswer({ history, onToken, question, signal }: StreamAssistantOptions) {
+async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(`${API_BASE}/assistant${path}`, init);
+  const result = (await response.json().catch(() => null)) as ApiResponse<T> | null;
+  if (!response.ok || !result?.success || result.data === undefined) {
+    throw new Error(result?.message || '歷史對話請求失敗');
+  }
+  return result.data;
+}
+
+export function getAssistantConversations() {
+  return request<AssistantConversation[]>('/conversations');
+}
+
+export function getAssistantConversation(id: string) {
+  return request<AssistantConversationDetail>(`/conversations/${encodeURIComponent(id)}`);
+}
+
+export function deleteAssistantConversation(id: string) {
+  return request<{ deleted: boolean; id: string }>(`/conversations/${encodeURIComponent(id)}`, {
+    method: 'DELETE'
+  });
+}
+
+export async function streamAssistantAnswer({
+  conversationId,
+  history,
+  onConversation,
+  onToken,
+  question,
+  signal
+}: StreamAssistantOptions) {
   const response = await fetch(`${API_BASE}/assistant/chat`, {
-    body: JSON.stringify({ history, question }),
+    body: JSON.stringify({ conversationId, history, question }),
     headers: { 'Content-Type': 'application/json' },
     method: 'POST',
     signal
@@ -50,6 +102,9 @@ export async function streamAssistantAnswer({ history, onToken, question, signal
     if (!data) return false;
 
     const event = JSON.parse(data) as AssistantStreamEvent;
+    if (event.type === 'conversation' && event.conversation_id && event.title) {
+      onConversation({ id: event.conversation_id, title: event.title });
+    }
     if (event.type === 'token' && event.content) onToken(event.content);
     if (event.type === 'error') throw new Error(event.message || 'AI 助手暫時無法回應');
     return event.type === 'done';

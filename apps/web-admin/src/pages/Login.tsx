@@ -1,11 +1,10 @@
 import { Experience, canUseNebula } from '@go-tech-frontend/three';
-import { Button, Input } from '@go-tech-frontend/ui';
+import { Button, Input, toast } from '@go-tech-frontend/ui';
 import { useMutation } from '@tanstack/react-query';
 import { useKeyPress } from 'ahooks';
 import { Eye, EyeOff } from 'lucide-react';
 import { type RefObject, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
 import Logo from '@/assets/images/Gotech_Logo.webp';
 import TechCursor from '@/components/TechCursor';
 import VideoPlayer from '@/components/VideoPlayer';

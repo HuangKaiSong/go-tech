@@ -25,7 +25,7 @@ export const fetchPromotions = async (
 ): Promise<PromotionOption[]> => {
   if (!packageId) return [];
   try {
-    const res = await fetch(`/go-tech/platform/promotion/search?packageId=${packageId}`, {
+    const res = await fetch(`/go-tech/platform/promotion/search?packageCode=${packageId}`, {
       headers: { Authorization: `Bearer ${token}`, 'User-Type': 'platform_customer' }
     });
     const data = await res.json();

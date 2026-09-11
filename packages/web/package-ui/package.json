@@ -1,0 +1,38 @@
+{
+  "name": "@go-tech/package-ui",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Shared package pricing cards for the customer site and admin preview",
+  "type": "module",
+  "sideEffects": false,
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./model": "./src/model.ts"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@go-tech-frontend/ui": "workspace:*",
+    "@go-tech/types": "workspace:*",
+    "lucide-react": "catalog:"
+  },
+  "devDependencies": {
+    "@go-tech/tsconfig": "workspace:*",
+    "@types/node": "catalog:dev",
+    "@types/react": "catalog:react19",
+    "@types/react-dom": "catalog:react19",
+    "react": "catalog:react19",
+    "react-dom": "catalog:react19",
+    "tsdown": "catalog:dev",
+    "typescript": "catalog:core",
+    "vitest": "catalog:dev"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
+}

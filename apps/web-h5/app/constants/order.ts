@@ -53,28 +53,7 @@ export type OrderInfoType = {
   promotionId?: number;
 };
 
-export type PlatformPackageDto = {
-  accountingSysPrice: number;
-  addUnitPrice: number;
-  custServiceSysPrice: number;
-  id: number;
-  packageItemList: {
-    id: number;
-    level: number;
-    menuIcon: string;
-    menuId: number;
-    menuTitle: string;
-    packageId: number;
-  }[];
-  packageName: string;
-  price: number;
-  priceA?: number;
-  priceB?: number;
-  priceC?: number;
-  rentSysPrice: number;
-  unitCount: number;
-  venueSysPrice: number;
-};
+export type PlatformPackageDto = Packages;
 
 export type OrderItemInfoType = {
   activateDate: string | null;
@@ -90,9 +69,9 @@ export type OrderItemInfoType = {
   orderNo: string;
   orderStatus: OrderStatusEnum;
   orderStatusName: string;
+  packageDetail: PlatformPackageDto;
+
   packageName: string;
 
   payTime: string | null;
-
-  platformPackageDto: PlatformPackageDto;
 } & OrderInfoType;

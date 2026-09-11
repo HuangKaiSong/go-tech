@@ -1,12 +1,12 @@
 import { atom } from 'jotai';
+import type { ServiceSelection } from '@/app/lib/package-purchase';
 
 /**
  * 用户在下单流程中选择的增值服务。
  *
- * key = serviceId，value = 数量。
- * 仅存于内存（Jotai globalStore），刷新页面即重置，不做持久化。
+ * Key = serviceId，value = 数量。 仅存于内存（Jotai globalStore），刷新页面即重置，不做持久化。
  */
-export const selectedServicesAtom = atom<Record<string, number>>({});
+export const selectedServicesAtom = atom<ServiceSelection>({});
 
 /**
  * 用户选择的开通月份。
@@ -15,5 +15,4 @@ export const selectedServicesAtom = atom<Record<string, number>>({});
  */
 export const selectedMonthsAtom = atom<number>(1);
 
-
-export const needAddonsAtom = atom<boolean>(true)
+export const needAddonsAtom = atom<boolean>(true);

@@ -1,7 +1,7 @@
+import { toast } from '@go-tech-frontend/ui';
 import { useMutation } from '@tanstack/react-query';
 import { Button, Card, Form, type FormProps, Input } from 'antd';
 import { Languages } from 'lucide-react';
-import { toast } from 'sonner';
 
 type FieldType = {
   'en-us'?: string;

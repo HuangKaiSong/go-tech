@@ -7,6 +7,7 @@
 
 @source "../../../packages/web/ui/shadcn/src/**/*.{ts,tsx}";
 @source "../../../packages/ui/src/**/*.{ts,tsx}";
+@source "../../../packages/web/package-ui/src/**/*.{ts,tsx}";
 
 [data-iframe='true'] .restricted-element {
   opacity: 0.6;

@@ -1,6 +1,6 @@
 import { relations } from 'drizzle-orm';
+import { umsAdmin } from '../external/platform_admin';
 import { platformCustomer } from '../external/platform_customer';
-import { umsAdmin } from '../external/ums_admin';
 import { fbCategory, fbSubCategory } from './fb_categories';
 import { fbComment } from './fb_comments';
 import { fbFeature } from './fb_feature';
