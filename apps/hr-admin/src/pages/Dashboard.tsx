@@ -32,7 +32,7 @@ import {
   XAxis,
   YAxis
 } from 'recharts';
-import { type DashboardOverview, getDashboardOverview, type NameValue } from '@/api/dashboard';
+import { type DashboardOverview, getDashboardOverview, type NameValue, type PayrollStep } from '@/api/dashboard';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { hasRoute } from '@/lib/auth';
@@ -132,14 +132,21 @@ const TONE: Record<string, string> = {
   destructive: 'bg-destructive/10 text-destructive'
 };
 
-export default function Dashboard() {
+const STEP_CLASS = {
+  done: 'bg-success/10 text-success',
+  current: 'bg-primary/10 text-primary ring-2 ring-primary',
+  fallback: 'bg-muted text-muted-foreground'
+} as const;
+
+function resolveStepStatus(s: PayrollStep): keyof typeof STEP_CLASS {
+  if (s.done) return 'done';
+  if (s.current) return 'current';
+  return 'fallback';
+}
+
+const DashboardContent = ({ data }: { data: DashboardOverview }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-
-  const { data, isError, isLoading } = useQuery({
-    queryKey: ['dashboardOverview', USE_MOCK],
-    queryFn: () => (USE_MOCK ? Promise.resolve(MOCK_OVERVIEW) : getDashboardOverview().then(r => r.data))
-  });
 
   // 卡片級門控（未提供路由集合時放行全部）
   const canEmp = hasRoute('/employees');
@@ -147,18 +154,6 @@ export default function Dashboard() {
   const canPerf = hasRoute('/performance');
   const canTraining = hasRoute('/training');
   const canPayroll = hasRoute('/payroll');
-
-  if (isError) {
-    return <div className="py-24 text-center text-muted-foreground">{t('載入失敗')}</div>;
-  }
-  if (isLoading || !data) {
-    return (
-      <div className="py-24 text-center text-muted-foreground">
-        <Loader2 className="h-6 w-6 animate-spin inline mr-2" />
-        {t('載入中...')}
-      </div>
-    );
-  }
 
   const {
     activities,
@@ -543,13 +538,7 @@ export default function Dashboard() {
               {payroll.steps.map((s, i) => (
                 <div key={i} className="flex items-center gap-2">
                   <div
-                    className={`h-8 w-8 rounded-full flex items-center justify-center text-sm shrink-0 ${
-                      s.done
-                        ? 'bg-success/10 text-success'
-                        : s.current
-                          ? 'bg-primary/10 text-primary ring-2 ring-primary'
-                          : 'bg-muted text-muted-foreground'
-                    }`}
+                    className={`h-8 w-8 rounded-full flex items-center justify-center text-sm shrink-0 ${STEP_CLASS[resolveStepStatus(s)]}`}
                   >
                     {s.done ? '✓' : i + 1}
                   </div>
@@ -575,4 +564,37 @@ export default function Dashboard() {
       )}
     </div>
   );
+};
+
+const DashboardError = () => {
+  const { t } = useTranslation();
+  return <div className="py-24 text-center text-muted-foreground">{t('載入失敗')}</div>;
+};
+
+const DashboardLoading = () => {
+  const { t } = useTranslation();
+
+  return (
+    <div className="py-24 text-center text-muted-foreground">
+      <Loader2 className="h-6 w-6 animate-spin inline mr-2" />
+      {t('載入中...')}
+    </div>
+  );
+};
+
+export default function Dashboard() {
+  const { data, isError, isLoading } = useQuery({
+    queryKey: ['dashboardOverview', USE_MOCK],
+    queryFn: () => (USE_MOCK ? Promise.resolve(MOCK_OVERVIEW) : getDashboardOverview().then(r => r.data))
+  });
+
+  if (isError) {
+    return <DashboardError />;
+  }
+
+  if (isLoading || !data) {
+    return <DashboardLoading />;
+  }
+
+  return <DashboardContent data={data} />;
 }
