@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import MobileLayout from "@/components/MobileLayout";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
@@ -335,21 +334,19 @@ const Contacts = () => {
         {tab === "people" ? (
           <>
             {/* Department filter */}
-            <ScrollArea className="mb-4">
-              <div className="flex gap-2 pb-1">
-                {departments.map((d) => (
-                  <button
-                    key={d}
-                    onClick={() => setDeptFilter(d)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
-                      deptFilter === d ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-                    }`}
-                  >
-                    {d}
-                  </button>
-                ))}
-              </div>
-            </ScrollArea>
+            <div className="mb-4 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+              {departments.map((d) => (
+                <button
+                  key={d}
+                  onClick={() => setDeptFilter(d)}
+                  className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
+                    deptFilter === d ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                  }`}
+                >
+                  {d}
+                </button>
+              ))}
+            </div>
 
             {/* Stats */}
             <div className="flex items-center justify-between mb-3">

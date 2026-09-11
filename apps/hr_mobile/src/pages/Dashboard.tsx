@@ -1,13 +1,13 @@
-import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { APPROVAL_TYPE_TEXT, getMyPending } from "@/api/approval";
+import { getTodayClock } from "@/api/attendance";
+import { getMyProfile } from "@/api/employee";
 import MobileLayout from "@/components/MobileLayout";
+import { useQuery } from "@tanstack/react-query";
 import {
   BarChart3, Bell, BookUser, CalendarDays, CheckCircle2, ChevronRight,
   Clock, DollarSign, FileText, GraduationCap, MapPin, User
 } from "lucide-react";
-import { APPROVAL_TYPE_TEXT, getMyPending } from "@/api/approval";
-import { getMyProfile } from "@/api/employee";
-import { getTodayClock } from "@/api/attendance";
+import { useNavigate } from "react-router-dom";
 
 const greetingFor = (hours: number) => {
   if (hours < 12) return "早安";
@@ -17,7 +17,7 @@ const greetingFor = (hours: number) => {
 
 const quickActions = [
   { icon: Clock, label: "打卡", path: "/clock", color: "bg-primary" },
-  { icon: FileText, label: "請假", path: "/applications", color: "bg-accent" },
+  { icon: FileText, label: "申请", path: "/applications", color: "bg-accent" },
   { icon: DollarSign, label: "薪酬", path: "/salary", color: "bg-warning" },
   { icon: BarChart3, label: "KPI", path: "/kpi", color: "bg-info" },
   { icon: GraduationCap, label: "培訓", path: "/training", color: "bg-[hsl(var(--info))]" },

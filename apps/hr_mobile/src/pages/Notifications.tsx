@@ -17,6 +17,7 @@ import {
   MessageCircle,
   Mic,
   MoreVertical,
+  Pencil,
   Plus,
   Search,
   Send,
@@ -27,11 +28,12 @@ import {
   Users,
   X
 } from 'lucide-react';
-import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import { type ReactNode, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import {
   type ChatMember,
+  type ChatMessage,
   type Conversation,
   addGroupMembers,
   createGroup,
@@ -42,7 +44,9 @@ import {
   leaveConversation,
   markConversationRead,
   muteConversation,
+  recallMessage,
   removeGroupMember,
+  renameGroup,
   sendImageMessage,
   sendMessage,
   startDirect
@@ -185,12 +189,14 @@ const ChatList = ({
   conversations,
   loading,
   onCreateGroup,
-  onOpen
+  onOpen,
+  onStartDirect
 }: {
   conversations: Conversation[];
   loading: boolean;
   onCreateGroup: () => void;
   onOpen: (c: Conversation) => void;
+  onStartDirect: () => void;
 }) => {
   const [search, setSearch] = useState('');
   const filtered = conversations.filter(c => c.name.includes(search));
@@ -207,6 +213,10 @@ const ChatList = ({
             className="pl-9 h-9 text-sm rounded-lg"
           />
         </div>
+        <Button size="sm" variant="outline" className="h-9 gap-1" onClick={onStartDirect}>
+          <MessageCircle className="w-4 h-4" />
+          <span className="text-xs">發起</span>
+        </Button>
         <Button size="sm" className="h-9 gap-1" onClick={onCreateGroup}>
           <Plus className="w-4 h-4" />
           <span className="text-xs">建群</span>
@@ -241,16 +251,22 @@ const ChatList = ({
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-foreground truncate">{chat.name}</p>
+                  <p className="flex items-center gap-1 text-sm font-medium text-foreground truncate">
+                    {chat.name}
+                    {chat.muted && <BellOff className="w-3 h-3 text-muted-foreground shrink-0" />}
+                  </p>
                   <span className="text-[10px] text-muted-foreground shrink-0">{shortTime(chat.lastTime)}</span>
                 </div>
                 <p className="text-xs text-muted-foreground truncate mt-0.5">{chat.lastMessage || '暫無消息'}</p>
               </div>
-              {chat.unread > 0 && (
-                <div className="w-5 h-5 rounded-full bg-destructive flex items-center justify-center shrink-0">
-                  <span className="text-[10px] text-destructive-foreground font-medium">{chat.unread}</span>
-                </div>
-              )}
+              {chat.unread > 0 &&
+                (chat.muted ? (
+                  <div className="w-2 h-2 rounded-full bg-muted-foreground/40 shrink-0" />
+                ) : (
+                  <div className="w-5 h-5 rounded-full bg-destructive flex items-center justify-center shrink-0">
+                    <span className="text-[10px] text-destructive-foreground font-medium">{chat.unread}</span>
+                  </div>
+                ))}
             </div>
           ))}
         </div>
@@ -262,12 +278,17 @@ const ChatList = ({
 // ── Member Info Panel ──
 const MemberInfoPanel = ({
   member,
+  muted,
   onBack,
-  onChat
+  onChat,
+  onToggleMute
 }: {
   member: ChatMember;
+  /** 单聊会话的免打扰状态；为 undefined 表示不是从单聊进入（不展示静音开关） */
+  muted?: boolean;
   onBack: () => void;
   onChat: () => void;
+  onToggleMute?: () => void;
 }) => (
   <div className="px-5 pt-4">
     <div className="flex items-center gap-3 mb-6">
@@ -296,6 +317,18 @@ const MemberInfoPanel = ({
         <span className="text-sm text-foreground">{member.position || '—'}</span>
       </div>
     </div>
+    {onToggleMute && (
+      <button
+        onClick={onToggleMute}
+        className="w-full bg-card rounded-xl border p-4 flex items-center justify-between mb-4"
+      >
+        <span className="flex items-center gap-2 text-sm text-foreground">
+          {muted ? <BellOff className="w-4 h-4 text-muted-foreground" /> : <Bell className="w-4 h-4 text-muted-foreground" />}
+          消息免打擾
+        </span>
+        <span className={`text-xs ${muted ? 'text-primary' : 'text-muted-foreground'}`}>{muted ? '已開啟' : '關閉'}</span>
+      </button>
+    )}
     {!member.mine && (
       <Button className="w-full gap-2" onClick={onChat}>
         <MessageCircle className="w-4 h-4" />
@@ -315,6 +348,7 @@ const GroupInfoPanel = ({
   onLeave,
   onMemberClick,
   onRemoveMember,
+  onRename,
   onToggleMute
 }: {
   conv: Conversation;
@@ -325,10 +359,14 @@ const GroupInfoPanel = ({
   onLeave: () => void;
   onMemberClick: (m: ChatMember) => void;
   onRemoveMember: (m: ChatMember) => void;
+  onRename: (name: string) => void;
   onToggleMute: () => void;
 }) => {
   const isOwner = members.some(m => m.mine && m.owner);
   const [confirmAction, setConfirmAction] = useState<'leave' | 'dissolve' | null>(null);
+  const [removeTarget, setRemoveTarget] = useState<ChatMember | null>(null);
+  const [renameOpen, setRenameOpen] = useState(false);
+  const [renameVal, setRenameVal] = useState('');
 
   return (
     <div className="px-5 pt-4">
@@ -345,7 +383,21 @@ const GroupInfoPanel = ({
             {conv.avatar}
           </AvatarFallback>
         </Avatar>
-        <p className="text-lg font-semibold text-foreground">{conv.name}</p>
+        <div className="flex items-center gap-1.5">
+          <p className="text-lg font-semibold text-foreground">{conv.name}</p>
+          {isOwner && (
+            <button
+              onClick={() => {
+                setRenameVal(conv.name);
+                setRenameOpen(true);
+              }}
+              className="p-1 rounded-md hover:bg-muted"
+              title="修改群名"
+            >
+              <Pencil className="w-3.5 h-3.5 text-muted-foreground" />
+            </button>
+          )}
+        </div>
         <p className="text-xs text-muted-foreground mt-0.5">{members.length} 位成員</p>
       </div>
 
@@ -403,7 +455,7 @@ const GroupInfoPanel = ({
                 <button
                   onClick={e => {
                     e.stopPropagation();
-                    onRemoveMember(m);
+                    setRemoveTarget(m);
                   }}
                   className="p-1.5 rounded-md hover:bg-destructive/10 transition-colors"
                   title="移除成員"
@@ -435,6 +487,61 @@ const GroupInfoPanel = ({
           </Button>
         )}
       </div>
+
+      <Dialog open={Boolean(removeTarget)} onOpenChange={() => setRemoveTarget(null)}>
+        <DialogContent className="max-w-xs mx-auto">
+          <DialogHeader>
+            <DialogTitle className="text-base">確認移除</DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">
+              確定要將「{removeTarget?.name || '該成員'}」移出群組嗎？
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" size="sm" onClick={() => setRemoveTarget(null)}>
+              取消
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => {
+                if (removeTarget) onRemoveMember(removeTarget);
+                setRemoveTarget(null);
+              }}
+            >
+              移除
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={renameOpen} onOpenChange={setRenameOpen}>
+        <DialogContent className="max-w-xs mx-auto">
+          <DialogHeader>
+            <DialogTitle className="text-base">修改群名</DialogTitle>
+          </DialogHeader>
+          <Input
+            value={renameVal}
+            onChange={e => setRenameVal(e.target.value)}
+            placeholder="輸入新群名..."
+            className="h-9 text-sm"
+          />
+          <DialogFooter className="gap-2">
+            <Button variant="outline" size="sm" onClick={() => setRenameOpen(false)}>
+              取消
+            </Button>
+            <Button
+              size="sm"
+              disabled={!renameVal.trim() || renameVal.trim() === conv.name}
+              onClick={() => {
+                onRename(renameVal.trim());
+                setRenameOpen(false);
+              }}
+            >
+              儲存
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={Boolean(confirmAction)} onOpenChange={() => setConfirmAction(null)}>
         <DialogContent className="max-w-xs mx-auto">
@@ -522,19 +629,64 @@ const EMOJIS = [
   '🤣'
 ];
 
+/** 复制到剪贴板：优先 Clipboard API（需 HTTPS/安全上下文），webview 非安全上下文回退 execCommand */
+const copyToClipboard = (text: string) => {
+  const fallback = () => {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.append(ta);
+      ta.focus();
+      ta.select();
+      const ok = document.execCommand('copy');
+      ta.remove();
+      if (ok) toast.success('已複製');
+      else toast.error('複製失敗');
+    } catch {
+      toast.error('複製失敗');
+    }
+  };
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(text).then(() => toast.success('已複製'), fallback);
+  } else {
+    fallback();
+  }
+};
+
+/** 撤回时限（分钟），与后端保持一致 */
+const RECALL_WINDOW_MIN = 2;
+const withinRecall = (iso?: string) => {
+  if (!iso) return false;
+  const t = new Date(iso.replace(' ', 'T')).getTime();
+  if (Number.isNaN(t)) return false;
+  return Date.now() - t < RECALL_WINDOW_MIN * 60000;
+};
+
 const ChatRoom = ({
   conv,
   messages,
+  loadingMore,
+  noMore,
   onBack,
+  onLoadMore,
   onOpenInfo,
+  onRecall,
+  onRetry,
   onSend,
   onSendImage,
   sending
 }: {
   conv: Conversation;
   messages: import('@/api/chat').ChatMessage[];
+  loadingMore: boolean;
+  noMore: boolean;
   onBack: () => void;
+  onLoadMore: () => void;
   onOpenInfo: () => void;
+  onRecall: (m: import('@/api/chat').ChatMessage) => void;
+  onRetry: (m: import('@/api/chat').ChatMessage) => void;
   onSend: (text: string) => void;
   onSendImage: (file: File) => void;
   sending: boolean;
@@ -542,9 +694,15 @@ const ChatRoom = ({
   const [input, setInput] = useState('');
   const [emojiOpen, setEmojiOpen] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
+  const [actionMsg, setActionMsg] = useState<import('@/api/chat').ChatMessage | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  // 滚动位置维护：首条id/末条key/加载更多前高度/是否贴底
+  const firstIdRef = useRef<string | undefined>(undefined);
+  const lastKeyRef = useRef<string | undefined>(undefined);
+  const prevHeightRef = useRef(0);
+  const nearBottomRef = useRef(true);
   // 键盘弹出时用 VisualViewport 把聊天区钉在可视区域（键盘上方），webview 里 100dvh 不生效才需要
   const [vv, setVv] = useState<{ height: number; top: number } | null>(null);
   useEffect(() => {
@@ -559,9 +717,40 @@ const ChatRoom = ({
       view.removeEventListener('scroll', update);
     };
   }, []);
+  // 键盘高度变化时贴底
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
-  }, [messages.length, vv?.height]);
+  }, [vv?.height]);
+  // 消息变化：向前增长(加载历史)保持位置；末尾新增且贴底才自动滚到底
+  useLayoutEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const firstId = messages[0]?.id;
+    const last = messages[messages.length - 1];
+    const lastKey = last?.id ?? last?.localId;
+    const grewFront =
+      Boolean(firstIdRef.current) &&
+      Boolean(firstId) &&
+      firstId !== firstIdRef.current &&
+      Number(firstId) < Number(firstIdRef.current);
+    if (grewFront) {
+      el.scrollTop = el.scrollHeight - prevHeightRef.current;
+    } else if (lastKey !== lastKeyRef.current && (nearBottomRef.current || lastKeyRef.current === undefined)) {
+      el.scrollTo({ top: el.scrollHeight });
+    }
+    firstIdRef.current = firstId;
+    lastKeyRef.current = lastKey;
+  }, [messages]);
+
+  const handleScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    nearBottomRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+    if (el.scrollTop < 40 && !loadingMore && !noMore) {
+      prevHeightRef.current = el.scrollHeight;
+      onLoadMore();
+    }
+  };
 
   const handleSend = () => {
     if (!input.trim()) return;
@@ -569,6 +758,12 @@ const ChatRoom = ({
     setInput('');
     // 发送后保持焦点，键盘不收起
     inputRef.current?.focus();
+  };
+
+  const closeAction = () => setActionMsg(null);
+  const copyText = (m: import('@/api/chat').ChatMessage) => {
+    if (m.content) copyToClipboard(m.content);
+    closeAction();
   };
 
   const insertEmoji = (e: string) => {
@@ -616,10 +811,42 @@ const ChatRoom = ({
         </button>
       </div>
 
-      <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-4 py-3 space-y-3 bg-muted/30">
+      <div
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className="flex-1 min-h-0 overflow-y-auto px-4 py-3 space-y-3 bg-muted/30"
+      >
+        {loadingMore && (
+          <div className="flex justify-center py-2">
+            <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+          </div>
+        )}
+        {noMore && messages.length > 0 && (
+          <p className="text-center text-[10px] text-muted-foreground/50 py-1">沒有更多消息了</p>
+        )}
         {messages.length === 0 && <p className="text-center text-xs text-muted-foreground py-8">開始你們的對話吧</p>}
         {/* oxlint-disable-next-line complexity */}
         {messages.map(msg => {
+          // 系统提示：居中灰条
+          if (msg.msgType === 3) {
+            return (
+              <div key={msg.id} className="flex justify-center">
+                <span className="text-[11px] text-muted-foreground/70 bg-muted/60 px-2 py-0.5 rounded-full max-w-[85%] text-center">
+                  {msg.content}
+                </span>
+              </div>
+            );
+          }
+          // 撤回消息：居中灰条提示
+          if (msg.recalled) {
+            return (
+              <div key={msg.id} className="flex justify-center">
+                <span className="text-[11px] text-muted-foreground/70 bg-muted/60 px-2 py-0.5 rounded-full">
+                  {msg.mine ? '你' : msg.senderName || '對方'}撤回了一條消息
+                </span>
+              </div>
+            );
+          }
           let groupReadBadge: ReactNode = null;
           if (msg.mine && conv.type === 2) {
             const total = msg.totalReaders ?? 0;
@@ -648,8 +875,47 @@ const ChatRoom = ({
               );
             }
           }
+          const canAct = msg.mine && !msg.sendStatus;
+          let statusEl: ReactNode;
+          if (msg.sendStatus === 'failed') {
+            statusEl = (
+              <button onClick={() => onRetry(msg)} className="flex items-center gap-0.5 text-[9px] text-destructive">
+                <X className="w-3 h-3" />
+                發送失敗，點擊重試
+              </button>
+            );
+          } else if (msg.sendStatus === 'sending') {
+            statusEl = (
+              <span className="flex items-center gap-0.5 text-[9px] text-muted-foreground/50">
+                <Loader2 className="w-3 h-3 animate-spin" />
+                發送中
+              </span>
+            );
+          } else {
+            let readEl: ReactNode = null;
+            if (msg.mine && conv.type === 1) {
+              readEl = msg.read ? (
+                <span className="flex items-center gap-0.5 text-[9px] text-primary/70">
+                  <CheckCheck className="w-3 h-3" />
+                  已讀
+                </span>
+              ) : (
+                <span className="flex items-center gap-0.5 text-[9px] text-muted-foreground/50">
+                  <Check className="w-3 h-3" />
+                  未讀
+                </span>
+              );
+            }
+            statusEl = (
+              <>
+                <span className="text-[9px] text-muted-foreground/60">{shortTime(msg.createTime)}</span>
+                {readEl}
+                {groupReadBadge}
+              </>
+            );
+          }
           return (
-          <div key={msg.id} className={`flex ${msg.mine ? 'justify-end' : 'justify-start'}`}>
+          <div key={msg.id ?? msg.localId} className={`flex ${msg.mine ? 'justify-end' : 'justify-start'}`}>
             <div className={`flex gap-2 max-w-[75%] ${msg.mine ? 'flex-row-reverse' : ''}`}>
               {!msg.mine && (
                 <Avatar className="w-8 h-8 shrink-0 mt-1">
@@ -666,33 +932,18 @@ const ChatRoom = ({
                   <img
                     src={msg.imageUrl}
                     alt="圖片"
-                    onClick={() => setPreview(msg.imageUrl!)}
-                    className="max-w-[200px] max-h-[240px] rounded-2xl border border-border object-cover cursor-pointer"
+                    onClick={() => (canAct ? setActionMsg(msg) : setPreview(msg.imageUrl!))}
+                    className={`max-w-[200px] max-h-[240px] rounded-2xl border border-border object-cover cursor-pointer ${msg.sendStatus === 'sending' ? 'opacity-60' : ''}`}
                   />
                 ) : (
                   <div
-                    className={`px-3 py-2 rounded-2xl text-sm break-words ${msg.mine ? 'bg-primary text-primary-foreground rounded-tr-md' : 'bg-card text-foreground border border-border rounded-tl-md'}`}
+                    onClick={canAct ? () => setActionMsg(msg) : undefined}
+                    className={`px-3 py-2 rounded-2xl text-sm break-words ${msg.mine ? 'bg-primary text-primary-foreground rounded-tr-md' : 'bg-card text-foreground border border-border rounded-tl-md'} ${canAct ? 'cursor-pointer' : ''}`}
                   >
                     {msg.content}
                   </div>
                 )}
-                <div className={`flex items-center gap-1 mt-0.5 ${msg.mine ? 'justify-end' : ''}`}>
-                  <span className="text-[9px] text-muted-foreground/60">{shortTime(msg.createTime)}</span>
-                  {msg.mine &&
-                    conv.type === 1 &&
-                    (msg.read ? (
-                      <span className="flex items-center gap-0.5 text-[9px] text-primary/70">
-                        <CheckCheck className="w-3 h-3" />
-                        已讀
-                      </span>
-                    ) : (
-                      <span className="flex items-center gap-0.5 text-[9px] text-muted-foreground/50">
-                        <Check className="w-3 h-3" />
-                        未讀
-                      </span>
-                    ))}
-                  {groupReadBadge}
-                </div>
+                <div className={`flex items-center gap-1 mt-0.5 ${msg.mine ? 'justify-end' : ''}`}>{statusEl}</div>
               </div>
             </div>
           </div>
@@ -756,6 +1007,53 @@ const ChatRoom = ({
           </div>
         )}
       </div>
+
+      {/* 消息操作面板（本人消息：查看/复制/撤回） */}
+      {actionMsg && (
+        <div className="fixed inset-0 z-[60] flex items-end bg-black/30" onClick={closeAction}>
+          <div
+            className="w-full max-w-lg mx-auto bg-card rounded-t-2xl p-2 pb-6 space-y-1"
+            onClick={e => e.stopPropagation()}
+          >
+            {actionMsg.msgType === 2 && actionMsg.imageUrl && (
+              <button
+                className="w-full text-center py-3 text-sm text-foreground rounded-lg hover:bg-muted"
+                onClick={() => {
+                  setPreview(actionMsg.imageUrl!);
+                  closeAction();
+                }}
+              >
+                查看大圖
+              </button>
+            )}
+            {actionMsg.msgType !== 2 && (
+              <button
+                className="w-full text-center py-3 text-sm text-foreground rounded-lg hover:bg-muted"
+                onClick={() => copyText(actionMsg)}
+              >
+                複製
+              </button>
+            )}
+            {withinRecall(actionMsg.createTime) && (
+              <button
+                className="w-full text-center py-3 text-sm text-destructive rounded-lg hover:bg-muted"
+                onClick={() => {
+                  onRecall(actionMsg);
+                  closeAction();
+                }}
+              >
+                撤回
+              </button>
+            )}
+            <button
+              className="w-full text-center py-3 text-sm text-muted-foreground rounded-lg hover:bg-muted"
+              onClick={closeAction}
+            >
+              取消
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* 图片全屏预览 */}
       {preview && (
@@ -843,6 +1141,9 @@ type ChatView = 'addMember' | 'chat' | 'groupInfo' | 'list' | 'memberInfo';
 
 const onErr = (e: any) => toast.error(e?.message || '操作失敗');
 
+const genLocalId = () => `tmp_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+const nowStr = () => new Date().toISOString().slice(0, 19).replace('T', ' ');
+
 // oxlint-disable-next-line complexity
 const Notifications = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -852,6 +1153,8 @@ const Notifications = () => {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [selectedMember, setSelectedMember] = useState<ChatMember | null>(null);
   const [showCreateGroup, setShowCreateGroup] = useState(false);
+  const [showStartDirect, setShowStartDirect] = useState(false);
+  const [directSearch, setDirectSearch] = useState('');
   const [groupName, setGroupName] = useState('');
   const [pickIds, setPickIds] = useState<number[]>([]);
 
@@ -869,12 +1172,48 @@ const Notifications = () => {
     () => conversations.find(c => c.id === activeId),
     [conversations, activeId]
   );
-  const { data: messages = [] } = useQuery({
+  // 最新一页（轮询刷新已读回执/新消息/撤回）
+  const { data: newest = [] } = useQuery({
     queryKey: ['chatMsgs', activeId],
     queryFn: async () => (await getMessages(activeId!)).data ?? [],
     enabled: Boolean(activeId) && inChat,
     refetchInterval: inChat ? 3000 : false
   });
+  // 上滑加载的历史页 / 已发送但轮询尚未覆盖的真实消息 / 乐观临时消息
+  const [older, setOlder] = useState<ChatMessage[]>([]);
+  const [extra, setExtra] = useState<ChatMessage[]>([]);
+  const [pending, setPending] = useState<ChatMessage[]>([]);
+  const [noMore, setNoMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  // 切换会话时重置本地消息态
+  useEffect(() => {
+    setOlder([]);
+    setExtra([]);
+    setPending([]);
+    setNoMore(false);
+    setLoadingMore(false);
+  }, [activeId]);
+
+  // 合并去重：真实消息按 id 升序，乐观消息置于末尾
+  const messages = useMemo(() => {
+    const map = new Map<string, ChatMessage>();
+    for (const m of older) map.set(m.id, m);
+    for (const m of newest) map.set(m.id, m);
+    for (const m of extra) map.set(m.id, m);
+    // oxlint-disable-next-line no-array-sort -- 对全新的展开数组排序，无副作用
+    const reals = [...map.values()].sort((a, b) => Number(a.id) - Number(b.id));
+    return [...reals, ...pending];
+  }, [older, newest, extra, pending]);
+
+  // newest 已覆盖到的 extra 清理，避免无限增长
+  useEffect(() => {
+    if (extra.length === 0 || newest.length === 0) return;
+    const ids = new Set(newest.map(m => m.id));
+    setExtra(prev => (prev.some(m => ids.has(m.id)) ? prev.filter(m => !ids.has(m.id)) : prev));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [newest]);
+
   const { data: members = [] } = useQuery({
     queryKey: ['chatMembers', activeId],
     queryFn: async () => (await getChatMembers(activeId!)).data ?? [],
@@ -883,11 +1222,10 @@ const Notifications = () => {
   const { data: directory = [] } = useQuery({
     queryKey: ['empDirectory'],
     queryFn: async () => (await getEmployeeDirectory()).data?.records ?? [],
-    enabled: showCreateGroup || inAddMember
+    enabled: showCreateGroup || inAddMember || showStartDirect
   });
 
   const invalidateConvs = () => queryClient.invalidateQueries({ queryKey: ['chatConvs'] });
-  const invalidateMsgs = () => queryClient.invalidateQueries({ queryKey: ['chatMsgs', activeId] });
   const invalidateMembers = () => queryClient.invalidateQueries({ queryKey: ['chatMembers', activeId] });
   const backToList = () => {
     setActiveId(null);
@@ -903,22 +1241,87 @@ const Notifications = () => {
     readM.mutate(id);
   };
 
-  const sendM = useMutation({
-    mutationFn: (text: string) => sendMessage(activeId!, text),
-    onSuccess: () => {
-      invalidateMsgs();
-      invalidateConvs();
-    },
-    onError: onErr
-  });
-  const sendImgM = useMutation({
-    mutationFn: (file: File) => sendImageMessage(activeId!, file),
-    onSuccess: () => {
-      invalidateMsgs();
-      invalidateConvs();
-    },
-    onError: onErr
-  });
+  // ── 乐观发送 / 重试 / 撤回 / 加载历史 ──
+  const settleSent = (localId: string, real?: ChatMessage) => {
+    setPending(p => p.filter(x => x.localId !== localId));
+    if (real) setExtra(e => [...e, real]);
+    invalidateConvs();
+  };
+  const failSent = (localId: string) =>
+    setPending(p => p.map(x => (x.localId === localId ? { ...x, sendStatus: 'failed' } : x)));
+
+  const doSendText = (text: string, localId: string) => {
+    if (!activeId) return;
+    sendMessage(activeId, text)
+      .then(res => settleSent(localId, res.data))
+      .catch(() => failSent(localId));
+  };
+  const doSendImage = (file: File, localId: string) => {
+    if (!activeId) return;
+    sendImageMessage(activeId, file)
+      .then(res => settleSent(localId, res.data))
+      .catch(() => failSent(localId));
+  };
+
+  const sendText = (text: string) => {
+    if (!activeId) return;
+    const localId = genLocalId();
+    setPending(p => [
+      ...p,
+      { id: '', localId, mine: true, msgType: 1, content: text, senderId: '', createTime: nowStr(), sendStatus: 'sending', pendingText: text }
+    ]);
+    doSendText(text, localId);
+  };
+  const sendImg = (file: File) => {
+    if (!activeId) return;
+    const localId = genLocalId();
+    setPending(p => [
+      ...p,
+      { id: '', localId, mine: true, msgType: 2, imageUrl: URL.createObjectURL(file), content: '[圖片]', senderId: '', createTime: nowStr(), sendStatus: 'sending', pendingFile: file }
+    ]);
+    doSendImage(file, localId);
+  };
+  const retrySend = (m: ChatMessage) => {
+    if (!m.localId) return;
+    setPending(p => p.map(x => (x.localId === m.localId ? { ...x, sendStatus: 'sending' } : x)));
+    if (m.msgType === 2 && m.pendingFile) doSendImage(m.pendingFile, m.localId);
+    else if (m.pendingText) doSendText(m.pendingText, m.localId);
+  };
+
+  const recall = (m: ChatMessage) => {
+    if (!m.id) return;
+    recallMessage(m.id)
+      .then(res => {
+        const real = res.data;
+        if (real) {
+          setExtra(e => [...e, real]);
+          setOlder(prev => prev.map(x => (x.id === real.id ? real : x)));
+        }
+        invalidateConvs();
+      })
+      .catch(onErr);
+  };
+
+  const loadMore = () => {
+    if (noMore || loadingMore || !activeId) return;
+    const firstId = messages[0]?.id;
+    if (!firstId) return;
+    setLoadingMore(true);
+    getMessages(activeId, { beforeId: firstId })
+      .then(res => {
+        const page = res.data ?? [];
+        if (page.length < 30) setNoMore(true);
+        setOlder(prev => {
+          const map = new Map<string, ChatMessage>();
+          for (const x of page) map.set(x.id, x);
+          for (const x of prev) map.set(x.id, x);
+          // oxlint-disable-next-line no-array-sort -- 对全新的展开数组排序，无副作用
+          return [...map.values()].sort((a, b) => Number(a.id) - Number(b.id));
+        });
+      })
+      .catch(onErr)
+      .finally(() => setLoadingMore(false));
+  };
   const startM = useMutation({
     mutationFn: (targetUserId: number) => startDirect(targetUserId),
     onSuccess: res => {
@@ -980,6 +1383,14 @@ const Notifications = () => {
     onSuccess: invalidateConvs,
     onError: onErr
   });
+  const renameM = useMutation({
+    mutationFn: (name: string) => renameGroup(activeId!, name),
+    onSuccess: () => {
+      toast.success('已修改');
+      invalidateConvs();
+    },
+    onError: onErr
+  });
 
   const togglePick = (id: number) =>
     setPickIds(prev => (prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]));
@@ -994,7 +1405,8 @@ const Notifications = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
-  const totalUnread = conversations.reduce((s, c) => s + (c.unread || 0), 0);
+  // 免打扰会话不计入 Tab 顶部总未读
+  const totalUnread = conversations.reduce((s, c) => s + (c.muted ? 0 : c.unread || 0), 0);
 
   // ── Views ──
   if (tab === 'chat' && view === 'memberInfo' && selectedMember) {
@@ -1002,6 +1414,10 @@ const Notifications = () => {
       <MobileLayout title="">
         <MemberInfoPanel
           member={selectedMember}
+          muted={activeConv?.type === 1 ? Boolean(activeConv.muted) : undefined}
+          onToggleMute={
+            activeConv?.type === 1 ? () => muteM.mutate(!activeConv.muted) : undefined
+          }
           onBack={() => {
             setSelectedMember(null);
             setView(activeConv?.type === 2 ? 'groupInfo' : 'list');
@@ -1065,6 +1481,7 @@ const Notifications = () => {
           }}
           onToggleMute={() => muteM.mutate(!activeConv.muted)}
           onRemoveMember={m => removeM.mutate(m.userId)}
+          onRename={name => renameM.mutate(name)}
         />
       </MobileLayout>
     );
@@ -1075,10 +1492,15 @@ const Notifications = () => {
       <ChatRoom
         conv={activeConv}
         messages={messages}
-        sending={sendM.isPending || sendImgM.isPending}
+        loadingMore={loadingMore}
+        noMore={noMore}
+        sending={false}
         onBack={backToList}
-        onSend={text => sendM.mutate(text)}
-        onSendImage={file => sendImgM.mutate(file)}
+        onLoadMore={loadMore}
+        onRecall={recall}
+        onRetry={retrySend}
+        onSend={sendText}
+        onSendImage={sendImg}
         onOpenInfo={() => {
           if (activeConv.type === 2) setView('groupInfo');
           else {
@@ -1126,6 +1548,10 @@ const Notifications = () => {
             conversations={conversations}
             loading={convLoading}
             onOpen={c => openConversation(c.id)}
+            onStartDirect={() => {
+              setDirectSearch('');
+              setShowStartDirect(true);
+            }}
             onCreateGroup={() => {
               setPickIds([]);
               setGroupName('');
@@ -1134,6 +1560,53 @@ const Notifications = () => {
           />
         </TabsContent>
       </Tabs>
+
+      <Dialog open={showStartDirect} onOpenChange={setShowStartDirect}>
+        <DialogContent className="max-w-sm mx-auto">
+          <DialogHeader>
+            <DialogTitle className="text-base">發起單聊</DialogTitle>
+          </DialogHeader>
+          <Input
+            placeholder="搜索同事..."
+            value={directSearch}
+            onChange={e => setDirectSearch(e.target.value)}
+            className="h-9 text-sm"
+          />
+          <ScrollArea className="h-72 -mx-1">
+            <div className="space-y-1 px-1">
+              {directory
+                .filter(
+                  e => (e.name ?? '').includes(directSearch) || (e.department ?? '').includes(directSearch)
+                )
+                .map(c => (
+                  <div
+                    key={c.id}
+                    onClick={() => {
+                      setShowStartDirect(false);
+                      startM.mutate(c.id);
+                    }}
+                    className="flex items-center gap-3 p-2.5 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                  >
+                    <Avatar className="w-9 h-9">
+                      <AvatarFallback className="text-[11px] bg-primary/10 text-primary">
+                        {(c.name ?? '?').slice(0, 1)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                      <p className="text-sm text-foreground truncate">{c.name}</p>
+                      <p className="text-[10px] text-muted-foreground truncate">
+                        {c.department || '—'} · {c.position || '—'}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              {directory.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-8">加載中…</p>
+              )}
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={showCreateGroup} onOpenChange={setShowCreateGroup}>
         <DialogContent className="max-w-sm mx-auto">

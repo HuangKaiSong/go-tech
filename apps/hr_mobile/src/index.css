@@ -8,6 +8,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 移动端：输入框字体 <16px 时 iOS Safari 聚焦会自动放大整页，统一兜底 16px 规避。
+   放在 utilities 之后并加 !important，以压过组件里的 text-sm 等更小字号。 */
+@media screen and (max-width: 767px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
 @layer base {
   :root {
     --background: 210 20% 98%;

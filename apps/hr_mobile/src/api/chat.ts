@@ -25,6 +25,16 @@ export interface ChatMessage {
   mine: boolean;
   /** 消息类型 1文本 2图片 */
   msgType?: number;
+  /** 是否已撤回 */
+  recalled?: boolean | null;
+  /** —— 前端本地态（乐观发送，不来自后端） —— */
+  /** 本地临时id（乐观消息用，落库后被真实消息替换） */
+  localId?: string;
+  /** 发送状态：sending 发送中 / failed 失败；成功后清空 */
+  sendStatus?: 'failed' | 'sending';
+  /** 失败重试用：暂存待发文本或图片文件 */
+  pendingText?: string;
+  pendingFile?: File;
   /** 对方是否已读（仅单聊本人消息有值，群聊/对方消息为 null） */
   read?: boolean | null;
   /** 已读人数（仅群聊本人消息有值，不含本人） */
@@ -49,10 +59,18 @@ export function getConversations() {
   return request.get<any, ApiResult<Conversation[]>>('chat/conversations');
 }
 
-export function getMessages(conversationId: string | number, afterId?: string | number) {
+export function getMessages(
+  conversationId: string | number,
+  opts?: { afterId?: string | number; beforeId?: string | number }
+) {
   return request.get<any, ApiResult<ChatMessage[]>>('chat/messages', {
-    params: { conversationId, afterId }
+    params: { conversationId, afterId: opts?.afterId, beforeId: opts?.beforeId }
   });
+}
+
+/** 撤回消息（仅本人、限时窗口内） */
+export function recallMessage(messageId: string | number) {
+  return request.post<any, ApiResult<ChatMessage>>('chat/recall', null, { params: { messageId } });
 }
 
 export function sendMessage(conversationId: string | number, content: string) {
@@ -91,6 +109,11 @@ export function leaveConversation(conversationId: string | number) {
 
 export function dissolveGroup(conversationId: string | number) {
   return request.post<any, ApiResult<boolean>>('chat/dissolve', null, { params: { conversationId } });
+}
+
+/** 群改名（仅群主） */
+export function renameGroup(conversationId: string | number, name: string) {
+  return request.post<any, ApiResult<boolean>>('chat/rename', null, { params: { conversationId, name } });
 }
 
 export function addGroupMembers(conversationId: string | number, memberIds: number[]) {
