@@ -1,8 +1,8 @@
 export interface MenuType {
   children?: MenuType[];
   desc: string;
-  icon: string;
-  id: number;
+  menuIcon: string;
+  menuId: number;
+  menuTitle: string;
   parentId: number;
-  title: string;
 }

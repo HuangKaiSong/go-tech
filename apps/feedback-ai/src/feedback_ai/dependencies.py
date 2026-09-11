@@ -1,9 +1,11 @@
 import secrets
+from functools import lru_cache
 from typing import Annotated
 
 from fastapi import Depends, Header, HTTPException, status
 
 from feedback_ai.config import Settings, get_settings
+from feedback_ai.conversation import ConversationRepository
 from feedback_ai.service import AssistantService
 
 SettingsDep = Annotated[Settings, Depends(get_settings)]
@@ -25,10 +27,12 @@ def require_internal_token(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid internal token")
 
 
+@lru_cache
 def get_assistant_service() -> AssistantService:
-    """为请求创建轻量分发服务，模块内部资源仍按需初始化。"""
+    """复用模块、模型客户端和会话仓储，减少每次聊天的首字等待。"""
 
-    return AssistantService()
+    settings = get_settings()
+    return AssistantService(conversation_repository=ConversationRepository(settings.require_postgres_url()))
 
 
 AssistantServiceDep = Annotated[AssistantService, Depends(get_assistant_service)]

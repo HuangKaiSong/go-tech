@@ -46,10 +46,13 @@ async def test_feedback_module_streams_langchain_runnable_with_history(
         user_id: str,
         target: FeedbackRepository,
         settings: FeedbackSettings,
+        *,
+        use_semantic_knowledge: bool,
     ) -> str:
         del target, settings
         assert question == "请记住这个需求"
         assert user_id == "admin:1"
+        assert use_semantic_knowledge is True
         return "检索上下文"
 
     monkeypatch.setattr(feedback_module_source, "build_context", fake_build_context)
@@ -71,3 +74,10 @@ async def test_feedback_module_streams_langchain_runnable_with_history(
     assert chain.input["context"] == "检索上下文"
     assert isinstance(cast(list[object], chain.input["history"])[0], HumanMessage)
     assert isinstance(cast(list[object], chain.input["history"])[1], AIMessage)
+
+
+def test_feedback_module_reuses_history_for_contextual_follow_up() -> None:
+    history = [ChatMessage(role="assistant", content="上一轮列出了三个需求")]
+
+    assert FeedbackModule.uses_semantic_knowledge("这些需求有什么共同点？", history) is False
+    assert FeedbackModule.uses_semantic_knowledge("请重新搜索登录相关需求", history) is True

@@ -677,6 +677,9 @@ importers:
       '@go-tech-frontend/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@go-tech/package-ui':
+        specifier: workspace:*
+        version: link:../../packages/web/package-ui
       '@go-tech/utils':
         specifier: workspace:*
         version: link:../../packages/core/utils
@@ -762,6 +765,9 @@ importers:
       '@go-tech/tsconfig':
         specifier: workspace:*
         version: link:../../internal/tsconfig
+      '@go-tech/types':
+        specifier: workspace:*
+        version: link:../../packages/core/types
       '@tailwindcss/postcss':
         specifier: 'catalog:'
         version: 4.1.18
@@ -846,6 +852,9 @@ importers:
       '@go-tech/hooks':
         specifier: workspace:*
         version: link:../../packages/core/hooks
+      '@go-tech/package-ui':
+        specifier: workspace:*
+        version: link:../../packages/web/package-ui
       '@go-tech/types':
         specifier: workspace:*
         version: link:../../packages/core/types
@@ -2201,6 +2210,46 @@ importers:
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
+
+  packages/web/package-ui:
+    dependencies:
+      '@go-tech-frontend/ui':
+        specifier: workspace:*
+        version: link:../../ui
+      '@go-tech/types':
+        specifier: workspace:*
+        version: link:../../core/types
+      lucide-react:
+        specifier: 'catalog:'
+        version: 0.562.0(react@19.2.7)
+    devDependencies:
+      '@go-tech/tsconfig':
+        specifier: workspace:*
+        version: link:../../../internal/tsconfig
+      '@types/node':
+        specifier: catalog:dev
+        version: 24.10.7
+      '@types/react':
+        specifier: catalog:react19
+        version: 19.2.8
+      '@types/react-dom':
+        specifier: catalog:react19
+        version: 19.2.3(@types/react@19.2.8)
+      react:
+        specifier: catalog:react19
+        version: 19.2.7
+      react-dom:
+        specifier: catalog:react19
+        version: 19.2.7(react@19.2.7)
+      tsdown:
+        specifier: catalog:dev
+        version: 0.18.4(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(synckit@0.11.13)(typescript@6.0.3)
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: catalog:dev
+        version: 4.1.9(@opentelemetry/api@1.9.1)(@types/node@24.10.7)(jsdom@20.0.3)(msw@2.14.6(@types/node@24.10.7)(typescript@6.0.3))(vite@8.1.2(@types/node@24.10.7)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(tsx@4.23.0)(yaml@2.9.0))
 
   packages/web/tailwind-plugin:
     dependencies:
@@ -10736,7 +10785,6 @@ packages:
     resolution: {integrity: sha512-Quz3MvAwHxVYNXsOByL7xI5EB2WYOeFswqaHIA3qOK3isRWTxiplBEocmmru6XmxDB2L7jDNYtYA4FyimoAFEw==}
     engines: {node: '>=8.17.0'}
     hasBin: true
-    bundledDependencies: []
 
   jsonfile@6.2.1:
     resolution: {integrity: sha512-zwOTdL3rFQ/lRdBnntKVOX6k5cKJwEc1HdilT71BWEu7J41gXIB2MRp+vxduPSwZJPWBxEzv4yH1wYLJGUHX4Q==}
@@ -12597,11 +12645,6 @@ packages:
 
   semver@7.7.2:
     resolution: {integrity: sha512-RF0Fw+rO5AMf9MAyaRXI4AV0Ulj5lMHqVxxdSgiVbixSCXoEmmX/jk0CuJw4+3SqroYO9VoUh+HcuJivvtJemA==}
-    engines: {node: '>=10'}
-    hasBin: true
-
-  semver@7.7.3:
-    resolution: {integrity: sha512-SdsKMrI9TdgjdweUSR9MweHA4EJ8YxHn8DFaDisvhVlUOe4BF1tLD7GAj0lIqWVl+dPb/rExr0Btby5loQm20Q==}
     engines: {node: '>=10'}
     hasBin: true
 
@@ -15672,12 +15715,33 @@ snapshots:
 
   '@inquirer/ansi@2.0.7': {}
 
+  '@inquirer/confirm@6.1.1(@types/node@24.10.7)':
+    dependencies:
+      '@inquirer/core': 11.2.1(@types/node@24.10.7)
+      '@inquirer/type': 4.0.7(@types/node@24.10.7)
+    optionalDependencies:
+      '@types/node': 24.10.7
+    optional: true
+
   '@inquirer/confirm@6.1.1(@types/node@25.9.4)':
     dependencies:
       '@inquirer/core': 11.2.1(@types/node@25.9.4)
       '@inquirer/type': 4.0.7(@types/node@25.9.4)
     optionalDependencies:
       '@types/node': 25.9.4
+
+  '@inquirer/core@11.2.1(@types/node@24.10.7)':
+    dependencies:
+      '@inquirer/ansi': 2.0.7
+      '@inquirer/figures': 2.0.7
+      '@inquirer/type': 4.0.7(@types/node@24.10.7)
+      cli-width: 4.1.0
+      fast-wrap-ansi: 0.2.2
+      mute-stream: 3.0.0
+      signal-exit: 4.1.0
+    optionalDependencies:
+      '@types/node': 24.10.7
+    optional: true
 
   '@inquirer/core@11.2.1(@types/node@25.9.4)':
     dependencies:
@@ -15692,6 +15756,11 @@ snapshots:
       '@types/node': 25.9.4
 
   '@inquirer/figures@2.0.7': {}
+
+  '@inquirer/type@4.0.7(@types/node@24.10.7)':
+    optionalDependencies:
+      '@types/node': 24.10.7
+    optional: true
 
   '@inquirer/type@4.0.7(@types/node@25.9.4)':
     optionalDependencies:
@@ -15849,18 +15918,18 @@ snapshots:
       '@napi-rs/canvas-win32-x64-msvc': 0.1.100
     optional: true
 
-  '@napi-rs/wasm-runtime@1.1.5(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)':
-    dependencies:
-      '@emnapi/core': 1.10.0
-      '@emnapi/runtime': 1.10.0
-      '@tybys/wasm-util': 0.10.2
-    optional: true
-
   '@napi-rs/wasm-runtime@1.1.5(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)':
     dependencies:
       '@emnapi/core': 1.11.1
       '@emnapi/runtime': 1.11.1
       '@tybys/wasm-util': 0.10.2
+    optional: true
+
+  '@napi-rs/wasm-runtime@1.1.6(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)':
+    dependencies:
+      '@emnapi/core': 1.10.0
+      '@emnapi/runtime': 1.10.0
+      '@tybys/wasm-util': 0.10.3
     optional: true
 
   '@napi-rs/wasm-runtime@1.1.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)':
@@ -16082,14 +16151,14 @@ snapshots:
     dependencies:
       '@emnapi/core': 1.10.0
       '@emnapi/runtime': 1.10.0
-      '@napi-rs/wasm-runtime': 1.1.5(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)
+      '@napi-rs/wasm-runtime': 1.1.6(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)
     optional: true
 
   '@oxc-parser/binding-wasm32-wasi@0.132.0':
     dependencies:
       '@emnapi/core': 1.10.0
       '@emnapi/runtime': 1.10.0
-      '@napi-rs/wasm-runtime': 1.1.5(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)
+      '@napi-rs/wasm-runtime': 1.1.6(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)
     optional: true
 
   '@oxc-parser/binding-win32-arm64-msvc@0.120.0':
@@ -18845,7 +18914,7 @@ snapshots:
 
   '@rolldown/binding-wasm32-wasi@1.0.0-beta.57(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)':
     dependencies:
-      '@napi-rs/wasm-runtime': 1.1.5(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)
+      '@napi-rs/wasm-runtime': 1.1.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)
     transitivePeerDependencies:
       - '@emnapi/core'
       - '@emnapi/runtime'
@@ -18855,7 +18924,7 @@ snapshots:
     dependencies:
       '@emnapi/core': 1.10.0
       '@emnapi/runtime': 1.10.0
-      '@napi-rs/wasm-runtime': 1.1.5(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)
+      '@napi-rs/wasm-runtime': 1.1.6(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)
     optional: true
 
   '@rolldown/binding-wasm32-wasi@1.1.3':
@@ -19993,7 +20062,7 @@ snapshots:
       '@typescript-eslint/visitor-keys': 8.62.1
       debug: 4.4.3
       minimatch: 10.2.5
-      semver: 7.7.3
+      semver: 7.8.5
       tinyglobby: 0.2.17
       ts-api-utils: 2.5.0(typescript@6.0.3)
       typescript: 6.0.3
@@ -20258,7 +20327,7 @@ snapshots:
     dependencies:
       '@emnapi/core': 1.10.0
       '@emnapi/runtime': 1.10.0
-      '@napi-rs/wasm-runtime': 1.1.5(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)
+      '@napi-rs/wasm-runtime': 1.1.6(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)
     optional: true
 
   '@unrs/resolver-binding-win32-arm64-msvc@1.12.2':
@@ -20336,6 +20405,15 @@ snapshots:
       '@vitest/utils': 4.1.9
       chai: 6.2.2
       tinyrainbow: 3.1.0
+
+  '@vitest/mocker@4.1.9(msw@2.14.6(@types/node@24.10.7)(typescript@6.0.3))(vite@8.1.2(@types/node@24.10.7)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(tsx@4.23.0)(yaml@2.9.0))':
+    dependencies:
+      '@vitest/spy': 4.1.9
+      estree-walker: 3.0.3
+      magic-string: 0.30.21
+    optionalDependencies:
+      msw: 2.14.6(@types/node@24.10.7)(typescript@6.0.3)
+      vite: 8.1.2(@types/node@24.10.7)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(tsx@4.23.0)(yaml@2.9.0)
 
   '@vitest/mocker@4.1.9(msw@2.14.6(@types/node@25.9.4)(typescript@6.0.3))(vite@8.1.2(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(tsx@4.23.0)(yaml@2.9.0))':
     dependencies:
@@ -22069,7 +22147,7 @@ snapshots:
   eslint-compat-utils@0.5.1(eslint@10.5.0(jiti@2.7.0)):
     dependencies:
       eslint: 10.5.0(jiti@2.7.0)
-      semver: 7.7.3
+      semver: 7.8.5
 
   eslint-config-flat-gitignore@2.3.0(eslint@10.5.0(jiti@2.7.0)):
     dependencies:
@@ -22105,7 +22183,7 @@ snapshots:
       eslint-import-context: 0.1.9(unrs-resolver@1.12.2)
       is-glob: 4.0.3
       minimatch: 10.2.5
-      semver: 7.7.3
+      semver: 7.8.5
       stable-hash-x: 0.2.0
       unrs-resolver: 1.12.2
     optionalDependencies:
@@ -22123,7 +22201,7 @@ snapshots:
       globals: 15.15.0
       globrex: 0.1.2
       ignore: 5.3.2
-      semver: 7.7.3
+      semver: 7.8.5
       ts-declaration-location: 1.0.7(typescript@6.0.3)
     transitivePeerDependencies:
       - typescript
@@ -22206,7 +22284,7 @@ snapshots:
       pluralize: 8.0.0
       regexp-tree: 0.1.27
       regjsparser: 0.13.1
-      semver: 7.7.3
+      semver: 7.8.5
       strip-indent: 4.1.1
 
   eslint-scope@8.4.0:
@@ -24362,6 +24440,32 @@ snapshots:
 
   ms@2.1.3: {}
 
+  msw@2.14.6(@types/node@24.10.7)(typescript@6.0.3):
+    dependencies:
+      '@inquirer/confirm': 6.1.1(@types/node@24.10.7)
+      '@mswjs/interceptors': 0.41.9
+      '@open-draft/deferred-promise': 3.0.0
+      '@types/statuses': 2.0.6
+      cookie: 1.1.1
+      graphql: 16.14.2
+      headers-polyfill: 5.0.1
+      is-node-process: 1.2.0
+      outvariant: 1.4.3
+      path-to-regexp: 6.3.0
+      picocolors: 1.1.1
+      rettime: 0.11.11
+      statuses: 2.0.2
+      strict-event-emitter: 0.5.1
+      tough-cookie: 6.0.1
+      type-fest: 5.8.0
+      until-async: 3.0.2
+      yargs: 17.7.3
+    optionalDependencies:
+      typescript: 6.0.3
+    transitivePeerDependencies:
+      - '@types/node'
+    optional: true
+
   msw@2.14.6(@types/node@25.9.4)(typescript@6.0.3):
     dependencies:
       '@inquirer/confirm': 6.1.1(@types/node@25.9.4)
@@ -25038,9 +25142,9 @@ snapshots:
     dependencies:
       postcss: 5.2.18
 
-  postcss-scss@4.0.9(postcss@8.5.16):
+  postcss-scss@4.0.9(postcss@8.5.23):
     dependencies:
-      postcss: 8.5.16
+      postcss: 8.5.23
 
   postcss-selector-parser@6.0.10:
     dependencies:
@@ -25885,8 +25989,6 @@ snapshots:
 
   semver@7.7.2: {}
 
-  semver@7.7.3: {}
-
   semver@7.8.5: {}
 
   send@0.19.2:
@@ -26352,7 +26454,7 @@ snapshots:
       lines-and-columns: 1.2.4
       mz: 2.7.0
       pirates: 4.0.7
-      tinyglobby: 0.2.15
+      tinyglobby: 0.2.17
       ts-interface-checker: 0.1.13
 
   supports-color@2.0.0: {}
@@ -26376,8 +26478,8 @@ snapshots:
       eslint-scope: 8.4.0
       eslint-visitor-keys: 4.2.1
       espree: 10.4.0
-      postcss: 8.5.16
-      postcss-scss: 4.0.9(postcss@8.5.16)
+      postcss: 8.5.23
+      postcss-scss: 4.0.9(postcss@8.5.23)
       postcss-selector-parser: 7.1.4
       semver: 7.8.5
 
@@ -26657,7 +26759,7 @@ snapshots:
       picomatch: 4.0.4
       rolldown: 1.0.0-beta.57(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)
       rolldown-plugin-dts: 0.20.0(rolldown@1.0.0-beta.57(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1))(typescript@6.0.3)
-      semver: 7.7.3
+      semver: 7.8.5
       tinyexec: 1.2.4
       tinyglobby: 0.2.17
       tree-kill: 1.2.2
@@ -27293,6 +27395,35 @@ snapshots:
       terser: 5.48.0
       tsx: 4.23.0
       yaml: 2.9.0
+
+  vitest@4.1.9(@opentelemetry/api@1.9.1)(@types/node@24.10.7)(jsdom@20.0.3)(msw@2.14.6(@types/node@24.10.7)(typescript@6.0.3))(vite@8.1.2(@types/node@24.10.7)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(tsx@4.23.0)(yaml@2.9.0)):
+    dependencies:
+      '@vitest/expect': 4.1.9
+      '@vitest/mocker': 4.1.9(msw@2.14.6(@types/node@24.10.7)(typescript@6.0.3))(vite@8.1.2(@types/node@24.10.7)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(tsx@4.23.0)(yaml@2.9.0))
+      '@vitest/pretty-format': 4.1.9
+      '@vitest/runner': 4.1.9
+      '@vitest/snapshot': 4.1.9
+      '@vitest/spy': 4.1.9
+      '@vitest/utils': 4.1.9
+      es-module-lexer: 2.2.0
+      expect-type: 1.4.0
+      magic-string: 0.30.21
+      obug: 2.1.3
+      pathe: 2.0.3
+      picomatch: 4.0.4
+      std-env: 4.1.0
+      tinybench: 2.9.0
+      tinyexec: 1.2.4
+      tinyglobby: 0.2.17
+      tinyrainbow: 3.1.0
+      vite: 8.1.2(@types/node@24.10.7)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(tsx@4.23.0)(yaml@2.9.0)
+      why-is-node-running: 2.3.0
+    optionalDependencies:
+      '@opentelemetry/api': 1.9.1
+      '@types/node': 24.10.7
+      jsdom: 20.0.3
+    transitivePeerDependencies:
+      - msw
 
   vitest@4.1.9(@opentelemetry/api@1.9.1)(@types/node@25.9.4)(jsdom@20.0.3)(msw@2.14.6(@types/node@25.9.4)(typescript@6.0.3))(vite@8.1.2(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.101.0)(terser@5.48.0)(tsx@4.23.0)(yaml@2.9.0)):
     dependencies:

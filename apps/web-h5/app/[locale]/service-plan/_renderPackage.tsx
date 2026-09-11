@@ -1,16 +1,14 @@
 'use client';
 
 import { Button, Card, CardContent, CardHeader } from '@go-tech-frontend/ui';
-import type { PackageBizCode } from '@go-tech/types';
+import type { PackageBizCode, Packages } from '@go-tech/types';
 import { ArrowLeft, Building2, Settings, Users } from 'lucide-react';
 import { useProgressRouter } from '@/app/hooks/use-progress-router';
+import { getFeaturedHrPlan } from '@/app/lib/package-card-plan';
 import { DynamicText } from '../../components/DynamicI18nText.client';
+import { HrServicePackages } from './hr-service-packages';
 
-type ExtendedPackages = Packages & {
-  newFeatures: { icon?: string; label: string }[];
-  newPackageItemList: { menuIcon: string; menuId: number; menuTitle: string }[];
-  upgradeNote: string | null;
-};
+import type { ExtendedPackages } from './service-plan-data';
 
 const getIconHref = (value: string) => {
   const normalized = value
@@ -22,11 +20,13 @@ const getIconHref = (value: string) => {
 
 export default function Page({ packages, product }: { packages: ExtendedPackages[]; product: PackageBizCode }) {
   const router = useProgressRouter();
+  const hrPlan = product === 'hr' ? getFeaturedHrPlan(packages) : undefined;
+  const hrAddonNames = hrPlan?.additionalItems?.map(addon => addon.itemName).join('、');
 
-  const handleSelectPlan = (plan: ExtendedPackages) => {
+  const handleSelectPlan = (plan: Packages) => {
     const price = plan.price;
     if (typeof price === 'number') {
-      router.push(`/select-plan/${plan.id}?product=${product}`);
+      router.push(`/select-plan/${plan.packageCode}?product=${product}`);
     }
   };
 
@@ -38,7 +38,7 @@ export default function Page({ packages, product }: { packages: ExtendedPackages
     <section className="pt-10 bg-background">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 max-w-6xl mx-auto">
-          <Button className="mb-6 " variant="ghost" onClick={handleReselect}>
+          <Button className={product === 'pms' ? 'mb-6' : undefined} variant="ghost" onClick={handleReselect}>
             <ArrowLeft />
             <DynamicText text="重新選擇系統" />
           </Button>
@@ -57,7 +57,7 @@ export default function Page({ packages, product }: { packages: ExtendedPackages
               }`}
             >
               <Building2 className="h-4 w-4" aria-hidden="true" />
-              PMS 租務系統
+              <DynamicText text="PMS 租務系統" />
             </button>
             <button
               type="button"
@@ -69,16 +69,22 @@ export default function Page({ packages, product }: { packages: ExtendedPackages
               }`}
             >
               <Users className="h-4 w-4" aria-hidden="true" />
-              HR 人力資源系統
+              <DynamicText text="HR 人力資源系統" />
             </button>
           </div>
         </div>
-        <div className="text-center mt-8 max-w-2xl mx-auto">
+        <div className={`text-center mt-8 mx-auto ${product === 'hr' ? 'max-w-4xl' : 'max-w-2xl'}`}>
           <h2 className="text-2xl font-bold text-foreground mb-2">
-            <DynamicText text="GO-PMS 物業租務管理系統" />
+            <DynamicText text={product === 'hr' ? 'GO-HR 人力資源管理系統' : 'GO-PMS 物業租務管理系統'} />
           </h2>
           <p className="text-muted-foreground text-sm">
-            <DynamicText text="按物業單位數量開通，涵蓋租約、單位、水電、會計等完整租務流程。" />
+            <DynamicText
+              text={
+                product === 'hr'
+                  ? `以「${hrPlan?.packageName || '基礎版'}」為兜底套餐（包含人事管理功能），再按需加購${hrAddonNames || '適合團隊的附加模塊'}。`
+                  : '按物業單位數量開通，涵蓋租約、單位、水電、會計等完整租務流程。'
+              }
+            />
           </p>
         </div>
         {packages.length === 0 ? (
@@ -87,7 +93,9 @@ export default function Page({ packages, product }: { packages: ExtendedPackages
               <DynamicText text={product === 'hr' ? 'HR 套餐資料準備中' : 'PMS 套餐資料準備中'} />
             </h2>
           </div>
-        ) : (
+        ) : null}
+        {hrPlan ? <HrServicePackages plan={hrPlan} onSelect={handleSelectPlan} /> : null}
+        {product === 'pms' && packages.length > 0 ? (
           <div className="py-16 bg-background">
             <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
               {packages.map((plan, index) => {
@@ -106,7 +114,10 @@ export default function Page({ packages, product }: { packages: ExtendedPackages
                 ];
 
                 return (
-                  <Card key={plan.id} className="border border-border hover:shadow-xl transition-shadow duration-300">
+                  <Card
+                    key={plan.packageCode}
+                    className="border border-border hover:shadow-xl transition-shadow duration-300"
+                  >
                     <CardHeader className="text-center pb-4 pt-8">
                       <div className="flex items-center justify-center gap-2 mb-2">
                         <Settings className="w-6 h-6 text-primary" />
@@ -115,11 +126,7 @@ export default function Page({ packages, product }: { packages: ExtendedPackages
                         </h3>
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        <DynamicText
-                          text={
-                            product === 'hr' ? `最多可管理${plan.unitCount}名員工` : `最多可創建${plan.unitCount}個單位`
-                          }
-                        />
+                        <DynamicText text={`最多可創建${plan.detail?.dataCount}個單位`} />
                       </p>
                     </CardHeader>
 
@@ -155,7 +162,7 @@ export default function Page({ packages, product }: { packages: ExtendedPackages
                       </div>
 
                       <div className="text-left">
-                        {plan.newPackageItemList?.map((feature, fIndex) => (
+                        {plan.newPackageItemList.map((feature, fIndex) => (
                           <div
                             key={fIndex}
                             className={`flex items-center gap-3 py-2 px-2 ${fIndex % 2 === 1 ? 'bg-secondary' : ''}`}
@@ -201,7 +208,7 @@ export default function Page({ packages, product }: { packages: ExtendedPackages
               })}
             </div>
           </div>
-        )}
+        ) : null}
       </div>
     </section>
   );

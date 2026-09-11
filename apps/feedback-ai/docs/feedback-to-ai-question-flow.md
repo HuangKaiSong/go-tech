@@ -259,7 +259,7 @@ pnpm --filter feedback-ai ingest
 
 入口组件是 [`FeedbackAssistant.tsx`](../../web-admin/src/pages/FeedbackPage/FeedbackAssistant.tsx)。管理员发送问题时：
 
-1. 取最近 16 条消息作为短期对话历史。
+1. 选中已有历史会话，或保持“新对话”状态。
 2. 插入一个空的 assistant 消息作为流式输出占位。
 3. 使用 `AbortController` 支持停止生成或关闭弹窗时取消请求。
 4. 调用 [`assistant-api.ts`](../../web-admin/src/pages/FeedbackPage/assistant-api.ts)。
@@ -273,10 +273,7 @@ Content-Type: application/json
 
 {
   "question": "找出點讚大於 50 的需求",
-  "history": [
-    { "role": "user", "content": "..." },
-    { "role": "assistant", "content": "..." }
-  ]
+  "conversationId": "已有会话 UUID；新对话时省略"
 }
 ```
 
@@ -328,7 +325,7 @@ Next.js Route Handler 位于
 1. 从 `Authorization: Bearer ...` 读取管理员 JWT。
 2. 使用 `PLATFORM_JWT_SECRET` 和 `HS512` 验签。
 3. 根据 `userId`，必要时根据 `username`，确认 MySQL 中存在启用状态的管理员。
-4. 使用 Zod 校验问题和历史；问题最多 4,000 字，历史最多 16 条，每条最多 12,000 字。
+4. 使用 Zod 校验问题、可选会话 ID 和兼容旧调用的历史；问题最多 4,000 字。
 5. 将用户标识改写为 `admin:<管理员 ID>`，避免浏览器自行伪造长期记忆所属用户。
 6. 通过 [`ai-client.ts`](../../web-h5/app/api/feedback/ai-client.ts) 调用
    `FEEDBACK_AI_URL/v1/chat`。该旧地址由通用模块路由兼容转发到 `feedback`；新调用也可直接使用
@@ -352,8 +349,8 @@ Content-Type: application/json
 依赖 [`dependencies.py`](../src/feedback_ai/dependencies.py) 使用常量时间比较验证内部 Token。未配置返回
 `503`，缺失或不匹配返回 `401`。
 
-请求模型由 [`schemas.py`](../src/feedback_ai/schemas.py) 再次校验。验证成功后，API 立即建立
-`text/event-stream` 响应，实际检索和模型调用发生在流生成器内。
+请求模型由 [`schemas.py`](../src/feedback_ai/schemas.py) 再次校验。服务创建或校验会话，从 PostgreSQL 读取受预算
+限制的最近消息，再建立 `text/event-stream` 响应。会话 ID 和用户、模块同时校验，不能跨管理员读取。
 
 服务可通过 `GET /v1/modules` 发现模块及其能力。模块化正式入口为
 `/v1/modules/{module_id}/chat`、`/v1/modules/{module_id}/ingest` 和
@@ -366,13 +363,13 @@ Content-Type: application/json
 [`module.py`](../src/feedback_ai/modules/feedback/module.py)，检索路由位于
 [`retrieval.py`](../src/feedback_ai/modules/feedback/retrieval.py)。每次提问执行：
 
-1. 确保 pgvector 扩展和存储表存在。
+1. 首次请求确保 pgvector 扩展和存储表存在，后续请求复用初始化结果。
 2. 对问题做意图识别。
-3. 并行执行适用的检索任务。
+3. 并行执行适用的检索任务；知识与记忆复用同一个问题 Embedding。
 4. 将结果组织成 `<retrieved-context>`。
-5. 由 LangChain `ChatPromptTemplate` 拼接系统提示、最近 16 条短期历史和当前问题。
+5. 由 LangChain `ChatPromptTemplate` 拼接系统提示、压缩后的短期历史和当前问题。
 6. 通过 LangChain DeepSeek ChatModel 和 Runnable 流调用模型，设置 `temperature = 0`。
-7. 将模型增量内容逐块转换为 SSE token。
+7. 将模型增量内容逐块转换为 SSE token，正常结束后原子保存本轮问答。
 
 ### 6.1 检索分支
 
@@ -387,14 +384,16 @@ Content-Type: application/json
 | 回收站、已删除问题         | metadata 精确查询                              | 已删除需求或包含已删除评论的需求          |
 | 用户长期记忆               | 问题 Embedding + `user_id` metadata 过滤       | `aide_long_term_memory`                   |
 
-普通问题会执行语义检索；明确询问回收站时跳过普通有效知识检索，改走回收站精确查询。
+普通问题会执行语义检索；数值、系统、时间、排行或回收站等精确问题会跳过普通知识语义检索。
 
 系统归属、创建时间、点赞数、评论数和回收站问题必须使用 metadata 精确查询结果，而不是让模型从相似文本中猜测。
 当系统或创建时间与点赞/评论条件同时出现时，条件会组合到同一条精确查询中；统计总数不受最多展示 100 条文档的限制。
 
 ### 6.2 短期历史与长期记忆
 
-- **短期历史**：由浏览器保存并在每次请求中传递，最多 16 条；服务器当前不持久化它。
+- **短期历史**：持久化到 PostgreSQL 的 `aide_conversations` 和 `aide_conversation_messages`。模型每轮最多读取
+  最近 8 条、合计 12,000 字，单条最多 6,000 字；管理后台仍可查看完整历史。
+- 包含“这些”“上述”“继续”“共同点”等引用表达的短追问直接复用对话历史，不重复执行知识语义检索。
 - **长期记忆**：当问题包含“请记住”等意图，且不包含密码、API Key、Token、银行卡等敏感关键词时，
   将原始问题写入 `aide_long_term_memory`。
 - 长期记忆使用 Next.js 生成的 `admin:<管理员 ID>` 隔离。
@@ -413,9 +412,11 @@ Content-Type: application/json
 
 ## 7. SSE 响应如何回到界面
 
-Python 产生三种事件：
+Python 产生四种事件：
 
 ```text
+data: {"type":"conversation","conversation_id":"...","title":"..."}
+
 data: {"type":"token","content":"第一段文字"}
 
 data: {"type":"token","content":"第二段文字"}
@@ -437,6 +438,7 @@ feedback-ai -> web-h5 Route Handler -> Nginx -> 浏览器 ReadableStream
 
 `web-admin` 按空行拆分 SSE block，解析 `data:` JSON：
 
+- `conversation`：先返回会话 ID 和标题，让界面立即建立历史项。
 - `token`：追加到当前 assistant 消息并实时渲染 Markdown。
 - `done`：结束本轮读取。
 - `error`：抛出前端错误；如果尚未收到 token，显示错误提示。
@@ -462,6 +464,9 @@ Python 在流内异常时会记录 `Feedback assistant stream failed` 及完整 
 ```bash
 pm2 logs feedback-ai --err --lines 150
 ```
+
+正常请求还会输出 `Assistant timing` 和 `Feedback generation timing`，分别包含会话准备、检索上下文和模型首 token
+耗时，可用于判断慢点位于 PostgreSQL、Embedding/检索还是聊天模型。
 
 Next.js 无法访问 Python 时记录：
 

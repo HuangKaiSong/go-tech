@@ -1,0 +1,5 @@
+{
+  "extends": "@go-tech/tsconfig/web.json",
+  "compilerOptions": { "types": ["node", "react", "react-dom"] },
+  "include": ["src", "tests", "tsdown.config.ts", "vitest.config.ts"]
+}

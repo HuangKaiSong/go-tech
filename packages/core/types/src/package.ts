@@ -13,6 +13,7 @@ export type PackageCapacityMetric = 'employee' | 'property' | 'unit';
 export type PackageKind = 'addon' | 'plan';
 
 export interface PackageDisplayConfig {
+  /** 首页/比较页标签，例如“最受欢迎” */
   badge?: string;
   billingLabel?: string;
   capacityLabel?: string;
@@ -25,30 +26,33 @@ export interface PackageDisplayConfig {
   summary?: string;
 }
 
-export interface Packages {
-  accountingSysPrice: number;
-  addonCode?: string;
-  addUnitPrice: number;
-  /** 首页/比较页标签，例如“最受欢迎” */
-  badge?: string;
+export interface PackageDetail extends PackageDisplayConfig {
+  applyTo?: string;
   billingIntervalCount?: number;
   billingMode?: PackageBillingMode;
+  dataCount?: number;
+  menu?: PackageItem[];
+  packageKind?: PackageKind;
+  remind?: string;
+  unitCount?: number;
+}
+
+export interface Packages {
+  additionalItems?: PackageAddon[];
   bizCode?: PackageBizCode;
   capacityMetric?: PackageCapacityMetric;
   currency?: string;
-  custServiceSysPrice: number;
+  detail?: PackageDetail;
   displayConfig?: PackageDisplayConfig;
-  /** 可选的首页核心卖点；未提供时使用 packageItemList */
   displayFeatures?: string[];
   id: number;
   isFeatured?: boolean;
-  isRecommended?: boolean;
+  itemName?: string;
+  itemType?: number;
   note?: string;
   originalPrice?: number;
   overageStep?: number;
   packageCode?: string;
-  packageItemList: PackageItem[];
-  packageKind?: PackageKind;
   packageName: string;
   parentId?: number | null;
   price: number;
@@ -59,10 +63,12 @@ export interface Packages {
   /** 365天价格 */
   priceC?: number;
   purchaseEnabled?: boolean;
-  rentSysPrice: number;
   sortOrder?: number;
   subtitle?: string;
-  summary?: string;
-  unitCount: number;
-  venueSysPrice: number;
+}
+
+export interface PackageAddon extends Omit<Partial<Packages>, 'additionalItems'> {
+  itemName: string;
+  itemType: number;
+  price: number;
 }

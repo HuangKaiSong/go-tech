@@ -1,4 +1,11 @@
-import type { PackageBizCode, PackageDisplayConfig, PackageKind, Packages } from '@go-tech/types';
+import type {
+  PackageAddon,
+  PackageBizCode,
+  PackageDetail,
+  PackageDisplayConfig,
+  PackageKind,
+  Packages
+} from '@go-tech/types';
 
 export type PackageCatalog = Record<PackageBizCode, Packages[]>;
 
@@ -30,18 +37,36 @@ const toDisplayConfig = (value: unknown): PackageDisplayConfig | undefined => {
   }
 };
 
+const toPackageDetail = (value: unknown): PackageDetail | undefined =>
+  toDisplayConfig(value) as PackageDetail | undefined;
+
+const normalizeAdditionalItems = (value: unknown, bizCode: PackageBizCode): PackageAddon[] => {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap(item => {
+    if (!isRecord(item) || typeof item.itemName !== 'string' || typeof item.price !== 'number') return [];
+    const itemType = Number(item.itemType);
+    if (![1, 2, 3].includes(itemType)) return [];
+    return [
+      { ...item, itemName: item.itemName, price: item.price, itemType, bizCode, detail: toPackageDetail(item.detail) }
+    ];
+  });
+};
+
 const normalizePackage = (value: unknown, sourceIndex: number, forcedProduct?: PackageBizCode): Packages | null => {
-  if (!isRecord(value) || typeof value.id !== 'number' || typeof value.packageName !== 'string') return null;
+  if (!isRecord(value) || value.packageCode === '' || typeof value.packageName !== 'string') return null;
 
   const bizCode = forcedProduct || toProductKey(value.bizCode ?? value.biz_code) || 'pms';
   const parentId = value.parentId ?? value.parent_id;
   const rawSortOrder = value.sortOrder ?? value.sort_order;
+  const detail = toPackageDetail(value.detail);
 
   return {
     ...value,
+    additionalItems: normalizeAdditionalItems(value.additionalItems, bizCode),
     bizCode,
+    detail,
     displayConfig: toDisplayConfig(value.displayConfig ?? value.display_config),
-    packageKind: toPackageKind(value.packageKind ?? value.package_kind, parentId),
+    packageKind: toPackageKind(value.packageKind ?? value.package_kind ?? detail?.packageKind, parentId),
     parentId: typeof parentId === 'number' ? parentId : null,
     sortOrder: typeof rawSortOrder === 'number' ? rawSortOrder : sourceIndex
   } as unknown as Packages;
@@ -54,7 +79,6 @@ const sortPackages = (packages: Packages[]) =>
 export function buildPackageCatalog(response: unknown): PackageCatalog {
   const catalog: PackageCatalog = { hr: [], pms: [] };
   const data = isRecord(response) && 'data' in response ? response.data : response;
-
   if (Array.isArray(data)) {
     data.forEach((item, index) => {
       const normalized = normalizePackage(item, index);

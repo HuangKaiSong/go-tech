@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { type PromotionOption, toArray } from '@/app/constants/promotion';
+import { buildPackageCatalog } from '@/app/lib/package-catalog';
 import { getBaseUrl } from '@/lib/http';
 import PageClient from './_page';
 
@@ -17,9 +18,11 @@ export default async function ConfirmOrderPage({ params }: { params: { plan: str
   const packagesResponse = (await fetch(`${baseUrl}/go-tech/platform/platformPackage/detail/${plan}`).then(res =>
     res.json()
   )) as HttpBaseResponse<Packages>;
-  const packagesData = packagesResponse.data as Packages;
-  if (packagesData.packageItemList) {
-    packagesData.packageItemList = packagesData.packageItemList.filter(item => {
+  const catalog = buildPackageCatalog([packagesResponse.data]);
+  const packagesData = [...catalog.hr, ...catalog.pms][0];
+  if (!packagesData) notFound();
+  if (packagesData.detail?.menu) {
+    packagesData.detail.menu = packagesData.detail.menu.filter(item => {
       return item.level <= 1;
     });
   }
@@ -34,6 +37,8 @@ export default async function ConfirmOrderPage({ params }: { params: { plan: str
   } catch {
     // 忽略：优惠获取失败不影响下单
   }
+
+  console.log(packagesData);
 
   return <PageClient planId={plan} data={packagesData} promotions={promotions} />;
 }

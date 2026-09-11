@@ -29,6 +29,7 @@ import { type PromotionOption, getPromotionDiscount } from '@/app/constants/prom
 import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 import { usePromotions } from '@/app/hooks/usePromotions';
+import { getCreatedOrderId } from '@/app/lib/order-id';
 import { translateError } from '@/app/lib/translate-error';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -43,7 +44,7 @@ const renewalOptions = [
   { id: 'custom', label: '自定义月数', months: 6, discount: 0 }
 ];
 
-type OrderPackage = OrderItemInfoType['platformPackageDto'];
+type OrderPackage = OrderItemInfoType['packageDetail'];
 
 /** 优惠价格 1个月-2个月 -> price 3个月-5个月 -> priceA 6个月-11个月 -> priceB 12个月及以上 -> priceC */
 const getRenewalDiscount = (orderPackage: OrderPackage | undefined, months: number) => {
@@ -62,7 +63,7 @@ const getRenewalDiscount = (orderPackage: OrderPackage | undefined, months: numb
 };
 
 const getRenewalOrderPricing = (order: OrderItemInfoType, months: number) => {
-  const orderPackage = order?.platformPackageDto;
+  const orderPackage = order?.packageDetail;
   const addService = order?.orderItems?.filter(item => item.itemType === OrderItemTypeEnum.ADDITION) ?? [];
   const yearlyPrice = orderPackage?.price || 0;
   const originalPrice = yearlyPrice * months;
@@ -254,10 +255,10 @@ const RenewOrderContent = ({ detail, promotions }: RenewOrderContentProps) => {
       originalOrder: detail.orderNo,
       orderItems: [
         {
-          packageId: detail.platformPackageDto?.id,
+          packageId: detail.packageDetail?.id,
           itemType: OrderItemTypeEnum.PACKAGE,
-          itemName: detail?.platformPackageDto?.packageName,
-          price: detail?.platformPackageDto?.price,
+          itemName: detail?.packageDetail?.packageName,
+          price: detail?.packageDetail?.price,
           count: months,
           days: months * DAYSPERMONTH
         }
@@ -266,7 +267,7 @@ const RenewOrderContent = ({ detail, promotions }: RenewOrderContentProps) => {
     if (addService.length) {
       addService.map(item => {
         orderInfo.orderItems.push({
-          packageId: detail.platformPackageDto?.id,
+          packageId: detail.packageDetail?.id,
           itemType: OrderItemTypeEnum.ADDITION,
           itemCode: item.itemCode,
           itemName: item.itemName!,
@@ -302,7 +303,7 @@ const RenewOrderContent = ({ detail, promotions }: RenewOrderContentProps) => {
         });
       if (orderResponse.code === 200) {
         toast.success(renewOrderCreated, { id: toastId });
-        const orderId = orderResponse.data;
+        const orderId = getCreatedOrderId(orderResponse.data);
         // 上传凭证
         await fetch('/go-tech/platform/packageOrder/payEvidence', {
           method: 'POST',
@@ -349,8 +350,9 @@ const RenewOrderContent = ({ detail, promotions }: RenewOrderContentProps) => {
       // 后端返回 OrderAddResponse（含签名等参数）；先跳转订单详情，再由详情页唤起第三方支付
       toast.success(orderCreatedRedirecting, { id: toastId });
       setShowPaymentDialog(false);
+      const orderId = getCreatedOrderId(orderResponse.data);
       stashWebManagedCashier(orderResponse.data);
-      router.push(`/my-orders/${orderResponse.data.orderId}`);
+      router.push(`/my-orders/${orderId}`);
     } catch (error) {
       console.log(error);
       toast.error(renewOrderFailed, { id: toastId });
@@ -401,7 +403,7 @@ const RenewOrderContent = ({ detail, promotions }: RenewOrderContentProps) => {
                     <div>
                       <h2 className="text-xl font-bold">{order.packageName}</h2>
                       <p className="text-sm text-muted-foreground">
-                        <DynamicText text={`最多可創建${order.platformPackageDto?.unitCount}個單位`} />
+                        <DynamicText text={`最多可創建${order.packageDetail?.detail?.dataCount}個單位`} />
                       </p>
                     </div>
                   </div>
@@ -419,7 +421,7 @@ const RenewOrderContent = ({ detail, promotions }: RenewOrderContentProps) => {
                   </span>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                  {order.platformPackageDto?.packageItemList?.map((feature: any) => {
+                  {(order.packageDetail.detail?.menu || [])?.map((feature: any) => {
                     if (feature.level >= 2) return null;
                     return (
                       <div key={feature.id} className="flex items-center gap-2 py-1.5 px-2 rounded bg-[#FAEEEB]">

@@ -1,3 +1,4 @@
+import asyncio
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Literal, cast
@@ -103,6 +104,54 @@ class FeedbackRepository:
             limit,
             {"user_id": user_id},
         )
+
+    async def search_context(
+        self,
+        query: str,
+        user_id: str,
+        knowledge_limit: int,
+        memory_limit: int,
+        *,
+        include_knowledge: bool,
+    ) -> tuple[list[Document], list[Document]]:
+        """用一次查询向量并行检索知识与用户记忆，精确查询时可跳过知识语义检索。"""
+
+        memory_filter: dict[str, object] = {"user_id": user_id}
+        memory_exists_task = asyncio.create_task(self.store.has_documents(MEMORY_COLLECTION, memory_filter))
+        # 常规 RAG 必然需要知识向量，可与轻量的记忆存在性查询并行调用 Embedding API。
+        embedding_task = asyncio.create_task(self.store.embeddings.aembed_query(query)) if include_knowledge else None
+        memory_exists = await memory_exists_task
+        if not include_knowledge and not memory_exists:
+            return [], []
+
+        query_embedding = await embedding_task if embedding_task else await self.store.embeddings.aembed_query(query)
+        knowledge_task = (
+            asyncio.create_task(
+                self.store.similarity_search_by_embedding(
+                    KNOWLEDGE_COLLECTION,
+                    query_embedding,
+                    knowledge_limit,
+                    {"is_deleted": False},
+                )
+            )
+            if include_knowledge
+            else None
+        )
+        memory_task = (
+            asyncio.create_task(
+                self.store.similarity_search_by_embedding(
+                    MEMORY_COLLECTION,
+                    query_embedding,
+                    memory_limit,
+                    memory_filter,
+                )
+            )
+            if memory_exists
+            else None
+        )
+        knowledge = await knowledge_task if knowledge_task else []
+        memories = await memory_task if memory_task else []
+        return knowledge, memories
 
     async def remember(self, user_id: str, content: str) -> None:
         """将经过敏感词检查的用户记忆写入独立集合。"""

@@ -87,7 +87,7 @@ export const routes: RouteObject[] = [
         element: <PackagesPage />
       },
       {
-        path: '/packages/:id/edit',
+        path: '/packages/:packageCode/edit',
         element: <PackageEditPage />
       },
       {

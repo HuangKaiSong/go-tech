@@ -1,5 +1,6 @@
 export * from './cust_tenant_relation';
 export * from './leave_message';
+export * from './package_item';
 export * from './package_order';
 export * from './package_order_item';
 export * from './pay_record';

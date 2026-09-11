@@ -671,15 +671,13 @@ const PromoCodesPage = () => {
                       </>
                     )}
                     {code.status === 3 && (
-                      <>
-                        <Button
-                          variant="link"
-                          className="text-primary p-0 h-auto text-sm"
-                          onClick={() => navigate(`/promo-codes/${code.id}`)}
-                        >
-                          查看
-                        </Button>
-                      </>
+                      <Button
+                        variant="link"
+                        className="text-primary p-0 h-auto text-sm"
+                        onClick={() => navigate(`/promo-codes/${code.id}`)}
+                      >
+                        查看
+                      </Button>
                     )}
                   </div>
                 </TableCell>

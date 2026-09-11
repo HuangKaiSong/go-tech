@@ -13,18 +13,19 @@ import {
   type UploadedFile,
   toast
 } from '@go-tech-frontend/ui';
-import { useAsyncEffect } from 'ahooks';
 import { ArrowUpCircle, Eye, Package, RefreshCw, Settings, ShoppingCart } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Footer from '@/app/components/Footer';
 import Header from '@/app/components/Header';
 import Link from '@/app/components/Link';
 import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { translateError } from '@/app/lib/translate-error';
 import { useAuth } from '@/contexts/AuthContext';
-import { type OrderItemInfoType, OrderStatusEnum } from '../../constants/order';
+import { DynamicText } from '../../components/DynamicI18nText.client';
+import { OrderItemTypeEnum, OrderStatusEnum } from '../../constants/order';
+import type { MyOrder, MyOrdersResponse } from '../../constants/order-response';
 import { AddService } from './AddService';
 import { Upgrade } from './Upgrade';
 
@@ -48,13 +49,22 @@ const getStatusColor = (status: OrderStatusEnum) => {
   }
 };
 
+function getOrderSummary(order: MyOrder) {
+  const detail = order.packageDetail?.detail;
+  if (detail?.summary) return detail.summary;
+  if (typeof detail?.dataCount !== 'number') return '';
+  return order.bizCode === 'hr' ? `包含 ${detail.dataCount} 名員工` : `最多可創建 ${detail.dataCount} 個單位`;
+}
+
 const MyOrders = () => {
   const { token } = useAuth();
   const router = useProgressRouter();
   const t = useTranslations('Order');
   const locale = useLocale();
 
-  const [orderList, setOrderList] = useState<OrderItemInfoType[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [orderList, setOrderList] = useState<MyOrder[]>([]);
   const [showAddonsDialog, setShowAddonsDialog] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
   const selectOrder = useMemo(() => {
@@ -110,24 +120,41 @@ const MyOrders = () => {
     setShowUpgradeDialog(true);
   };
 
-  useAsyncEffect(async () => {
-    try {
-      const data = await fetch('/go-tech/platform/packageOrder/myOrders', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'User-Type': 'platform_customer',
-          Authorization: `Bearer ${token}`
+  useEffect(() => {
+    const controller = new AbortController();
+    setOrderList([]);
+    setLoadFailed(false);
+    setIsLoading(Boolean(token));
+    if (!token) return;
+    const loadOrders = async () => {
+      try {
+        const data: MyOrdersResponse = await fetch('/go-tech/platform/packageOrder/myOrders', {
+          signal: controller.signal,
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Type': 'platform_customer',
+            Authorization: `Bearer ${token}`
+          }
+        }).then(res => res.json());
+        if (controller.signal.aborted) return;
+        if (data.code !== 200 || (data.data !== null && !Array.isArray(data.data))) {
+          throw new Error('Failed to load orders');
         }
-      }).then(res => res.json());
-      if (data.code === 200) {
-        setOrderList(data.data);
+        setOrderList(data.data ?? []);
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          console.error(error);
+          setOrderList([]);
+          setLoadFailed(true);
+        }
+      } finally {
+        if (!controller.signal.aborted) setIsLoading(false);
       }
-    } catch (error) {
-      console.log(error);
-      setOrderList([]);
-    }
-  }, []);
+    };
+    loadOrders();
+    return () => controller.abort();
+  }, [token]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -148,7 +175,13 @@ const MyOrders = () => {
       <section className="py-12 bg-background">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto space-y-6">
-            {orderList?.length === 0 ? (
+            {isLoading || loadFailed ? (
+              <Card className="text-center py-12">
+                <CardContent role={loadFailed ? 'alert' : 'status'}>
+                  <DynamicText text={loadFailed ? '訂單載入失敗，請重新整理後再試' : '正在載入訂單…'} />
+                </CardContent>
+              </Card>
+            ) : orderList.length === 0 ? (
               <Card className="text-center py-12">
                 <CardContent>
                   <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
@@ -167,18 +200,16 @@ const MyOrders = () => {
                       <div>
                         <div className="flex items-center gap-3 mb-2">
                           <Settings className="w-6 h-6 text-primary" />
-                          <h3 className="text-xl font-bold text-foreground">{order.platformPackageDto?.packageName}</h3>
+                          <h3 className="text-xl font-bold text-foreground">{order.packageName}</h3>
                           <Badge className={getStatusColor(order.orderStatus)}>{order.orderStatusName}</Badge>
                         </div>
                         <p className="text-sm text-muted-foreground">
-                          {t('maxUnit', {
-                            count: order.platformPackageDto?.unitCount
-                          })}
+                          <DynamicText text={getOrderSummary(order)} />
                         </p>
                       </div>
                       <div className="text-right">
                         <div className="text-2xl font-bold text-primary">
-                          {order.finalAmount} <span className="text-base">HKD</span>
+                          {order.finalAmount.toLocaleString()} <span className="text-base">HKD</span>
                         </div>
                         <p className="text-xs text-muted-foreground">
                           {t('column.orderNo')}：{order.orderNo}
@@ -201,17 +232,26 @@ const MyOrders = () => {
                             <span className="text-muted-foreground">{t('column.expireDate')}</span>
                             <span>{order.expireDate || '-'}</span>
                           </div>
-                          {order.orderItems?.filter((item: any) => item.itemType !== 1)?.length > 0 && (
+                          {order.discountAmount > 0 && (
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">
+                                <DynamicText text="優惠金額" />
+                              </span>
+                              <span className="text-primary">−{order.discountAmount.toLocaleString()} HKD</span>
+                            </div>
+                          )}
+                          {order.orderItems?.filter(item => item.itemType === OrderItemTypeEnum.ADDITION)?.length >
+                            0 && (
                             <div className="pt-2 border-t border-foreground/30">
                               <span className="text-muted-foreground">{t('addons')}</span>
                               {order.orderItems
-                                ?.filter((item: any) => item.itemType !== 1)
-                                ?.map((addon: any) => (
+                                ?.filter(item => item.itemType === OrderItemTypeEnum.ADDITION)
+                                ?.map(addon => (
                                   <div key={addon.id} className="flex justify-between mt-1">
                                     <span>
                                       {addon.itemName} x{addon.count}
                                     </span>
-                                    <span>{addon.amount}</span>
+                                    <span>{addon.amount.toLocaleString()} HKD</span>
                                   </div>
                                 ))}
                             </div>
@@ -225,23 +265,37 @@ const MyOrders = () => {
                           {t('features')}
                         </h4>
                         <div className="grid grid-cols-2 gap-2">
-                          {order.platformPackageDto?.packageItemList?.map((feature: any) => {
-                            if (feature.level >= 2) return null;
-                            return (
-                              <div
-                                key={feature.id}
-                                className="flex items-center gap-2 py-1.5 px-2 rounded bg-[#FAEEEB]"
-                              >
-                                {/* <feature.icon className="w-4 h-4 text-[#F9881E]" /> */}
-                                {feature.menuIcon && (
-                                  <svg className="svg-icon w-4 h-4 text-primary mr-1" aria-hidden="true">
-                                    <use href={`#icon-${feature.menuIcon}`} xlinkHref={`#icon-${feature.menuIcon}`} />
-                                  </svg>
-                                )}
-                                <span className="text-xs text-muted-foreground">{feature.menuTitle}</span>
-                              </div>
-                            );
-                          })}
+                          {order.packageDetail?.detail.features?.length
+                            ? order.packageDetail.detail.features.map((feature, index) => (
+                                <div
+                                  key={`${feature}-${index}`}
+                                  className="flex items-center gap-2 py-1.5 px-2 rounded bg-[#FAEEEB]"
+                                >
+                                  <span className="text-xs text-muted-foreground">
+                                    <DynamicText text={feature} />
+                                  </span>
+                                </div>
+                              ))
+                            : order.packageDetail?.detail.menu?.map(feature => {
+                                if (feature.level >= 2) return null;
+                                return (
+                                  <div
+                                    key={feature.menuId}
+                                    className="flex items-center gap-2 py-1.5 px-2 rounded bg-[#FAEEEB]"
+                                  >
+                                    {/* <feature.icon className="w-4 h-4 text-[#F9881E]" /> */}
+                                    {feature.menuIcon && (
+                                      <svg className="svg-icon w-4 h-4 text-primary mr-1" aria-hidden="true">
+                                        <use
+                                          href={`#icon-${feature.menuIcon}`}
+                                          xlinkHref={`#icon-${feature.menuIcon}`}
+                                        />
+                                      </svg>
+                                    )}
+                                    <span className="text-xs text-muted-foreground">{feature.menuTitle}</span>
+                                  </div>
+                                );
+                              })}
                         </div>
                       </div>
                     </div>

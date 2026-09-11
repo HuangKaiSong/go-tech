@@ -21,6 +21,7 @@
     "@go-tech/core-http": "workspace:*",
     "@go-tech/core-state": "workspace:*",
     "@go-tech/hooks": "workspace:*",
+    "@go-tech/package-ui": "workspace:*",
     "@go-tech/types": "workspace:*",
     "@go-tech/web-ui": "workspace:*",
     "@react-pdf/renderer": "^4.5.1",

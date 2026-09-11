@@ -1,26 +1,31 @@
 'use client';
 
 import { Button, Input, Label, Switch, type UploadedFile, toast } from '@go-tech-frontend/ui';
+import { formatPackagePrice, getPackageFeatures } from '@go-tech/package-ui/model';
 import { Result, Spin } from 'antd';
 import { useAtom, useAtomValue } from 'jotai';
 import { FileCheck } from 'lucide-react';
 import { useLocale } from 'next-intl';
 import dynamic from 'next/dynamic';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DynamicText } from '@/app/components/DynamicI18nText.client';
-import valueAddedServices from '@/app/constants/addedServices';
 import { type PromotionOption } from '@/app/constants/promotion';
 import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 import { usePromotions } from '@/app/hooks/usePromotions';
+import { getCreatedOrderId } from '@/app/lib/order-id';
+import { getPurchaseTotals } from '@/app/lib/package-purchase';
 import { translateError } from '@/app/lib/translate-error';
 import servicePlanBg from '@/assets/service-plan-bg.jpg';
 import { useAuth } from '@/contexts/AuthContext';
 import { needAddonsAtom, selectedMonthsAtom, selectedServicesAtom } from '@/contexts/Order.jotai';
+import { useProductSelection } from '@/contexts/ProductSelectionContext';
 import Footer from '../../../components/Footer';
 import Header from '../../../components/Header';
 import { type OrderInfoType, OrderItemTypeEnum, OrderTypeEnum } from '../../../constants/order';
 import { DAYSPERMONTH, PayTypeEnum, stashWebManagedCashier } from '../../../constants/payment';
+
+const money = (value: number) => formatPackagePrice(value) ?? '—';
 
 const PaymentPanel = dynamic(() => import('../../../components/payment/Panel'), {
   loading({ error, isLoading }) {
@@ -66,6 +71,7 @@ const ConfirmOrder = ({
   promotions?: PromotionOption[];
 }) => {
   const router = useProgressRouter();
+  const { product } = useProductSelection();
   const { planId } = { planId: planIdFromQuery };
   const { token, user } = useAuth();
   const locale = useLocale();
@@ -115,53 +121,14 @@ const ConfirmOrder = ({
     setShowPaymentDialog(true);
   };
 
-  const getServiceUnitPrice = (serviceId: string) => {
-    if (!selectedPlan) return 0;
-
-    if (serviceId === 'rentSysPrice') return selectedPlan.rentSysPrice;
-    if (serviceId === 'venueSysPrice') return selectedPlan.venueSysPrice;
-    if (serviceId === 'accountingSysPrice') return selectedPlan.accountingSysPrice;
-    if (serviceId === 'custServiceSysPrice') return selectedPlan.custServiceSysPrice;
-    if (serviceId === 'addUnitPrice') return selectedPlan.addUnitPrice;
-
-    return 0;
-  };
-
-  const addonsTotal = !needAddons
-    ? 0
-    : Object.entries(selectedServicesSafe).reduce(
-        (sum, [serviceId, quantity]) => sum + getServiceUnitPrice(serviceId) * quantity,
-        0
-      ) * month;
-  // @ts-ignore
-  const originalPrice = (selectedPlan?.price * month || 0) + addonsTotal;
-
-  /** 优惠价格 1个月-2个月 -> price 3个月-5个月 -> priceA 6个月-11个月 -> priceB 12个月及以上 -> priceC */
-  const discount = useMemo<number>(() => {
-    // 原价
-    let recursePrice = selectedPlan?.price;
-    if (month >= 12) {
-      recursePrice = selectedPlan?.priceC || recursePrice;
-    }
-    if (month >= 6 && month < 12) {
-      recursePrice = selectedPlan?.priceB || recursePrice;
-    }
-    if (month >= 3 && month < 6) {
-      recursePrice = selectedPlan?.priceA || recursePrice;
-    }
-
-    const diffPrice = Math.max(0, (selectedPlan?.price || 0) - (recursePrice || 0)) * month;
-
-    return Math.max(0, diffPrice);
-    // oxlint-disable-next-line react-hooks/exhaustive-deps
-  }, [month, addonsTotal]);
+  const purchase = getPurchaseTotals(selectedPlan, month, needAddons ? selectedServicesSafe : {});
 
   // ---------------------------------------------------------------------------
   // 优惠活动 / 优惠码
   // ---------------------------------------------------------------------------
 
   /** 优惠前的应付金额（套餐费 + 增值服务 - 时长折扣） */
-  const promotionBaseAmount = Math.max(0, originalPrice - discount);
+  const promotionBaseAmount = purchase.total;
 
   const {
     applyingCode,
@@ -175,7 +142,7 @@ const ConfirmOrder = ({
     setSelectedPromotionId
   } = usePromotions({ baseAmount: promotionBaseAmount, packageId: selectedPlan?.id, promotions, token, locale });
 
-  const totalPrice = Math.max(0, originalPrice - discount - promotionDiscount);
+  const totalPrice = Math.max(0, purchase.total - promotionDiscount);
 
   const requestHeaders = () =>
     new Headers({
@@ -191,9 +158,10 @@ const ConfirmOrder = ({
       payType,
       orderItems: [
         {
-          packageId: selectedPlan?.id,
           itemType: OrderItemTypeEnum.PACKAGE,
-          itemName: selectedPlan?.packageName,
+          packageItemId: selectedPlan?.id,
+          itemName: selectedPlan?.itemName,
+          packageCode: selectedPlan?.packageCode,
           price: selectedPlan!.price!,
           count: month,
           days: month * DAYSPERMONTH
@@ -210,21 +178,17 @@ const ConfirmOrder = ({
       orderInfo.promotionId = selectedPromotion.promotionId;
     }
 
-    if (needAddons && selectedServices) {
-      Object.entries(selectedServicesSafe).map(([serviceId, quantity]) => {
-        const service = valueAddedServices.find(s => s.id === serviceId);
-        if (!service) return null;
-        const serviceTotalPrice = getServiceUnitPrice(serviceId);
-        orderInfo.orderItems.push({
-          itemType: OrderItemTypeEnum.ADDITION,
-          count: quantity,
-          price: serviceTotalPrice,
-          packageId: selectedPlan?.id,
-          itemName: service.name,
-          // @ts-ignore
-          itemCode: serviceId.replace('Price', '')
-        });
-        return null;
+    // 附加服务
+    for (const line of purchase.lines) {
+      orderInfo.orderItems.push({
+        itemType: OrderItemTypeEnum.ADDITION,
+        count: line.quantity,
+        price: line.service.price,
+        packageCode: selectedPlan?.packageCode,
+        itemName: line.service.itemName,
+        packageItemId: line.service.id,
+        itemCode: line.service.packageCode,
+        days: month * DAYSPERMONTH
       });
     }
     return orderInfo;
@@ -250,7 +214,7 @@ const ConfirmOrder = ({
         });
       if (orderResponse.code === 200) {
         toast.success(orderCreated, { id: toastId });
-        const orderId = orderResponse.data?.orderId;
+        const orderId = getCreatedOrderId(orderResponse.data);
         if (orderInfo.payType === PayTypeEnum.FPS) {
           // 上传凭证
           await fetch('/go-tech/platform/packageOrder/payEvidence', {
@@ -303,8 +267,9 @@ const ConfirmOrder = ({
       // 后端返回 OrderAddResponse（含签名等参数），以 GET 表单方式喚起全托管收银台
       toast.success(redirectingToCashier, { id: toastId });
       setShowPaymentDialog(false);
+      const orderId = getCreatedOrderId(orderResponse.data);
       stashWebManagedCashier(orderResponse.data);
-      router.push(`/my-orders/${orderResponse.data.orderId}`);
+      router.push(`/my-orders/${orderId}`);
       // openWebManagedCashier(orderResponse.data);
     } catch (error) {
       console.log(error);
@@ -369,9 +334,11 @@ const ConfirmOrder = ({
                   </h2>
                 </div>
               </div>
-              <div className="text-right">
-                <span className="text-2xl font-bold text-gray-700">${selectedPlan?.price?.toLocaleString()}</span>
-                <span className="text-lg text-gray-700 ml-1" />
+              <div className="flex flex-col text-right">
+                <div className="text-2xl font-bold text-gray-700">${money(purchase.baseOriginal)} HKD</div>
+                <div className="text-xs text-muted-foreground">
+                  ${money(selectedPlan?.price ?? 0)} / 月 × {purchase.months} 個月
+                </div>
               </div>
             </div>
 
@@ -381,7 +348,7 @@ const ConfirmOrder = ({
                   <DynamicText text="套餐内容" />
                 </span>
                 <span className="text-sm text-gray-700">
-                  <DynamicText text={`最多可創建${selectedPlan?.unitCount}個單位`} />
+                  <DynamicText text={`最多可創建${selectedPlan?.detail?.dataCount}個單位`} />
                 </span>
               </div>
 
@@ -390,7 +357,7 @@ const ConfirmOrder = ({
                   <DynamicText text="包含功能" />
                 </span>
                 <div className="flex flex-wrap gap-2">
-                  {selectedPlan?.packageItemList?.map((feature, index) => (
+                  {selectedPlan?.detail?.menu?.map((feature, index) => (
                     <div
                       key={index}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm text-muted-foreground"
@@ -412,35 +379,44 @@ const ConfirmOrder = ({
           </div>
 
           {/* Value-Added Services Card */}
-          {Object.keys(selectedServicesSafe).length > 0 && needAddons && (
+          {Boolean(purchase.lines.length) && (
             <div className="bg-white rounded-lg border border-border p-6 mb-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-1 h-6 bg-primary rounded-full" />
                 <h3 className="text-lg font-bold text-gray-700">
-                  <DynamicText text="增值服務" />
+                  <DynamicText text="附加模塊/增值服務" />
                 </h3>
               </div>
 
               <div className="space-y-3">
-                {Object.entries(selectedServicesSafe).map(([serviceId, quantity]) => {
-                  const service = valueAddedServices.find(s => s.id === serviceId);
-                  if (!service) return null;
-                  const serviceTotalPrice = getServiceUnitPrice(serviceId) * quantity;
-                  const subTotalPrice = serviceTotalPrice * month;
-
+                {purchase.lines.map(({ key: serviceId, quantity, service, total: subTotalPrice }) => {
+                  const features = getPackageFeatures({
+                    features: service.detail?.features,
+                    menu: service.detail?.menu
+                  });
                   return (
                     <div
                       key={serviceId}
-                      className="flex items-center justify-between py-3 border-b border-border last:border-0"
+                      className="flex items-start justify-between py-3 border-b border-border last:border-0"
                     >
-                      <span className="text-sm text-gray-700">
-                        <DynamicText text={service.name} />
-                      </span>
+                      <div>
+                        <span className="text-sm text-foreground">{service.itemName}</span>
+                        {features && features.length > 0 && (
+                          <div className="mt-1 flex flex-wrap gap-1.5">
+                            {features.map((it, idx) => (
+                              <span key={idx} className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded">
+                                {it}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                       <div className="flex items-center gap-8">
-                        <span className="text-sm font-medium">${subTotalPrice}</span>
+                        <span className="text-sm font-medium">${money(subTotalPrice)}</span>
                         <span className="text-sm text-muted-foreground">
-                          <DynamicText text="數量" /> {quantity}
+                          {product === 'hr' ? `$${service.price} × ${quantity} 名員工` : `數量 ${quantity}`}
                         </span>
+                        <span className="text-sm text-muted-foreground">{purchase.months} 個月</span>
                       </div>
                     </div>
                   );
@@ -462,14 +438,9 @@ const ConfirmOrder = ({
           />
 
           {/* Price Summary Card */}
-          <PriceSummary
-            originalPrice={originalPrice}
-            durationDiscount={discount}
-            promotionDiscount={promotionDiscount}
-            totalPrice={totalPrice}
-          />
+          <PriceSummary plan={selectedPlan!} totals={purchase} />
 
-          <div className="bg-white rounded-lg border border-border p-6 mb-8">
+          <div className="bg-white rounded-lg border border-border p-6 mt-6 mb-8">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-1 h-6 bg-primary rounded-full" />
               <h2 className="text-lg font-bold text-foreground">

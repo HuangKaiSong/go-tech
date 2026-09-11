@@ -25,6 +25,19 @@ class FakeFeedbackRepository:
         del query, user_id, limit
         return [Document(page_content="用户偏好简短回答", metadata={"source": "memory"})]
 
+    async def search_context(
+        self,
+        query: str,
+        user_id: str,
+        knowledge_limit: int,
+        memory_limit: int,
+        *,
+        include_knowledge: bool,
+    ) -> tuple[list[Document], list[Document]]:
+        knowledge = await self.similarity_search_knowledge(query, knowledge_limit) if include_knowledge else []
+        memory = await self.similarity_search_memory(query, user_id, memory_limit)
+        return knowledge, memory
+
     async def find_by_numeric_field(self, field: str, minimum: int, inclusive: bool = False) -> list[Document]:
         return [Document(page_content=f"{field}={minimum}, inclusive={inclusive}", metadata={"feature_id": 2})]
 

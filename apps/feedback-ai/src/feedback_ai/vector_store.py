@@ -114,6 +114,17 @@ class PgVectorStore:
         """按余弦距离检索文档，并支持 JSON metadata 包含过滤。"""
 
         query_embedding = await self.embeddings.aembed_query(query)
+        return await self.similarity_search_by_embedding(collection, query_embedding, limit, metadata_filter)
+
+    async def similarity_search_by_embedding(
+        self,
+        collection: str,
+        query_embedding: list[float],
+        limit: int,
+        metadata_filter: dict[str, object] | None = None,
+    ) -> list[Document]:
+        """复用已经生成的查询向量执行检索，避免同一问题重复请求 Embedding API。"""
+
         filter_sql = "AND vectors.metadata @> %s" if metadata_filter else ""
         params: list[object] = [collection]
         if metadata_filter:
@@ -138,6 +149,29 @@ class PgVectorStore:
         return [
             Document(page_content=str(row["text"]), metadata=cast(dict[str, object], row["metadata"])) for row in rows
         ]
+
+    async def has_documents(self, collection: str, metadata_filter: dict[str, object] | None = None) -> bool:
+        """在生成 Embedding 前快速判断集合是否存在可检索文档。"""
+
+        filter_sql = "AND vectors.metadata @> %s" if metadata_filter else ""
+        params: list[object] = [collection]
+        if metadata_filter:
+            params.append(Jsonb(metadata_filter))
+        connection = await self.connect()
+        async with connection:
+            row = await (
+                await connection.execute(
+                    f"""
+                    SELECT 1
+                    FROM {TABLE_NAME} vectors
+                    INNER JOIN {COLLECTION_TABLE_NAME} collections ON collections.uuid = vectors.collection_id
+                    WHERE collections.name = %s {filter_sql}
+                    LIMIT 1
+                    """,
+                    params,
+                )
+            ).fetchone()
+        return row is not None
 
     async def delete_by_metadata(
         self,

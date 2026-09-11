@@ -17,11 +17,12 @@ import dynamic from 'next/dynamic';
 import { type FC, useEffect, useState } from 'react';
 import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
+import { getCreatedOrderId } from '@/app/lib/order-id';
 import { translateError } from '@/app/lib/translate-error';
 import { useAuth } from '@/contexts/AuthContext';
 import { DynamicText } from '../../components/DynamicI18nText.client';
-import valueAddedServices, { type SpecificValueAddedServicesId } from '../../constants/addedServices';
-import { type OrderItemInfoType, OrderItemTypeEnum, OrderTypeEnum } from '../../constants/order';
+import { OrderItemTypeEnum, OrderTypeEnum } from '../../constants/order';
+import type { MyOrder } from '../../constants/order-response';
 import { DAYSPERMONTH, PayTypeEnum, stashWebManagedCashier } from '../../constants/payment';
 import { type PromotionOption, fetchPromotions } from '../../constants/promotion';
 import { usePromotions } from '../../hooks/usePromotions';
@@ -31,7 +32,7 @@ const PaymentPanel = dynamic(() => import('../../components/payment/Panel'), {
 });
 
 type AddServiceProps = {
-  data: OrderItemInfoType;
+  data: MyOrder;
   onOpenChangeAction: (open: boolean) => void;
   open: boolean;
 };
@@ -49,6 +50,12 @@ export const AddService: FC<AddServiceProps> = ({
   open: showAddonsDialog
 }) => {
   const currentOrder = data;
+  const valueAddedServices = (data.packageDetail?.additionalItems ?? []).map(item => ({
+    id: String(item.id),
+    name: item.itemName,
+    price: item.price,
+    packageCode: item.packageCode
+  }));
 
   const { token } = useAuth();
   const router = useProgressRouter();
@@ -64,7 +71,7 @@ export const AddService: FC<AddServiceProps> = ({
   const orderCreatedRedirecting = useBatchTranslation('訂單創建成功，正在跳转...');
   const addServiceOrderFailed = useBatchTranslation('創建增值服務訂單失敗，請稍後重試');
 
-  const packageId = currentOrder?.platformPackageDto?.id;
+  const packageId = currentOrder?.packageDetail?.id;
 
   // 拉取当前套餐可用的优惠活动
   useEffect(() => {
@@ -128,7 +135,7 @@ export const AddService: FC<AddServiceProps> = ({
       const service = valueAddedServices.find(s => s.id === id);
       let price = 0;
       if (service) {
-        price = currentOrder?.platformPackageDto?.[service.id] || 0;
+        price = service.price;
       }
       const subTotal = service ? Math.floor((price / DAYSPERMONTH) * daysRemaining * ratio * qty * 100) / 100 : 0;
       // 計算增值服務金額
@@ -181,15 +188,16 @@ export const AddService: FC<AddServiceProps> = ({
     Object.entries(selectedServices).map(([serviceId, quantity]) => {
       const service = valueAddedServices.find(s => s.id === serviceId);
       if (!service) return null;
-      const serviceTotalPrice = currentOrder.platformPackageDto[serviceId as SpecificValueAddedServicesId];
+      const serviceTotalPrice = service.price;
 
       orderInfo.orderItems.push({
         itemType: OrderItemTypeEnum.ADDITION,
         count: quantity,
         price: serviceTotalPrice,
-        packageId: data.platformPackageDto?.id,
+        packageId: data.packageDetail?.id,
         itemName: service.name,
-        itemCode: serviceId.replace('Price', '')
+        itemCode: service.packageCode,
+        packageItemId: Number(service.id)
       });
       return null;
     });
@@ -220,7 +228,7 @@ export const AddService: FC<AddServiceProps> = ({
         });
       if (orderResponse.code === 200) {
         toast.success(addServiceOrderCreated, { id: toastId });
-        const orderId = orderResponse.data;
+        const orderId = getCreatedOrderId(orderResponse.data);
         // 上传凭证
         await fetch('/go-tech/platform/packageOrder/payEvidence', {
           method: 'POST',
@@ -268,8 +276,9 @@ export const AddService: FC<AddServiceProps> = ({
       // 后端返回 OrderAddResponse（含签名等参数）；先跳转订单详情，再由详情页唤起第三方支付
       toast.success(orderCreatedRedirecting, { id: toastId });
       setShowPaymentDialog(false);
+      const orderId = getCreatedOrderId(orderResponse.data);
       stashWebManagedCashier(orderResponse.data);
-      router.push(`/my-orders/${orderResponse.data.orderId}`);
+      router.push(`/my-orders/${orderId}`);
     } catch (error) {
       console.log(error);
       toast.error(addServiceOrderFailed, { id: toastId });
@@ -299,7 +308,7 @@ export const AddService: FC<AddServiceProps> = ({
                 {valueAddedServices.map(service => {
                   const isSelected = selectedServices[service.id] !== undefined;
                   const quantity = selectedServices[service.id] || 0;
-                  const price = currentOrder?.platformPackageDto?.[service.id] || 0;
+                  const price = service.price;
 
                   return (
                     <div

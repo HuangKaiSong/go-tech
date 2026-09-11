@@ -1,8 +1,9 @@
 'use client';
 
 import { Badge, Card, CardContent, CardHeader, Separator } from '@go-tech-frontend/ui';
+import { getPackageFeatures } from '@go-tech/package-ui/model';
 import { Button, toast } from '@go-tech/web-ui';
-import { ArrowLeft, CheckCircle, CreditCard, Download, Package, RefreshCw, Settings, XCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle, CreditCard, Download, RefreshCw, Settings, XCircle } from 'lucide-react';
 import { useLocale } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';
 import { DynamicText } from '@/app/components/DynamicI18nText.client';
@@ -59,6 +60,8 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
   const locale = useLocale();
 
   const [order, setOrder] = useState(detail);
+
+  const features = getPackageFeatures(order.packageDetail?.detail ?? []);
 
   // i18n messages
   const fetchingPaymentInfo = useBatchTranslation('獲取支付信息中…');
@@ -222,31 +225,6 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
     }
   };
 
-  if (!order) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <section className="pt-32 pb-16">
-          <div className="container mx-auto px-4 text-center">
-            <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h1 className="text-2xl font-bold mb-4">
-              <DynamicText text="訂單詳情" />
-            </h1>
-            <p className="text-muted-foreground mb-6">
-              <DynamicText text="該訂單不存在或已被刪除" />
-            </p>
-            <Link href="/my-orders">
-              <Button>
-                <DynamicText text="返回我的訂單" />
-              </Button>
-            </Link>
-          </div>
-        </section>
-        <Footer />
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -317,7 +295,13 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
                   <div>
                     <h2 className="text-xl font-bold">{order.packageName}</h2>
                     <p className="text-sm text-muted-foreground">
-                      <DynamicText text={`最多可創建${order.platformPackageDto?.unitCount}個單位`} />
+                      <DynamicText
+                        text={
+                          order.packageDetail?.detail?.summary || order.bizCode === 'hr'
+                            ? `包含 ${order.packageDetail.detail.dataCount} 名員工`
+                            : `最多可創建 ${order.packageDetail.detail.dataCount} 個單位`
+                        }
+                      />
                     </p>
                   </div>
                 </div>
@@ -328,15 +312,10 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
                   <DynamicText text="包含功能" />
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {order.platformPackageDto?.packageItemList?.map((feature: any) => (
-                    <div key={feature.id} className="flex items-center gap-2 py-2 px-3 rounded-lg bg-[#FAEEEB]">
-                      {feature.menuIcon && (
-                        <svg className="svg-icon w-4 h-4 text-primary mr-1" aria-hidden="true">
-                          <use href={`#icon-${feature.menuIcon}`} xlinkHref={`#icon-${feature.menuIcon}`} />
-                        </svg>
-                      )}
+                  {features.map(feature => (
+                    <div key={feature} className="flex items-center gap-2 py-2 px-3 rounded-lg bg-[#FAEEEB]">
                       <span className="text-sm">
-                        <DynamicText text={feature.menuTitle} />
+                        <DynamicText text={feature} />
                       </span>
                     </div>
                   ))}
@@ -373,7 +352,7 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
                             <span className="text-sm">
                               {addon.itemName} × {addon.count}
                               <span className="text-muted-foreground ml-2">
-                                ({addon.price}/<DynamicText text="個" />)
+                                ({addon.price} / <DynamicText text="個" />)
                               </span>
                             </span>
                             <span className="font-medium">{addon.amount} HKD</span>

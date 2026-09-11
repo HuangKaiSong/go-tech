@@ -11,7 +11,7 @@
 ```text
 web-admin -> web-h5 (管理员鉴权、SSE 代理) -> feedback-ai (RAG/LLM)
                                                    |-> MySQL（反馈与 Outbox）
-                                                   `-> PostgreSQL/pgvector（知识与长期记忆）
+                                                   `-> PostgreSQL/pgvector（知识、会话与长期记忆）
 ```
 
 ## 环境准备
@@ -70,6 +70,8 @@ pnpm --filter feedback-ai chat -- --user user-001
 - `GET /health`：健康检查，无需内部 token。
 - `GET /v1/modules`：列出已注册模块及其能力。
 - `POST /v1/modules/feedback/chat`：需求反馈模块的 SSE 聊天流。
+- `GET /v1/modules/feedback/conversations`：按用户列出历史对话。
+- `GET/DELETE /v1/modules/feedback/conversations/{id}`：读取或删除历史对话。
 - `POST /v1/modules/feedback/sync/process`：消费 MySQL `fb_aide_sync_job`。
 - `POST /v1/modules/feedback/ingest`：全量重建反馈知识切片。
 - `POST /v1/chat`、`POST /v1/sync/process`、`POST /v1/ingest`：兼容现有调用，转发到 `feedback` 模块。
@@ -82,6 +84,7 @@ pnpm --filter feedback-ai chat -- --user user-001
 src/feedback_ai/
   api.py                      # 通用模块路由和旧接口兼容层
   service.py                  # 模块注册、发现和分发
+  conversation.py             # 跨模块复用的 PostgreSQL 历史会话仓储
   vector_store.py             # 共享 LangChain Document/Embedding 存储基础设施
   modules/
     base.py                   # 模块契约与能力声明
@@ -98,6 +101,10 @@ src/feedback_ai/
 新增模块时，实现 `AssistantModule`、声明 `ModuleDescriptor`，把业务文件放进独立目录，并在
 `feedback_ai.modules.create_modules()` 注册。模块只暴露自己支持的 `chat`、`ingest`、`sync` 能力；未注册模块返回
 `404`，不支持的能力返回 `405`。
+
+聊天会复用进程内的模型、Embedding 客户端和仓储实例；知识与长期记忆共享同一次问题 Embedding。精确筛选及引用
+上一轮结果的短追问会跳过不必要的知识语义检索。模型历史限制为最近 8 条、合计 12,000 字，从而避免对话越长首字
+等待越久。会话按 `module_id + user_id` 隔离，完整回答结束后才原子写入一问一答。
 
 首次使用增量同步前，仍需执行：
 

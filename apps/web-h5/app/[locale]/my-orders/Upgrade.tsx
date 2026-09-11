@@ -18,16 +18,12 @@ import dynamic from 'next/dynamic';
 import { type FC, useEffect, useState } from 'react';
 import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
+import { getCreatedOrderId } from '@/app/lib/order-id';
 import { translateError } from '@/app/lib/translate-error';
 import { useAuth } from '@/contexts/AuthContext';
 import { DynamicText } from '../../components/DynamicI18nText.client';
-import valueAddedServices, { type SpecificValueAddedServicesId } from '../../constants/addedServices';
-import {
-  type OrderItemInfoType,
-  OrderItemTypeEnum,
-  OrderTypeEnum,
-  type PlatformPackageDto
-} from '../../constants/order';
+import { OrderItemTypeEnum, OrderTypeEnum } from '../../constants/order';
+import type { MyOrder } from '../../constants/order-response';
 import { DAYSPERMONTH, PayTypeEnum, stashWebManagedCashier } from '../../constants/payment';
 import { type PromotionOption, fetchPromotions } from '../../constants/promotion';
 import { usePromotions } from '../../hooks/usePromotions';
@@ -37,7 +33,7 @@ const PaymentPanel = dynamic(() => import('../../components/payment/Panel'), {
 });
 
 type UpgradeProps = {
-  data: OrderItemInfoType;
+  data: MyOrder;
   onOpenChangeAction: (open: boolean) => void;
   open: boolean;
 };
@@ -55,6 +51,12 @@ export const Upgrade: FC<UpgradeProps> = ({
   open: showUpgradeDialog
 }) => {
   const currentOrder = data;
+  const valueAddedServices = (data.packageDetail?.additionalItems ?? []).map(item => ({
+    id: String(item.id),
+    name: item.itemName,
+    price: item.price,
+    packageCode: item.packageCode
+  }));
 
   const { token } = useAuth();
   const router = useProgressRouter();
@@ -68,8 +70,8 @@ export const Upgrade: FC<UpgradeProps> = ({
   const orderCreatedRedirecting = useBatchTranslation('訂單創建成功，正在跳转...');
   const upgradeOrderFailed = useBatchTranslation('創建升級訂單失敗，請稍後重試');
 
-  const [upgradePlans, setUpgradePlans] = useState<PlatformPackageDto[]>([]);
-  const [selectedUpgradePlan, setSelectedUpgradePlan] = useState<number | null>(null);
+  const [upgradePlans, setUpgradePlans] = useState<Packages[]>([]);
+  const [selectedUpgradePlan, setSelectedUpgradePlan] = useState<string | null>(null);
   const [promotions, setPromotions] = useState<PromotionOption[]>([]);
 
   // oxlint-disable
@@ -122,14 +124,14 @@ export const Upgrade: FC<UpgradeProps> = ({
   // 升級增值服務按「升級後新訂單時長」計費（重新計時）
   const calculateUpgradeAddonsTotal = () => {
     const { months, ratio } = getUpgradeProrationInfo();
-    const plan = upgradePlans.find(p => p.id === selectedUpgradePlan);
+    const plan = upgradePlans.find(p => p.packageCode === selectedUpgradePlan);
 
     return (
       Object.entries(upgradeSelectedServices).reduce((sum, [id, qty]) => {
         const service = valueAddedServices.find(s => s.id === id);
         let price = service?.price || 0;
         if (plan && service) {
-          price = plan[service.id];
+          price = service.price;
         }
 
         console.log(price);
@@ -142,7 +144,7 @@ export const Upgrade: FC<UpgradeProps> = ({
 
   // 升級新套餐總費用（按原訂單時長重新計費）
   const getUpgradeNewPlanCost = () => {
-    const plan = upgradePlans.find(p => p.id === selectedUpgradePlan);
+    const plan = upgradePlans.find(p => p.packageCode === selectedUpgradePlan);
     if (!plan) return 0;
     const { months } = getUpgradeProrationInfo();
 
@@ -152,7 +154,7 @@ export const Upgrade: FC<UpgradeProps> = ({
 
   // 升級應付差額 = 新套餐總價 - 舊套餐剩餘餘額（不為負）
   const getUpgradePrice = () => {
-    const plan = upgradePlans.find(p => p.id === selectedUpgradePlan);
+    const plan = upgradePlans.find(p => p.packageCode === selectedUpgradePlan);
     if (!plan) return 0;
     const newCost = getUpgradeNewPlanCost();
     const { remainingCredit } = getUpgradeProrationInfo();
@@ -214,7 +216,7 @@ export const Upgrade: FC<UpgradeProps> = ({
 
   /** 构建升级订单数据（FPS 与线上支付一致，仅 payType 不同） */
   const buildOrderInfo = (payType: PayTypeEnum) => {
-    const plan = upgradePlans.find(p => p.id === selectedUpgradePlan);
+    const plan = upgradePlans.find(p => p.packageCode === selectedUpgradePlan);
     const orderPackageInfo = data.orderItems.find(item => item.itemType === OrderItemTypeEnum.PACKAGE);
     const orderInfo: any = {
       orderType: OrderTypeEnum.UPGRADE,
@@ -222,12 +224,13 @@ export const Upgrade: FC<UpgradeProps> = ({
       originalOrder: currentOrder.orderNo,
       orderItems: [
         {
-          packageId: plan?.id,
           itemType: OrderItemTypeEnum.PACKAGE,
-          itemName: plan?.packageName,
-          price: plan?.price,
+          packageItemId: plan?.id,
+          itemName: plan?.itemName,
+          packageCode: plan?.packageCode,
+          price: plan!.price!,
           count: orderPackageInfo?.count,
-          days: orderPackageInfo?.days || 0
+          days: orderPackageInfo?.days
         }
       ]
     };
@@ -235,15 +238,16 @@ export const Upgrade: FC<UpgradeProps> = ({
     Object.entries(upgradeSelectedServices).map(([serviceId, quantity]) => {
       const service = valueAddedServices.find(s => s.id === serviceId);
       if (!service) return null;
-      const serviceTotalPrice = currentOrder.platformPackageDto[serviceId as SpecificValueAddedServicesId];
+      const serviceTotalPrice = service.price;
 
       orderInfo.orderItems.push({
         itemType: OrderItemTypeEnum.ADDITION,
         count: quantity,
         price: serviceTotalPrice,
-        packageId: currentOrder.platformPackageDto?.id,
+        packageId: currentOrder.packageDetail?.id,
         itemName: service.name,
-        itemCode: serviceId.replace('Price', '')
+        itemCode: service.packageCode,
+        packageItemId: Number(service.id)
       });
       return null;
     });
@@ -274,7 +278,7 @@ export const Upgrade: FC<UpgradeProps> = ({
         });
       if (orderResponse.code === 200) {
         toast.success(upgradeOrderCreated, { id: toastId });
-        const orderId = orderResponse.data;
+        const orderId = getCreatedOrderId(orderResponse.data);
         // 上传凭证
         await fetch('/go-tech/platform/packageOrder/payEvidence', {
           method: 'POST',
@@ -322,8 +326,9 @@ export const Upgrade: FC<UpgradeProps> = ({
       // 后端返回 OrderAddResponse（含签名等参数）；先跳转订单详情，再由详情页唤起第三方支付
       toast.success(orderCreatedRedirecting, { id: toastId });
       setShowPaymentDialog(false);
+      const orderId = getCreatedOrderId(orderResponse.data);
       stashWebManagedCashier(orderResponse.data);
-      router.push(`/my-orders/${orderResponse.data.orderId}`);
+      router.push(`/my-orders/${orderId}`);
     } catch (error) {
       console.log(error);
       toast.error(upgradeOrderFailed, { id: toastId });
@@ -340,10 +345,18 @@ export const Upgrade: FC<UpgradeProps> = ({
       .then(res => res.json())
       .then(res => {
         if (res && res.code && res.code === 200) {
-          const plans = res.data as PlatformPackageDto[];
-          const originPackageId = currentOrder.platformPackageDto.id;
+          const plans = res.data as Packages[];
+          const originPackageId = currentOrder.packageDetail?.id;
           const originPackage = plans.find(p => p.id === originPackageId);
-          const accordPlans = plans.filter(p => p.id !== originPackageId);
+          if (!originPackage) {
+            setUpgradePlans([]);
+            return;
+          }
+          const accordPlans = plans
+            .filter(p => p.id !== originPackageId)
+            .filter(p => p.bizCode === currentOrder.bizCode);
+          console.log(accordPlans);
+
           if (originPackage) {
             setUpgradePlans(accordPlans.filter(p => p.price > originPackage.price));
           }
@@ -382,9 +395,9 @@ export const Upgrade: FC<UpgradeProps> = ({
                   return (
                     <div
                       key={plan.id}
-                      onClick={() => setSelectedUpgradePlan(plan.id)}
+                      onClick={() => setSelectedUpgradePlan(plan.packageCode!)}
                       className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                        selectedUpgradePlan === plan.id
+                        selectedUpgradePlan === plan.packageCode
                           ? 'border-primary bg-primary/5 shadow-md'
                           : 'border-border hover:border-primary/50'
                       }`}
@@ -393,7 +406,7 @@ export const Upgrade: FC<UpgradeProps> = ({
                         <div>
                           <h4 className="font-bold text-lg">{plan.packageName}</h4>
                           <p className="text-sm text-muted-foreground">
-                            <DynamicText text={`最多可創建${plan?.unitCount}個單位`} />
+                            <DynamicText text={`最多可創建${plan?.detail?.dataCount}個單位`} />
                           </p>
                         </div>
                         <div className="text-right">
@@ -406,7 +419,7 @@ export const Upgrade: FC<UpgradeProps> = ({
                       </div>
 
                       <div className="flex flex-wrap items-center gap-2">
-                        {plan.packageItemList
+                        {(plan.detail?.menu || [])
                           .filter(feature => feature.level < 2)
                           .slice(0, 6)
                           .map((feature, idx) => (
@@ -418,9 +431,9 @@ export const Upgrade: FC<UpgradeProps> = ({
                               {feature.menuTitle}
                             </span>
                           ))}
-                        {plan.packageItemList.length > 6 && (
+                        {(plan.detail?.menu || []).length > 6 && (
                           <span className="text-xs text-muted-foreground">
-                            +{plan.packageItemList.length - 6} <DynamicText text="更多功能" />
+                            +{(plan.detail?.menu || []).length - 6} <DynamicText text="更多功能" />
                           </span>
                         )}
                       </div>
@@ -447,7 +460,7 @@ export const Upgrade: FC<UpgradeProps> = ({
                             );
                             let price = service.price;
                             if (plan) {
-                              price = plan[service.id];
+                              price = service.price;
                             }
 
                             return (

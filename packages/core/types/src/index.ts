@@ -16,9 +16,11 @@ export type { HttpBaseResponse } from './http';
 export * from './locales/i18n';
 export type { MenuType } from './menu';
 export type {
+  PackageAddon,
   PackageBillingMode,
   PackageBizCode,
   PackageCapacityMetric,
+  PackageDetail,
   PackageDisplayConfig,
   PackageItem,
   PackageKind,

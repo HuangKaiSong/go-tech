@@ -294,6 +294,8 @@ async def build_context(
     user_id: str,
     repository: FeedbackRepository,
     settings: FeedbackSettings,
+    *,
+    use_semantic_knowledge: bool = True,
 ) -> str:
     """根据问题意图并行组合语义检索、精确查询和用户记忆。"""
 
@@ -312,13 +314,19 @@ async def build_context(
         sort_by="comment_count" if comment_ranking else "created_at",
         descending=created_at_filter.descending if created_at_filter else True,
     )
-    # 语义检索、长期记忆和适用的精确查询互不依赖，可以并行降低首 token 延迟。
-    knowledge_task = (
-        asyncio.create_task(repository.similarity_search_knowledge(question, settings.rag_knowledge_limit))
-        if not trash_intent
-        else None
+    has_exact_query = bool(
+        systems or created_at_filter or like_filter or comment_filter or comment_ranking or trash_intent
     )
-    memory_task = asyncio.create_task(repository.similarity_search_memory(question, user_id, settings.rag_memory_limit))
+    # 知识与记忆共享一次查询向量；已有精确查询时不再额外执行知识语义检索。
+    semantic_task = asyncio.create_task(
+        repository.search_context(
+            question,
+            user_id,
+            settings.rag_knowledge_limit,
+            settings.rag_memory_limit,
+            include_knowledge=use_semantic_knowledge and not has_exact_query,
+        )
+    )
     metadata_task = (
         asyncio.create_task(repository.find_by_query(metadata_query)) if systems or created_at_filter else None
     )
@@ -341,8 +349,7 @@ async def build_context(
     trash_task = asyncio.create_task(repository.find_trash()) if trash_intent else None
 
     # 统一在此等待任务，后续仅负责将结果组织成稳定的 Prompt 上下文。
-    knowledge = await knowledge_task if knowledge_task else []
-    memories = await memory_task
+    knowledge, memories = await semantic_task
     metadata_result = await metadata_task if metadata_task else None
     likes = await likes_task if likes_task else []
     comments = await comments_task if comments_task else []

@@ -7,6 +7,7 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 const chatRequestSchema = z.object({
+  conversationId: z.string().uuid().optional(),
   history: z
     .array(
       z.object({
@@ -31,6 +32,7 @@ export async function POST(req: NextRequest) {
   const upstream = await fetchFeedbackAi('/v1/modules/feedback/chat', {
     body: JSON.stringify({
       history: result.data.history ?? [],
+      conversation_id: result.data.conversationId,
       question: result.data.question,
       user_id: `admin:${auth.admin.id}`
     }),

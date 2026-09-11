@@ -4,7 +4,13 @@ import pytest
 
 from feedback_ai.modules.base import AssistantModule, ModuleDescriptor, UnsupportedModuleCapabilityError
 from feedback_ai.schemas import ChatMessage
-from feedback_ai.service import AssistantService, UnknownModuleError
+from feedback_ai.service import (
+    CHAT_HISTORY_MAX_CHARACTERS,
+    CHAT_HISTORY_MAX_CHARACTERS_PER_MESSAGE,
+    CHAT_HISTORY_MAX_MESSAGES,
+    AssistantService,
+    UnknownModuleError,
+)
 
 
 class ChatOnlyModule(AssistantModule):
@@ -36,6 +42,19 @@ def test_service_rejects_duplicate_and_unknown_modules() -> None:
 
     with pytest.raises(UnknownModuleError, match="unknown"):
         AssistantService([ChatOnlyModule()]).require_module("unknown")
+
+
+def test_service_compacts_history_for_follow_up_prompt() -> None:
+    history = [
+        ChatMessage(role="user" if index % 2 == 0 else "assistant", content=str(index) * 7_000) for index in range(10)
+    ]
+
+    compacted = AssistantService.compact_history(history)
+
+    assert len(compacted) <= CHAT_HISTORY_MAX_MESSAGES
+    assert sum(len(message.content) for message in compacted) <= CHAT_HISTORY_MAX_CHARACTERS
+    assert all(len(message.content) <= CHAT_HISTORY_MAX_CHARACTERS_PER_MESSAGE for message in compacted)
+    assert compacted[-1].content.startswith("9")
 
 
 @pytest.mark.anyio

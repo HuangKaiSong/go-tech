@@ -1,5 +1,7 @@
 @import '@go-tech-frontend/styles/src/index.css';
 
+@source "../../../packages/web/package-ui/src/**/*.{ts,tsx}";
+
 @keyframes feedback-assistant-shimmer {
   0% {
     transform: translateX(-120%);

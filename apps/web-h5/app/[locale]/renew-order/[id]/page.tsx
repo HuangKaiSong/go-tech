@@ -16,7 +16,7 @@ export default async function Page({ params }: { params: { id: string } }) {
 
   // 获取当前套餐可用的优惠活动
   let promotions: PromotionOption[] = [];
-  const packageId = detail?.platformPackageDto?.id;
+  const packageId = detail?.packageDetail?.id;
   if (packageId) {
     try {
       const res = await httpClient.get(`/go-tech/platform/promotion/search?packageId=${packageId}`);

@@ -2,6 +2,7 @@
 
 import { Button } from '@go-tech-frontend/ui';
 import type { PackageBizCode } from '@go-tech/types';
+import { cn } from '@go-tech/utils';
 import { Building2, Check, Minus, Users } from 'lucide-react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import Footer from '@/app/components/Footer';
@@ -17,11 +18,16 @@ const getIconHref = (value: string) => {
   return `#icon-${normalized}`;
 };
 
+const MIN_GRID_COLS = 2;
+
 const PricingPlan = ({ pricingCatalog }: { pricingCatalog: Record<PackageBizCode, PricingPlanData> }) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const product: PackageBizCode = searchParams.get('product') === 'hr' ? 'hr' : 'pms';
   const pricingData = pricingCatalog[product];
+
+  const gridLength = pricingData.plans.length;
+  const gridColCalss = `grid-cols-${MIN_GRID_COLS + gridLength}`;
 
   const selectProduct = (nextProduct: PackageBizCode) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -83,19 +89,19 @@ const PricingPlan = ({ pricingCatalog }: { pricingCatalog: Record<PackageBizCode
 
       {/* Pricing Table Section */}
       <section className="py-12 bg-background">
-        {pricingData.plans.length === 0 ? (
+        {gridLength === 0 ? (
           <div className="container mx-auto rounded-2xl border border-dashed border-border bg-muted/30 px-8 py-16 text-center">
             <h2 className="text-2xl font-bold text-foreground">
               <DynamicText text={product === 'hr' ? 'HR 套餐資料準備中' : 'PMS 套餐資料準備中'} />
             </h2>
           </div>
         ) : null}
-        {pricingData.plans.length > 0 ? (
+        {gridLength > 0 ? (
           <div className="container mx-auto px-15 py-10 bg-primary/20 rounded-lg">
             <div className="overflow-x-auto">
               <div className="border border-primary/40 bg-primary-foreground rounded-lg overflow-hidden min-w-200">
                 {/* Header Row */}
-                <div className="grid grid-cols-5 bg-muted/30">
+                <div className={cn(gridColCalss, 'grid bg-muted/30')}>
                   <div className="border-r border-primary/40 grid grid-rows-7 text-center items-center">
                     <div className="row-span-4 py-4 text-3xl font-bold text-foreground self-end">
                       <DynamicText text="月費" />
@@ -125,7 +131,7 @@ const PricingPlan = ({ pricingCatalog }: { pricingCatalog: Record<PackageBizCode
                         {plan.units}
                       </div>
                       <div className="h-full flex items-center justify-center text-muted-foreground">
-                        <DynamicText text={plan.extra} />
+                        {/* <DynamicText text={plan.extra} /> */}-
                       </div>
                       <Button size="sm" className="mt-3 ">
                         <DynamicText text={`購買${plan.name}`} />
@@ -147,7 +153,10 @@ const PricingPlan = ({ pricingCatalog }: { pricingCatalog: Record<PackageBizCode
                         return (
                           <div
                             key={`${catIndex}-${fIndex}`}
-                            className="grid grid-cols-5 hover:bg-muted/40 transition-colors border-b border-primary/40 last:border-none"
+                            className={cn(
+                              gridColCalss,
+                              'grid hover:bg-muted/40 transition-colors border-b border-primary/40 last:border-none'
+                            )}
                           >
                             <div className="border-r border-primary/40 flex items-center">
                               <div className="w-14 font-medium text-primary" />
@@ -197,36 +206,36 @@ const PricingPlan = ({ pricingCatalog }: { pricingCatalog: Record<PackageBizCode
 
                 {/* Add-ons Section */}
                 {pricingData.addons.map((addon, aIndex) => {
-                  const addonLength = addon.features.length;
                   return (
-                    <div key={aIndex} className="grid grid-cols-5 border-t border-primary/40 bg-muted/10">
-                      <div className="col-span-1 border-r border-primary/40 flex items-center justify-center">
+                    <div key={aIndex} className={cn(gridColCalss, 'grid border-t border-primary/40 bg-muted/10')}>
+                      <div className="col-span-2 flex items-stretch border-r border-primary/40">
                         <div
-                          className="w-14 font-medium text-primary tracking-widest border-r border-primary/40"
+                          className="flex w-14 items-center justify-center font-medium tracking-widest text-primary border-r border-primary/40"
                           style={{ writingMode: 'vertical-rl' }}
                         >
                           <div className="p-3">
                             <DynamicText text={addon.name} />
                           </div>
                         </div>
-                        <div className={`flex-1 h-full grid grid-rows-${addonLength} divide-y divide-primary/40`}>
-                          {addon.features.map((f, i) => (
-                            <div
-                              key={i}
-                              className="w-full h-full text-muted-foreground flex justify-center items-center"
-                            >
-                              <DynamicText text={f} />
-                            </div>
-                          ))}
+                        <div className="flex-1 flex items-center justify-center">
+                          <div className="grid h-full flex-1 auto-rows-[minmax(2.75rem,auto)] divide-y divide-primary/40">
+                            {addon.features.map((f, i) => (
+                              <div
+                                key={i}
+                                className="flex min-h-11 w-full items-center justify-center text-muted-foreground"
+                              >
+                                <DynamicText text={f} />
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       </div>
-                      <div className="border-r border-primary/40" />
                       {addon.prices.map((price, pIndex) => (
                         <div
                           key={pIndex}
-                          className="p-3 flex items-center justify-center border-r border-primary/40 last:border-r-0  text-primary"
+                          className="p-3 flex items-center justify-center border-r border-primary/40 last:border-r-0 text-primary"
                         >
-                          {price}
+                          +{price} each
                         </div>
                       ))}
                     </div>
