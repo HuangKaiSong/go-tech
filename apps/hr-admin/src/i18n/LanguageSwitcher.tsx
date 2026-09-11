@@ -1,10 +1,14 @@
-import { Languages } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { Languages } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
-  DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { LOCALES, setLang, type LocaleValue } from "@/i18n";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
+import { LOCALES, type LocaleValue, setLang } from '@/i18n';
 
 /** 語言切換器：Header 右上角下拉，切換繁/簡/英並持久化 */
 export function LanguageSwitcher() {
@@ -22,8 +26,8 @@ export function LanguageSwitcher() {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-36">
-        <DropdownMenuRadioGroup value={current} onValueChange={(v) => setLang(v as LocaleValue)}>
-          {LOCALES.map((l) => (
+        <DropdownMenuRadioGroup value={current} onValueChange={v => setLang(v as LocaleValue)}>
+          {LOCALES.map(l => (
             <DropdownMenuRadioItem key={l.value} value={l.value}>
               {l.label}
             </DropdownMenuRadioItem>

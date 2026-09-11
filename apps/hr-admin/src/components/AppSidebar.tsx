@@ -1,155 +1,150 @@
 import {
-  LayoutDashboard,
-  Users,
-  
+  BarChart3,
+  Bell,
+  Building2,
+  ChevronDown,
   Clock,
   DollarSign,
-  Target,
   GraduationCap,
-  Building2,
-  BarChart3,
-  Settings,
-  ChevronDown,
-  Bell,
+  LayoutDashboard,
   Menu,
-} from "lucide-react";
-import { NavLink } from "@/components/NavLink";
+  Settings,
+  Target,
+  Users
+} from 'lucide-react';
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { NavLink } from '@/components/NavLink';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
-  SidebarMenuSubItem,
   SidebarMenuSubButton,
-  SidebarHeader,
-} from "@/components/ui/sidebar";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { useMemo } from "react";
-import { useTranslation } from "react-i18next";
-import { getRoutes } from "@/lib/auth";
+  SidebarMenuSubItem
+} from '@/components/ui/sidebar';
+import { getRoutes } from '@/lib/auth';
 
 const menuGroups = [
   {
-    label: "總覽",
-    items: [
-      { title: "儀表板", url: "/", icon: LayoutDashboard },
-    ],
+    label: '總覽',
+    items: [{ title: '儀表板', url: '/', icon: LayoutDashboard }]
   },
   {
-    label: "人事管理",
+    label: '人事管理',
     items: [
       {
-        title: "員工管理",
+        title: '員工管理',
         icon: Users,
         children: [
-          { title: "員工資料", url: "/employees" },
-          { title: "入職管理", url: "/employees/onboarding" },
-          { title: "離職管理", url: "/employees/offboarding" },
-        ],
+          { title: '員工資料', url: '/employees' },
+          { title: '入職管理', url: '/employees/onboarding' },
+          { title: '離職管理', url: '/employees/offboarding' }
+        ]
       },
       {
-        title: "組織架構",
+        title: '組織架構',
         icon: Building2,
         children: [
-          { title: "部門管理", url: "/organization/departments" },
-          { title: "職位管理", url: "/organization/roles" },
-          { title: "職位架構", url: "/organization/chart" },
-        ],
-      },
-    ],
+          { title: '部門管理', url: '/organization/departments' },
+          { title: '職位管理', url: '/organization/roles' },
+          { title: '職位架構', url: '/organization/chart' }
+        ]
+      }
+    ]
   },
   {
-    label: "日常管理",
+    label: '日常管理',
     items: [
       {
-        title: "行政管理",
+        title: '行政管理',
         icon: Clock,
         children: [
-          { title: "打卡管理", url: "/attendance/clock-in" },
-          { title: "打卡記錄", url: "/attendance/records" },
-          { title: "假期設定", url: "/attendance/leave-settings" },
-          { title: "審批管理", url: "/attendance/approval" },
-        ],
+          { title: '打卡管理', url: '/attendance/clock-in' },
+          { title: '打卡記錄', url: '/attendance/records' },
+          { title: '假期設定', url: '/attendance/leave-settings' },
+          { title: '審批管理', url: '/attendance/approval' }
+        ]
       },
       {
-        title: "薪資管理",
+        title: '薪資管理',
         icon: DollarSign,
         children: [
-          
-          { title: "薪資方案", url: "/payroll/structure" },
-          { title: "薪資計算", url: "/payroll/calculate" },
-          { title: "獎金/罰款", url: "/payroll/bonus-penalty" },
-          { title: "發薪管理", url: "/payroll/distribute" },
-        ],
-      },
-    ],
+          { title: '薪資方案', url: '/payroll/structure' },
+          { title: '薪資計算', url: '/payroll/calculate' },
+          { title: '獎金/罰款', url: '/payroll/bonus-penalty' },
+          { title: '發薪管理', url: '/payroll/distribute' }
+        ]
+      }
+    ]
   },
   {
-    label: "發展與績效",
+    label: '發展與績效',
     items: [
       {
-        title: "績效管理",
+        title: '績效管理',
         icon: Target,
         children: [
-          { title: "考核方案", url: "/performance/plans" },
-          { title: "績效評估", url: "/performance/evaluation" },
-        ],
+          { title: '考核方案', url: '/performance/plans' },
+          { title: '績效評估', url: '/performance/evaluation' }
+        ]
       },
       {
-        title: "培訓管理",
+        title: '培訓管理',
         icon: GraduationCap,
         children: [
-          { title: "培訓計劃", url: "/training/plans" },
-          { title: "培訓記錄", url: "/training/records" },
-        ],
-      },
-    ],
+          { title: '培訓計劃', url: '/training/plans' },
+          { title: '培訓記錄', url: '/training/records' }
+        ]
+      }
+    ]
   },
   {
-    label: "分析與設定",
+    label: '分析與設定',
     items: [
-      { title: "消息通知", url: "/notifications", icon: Bell },
-      { title: "報表分析", url: "/reports", icon: BarChart3 },
-      { title: "菜單管理", url: "/settings/menus", icon: Menu },
-      { title: "系統管理", url: "/settings", icon: Settings },
-    ],
-  },
+      { title: '消息通知', url: '/notifications', icon: Bell },
+      { title: '報表分析', url: '/reports', icon: BarChart3 },
+      { title: '菜單管理', url: '/settings/menus', icon: Menu },
+      { title: '系統管理', url: '/settings', icon: Settings }
+    ]
+  }
 ];
 
 /** 落地頁：無論是否授權都保留，避免登入後側邊欄全空 */
-const ALWAYS_VISIBLE = new Set(["/"]);
+const ALWAYS_VISIBLE = new Set(['/']);
 
 /**
- * 依登入返回的 routes 過濾靜態菜單。
- * - getRoutes() 為 null（舊 session / 後端未接權限）→ 放行全部，不過濾。
- * - 否則：葉子命中 routes 才顯示；目錄僅保留有可見子項者；分組僅保留有可見項者。
+ * 依登入返回的 routes 過濾靜態菜單。 - getRoutes() 為 null（舊 session / 後端未接權限）→ 放行全部，不過濾。 - 否則：葉子命中 routes
+ * 才顯示；目錄僅保留有可見子項者；分組僅保留有可見項者。
  */
 function useVisibleGroups() {
   return useMemo(() => {
     const routes = getRoutes();
     if (routes == null) return menuGroups;
     const allowed = new Set(routes);
-    const canShow = (url?: string) => !!url && (ALWAYS_VISIBLE.has(url) || allowed.has(url));
+    const canShow = (url?: string) => Boolean(url) && (ALWAYS_VISIBLE.has(url) || allowed.has(url));
 
     return menuGroups
-      .map((group) => {
+      .map(group => {
         const items = group.items
-          .map((item) => {
-            if ("children" in item && item.children) {
-              const children = item.children.filter((c) => canShow(c.url));
+          .map(item => {
+            if ('children' in item && item.children) {
+              const children = item.children.filter(c => canShow(c.url));
               return children.length ? { ...item, children } : null;
             }
-            return canShow("url" in item ? item.url : undefined) ? item : null;
+            return canShow('url' in item ? item.url : undefined) ? item : null;
           })
           .filter(Boolean) as typeof group.items;
         return { ...group, items };
       })
-      .filter((group) => group.items.length > 0);
+      .filter(group => group.items.length > 0);
   }, []);
 }
 
@@ -164,21 +159,21 @@ export function AppSidebar() {
             HR
           </div>
           <div>
-            <h2 className="text-sm font-semibold text-sidebar-accent-foreground">{t("HR 管理系統")}</h2>
-            <p className="text-xs text-sidebar-muted">{t("企業人力資源平台")}</p>
+            <h2 className="text-sm font-semibold text-sidebar-accent-foreground">{t('HR 管理系統')}</h2>
+            <p className="text-xs text-sidebar-muted">{t('企業人力資源平台')}</p>
           </div>
         </div>
       </SidebarHeader>
       <SidebarContent className="px-2 py-2">
-        {visibleGroups.map((group) => (
+        {visibleGroups.map(group => (
           <SidebarGroup key={group.label}>
             <SidebarGroupLabel className="text-sidebar-muted text-xs uppercase tracking-wider px-2">
               {t(group.label)}
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {group.items.map((item) =>
-                  "children" in item && item.children ? (
+                {group.items.map(item =>
+                  'children' in item && item.children ? (
                     <Collapsible key={item.title} defaultOpen className="group/collapsible">
                       <SidebarMenuItem>
                         <CollapsibleTrigger asChild>
@@ -190,7 +185,7 @@ export function AppSidebar() {
                         </CollapsibleTrigger>
                         <CollapsibleContent>
                           <SidebarMenuSub>
-                            {item.children.map((child) => (
+                            {item.children.map(child => (
                               <SidebarMenuSubItem key={child.url}>
                                 <SidebarMenuSubButton asChild>
                                   <NavLink
@@ -212,7 +207,7 @@ export function AppSidebar() {
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild>
                         <NavLink
-                          to={"url" in item ? item.url : "#"}
+                          to={'url' in item ? item.url : '#'}
                           end
                           className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                           activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"

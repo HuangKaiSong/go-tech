@@ -1,58 +1,58 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import type { ReactElement } from "react";
-import { AppLayout } from "@/components/AppLayout";
-import { isLoggedIn } from "@/lib/auth";
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import EmployeeList from "./pages/employees/EmployeeList";
-import EmployeeDetail from "./pages/employees/EmployeeDetail";
-import Onboarding from "./pages/employees/Onboarding";
-import OnboardingDetail from "./pages/employees/OnboardingDetail";
-import EmployeeSelfService from "./pages/employees/EmployeeSelfService";
-import Offboarding from "./pages/employees/Offboarding";
-import OffboardingDetail from "./pages/employees/OffboardingDetail";
-import ClockInManagement from "./pages/attendance/ClockInManagement";
-import ApprovalManagement from "./pages/attendance/ApprovalManagement";
-import ApprovalDetail from "./pages/attendance/ApprovalDetail";
-import ApprovalRuleDetail from "./pages/attendance/ApprovalRuleDetail";
-import ApprovalRuleForm from "./pages/attendance/ApprovalRuleForm";
-import AttendanceRecords from "./pages/attendance/AttendanceRecords";
-import LeaveDetail from "./pages/attendance/LeaveDetail";
-import LeaveSettings from "./pages/attendance/LeaveSettings";
-import MonthlyAttendance from "./pages/attendance/MonthlyAttendance";
-import PayrollStructure from "./pages/payroll/PayrollStructure";
-import PayrollPlanDetail from "./pages/payroll/PayrollPlanDetail";
-import PayrollPlanForm from "./pages/payroll/PayrollPlanForm";
-import PayrollCalculate from "./pages/payroll/PayrollCalculate";
-import PayrollCalcDetail from "./pages/payroll/PayrollCalcDetail";
-import PayrollDistribute from "./pages/payroll/PayrollDistribute";
-import PayrollDistDetail from "./pages/payroll/PayrollDistDetail";
-import PayrollDistForm from "./pages/payroll/PayrollDistForm";
-import PayrollDistApproval from "./pages/payroll/PayrollDistApproval";
-import BonusPenaltyManagement from "./pages/payroll/BonusPenaltyManagement";
-import BonusPenaltyDetail from "./pages/payroll/BonusPenaltyDetail";
-import PerformancePlans from "./pages/performance/PerformancePlans";
-import PerformancePlanDetail from "./pages/performance/PerformancePlanDetail";
-import PerformancePlanForm from "./pages/performance/PerformancePlanForm";
-import PerformanceEvaluation from "./pages/performance/PerformanceEvaluation";
-import PerformanceEvalDetail from "./pages/performance/PerformanceEvalDetail";
-import TrainingPlans from "./pages/training/TrainingPlans";
-import TrainingPlanDetail from "./pages/training/TrainingPlanDetail";
-import TrainingRecords from "./pages/training/TrainingRecords";
-import Departments from "./pages/organization/Departments";
-import OrgChart from "./pages/organization/OrgChart";
-import DepartmentDetail from "./pages/organization/DepartmentDetail";
-import Roles from "./pages/organization/Roles";
-import RoleDetail from "./pages/organization/RoleDetail";
-import Reports from "./pages/Reports";
-import Notifications from "./pages/Notifications";
-import SystemSettings from "./pages/SystemSettings";
-import MenuManagement from "./pages/MenuManagement";
-import NotFound from "./pages/NotFound";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { ReactElement } from 'react';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { AppLayout } from '@/components/AppLayout';
+import { Toaster as Sonner } from '@/components/ui/sonner';
+import { Toaster } from '@/components/ui/toaster';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { isLoggedIn } from '@/lib/auth';
+import ApprovalDetail from './pages/attendance/ApprovalDetail';
+import ApprovalManagement from './pages/attendance/ApprovalManagement';
+import ApprovalRuleDetail from './pages/attendance/ApprovalRuleDetail';
+import ApprovalRuleForm from './pages/attendance/ApprovalRuleForm';
+import AttendanceRecords from './pages/attendance/AttendanceRecords';
+import ClockInManagement from './pages/attendance/ClockInManagement';
+import LeaveDetail from './pages/attendance/LeaveDetail';
+import LeaveSettings from './pages/attendance/LeaveSettings';
+import MonthlyAttendance from './pages/attendance/MonthlyAttendance';
+import Dashboard from './pages/Dashboard';
+import EmployeeDetail from './pages/employees/EmployeeDetail';
+import EmployeeList from './pages/employees/EmployeeList';
+import EmployeeSelfService from './pages/employees/EmployeeSelfService';
+import Offboarding from './pages/employees/Offboarding';
+import OffboardingDetail from './pages/employees/OffboardingDetail';
+import Onboarding from './pages/employees/Onboarding';
+import OnboardingDetail from './pages/employees/OnboardingDetail';
+import Login from './pages/Login';
+import MenuManagement from './pages/MenuManagement';
+import NotFound from './pages/NotFound';
+import Notifications from './pages/Notifications';
+import DepartmentDetail from './pages/organization/DepartmentDetail';
+import Departments from './pages/organization/Departments';
+import OrgChart from './pages/organization/OrgChart';
+import RoleDetail from './pages/organization/RoleDetail';
+import Roles from './pages/organization/Roles';
+import BonusPenaltyDetail from './pages/payroll/BonusPenaltyDetail';
+import BonusPenaltyManagement from './pages/payroll/BonusPenaltyManagement';
+import PayrollCalcDetail from './pages/payroll/PayrollCalcDetail';
+import PayrollCalculate from './pages/payroll/PayrollCalculate';
+import PayrollDistApproval from './pages/payroll/PayrollDistApproval';
+import PayrollDistDetail from './pages/payroll/PayrollDistDetail';
+import PayrollDistForm from './pages/payroll/PayrollDistForm';
+import PayrollDistribute from './pages/payroll/PayrollDistribute';
+import PayrollPlanDetail from './pages/payroll/PayrollPlanDetail';
+import PayrollPlanForm from './pages/payroll/PayrollPlanForm';
+import PayrollStructure from './pages/payroll/PayrollStructure';
+import PerformanceEvalDetail from './pages/performance/PerformanceEvalDetail';
+import PerformanceEvaluation from './pages/performance/PerformanceEvaluation';
+import PerformancePlanDetail from './pages/performance/PerformancePlanDetail';
+import PerformancePlanForm from './pages/performance/PerformancePlanForm';
+import PerformancePlans from './pages/performance/PerformancePlans';
+import Reports from './pages/Reports';
+import SystemSettings from './pages/SystemSettings';
+import TrainingPlanDetail from './pages/training/TrainingPlanDetail';
+import TrainingPlans from './pages/training/TrainingPlans';
+import TrainingRecords from './pages/training/TrainingRecords';
 
 const queryClient = new QueryClient();
 
@@ -69,7 +69,13 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route element={<RequireAuth><AppLayout /></RequireAuth>}>
+          <Route
+            element={
+              <RequireAuth>
+                <AppLayout />
+              </RequireAuth>
+            }
+          >
             <Route path="/" element={<Dashboard />} />
             <Route path="/employees" element={<EmployeeList />} />
             <Route path="/employees/onboarding" element={<Onboarding />} />

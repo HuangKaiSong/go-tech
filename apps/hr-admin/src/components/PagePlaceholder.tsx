@@ -1,18 +1,11 @@
-import type { LucideIcon } from "lucide-react";
-import { useTranslation } from "react-i18next";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Search, Plus, Download, Filter } from "lucide-react";
+import type { LucideIcon } from 'lucide-react';
+import { Download, Filter, Plus, Search } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 interface Column {
   key: string;
@@ -20,25 +13,25 @@ interface Column {
 }
 
 interface PagePlaceholderProps {
-  title: string;
-  description: string;
-  icon: LucideIcon;
+  addLabel?: string;
   columns: Column[];
   data: Record<string, string | number>[];
-  statusKey?: string;
+  description: string;
+  icon: LucideIcon;
   statusColors?: Record<string, string>;
-  addLabel?: string;
+  statusKey?: string;
+  title: string;
 }
 
 export function PagePlaceholder({
-  title,
-  description,
-  icon: Icon,
+  addLabel,
   columns,
   data,
-  statusKey,
+  description,
+  icon: Icon,
   statusColors = {},
-  addLabel,
+  statusKey,
+  title
 }: PagePlaceholderProps) {
   const { t } = useTranslation();
   return (
@@ -53,7 +46,7 @@ export function PagePlaceholder({
         </div>
         <Button size="sm">
           <Plus className="h-4 w-4 mr-1" />
-          {addLabel ?? t("新增")}
+          {addLabel ?? t('新增')}
         </Button>
       </div>
 
@@ -62,16 +55,16 @@ export function PagePlaceholder({
           <div className="flex items-center justify-between gap-4">
             <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input placeholder={t("搜尋...")} className="pl-9 h-9" />
+              <Input placeholder={t('搜尋...')} className="pl-9 h-9" />
             </div>
             <div className="flex gap-2">
               <Button variant="outline" size="sm">
                 <Filter className="h-4 w-4 mr-1" />
-                {t("篩選")}
+                {t('篩選')}
               </Button>
               <Button variant="outline" size="sm">
                 <Download className="h-4 w-4 mr-1" />
-                {t("匯出")}
+                {t('匯出')}
               </Button>
             </div>
           </div>
@@ -80,7 +73,7 @@ export function PagePlaceholder({
           <Table>
             <TableHeader>
               <TableRow>
-                {columns.map((col) => (
+                {columns.map(col => (
                   <TableHead key={col.key}>{col.label}</TableHead>
                 ))}
               </TableRow>
@@ -88,13 +81,10 @@ export function PagePlaceholder({
             <TableBody>
               {data.map((row, i) => (
                 <TableRow key={i}>
-                  {columns.map((col) => (
+                  {columns.map(col => (
                     <TableCell key={col.key}>
                       {statusKey && col.key === statusKey ? (
-                        <Badge
-                          variant="secondary"
-                          className={statusColors[String(row[col.key])] || ""}
-                        >
+                        <Badge variant="secondary" className={statusColors[String(row[col.key])] || ''}>
                           {row[col.key]}
                         </Badge>
                       ) : (

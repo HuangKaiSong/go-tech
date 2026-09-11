@@ -1,4 +1,4 @@
-import type { AttendanceSchedule } from "@/api/attendance";
+import type { AttendanceSchedule } from '@/api/attendance';
 
 /** HH:mm → 分钟数；非法返回 null */
 function toMinutes(hhmm?: string): number | null {
@@ -17,22 +17,19 @@ function trim1(n: number): string {
 }
 
 /**
- * 由打卡班次推算工时字段：
- * - 每日工作時數 = (下班-上班) - 午休，单位小时
- * - 每週工作日數 = 工作日数量
- * - 每月工作数(時) = 每日 × 每週 × 52 ÷ 12（≈4.333 週/月，与薪资引擎月标准工时口径一致）
+ * 由打卡班次推算工时字段： - 每日工作時數 = (下班-上班) - 午休，单位小时 - 每週工作日數 = 工作日数量 - 每月工作数(時) = 每日 × 每週 × 52 ÷ 12（≈4.333 週/月，与薪资引擎月标准工时口径一致）
  * 缺时间数据的项返回空串，交由调用方决定是否覆盖。
  */
 export function deriveWorkHoursFromSchedule(sc?: AttendanceSchedule | null): {
   dailyHours: string;
-  weeklyDays: string;
   monthlyHours: string;
+  weeklyDays: string;
 } {
-  if (!sc) return { dailyHours: "", weeklyDays: "", monthlyHours: "" };
+  if (!sc) return { dailyHours: '', weeklyDays: '', monthlyHours: '' };
 
   const start = toMinutes(sc.workStart);
   const end = toMinutes(sc.workEnd);
-  let daily = "";
+  let daily = '';
   let dailyNum = 0;
   if (start != null && end != null && end > start) {
     const bStart = toMinutes(sc.breakStart);
@@ -43,9 +40,9 @@ export function deriveWorkHoursFromSchedule(sc?: AttendanceSchedule | null): {
   }
 
   const weekDayCount = Array.isArray(sc.workDays) ? sc.workDays.length : 0;
-  const weekly = weekDayCount > 0 ? String(weekDayCount) : "";
+  const weekly = weekDayCount > 0 ? String(weekDayCount) : '';
 
-  let monthly = "";
+  let monthly = '';
   if (dailyNum > 0 && weekDayCount > 0) {
     monthly = String(Math.round((dailyNum * weekDayCount * 52) / 12));
   }

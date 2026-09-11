@@ -1,9 +1,7 @@
-import { Badge } from "@/components/ui/badge";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
-/**
- * 「未儲存變更」提示徽章。show 為 true 時顯示。
- */
+/** 「未儲存變更」提示徽章。show 為 true 時顯示。 */
 export function UnsavedBadge({ show }: { show: boolean }) {
   if (!show) {
     return null;

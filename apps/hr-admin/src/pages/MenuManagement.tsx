@@ -1,48 +1,82 @@
-import { useState, useEffect } from "react";
 import {
-  LayoutDashboard, Users, Building2, Clock, DollarSign, Target,
-  GraduationCap, Bell, BarChart3, Settings, Menu as MenuIcon,
-  Plus, Pencil, Trash2, ChevronRight, ChevronDown,
-  ArrowUp, ArrowDown, KeyRound,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardDescription } from "@/components/ui/card";
+  ArrowDown,
+  ArrowUp,
+  BarChart3,
+  Bell,
+  Building2,
+  ChevronDown,
+  ChevronRight,
+  Clock,
+  DollarSign,
+  GraduationCap,
+  KeyRound,
+  LayoutDashboard,
+  Menu as MenuIcon,
+  Pencil,
+  Plus,
+  Settings,
+  Target,
+  Trash2,
+  Users
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { deleteMenu, getMenuTree, type MenuSaveParams, type MenuTreeNode, type MenuType, saveMenu } from '@/api/menu';
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '@/components/ui/alert-dialog';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { toast } from "@/hooks/use-toast";
-import { hasPerm } from "@/lib/auth";
-import { MENU_PERM } from "@/lib/perms";
-import {
-  getMenuTree, saveMenu, deleteMenu,
-  type MenuTreeNode, type MenuType, type MenuSaveParams,
-} from "@/api/menu";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { toast } from '@/hooks/use-toast';
+import { hasPerm } from '@/lib/auth';
+import { MENU_PERM } from '@/lib/perms';
 
 /** 图标名 → 组件映射（与 hr_menu.icon 存的字符串一致） */
 const ICON_MAP: Record<string, any> = {
-  LayoutDashboard, Users, Building2, Clock, DollarSign, Target,
-  GraduationCap, Bell, BarChart3, Settings, Menu: MenuIcon,
+  LayoutDashboard,
+  Users,
+  Building2,
+  Clock,
+  DollarSign,
+  Target,
+  GraduationCap,
+  Bell,
+  BarChart3,
+  Settings,
+  Menu: MenuIcon
 };
 const ICON_OPTIONS = Object.keys(ICON_MAP);
 
-const TYPE_LABEL: Record<number, string> = { 0: "目錄", 1: "菜單", 2: "按鈕" };
-const TYPE_VARIANT: Record<number, "default" | "secondary" | "outline"> = { 0: "outline", 1: "default", 2: "secondary" };
+const TYPE_LABEL: Record<number, string> = { 0: '目錄', 1: '菜單', 2: '按鈕' };
+const TYPE_VARIANT: Record<number, 'default' | 'outline' | 'secondary'> = {
+  0: 'outline',
+  1: 'default',
+  2: 'secondary'
+};
 
 /** 编辑上下文：编辑现有节点带 node；新增仅带所属父级 parentId（0=顶级） */
 type EditCtx = { node?: MenuTreeNode; parentId: number };
 
-/** node → 保存入参（带覆盖字段），用于 visible/sort 等局部更新时补齐必填项 */
+/** Node → 保存入参（带覆盖字段），用于 visible/sort 等局部更新时补齐必填项 */
 function nodeToParams(node: MenuTreeNode, override: Partial<MenuSaveParams>): MenuSaveParams {
   return {
     id: node.id,
@@ -54,7 +88,7 @@ function nodeToParams(node: MenuTreeNode, override: Partial<MenuSaveParams>): Me
     menuType: node.menuType,
     sort: node.sort,
     visible: node.visible,
-    ...override,
+    ...override
   };
 }
 
@@ -67,22 +101,25 @@ export default function MenuManagement() {
 
   const reload = () =>
     getMenuTree()
-      .then((res) => setTree(res.data ?? []))
-      .catch((e) => toast({ title: "菜單載入失敗", description: e.message, variant: "destructive" }));
+      .then(res => setTree(res.data ?? []))
+      .catch(e => toast({ title: '菜單載入失敗', description: e.message, variant: 'destructive' }));
 
   useEffect(() => {
     reload().finally(() => setLoading(false));
   }, []);
 
-  const toggle = (id: number) => setExpanded((s) => ({ ...s, [id]: !s[id] }));
+  const toggle = (id: number) => setExpanded(s => ({ ...s, [id]: !s[id] }));
 
   // ==== 统计（拍平整棵树）====
   const flat: MenuTreeNode[] = [];
   const collect = (list: MenuTreeNode[]) =>
-    list.forEach((n) => { flat.push(n); if (n.children) collect(n.children); });
+    list.forEach(n => {
+      flat.push(n);
+      if (n.children) collect(n.children);
+    });
   collect(tree);
-  const countType = (t: number) => flat.filter((n) => n.menuType === t).length;
-  const hiddenCount = flat.filter((n) => n.visible !== 1).length;
+  const countType = (t: number) => flat.filter(n => n.menuType === t).length;
+  const hiddenCount = flat.filter(n => n.visible !== 1).length;
 
   // ==== 后端操作 ====
   const doSave = async (params: MenuSaveParams, okMsg: string) => {
@@ -91,7 +128,7 @@ export default function MenuManagement() {
       await reload();
       toast({ title: okMsg });
     } catch (e: any) {
-      toast({ title: "操作失敗", description: e.message, variant: "destructive" });
+      toast({ title: '操作失敗', description: e.message, variant: 'destructive' });
     }
   };
 
@@ -100,18 +137,18 @@ export default function MenuManagement() {
       try {
         await deleteMenu(node.id);
         await reload();
-        toast({ title: "已刪除" });
+        toast({ title: '已刪除' });
       } catch (e: any) {
-        toast({ title: "刪除失敗", description: e.message, variant: "destructive" });
+        toast({ title: '刪除失敗', description: e.message, variant: 'destructive' });
       }
     });
 
   const toggleVisible = (node: MenuTreeNode, v: boolean) =>
-    doSave(nodeToParams(node, { visible: v ? 1 : 0 }), v ? "已顯示" : "已隱藏");
+    doSave(nodeToParams(node, { visible: v ? 1 : 0 }), v ? '已顯示' : '已隱藏');
 
   // 同级上/下移：与相邻节点交换 sort 后两个节点各自落库
   const move = (node: MenuTreeNode, siblings: MenuTreeNode[], dir: -1 | 1) => {
-    const idx = siblings.findIndex((n) => n.id === node.id);
+    const idx = siblings.findIndex(n => n.id === node.id);
     const j = idx + dir;
     if (j < 0 || j >= siblings.length) return;
     const other = siblings[j];
@@ -119,31 +156,25 @@ export default function MenuManagement() {
     const sortB = other.sort ?? j;
     // sort 相同则用索引兜底，保证顺序确实变化
     const [newA, newB] = sortA === sortB ? [j, idx] : [sortB, sortA];
-    Promise.all([
-      saveMenu(nodeToParams(node, { sort: newA })),
-      saveMenu(nodeToParams(other, { sort: newB })),
-    ])
+    Promise.all([saveMenu(nodeToParams(node, { sort: newA })), saveMenu(nodeToParams(other, { sort: newB }))])
       .then(reload)
-      .then(() => toast({ title: "排序已更新" }))
-      .catch((e) => toast({ title: "排序失敗", description: e.message, variant: "destructive" }));
+      .then(() => toast({ title: '排序已更新' }))
+      .catch(e => toast({ title: '排序失敗', description: e.message, variant: 'destructive' }));
   };
 
   // ==== 渲染树 ====
   const renderNode = (node: MenuTreeNode, siblings: MenuTreeNode[], depth = 0) => {
     const Icon = node.icon ? ICON_MAP[node.icon] : null;
     const isOpen = expanded[node.id] ?? true;
-    const hasChildren = !!node.children?.length;
+    const hasChildren = Boolean(node.children?.length);
     return (
       <div key={node.id}>
         <div
           className="flex items-center gap-2 py-2 px-2 rounded hover:bg-muted/40"
           style={{ paddingLeft: 8 + depth * 20 }}
         >
-          <button
-            onClick={() => hasChildren && toggle(node.id)}
-            className="w-5 flex-shrink-0 text-muted-foreground"
-          >
-            {hasChildren ? (isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />) : null}
+          <button onClick={() => hasChildren && toggle(node.id)} className="w-5 flex-shrink-0 text-muted-foreground">
+            {hasChildren ? isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" /> : null}
           </button>
           {Icon && <Icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />}
           <div className="flex-1 min-w-0">
@@ -155,12 +186,17 @@ export default function MenuManagement() {
               {node.path && <code className="text-xs text-muted-foreground truncate">{node.path}</code>}
               {node.perms && (
                 <span className="inline-flex items-center text-[10px] text-muted-foreground">
-                  <KeyRound className="h-2.5 w-2.5 mr-0.5" />{node.perms}
+                  <KeyRound className="h-2.5 w-2.5 mr-0.5" />
+                  {node.perms}
                 </span>
               )}
             </div>
           </div>
-          <Switch checked={node.visible === 1} onCheckedChange={(v) => toggleVisible(node, v)} disabled={!hasPerm(MENU_PERM.EDIT)} />
+          <Switch
+            checked={node.visible === 1}
+            onCheckedChange={v => toggleVisible(node, v)}
+            disabled={!hasPerm(MENU_PERM.EDIT)}
+          />
           {hasPerm(MENU_PERM.EDIT) && (
             <>
               <Button size="icon" variant="ghost" onClick={() => move(node, siblings, -1)}>
@@ -187,9 +223,7 @@ export default function MenuManagement() {
             </Button>
           )}
         </div>
-        {hasChildren && isOpen && (
-          <div>{node.children!.map((c) => renderNode(c, node.children!, depth + 1))}</div>
-        )}
+        {hasChildren && isOpen && <div>{node.children!.map(c => renderNode(c, node.children!, depth + 1))}</div>}
       </div>
     );
   };
@@ -212,20 +246,36 @@ export default function MenuManagement() {
 
       <div className="grid grid-cols-4 gap-4">
         <Card>
-          <CardHeader className="pb-2"><CardDescription>目錄數</CardDescription></CardHeader>
-          <CardContent><div className="text-2xl font-bold">{countType(0)}</div></CardContent>
+          <CardHeader className="pb-2">
+            <CardDescription>目錄數</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{countType(0)}</div>
+          </CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2"><CardDescription>菜單數</CardDescription></CardHeader>
-          <CardContent><div className="text-2xl font-bold">{countType(1)}</div></CardContent>
+          <CardHeader className="pb-2">
+            <CardDescription>菜單數</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{countType(1)}</div>
+          </CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2"><CardDescription>按鈕數</CardDescription></CardHeader>
-          <CardContent><div className="text-2xl font-bold">{countType(2)}</div></CardContent>
+          <CardHeader className="pb-2">
+            <CardDescription>按鈕數</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{countType(2)}</div>
+          </CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2"><CardDescription>已隱藏</CardDescription></CardHeader>
-          <CardContent><div className="text-2xl font-bold">{hiddenCount}</div></CardContent>
+          <CardHeader className="pb-2">
+            <CardDescription>已隱藏</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{hiddenCount}</div>
+          </CardContent>
         </Card>
       </div>
 
@@ -238,7 +288,7 @@ export default function MenuManagement() {
               尚無菜單資料，點擊「新增頂級目錄」開始建立。
             </div>
           ) : (
-            tree.map((n) => renderNode(n, tree, 0))
+            tree.map(n => renderNode(n, tree, 0))
           )}
         </CardContent>
       </Card>
@@ -247,14 +297,14 @@ export default function MenuManagement() {
         <MenuEditDialog
           ctx={editCtx}
           onClose={() => setEditCtx(null)}
-          onSave={(params) => {
-            doSave(params, editCtx.node ? "菜單已更新" : "菜單已建立");
+          onSave={params => {
+            doSave(params, editCtx.node ? '菜單已更新' : '菜單已建立');
             setEditCtx(null);
           }}
         />
       )}
 
-      <AlertDialog open={!!confirmDelete} onOpenChange={(o) => !o && setConfirmDelete(null)}>
+      <AlertDialog open={Boolean(confirmDelete)} onOpenChange={o => !o && setConfirmDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>確認刪除此菜單？</AlertDialogTitle>
@@ -262,7 +312,12 @@ export default function MenuManagement() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>取消</AlertDialogCancel>
-            <AlertDialogAction onClick={() => { confirmDelete?.(); setConfirmDelete(null); }}>
+            <AlertDialogAction
+              onClick={() => {
+                confirmDelete?.();
+                setConfirmDelete(null);
+              }}
+            >
               確認刪除
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -272,59 +327,65 @@ export default function MenuManagement() {
   );
 }
 
-function MenuEditDialog({ ctx, onClose, onSave }: {
+function MenuEditDialog({
+  ctx,
+  onClose,
+  onSave
+}: {
   ctx: EditCtx;
   onClose: () => void;
   onSave: (p: MenuSaveParams) => void;
 }) {
   const editing = ctx.node;
   const [menuType, setMenuType] = useState<MenuType>(editing?.menuType ?? 1);
-  const [title, setTitle] = useState(editing?.title ?? "");
-  const [icon, setIcon] = useState(editing?.icon ?? "");
-  const [path, setPath] = useState(editing?.path ?? "");
-  const [perms, setPerms] = useState(editing?.perms ?? "");
-  const [sort, setSort] = useState<string>(editing?.sort != null ? String(editing.sort) : "0");
+  const [title, setTitle] = useState(editing?.title ?? '');
+  const [icon, setIcon] = useState(editing?.icon ?? '');
+  const [path, setPath] = useState(editing?.path ?? '');
+  const [perms, setPerms] = useState(editing?.perms ?? '');
+  const [sort, setSort] = useState<string>(editing?.sort != null ? String(editing.sort) : '0');
   const [visible, setVisible] = useState(editing ? editing.visible === 1 : true);
 
   const parentId = editing ? editing.parentId : ctx.parentId;
 
   const submit = () => {
     if (!title.trim()) {
-      toast({ title: "請填寫名稱", variant: "destructive" });
+      toast({ title: '請填寫名稱', variant: 'destructive' });
       return;
     }
     if (menuType === 1 && !path.trim()) {
-      toast({ title: "菜單類型需填寫路由 URL", variant: "destructive" });
+      toast({ title: '菜單類型需填寫路由 URL', variant: 'destructive' });
       return;
     }
     onSave({
       id: editing?.id,
       parentId,
       title: title.trim(),
-      icon: menuType === 2 ? undefined : (icon || undefined),
+      icon: menuType === 2 ? undefined : icon || undefined,
       path: menuType === 1 ? path.trim() : undefined,
-      perms: menuType === 0 ? undefined : (perms.trim() || undefined),
+      perms: menuType === 0 ? undefined : perms.trim() || undefined,
       menuType,
       sort: Number(sort) || 0,
-      visible: visible ? 1 : 0,
+      visible: visible ? 1 : 0
     });
   };
 
   return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
+    <Dialog open onOpenChange={o => !o && onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{editing ? "編輯菜單" : "新增菜單"}</DialogTitle>
+          <DialogTitle>{editing ? '編輯菜單' : '新增菜單'}</DialogTitle>
           <DialogDescription>
-            {parentId === 0 ? "頂級節點" : "子節點"}｜目錄用於分組，菜單對應頁面路由，按鈕對應頁面操作權限。
+            {parentId === 0 ? '頂級節點' : '子節點'}｜目錄用於分組，菜單對應頁面路由，按鈕對應頁面操作權限。
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-2">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>類型</Label>
-              <Select value={String(menuType)} onValueChange={(v) => setMenuType(Number(v) as MenuType)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select value={String(menuType)} onValueChange={v => setMenuType(Number(v) as MenuType)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="0">目錄</SelectItem>
                   <SelectItem value="1">菜單</SelectItem>
@@ -334,21 +395,25 @@ function MenuEditDialog({ ctx, onClose, onSave }: {
             </div>
             <div className="space-y-2">
               <Label>名稱</Label>
-              <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="例如：員工資料" />
+              <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="例如：員工資料" />
             </div>
           </div>
 
           {menuType === 1 && (
             <div className="space-y-2">
               <Label>路由 URL</Label>
-              <Input value={path} onChange={(e) => setPath(e.target.value)} placeholder="/employees（須與前端路由完全一致）" />
+              <Input
+                value={path}
+                onChange={e => setPath(e.target.value)}
+                placeholder="/employees（須與前端路由完全一致）"
+              />
             </div>
           )}
 
           {menuType !== 0 && (
             <div className="space-y-2">
-              <Label>權限字串{menuType === 2 ? "" : "（可選）"}</Label>
-              <Input value={perms} onChange={(e) => setPerms(e.target.value)} placeholder="例如：hr:employee:add" />
+              <Label>權限字串{menuType === 2 ? '' : '（可選）'}</Label>
+              <Input value={perms} onChange={e => setPerms(e.target.value)} placeholder="例如：hr:employee:add" />
             </div>
           )}
 
@@ -356,13 +421,17 @@ function MenuEditDialog({ ctx, onClose, onSave }: {
             <div className="space-y-2">
               <Label>圖示（可選）</Label>
               <Select value={icon} onValueChange={setIcon}>
-                <SelectTrigger><SelectValue placeholder="選擇圖示" /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="選擇圖示" />
+                </SelectTrigger>
                 <SelectContent>
-                  {ICON_OPTIONS.map((k) => {
+                  {ICON_OPTIONS.map(k => {
                     const I = ICON_MAP[k];
                     return (
                       <SelectItem key={k} value={k}>
-                        <span className="flex items-center gap-2"><I className="h-4 w-4" /> {k}</span>
+                        <span className="flex items-center gap-2">
+                          <I className="h-4 w-4" /> {k}
+                        </span>
                       </SelectItem>
                     );
                   })}
@@ -374,7 +443,7 @@ function MenuEditDialog({ ctx, onClose, onSave }: {
           <div className="grid grid-cols-2 gap-4 items-end">
             <div className="space-y-2">
               <Label>排序（同級升序）</Label>
-              <Input type="number" value={sort} onChange={(e) => setSort(e.target.value)} />
+              <Input type="number" value={sort} onChange={e => setSort(e.target.value)} />
             </div>
             <div className="flex items-center justify-between">
               <Label>啟用顯示</Label>
@@ -383,7 +452,9 @@ function MenuEditDialog({ ctx, onClose, onSave }: {
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>取消</Button>
+          <Button variant="outline" onClick={onClose}>
+            取消
+          </Button>
           <Button onClick={submit}>儲存</Button>
         </DialogFooter>
       </DialogContent>

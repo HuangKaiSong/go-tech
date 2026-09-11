@@ -1,13 +1,13 @@
-import { Settings, Shield, Bell, Database, Users } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { hasPerm } from "@/lib/auth";
-import { SYSTEM_PERM } from "@/lib/perms";
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Bell, Database, Settings, Shield, Users } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { hasPerm } from '@/lib/auth';
+import { SYSTEM_PERM } from '@/lib/perms';
 
 export default function SystemSettings() {
   return (
@@ -55,9 +55,7 @@ export default function SystemSettings() {
                   <Input defaultValue="02-2345-6789" />
                 </div>
               </div>
-              <div className="flex justify-end">
-                {hasPerm(SYSTEM_PERM.SAVE) && <Button>儲存變更</Button>}
-              </div>
+              <div className="flex justify-end">{hasPerm(SYSTEM_PERM.SAVE) && <Button>儲存變更</Button>}</div>
             </CardContent>
           </Card>
         </TabsContent>

@@ -1,5 +1,5 @@
-import request from "@/lib/request";
-import type { ApiResult, PageResult } from "@/api/employee";
+import type { ApiResult, PageResult } from '@/api/employee';
+import request from '@/lib/request';
 
 /** 方案状态：对齐后端 PerfPlanStatusEnum 0草稿 1进行中 2已完成 */
 export type PerfPlanStatus = 0 | 1 | 2;
@@ -14,129 +14,129 @@ export type PerfScoringType = 1 | 2 | 3;
 
 /** 考核方案列表项（对齐后端 PerfPlanVO） */
 export interface PerfPlan {
-  id: string;
-  name: string;
-  period: string | null;
+  createTime: string | null;
+  creatorName: string | null;
   cycle: PerfCycle | null;
   cycleText: string;
-  scopeType: PerfScopeType | null;
-  scopeText: string;
-  weightConfig: string;
+  employeeCount: number;
+  id: string;
+  indicatorCount: number;
+  name: string;
+  period: string | null;
   planStatus: PerfPlanStatus;
   planStatusText: string;
-  indicatorCount: number;
-  employeeCount: number;
-  creatorName: string | null;
-  createTime: string | null;
   publishedTime: string | null;
+  scopeText: string;
+  scopeType: PerfScopeType | null;
+  weightConfig: string;
 }
 
 /** 指标（对齐后端 PerfIndicatorVO） */
 export interface PerfIndicator {
-  id?: string;
-  name: string;
   category: PerfCategory;
   categoryText?: string;
-  weight: number;
+  id?: string;
   maxScore: number;
+  name: string;
   scoringType: PerfScoringType;
   scoringTypeText?: string;
   sort?: number;
+  weight: number;
 }
 
 /** 评级规则（对齐后端 PerfGradeRuleVO） */
 export interface PerfGradeRule {
-  id?: string;
-  grade: string;
-  minScore: number;
-  maxScore: number;
   description?: string;
+  grade: string;
+  id?: string;
+  maxScore: number;
+  minScore: number;
   sort?: number;
 }
 
 /** 方案详情（对齐后端 PerfPlanDetailVO） */
 export interface PerfPlanDetail {
-  id: string;
-  name: string;
-  period: string | null;
+  createTime: string | null;
+  creatorName: string | null;
   cycle: PerfCycle | null;
   cycleText: string;
-  scopeType: PerfScopeType | null;
-  scopeTypeText: string;
-  scopeRef: number[];
-  scopeNames: string[];
-  scopeText: string;
-  selfWeight: number;
-  peerWeight: number;
+  gradeRules: PerfGradeRule[];
+  id: string;
+  indicators: PerfIndicator[];
   managerWeight: number;
+  name: string;
   peerCount: number;
+  peerWeight: number;
+  period: string | null;
   planStatus: PerfPlanStatus;
   planStatusText: string;
-  remark: string | null;
-  creatorName: string | null;
-  createTime: string | null;
   publishedTime: string | null;
-  indicators: PerfIndicator[];
-  gradeRules: PerfGradeRule[];
+  remark: string | null;
+  scopeNames: string[];
+  scopeRef: number[];
+  scopeText: string;
+  scopeType: PerfScopeType | null;
+  scopeTypeText: string;
+  selfWeight: number;
 }
 
 /** 分页查询参数 */
 export interface PerfPlanPageParams {
   current?: number;
-  size?: number;
-  keyword?: string;
   cycle?: number;
+  keyword?: string;
   planStatus?: number;
+  size?: number;
 }
 
 /** 保存入参（对齐后端 PerfPlanSaveDTO） */
 export interface PerfPlanSavePayload {
-  id?: number;
-  name: string;
-  period?: string;
   cycle: number;
-  scopeType: number;
-  scopeRef?: number[];
-  scopeNames?: string[];
-  selfWeight: number;
-  peerWeight: number;
-  managerWeight: number;
-  peerCount?: number;
-  remark?: string;
-  indicators: Array<Omit<PerfIndicator, "categoryText" | "scoringTypeText">>;
   gradeRules: PerfGradeRule[];
+  id?: number;
+  indicators: Array<Omit<PerfIndicator, 'categoryText' | 'scoringTypeText'>>;
+  managerWeight: number;
+  name: string;
+  peerCount?: number;
+  peerWeight: number;
+  period?: string;
+  remark?: string;
+  scopeNames?: string[];
+  scopeRef?: number[];
+  scopeType: number;
+  selfWeight: number;
 }
 
 /** 状态文案表 */
 export const PERF_STATUS_TEXT: Record<PerfPlanStatus, string> = {
-  0: "草稿",
-  1: "進行中",
-  2: "已完成",
+  0: '草稿',
+  1: '進行中',
+  2: '已完成'
 };
 
 /** 考核方案分页 */
 export function getPerfPlanPage(params: PerfPlanPageParams) {
-  return request.get<any, ApiResult<PageResult<PerfPlan>>>("performance/plan/page", { params });
+  return request.get<any, ApiResult<PageResult<PerfPlan>>>('performance/plan/page', { params });
 }
 
 /** 考核方案详情（含指标与评级规则） */
 export function getPerfPlanDetail(id: number | string) {
-  return request.get<any, ApiResult<PerfPlanDetail>>("performance/plan/detail", { params: { id } });
+  return request.get<any, ApiResult<PerfPlanDetail>>('performance/plan/detail', { params: { id } });
 }
 
 /** 新建/编辑草稿，返回 id */
 export function savePerfPlan(data: PerfPlanSavePayload) {
-  return request.post<any, ApiResult<string>>("performance/plan/save", data);
+  return request.post<any, ApiResult<string>>('performance/plan/save', data);
 }
 
 /** 删除方案（仅草稿） */
 export function deletePerfPlan(id: number | string) {
-  return request.post<any, ApiResult<boolean>>("performance/plan/delete", null, { params: { id } });
+  return request.post<any, ApiResult<boolean>>('performance/plan/delete', null, { params: { id } });
 }
 
 /** 发布方案（草稿→进行中，生成考核任务）。data 为互评凑不满提示，空串表示无提示 */
 export function publishPerfPlan(id: number | string) {
-  return request.post<any, ApiResult<string>>("performance/plan/publish", null, { params: { id } });
+  return request.post<any, ApiResult<string>>('performance/plan/publish', null, { params: { id } });
 }
 
 // ==================== Phase2：考核任务 / 三方评分 ====================
@@ -148,35 +148,35 @@ export type PerfReviewerType = 1 | 2 | 3;
 
 /** 考核任务列表项（对齐后端 PerfTaskVO） */
 export interface PerfTask {
-  id: string;
-  planId: string;
-  planName: string;
+  departmentName: string | null;
   employeeId: string;
   employeeName: string;
-  departmentName: string | null;
-  position: string | null;
-  selfTotal: number | null;
-  peerTotal: number | null;
-  managerTotal: number | null;
   finalScore: number | null;
   grade: string | null;
+  id: string;
+  managerTotal: number | null;
+  peerProgress: string;
+  peerTotal: number | null;
+  planId: string;
+  planName: string;
+  position: string | null;
+  selfTotal: number | null;
   taskStatus: PerfTaskStatus;
   taskStatusText: string;
-  peerProgress: string;
 }
 
 /** 我的评价待办（对齐后端 MyPerfTaskVO） */
 export interface MyPerfTask {
-  reviewerRecordId: string;
-  taskId: string;
+  departmentName: string | null;
   planId: string;
   planName: string;
-  revieweeName: string;
-  departmentName: string | null;
   position: string | null;
+  revieweeName: string;
+  reviewerRecordId: string;
   reviewerType: PerfReviewerType;
   reviewerTypeText: string;
   submitStatus: 0 | 1;
+  taskId: string;
 }
 
 /** 评价者进度（对齐后端 PerfReviewerVO） */
@@ -191,157 +191,157 @@ export interface PerfReviewerProgress {
 
 /** 评分录入项（对齐后端 PerfScoreInputVO） */
 export interface PerfScoreInput {
-  indicatorId: string;
-  name: string;
   category: PerfCategory;
   categoryText: string;
-  weight: number;
+  indicatorId: string;
   maxScore: number;
+  myComment: string | null;
+  myScore: number | null;
+  name: string;
   scoringType: PerfScoringType;
   scoringTypeText: string;
-  myScore: number | null;
-  myComment: string | null;
+  weight: number;
 }
 
 /** 任务详情（对齐后端 PerfTaskDetailVO） */
 export interface PerfTaskDetail {
-  id: string;
-  planId: string;
-  planName: string;
-  employeeName: string;
+  canSubmit: boolean;
   departmentName: string | null;
-  position: string | null;
-  selfWeight: number;
-  peerWeight: number;
-  managerWeight: number;
-  selfTotal: number | null;
-  peerTotal: number | null;
-  managerTotal: number | null;
+  employeeName: string;
   finalScore: number | null;
   grade: string | null;
-  taskStatus: PerfTaskStatus;
-  taskStatusText: string;
-  reviewers: PerfReviewerProgress[];
+  id: string;
+  managerTotal: number | null;
+  managerWeight: number;
   myReviewerType: PerfReviewerType | null;
   myReviewerTypeText: string | null;
-  canSubmit: boolean;
   mySubmitted: boolean;
+  peerTotal: number | null;
+  peerWeight: number;
+  planId: string;
+  planName: string;
+  position: string | null;
+  reviewers: PerfReviewerProgress[];
   scoreItems: PerfScoreInput[] | null;
+  selfTotal: number | null;
+  selfWeight: number;
+  taskStatus: PerfTaskStatus;
+  taskStatusText: string;
 }
 
 /** 任务列表查询参数 */
 export interface PerfTaskPageParams {
   current?: number;
-  size?: number;
-  planId?: number | string;
   keyword?: string;
+  planId?: number | string;
+  size?: number;
   taskStatus?: number;
 }
 
 /** 任务状态文案表 */
 export const PERF_TASK_STATUS_TEXT: Record<PerfTaskStatus, string> = {
-  0: "待自評",
-  1: "同事互評中",
-  2: "待主管評",
-  3: "待校准",
-  4: "已完成",
+  0: '待自評',
+  1: '同事互評中',
+  2: '待主管評',
+  3: '待校准',
+  4: '已完成'
 };
 
 /** 考核任务分页（HR/主管视角） */
 export function getPerfTaskPage(params: PerfTaskPageParams) {
-  return request.get<any, ApiResult<PageResult<PerfTask>>>("performance/task/page", { params });
+  return request.get<any, ApiResult<PageResult<PerfTask>>>('performance/task/page', { params });
 }
 
 /** 我的评价待办 */
 export function getMyPerfTasks() {
-  return request.get<any, ApiResult<MyPerfTask[]>>("performance/task/my");
+  return request.get<any, ApiResult<MyPerfTask[]>>('performance/task/my');
 }
 
 /** 任务详情（含三方进度与我的评分录入） */
 export function getPerfTaskDetail(taskId: number | string) {
-  return request.get<any, ApiResult<PerfTaskDetail>>("performance/task/detail", { params: { taskId } });
+  return request.get<any, ApiResult<PerfTaskDetail>>('performance/task/detail', { params: { taskId } });
 }
 
 /** 互评明细（单个互评人对某指标） */
 export interface PerfPeerScore {
-  reviewerName: string | null;
-  department: string | null;
-  score: number | null;
   comment: string | null;
+  department: string | null;
+  reviewerName: string | null;
+  score: number | null;
 }
 
 /** 指标三方评分明细（对齐后端 PerfIndicatorBreakdownVO） */
 export interface PerfIndicatorBreakdown {
-  indicatorId: string;
-  name: string;
   category: PerfCategory;
   categoryText: string;
-  weight: number;
-  maxScore: number;
-  selfScore: number | null;
-  selfComment: string | null;
-  managerScore: number | null;
+  indicatorId: string;
   managerComment: string | null;
+  managerScore: number | null;
+  maxScore: number;
+  name: string;
   peerReviews: PerfPeerScore[];
+  selfComment: string | null;
+  selfScore: number | null;
+  weight: number;
 }
 
 /** 指标三方评分明细（供评估详情四 Tab） */
 export function getPerfTaskBreakdown(taskId: number | string) {
-  return request.get<any, ApiResult<PerfIndicatorBreakdown[]>>("performance/task/breakdown", { params: { taskId } });
+  return request.get<any, ApiResult<PerfIndicatorBreakdown[]>>('performance/task/breakdown', { params: { taskId } });
 }
 
 /** 提交评分入参 */
 export interface PerfScoreSubmitPayload {
+  items: Array<{ comment?: string; indicatorId: number | string; score: number }>;
   taskId: number | string;
-  items: Array<{ indicatorId: number | string; score: number; comment?: string }>;
 }
 
 /** 提交评分 */
 export function submitPerfScore(data: PerfScoreSubmitPayload) {
-  return request.post<any, ApiResult<boolean>>("performance/task/submitScore", data);
+  return request.post<any, ApiResult<boolean>>('performance/task/submitScore', data);
 }
 
 // ==================== Phase3：校准 / 结果汇总 / 导出 ====================
 
 /** 校准入参 */
 export interface PerfCalibratePayload {
-  taskId: number | string;
   finalScore: number;
   grade?: string;
   reason?: string;
+  taskId: number | string;
 }
 
 /** HR 校准（确认/调整最终分与评级，任务→已完成） */
 export function calibratePerfTask(data: PerfCalibratePayload) {
-  return request.post<any, ApiResult<boolean>>("performance/task/calibrate", data);
+  return request.post<any, ApiResult<boolean>>('performance/task/calibrate', data);
 }
 
 /** 等级分布项 */
 export interface PerfGradeCount {
-  grade: string;
   count: number;
+  grade: string;
 }
 
 /** 方案结果汇总（对齐后端 PerfPlanResultVO） */
 export interface PerfPlanResult {
+  avgScore: number | null;
+  completionRate: number;
+  finishedTasks: number;
+  grades: PerfGradeCount[];
   planId: string;
   planName: string;
   totalTasks: number;
-  finishedTasks: number;
-  completionRate: number;
-  avgScore: number | null;
-  grades: PerfGradeCount[];
 }
 
 /** 方案结果汇总 */
 export function getPerfPlanResult(planId: number | string) {
-  return request.get<any, ApiResult<PerfPlanResult>>("performance/task/result", { params: { planId } });
+  return request.get<any, ApiResult<PerfPlanResult>>('performance/task/result', { params: { planId } });
 }
 
 /** 导出方案结果（返回 blob） */
 export function exportPerfResult(planId: number | string) {
-  return request.get<any, { data: Blob; headers: Record<string, string> }>("performance/task/exportResult", {
+  return request.get<any, { data: Blob; headers: Record<string, string> }>('performance/task/exportResult', {
     params: { planId },
-    responseType: "blob",
+    responseType: 'blob'
   });
 }
