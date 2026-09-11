@@ -35,9 +35,9 @@
     "class-variance-authority": "^0.7.1",
     "dayjs": "^1.11.19",
     "input-otp": "^1.4.2",
-    "lucide-react": "^0.562.0",
+    "lucide-react": "catalog:",
     "next-themes": "^0.4.6",
-    "react-day-picker": "^9.13.0",
+    "react-day-picker": "catalog:",
     "sonner": "^1.7.4",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^1.1.2"

@@ -6,14 +6,14 @@ import { buildPricingData } from '../[locale]/pricing-plan/pricing-plan-data';
 const menus: MenuType[] = [
   {
     children: [
-      { desc: '已選功能', icon: 'check', id: 11, parentId: 1, title: '租約管理' },
-      { desc: '舊字段功能', icon: 'minus', id: 12, parentId: 1, title: '賬單管理' }
+      { desc: '已選功能', menuIcon: 'check', menuId: 11, menuTitle: '租約管理', parentId: 1 },
+      { desc: '舊字段功能', menuIcon: 'minus', menuId: 12, menuTitle: '賬單管理', parentId: 1 }
     ],
     desc: '',
-    icon: '',
-    id: 1,
-    parentId: 0,
-    title: '管理功能'
+    menuIcon: '',
+    menuId: 1,
+    menuTitle: '管理功能',
+    parentId: 0
   }
 ];
 
