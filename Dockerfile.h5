@@ -1,0 +1,57 @@
+# syntax=docker/dockerfile:1.7
+
+ARG NODE_IMAGE=node:22.23.2-bookworm-slim
+
+FROM ${NODE_IMAGE} AS pnpm-base
+
+ENV PNPM_HOME=/pnpm
+ENV PATH=$PNPM_HOME:$PATH
+
+RUN corepack enable && corepack prepare pnpm@10.17.0 --activate
+
+WORKDIR /workspace
+
+FROM pnpm-base AS dependencies
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+
+RUN pnpm fetch --frozen-lockfile
+
+FROM pnpm-base AS builder
+
+ENV NEXT_TELEMETRY_DISABLED=1
+
+COPY --from=dependencies /pnpm/store /pnpm/store
+COPY . .
+
+RUN pnpm install --frozen-lockfile --offline
+RUN --mount=type=secret,id=h5_env,target=/workspace/apps/web-h5/.env,required=true \
+    --mount=type=secret,id=h5_env_local,target=/workspace/apps/web-h5/.env.local,required=true \
+    pnpm build:h5 \
+    && rm -f \
+      /workspace/apps/web-h5/.next/standalone/apps/web-h5/.env \
+      /workspace/apps/web-h5/.next/standalone/apps/web-h5/.env.local \
+      /workspace/apps/web-h5/.next/standalone/apps/web-h5/.env.production \
+      /workspace/apps/web-h5/.next/standalone/apps/web-h5/.env.production.local
+
+FROM ${NODE_IMAGE} AS runner
+
+ENV HOSTNAME=0.0.0.0
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
+ENV NODE_OPTIONS=--max-old-space-size=4096
+ENV PORT=3200
+
+WORKDIR /app
+
+COPY --from=builder --chown=node:node /workspace/apps/web-h5/.next/standalone ./
+COPY --from=builder --chown=node:node /workspace/apps/web-h5/public ./apps/web-h5/public
+COPY --from=builder --chown=node:node /workspace/apps/web-h5/.next/static ./apps/web-h5/.next/static
+
+USER node
+
+EXPOSE 3200
+
+WORKDIR /app/apps/web-h5
+
+CMD ["node", "server.js"]

@@ -1,0 +1,74 @@
+name: go-tech-h5-test
+
+services:
+  h5:
+    image: go-tech-h5:test
+    build:
+      context: .
+      dockerfile: Dockerfile.h5
+      args:
+        NODE_IMAGE: ${H5_NODE_IMAGE:-docker.1ms.run/node:22.23.2-bookworm-slim}
+      secrets:
+        - h5_env
+        - h5_env_local
+    env_file:
+      - ./apps/web-h5/.env
+      - ./apps/web-h5/.env.local
+    environment:
+      HOSTNAME: 0.0.0.0
+      NEXT_TELEMETRY_DISABLED: '1'
+      NODE_ENV: production
+      NODE_OPTIONS: --max-old-space-size=4096
+      PORT: '3200'
+    ports:
+      - '127.0.0.1:3200:3200'
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    volumes:
+      - h5_page_blocks:/app/apps/web-h5/public/page-blocks
+      - h5_locales:/app/apps/web-h5/locales
+      - h5_translations:/app/apps/web-h5/translations
+    restart: unless-stopped
+    init: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    pids_limit: 512
+    stop_grace_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - >-
+          const net = require('node:net');
+          const socket = net.connect(3200, '127.0.0.1', () => {
+            socket.end();
+            process.exit(0);
+          });
+          socket.setTimeout(3000, () => {
+            socket.destroy();
+            process.exit(1);
+          });
+          socket.on('error', () => process.exit(1));
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+secrets:
+  h5_env:
+    file: ./apps/web-h5/.env
+  h5_env_local:
+    file: ./apps/web-h5/.env.local
+
+volumes:
+  h5_page_blocks:
+  h5_locales:
+  h5_translations:

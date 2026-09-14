@@ -136,8 +136,8 @@ export default function Roles() {
       departmentId: r.departmentId,
       level: r.level ?? '',
       salaryRange: r.salaryRange ?? '',
-      salaryMin: r.salaryMin != null ? String(r.salaryMin) : '',
-      salaryMax: r.salaryMax != null ? String(r.salaryMax) : '',
+      salaryMin: r.salaryMin !== null ? String(r.salaryMin) : '',
+      salaryMax: r.salaryMax !== null ? String(r.salaryMax) : '',
       description: r.description ?? ''
     });
     // 编辑：回显该职位已授权的菜单
@@ -149,7 +149,7 @@ export default function Roles() {
   };
 
   const handleSave = async () => {
-    if (!form.title.trim() || form.departmentId == null) {
+    if (!form.title.trim() || form.departmentId === null) {
       toast.error(t('請填寫必填欄位（名稱、所屬部門）'));
       return;
     }
@@ -370,7 +370,7 @@ export default function Roles() {
                   {t('所屬部門')} <span className="text-destructive">*</span>
                 </Label>
                 <Select
-                  value={form.departmentId != null ? String(form.departmentId) : ''}
+                  value={form.departmentId !== null ? String(form.departmentId) : ''}
                   onValueChange={v => setForm({ ...form, departmentId: v ? Number(v) : undefined })}
                 >
                   <SelectTrigger>
@@ -473,12 +473,12 @@ export default function Roles() {
       <AssignMenuDialog
         positionId={assignFor?.id ?? null}
         positionTitle={assignFor?.title}
-        open={assignFor != null}
+        open={assignFor !== null}
         onClose={() => setAssignFor(null)}
       />
 
       {/* 删除确认 */}
-      <AlertDialog open={confirmId != null} onOpenChange={o => !o && setConfirmId(null)}>
+      <AlertDialog open={confirmId !== null} onOpenChange={o => !o && setConfirmId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{t('確認刪除此職位？')}</AlertDialogTitle>
@@ -488,7 +488,7 @@ export default function Roles() {
             <AlertDialogCancel>{t('取消')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
-                if (confirmId != null) handleDelete(confirmId);
+                if (confirmId !== null) handleDelete(confirmId);
                 setConfirmId(null);
               }}
             >
