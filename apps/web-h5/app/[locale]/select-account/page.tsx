@@ -1,6 +1,7 @@
 'use client';
 
 import { Badge as CustomBadge } from '@go-tech-frontend/ui';
+import type { PackageBizCode } from '@go-tech/types';
 import { Button, toast } from '@go-tech/web-ui';
 import { Badge } from 'antd';
 import dayjs from 'dayjs';
@@ -41,7 +42,7 @@ const SelectAccount = () => {
   };
 
   const handleEnter = async (tenant: Tenant) => {
-    const response = await fetch(`/go-tech/platform/platformCustomer/gotoPmsCode?tenantId=${tenant!.tenantId}`, {
+    const response = await fetch(`/go-tech/platform/platformCustomer/gotoCode?tenantId=${tenant!.tenantId}`, {
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
@@ -49,8 +50,24 @@ const SelectAccount = () => {
       }
     }).then(res => res.json());
     if (response.code === 200) {
-      const uri = `tenantCallback?code=${response.data}`;
-      generateCallback(uri);
+      const bizCode: PackageBizCode = tenant.bizCode;
+      if (bizCode === 'pms') {
+        const uri = `tenantCallback?code=${response.data}`;
+        generateCallback(uri);
+        return;
+      }
+
+      if (bizCode === 'hr') {
+        const hrTrialHost = process.env.NEXT_PUBLIC_HR_TRIAL_HOST;
+        if (!hrTrialHost) {
+          toast.error(t('hrTrialHostMissing'));
+          return;
+        }
+
+        const targetUrl = new URL(hrTrialHost);
+        targetUrl.searchParams.set('code', String(response.data));
+        window.open(targetUrl.toString(), '_blank');
+      }
     }
   };
 

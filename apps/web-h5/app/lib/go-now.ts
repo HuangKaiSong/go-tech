@@ -13,7 +13,7 @@ function completeCallback(uri: string, generateCallback?: (uri: string) => void)
     return;
   }
 
-  const trialHost = process.env.NEXT_PUBLIC_TRIAL_HOST;
+  const trialHost = process.env.NEXT_PUBLIC_PMS_TRIAL_HOST;
   window.open(`${trialHost}/oauth/${uri}`, '_blank');
 }
 

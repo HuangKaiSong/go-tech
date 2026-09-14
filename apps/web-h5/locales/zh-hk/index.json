@@ -291,6 +291,7 @@
 		"tenantsLoadFailed": "帳戶載入失敗，請稍後再試。",
 		"retry": "重新載入",
 		"noOrderId": "当前数据无 orderId 或者 orderId 不合法!",
+		"hrTrialHostMissing": "HR 系統地址尚未配置，請聯絡管理員。",
 		"vEmailRequired": "請輸入郵箱",
 		"vEmailInvalid": "請輸入正確的郵箱",
 		"vNameRequired": "請輸入用戶名",

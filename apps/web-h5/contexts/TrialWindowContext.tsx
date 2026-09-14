@@ -30,7 +30,7 @@ export function TrialWindowProvider({ children }: { children: ReactNode }) {
   const pm2Window = useRef<Window | null>(null);
 
   const openPmsCallback = useCallback((uri: string) => {
-    const trialHost = process.env.NEXT_PUBLIC_TRIAL_HOST;
+    const trialHost = process.env.NEXT_PUBLIC_PMS_TRIAL_HOST;
     pm2Window.current = window.open(`${trialHost}/oauth/${uri}`, '_blank');
   }, []);
 

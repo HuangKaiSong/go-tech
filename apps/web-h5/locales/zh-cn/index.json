@@ -291,6 +291,7 @@
     "tenantsLoadFailed": "帐户加载失败，请稍后再试。",
     "retry": "重新加载",
     "noOrderId": "当前数据无 orderId 或者 orderId 不合法!",
+    "hrTrialHostMissing": "HR 系统地址尚未配置，请联系管理员。",
     "vEmailRequired": "请输入邮箱",
     "vEmailInvalid": "请输入正确的邮箱",
     "vNameRequired": "请输入用户名",

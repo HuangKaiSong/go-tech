@@ -290,6 +290,7 @@
     "tenantsLoadFailed": "Failed to load accounts. Please try again.",
     "retry": "Try again",
     "noOrderId": "Invalid or missing orderId in current data!",
+    "hrTrialHostMissing": "The HR system URL is not configured. Please contact an administrator.",
     "vEmailRequired": "Please enter your email",
     "vEmailInvalid": "Please enter a valid email",
     "vNameRequired": "Please enter a username",
