@@ -2,7 +2,6 @@
 
 import { Button } from '@go-tech-frontend/ui';
 import type { PackageBizCode } from '@go-tech/types';
-import { cn } from '@go-tech/utils';
 import { Building2, Check, Minus, Users } from 'lucide-react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import Footer from '@/app/components/Footer';
@@ -19,6 +18,7 @@ const getIconHref = (value: string) => {
 };
 
 const MIN_GRID_COLS = 2;
+const getGridTemplate = (count: number) => `repeat(${count}, minmax(0, 1fr))`;
 
 const PricingPlan = ({ pricingCatalog }: { pricingCatalog: Record<PackageBizCode, PricingPlanData> }) => {
   const pathname = usePathname();
@@ -27,7 +27,9 @@ const PricingPlan = ({ pricingCatalog }: { pricingCatalog: Record<PackageBizCode
   const pricingData = pricingCatalog[product];
 
   const gridLength = pricingData.plans.length;
-  const gridColCalss = `grid-cols-${MIN_GRID_COLS + gridLength}`;
+  const pricingGridStyle = {
+    gridTemplateColumns: getGridTemplate(MIN_GRID_COLS + gridLength)
+  };
 
   const selectProduct = (nextProduct: PackageBizCode) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -101,7 +103,7 @@ const PricingPlan = ({ pricingCatalog }: { pricingCatalog: Record<PackageBizCode
             <div className="overflow-x-auto">
               <div className="border border-primary/40 bg-primary-foreground rounded-lg overflow-hidden min-w-200">
                 {/* Header Row */}
-                <div className={cn(gridColCalss, 'grid bg-muted/30')}>
+                <div className="grid bg-muted/30" style={pricingGridStyle}>
                   <div className="border-r border-primary/40 grid grid-rows-7 text-center items-center">
                     <div className="row-span-4 py-4 text-3xl font-bold text-foreground self-end">
                       <DynamicText text="月費" />
@@ -142,21 +144,22 @@ const PricingPlan = ({ pricingCatalog }: { pricingCatalog: Record<PackageBizCode
 
                 {/* Feature Categories */}
                 {pricingData.categories.map((category, catIndex) => {
-                  const featuresLangth = category.features.length;
+                  const categoryGridStyle = category.features.length
+                    ? { gridTemplateRows: getGridTemplate(category.features.length) }
+                    : undefined;
 
                   return (
                     <div
                       key={catIndex}
-                      className={`border-t last:border-b-0 border-primary/40 box-border grid grid-rows-${featuresLangth} relative`}
+                      className="relative box-border grid border-t border-primary/40 last:border-b-0"
+                      style={categoryGridStyle}
                     >
                       {category.features.map((feature, fIndex) => {
                         return (
                           <div
                             key={`${catIndex}-${fIndex}`}
-                            className={cn(
-                              gridColCalss,
-                              'grid hover:bg-muted/40 transition-colors border-b border-primary/40 last:border-none'
-                            )}
+                            className="grid border-b border-primary/40 transition-colors last:border-none hover:bg-muted/40"
+                            style={pricingGridStyle}
                           >
                             <div className="border-r border-primary/40 flex items-center">
                               <div className="w-14 font-medium text-primary" />
@@ -207,7 +210,7 @@ const PricingPlan = ({ pricingCatalog }: { pricingCatalog: Record<PackageBizCode
                 {/* Add-ons Section */}
                 {pricingData.addons.map((addon, aIndex) => {
                   return (
-                    <div key={aIndex} className={cn(gridColCalss, 'grid border-t border-primary/40 bg-muted/10')}>
+                    <div key={aIndex} className="grid border-t border-primary/40 bg-muted/10" style={pricingGridStyle}>
                       <div className="col-span-2 flex items-stretch border-r border-primary/40">
                         <div
                           className="flex w-14 items-center justify-center font-medium tracking-widest text-primary border-r border-primary/40"

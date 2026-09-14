@@ -22,7 +22,6 @@ export default async function Layout() {
   const catalog = buildPackageCatalog(packageResponse);
   const pmsMenus = (pmsMenuResponse as HttpBaseResponse<MenuType[]> | undefined)?.data || [];
   const hrMenus = (hrMenuResponse as HttpBaseResponse<MenuType[]> | undefined)?.data || [];
-  console.log(catalog.pms);
 
   return (
     <PageClient

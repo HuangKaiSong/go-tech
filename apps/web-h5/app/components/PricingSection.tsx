@@ -79,9 +79,9 @@ const PricingSection = ({ catalog }: { catalog: PackageCatalog }) => {
 
         {product === 'pms' && plans.length > 0 ? (
           <div className="grid grid-cols-3 items-stretch max-w-5xl gap-5 mx-auto">
-            {plans.map(plan => (
+            {plans.map((plan, i) => (
               <PackageCard
-                key={plan.packageCode}
+                key={plan.packageCode ?? i}
                 plan={toPackageCardPlan(plan)}
                 product="pms"
                 TextComponent={DynamicText}
@@ -140,6 +140,7 @@ const PricingSection = ({ catalog }: { catalog: PackageCatalog }) => {
         <div className="mt-12 space-y-4 text-center">
           <Link
             href={`/pricing-plan?product=${product}`}
+            prefetch={false}
             className="inline-flex items-center text-base font-bold text-foreground underline underline-offset-4 transition-colors hover:text-primary"
           >
             <DynamicText text="查看完整的定價方案" />
