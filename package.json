@@ -15,7 +15,7 @@
     "format:check": "oxfmt --check .",
     "type-check": "turbo run type-check",
     "dev:h5": "pnpm --filter web-h5 run dev",
-    "build:h5": "pnpm --filter web-h5 run build",
+    "build:h5": "turbo run build --filter=web-h5",
     "start:h5": "pnpm --filter web-h5 run start",
     "dev:admin": "pnpm --filter web-admin run dev",
     "build:admin": "pnpm --filter web-admin run build",
