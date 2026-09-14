@@ -189,3 +189,15 @@ internal/*                       工程配置（不参与运行时）
 ```
 
 每个阶段建议独立 PR、独立验收。确认上面 5 个决策点后，我可以从阶段 0 开始逐步实施。
+
+
+sf-SybguXydOu@1667884088122294
+O!oMijvKcs0g
+
+百炼 APIKEY = sk-ws-H.EDLEMME.r0b2.MEQCIDD3yyer4LRCwueGyfiWNtqb9T_zaly2OL8P239aJDr_AiBcbH_64alAjpxF7-xTh6wpTuDMI2Fxo7fXtZDQxvSLhw
+API Host = ws-d0bh95ystwvriqip.cn-beijing.maas.aliyuncs.com
+OpenAI 兼容地址 = https://ws-d0bh95ystwvriqip.cn-beijing.maas.aliyuncs.com/compatible-mode/v1
+DashScope = https://ws-d0bh95ystwvriqip.cn-beijing.maas.aliyuncs.com/api/v1
+
+
+sk-ws-H.EDLPPLH.wn2l.MEUCIQCvpUsDZI143rSF4objJ4_GM8XC7qi9M0hPKM-2578oSAIgKj5RRrSZWHpOLT-59QMKAXXLnI1Cu1zznfiRO82g5Z4

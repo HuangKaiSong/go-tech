@@ -20,13 +20,16 @@ RUN --mount=type=cache,id=go-tech-frontend-pnpm-10.17-store,target=/pnpm/store,s
 
 FROM dependencies AS builder
 
+ENV CI=true
 ENV NEXT_TELEMETRY_DISABLED=1
 
 COPY . .
 
 RUN --mount=type=cache,id=go-tech-frontend-pnpm-10.17-store,target=/pnpm/store,sharing=locked \
     pnpm install --frozen-lockfile --offline
-RUN --mount=type=secret,id=h5_env,target=/workspace/apps/web-h5/.env,required=true \
+RUN --mount=type=cache,id=go-tech-frontend-turbo,target=/workspace/.turbo,sharing=locked \
+    --mount=type=cache,id=go-tech-frontend-next-h5,target=/workspace/apps/web-h5/.next/cache,sharing=locked \
+    --mount=type=secret,id=h5_env,target=/workspace/apps/web-h5/.env,required=true \
     --mount=type=secret,id=h5_env_local,target=/workspace/apps/web-h5/.env.local,required=true \
     pnpm build:h5 \
     && rm -f \
