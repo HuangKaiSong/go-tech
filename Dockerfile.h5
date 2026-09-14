@@ -16,7 +16,8 @@ FROM pnpm-base AS dependencies
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 
 RUN --mount=type=cache,id=go-tech-frontend-pnpm-10.17-store,target=/pnpm/store,sharing=locked \
-    pnpm fetch --frozen-lockfile
+    pnpm fetch --frozen-lockfile \
+    && rm -rf /workspace/node_modules
 
 FROM dependencies AS builder
 
