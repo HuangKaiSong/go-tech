@@ -15,16 +15,17 @@ FROM pnpm-base AS dependencies
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 
-RUN pnpm fetch --frozen-lockfile
+RUN --mount=type=cache,id=go-tech-frontend-pnpm-10.17-store,target=/pnpm/store,sharing=locked \
+    pnpm fetch --frozen-lockfile
 
-FROM pnpm-base AS builder
+FROM dependencies AS builder
 
 ENV NEXT_TELEMETRY_DISABLED=1
 
-COPY --from=dependencies /pnpm/store /pnpm/store
 COPY . .
 
-RUN pnpm install --frozen-lockfile --offline
+RUN --mount=type=cache,id=go-tech-frontend-pnpm-10.17-store,target=/pnpm/store,sharing=locked \
+    pnpm install --frozen-lockfile --offline
 RUN --mount=type=secret,id=h5_env,target=/workspace/apps/web-h5/.env,required=true \
     --mount=type=secret,id=h5_env_local,target=/workspace/apps/web-h5/.env.local,required=true \
     pnpm build:h5 \
