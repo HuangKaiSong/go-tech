@@ -45,6 +45,8 @@
     "zod": "catalog:utils"
   },
   "devDependencies": {
+    "@testing-library/react": "catalog:dev",
+    "@testing-library/user-event": "catalog:dev",
     "@go-tech/tsconfig": "workspace:*",
     "@go-tech/types": "workspace:*",
     "@tailwindcss/postcss": "catalog:",
