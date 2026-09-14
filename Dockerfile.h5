@@ -31,7 +31,7 @@ RUN --mount=type=cache,id=go-tech-frontend-turbo,target=/workspace/.turbo,sharin
     --mount=type=cache,id=go-tech-frontend-next-h5,target=/workspace/apps/web-h5/.next/cache,sharing=locked \
     --mount=type=secret,id=h5_env,target=/workspace/apps/web-h5/.env,required=true \
     --mount=type=secret,id=h5_env_local,target=/workspace/apps/web-h5/.env.local,required=true \
-    pnpm build:h5 \
+    pnpm exec turbo run build --filter=web-h5 \
     && rm -f \
       /workspace/apps/web-h5/.next/standalone/apps/web-h5/.env \
       /workspace/apps/web-h5/.next/standalone/apps/web-h5/.env.local \
