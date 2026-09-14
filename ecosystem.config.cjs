@@ -22,7 +22,7 @@ module.exports = {
       cwd: feedbackAiRoot,
       script: path.join(feedbackAiRoot, '.venv/bin/uvicorn'),
       interpreter: 'none',
-      args: 'feedback_ai.main:app --host 127.0.0.1 --port 8100 --workers 2',
+      args: 'feedback_ai.main:app --host 0.0.0.0 --port 8100 --workers 2',
       autorestart: true,
       restart_delay: 3000,
       max_memory_restart: '1G',

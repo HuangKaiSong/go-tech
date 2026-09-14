@@ -21,13 +21,13 @@ services:
       NODE_OPTIONS: --max-old-space-size=4096
       PORT: '3200'
     ports:
-      - '127.0.0.1:3200:3200'
+      - '0.0.0.0:3200:3200'
     extra_hosts:
       - 'host.docker.internal:host-gateway'
     volumes:
-      - h5_page_blocks:/app/apps/web-h5/public/page-blocks
-      - h5_locales:/app/apps/web-h5/locales
-      - h5_translations:/app/apps/web-h5/translations
+      - './apps/web-h5/public/page-blocks:/app/apps/web-h5/public/page-blocks:Z'
+      - './apps/web-h5/locales:/app/apps/web-h5/locales:Z'
+      - './apps/web-h5/translations:/app/apps/web-h5/translations:Z'
     restart: unless-stopped
     init: true
     security_opt:
