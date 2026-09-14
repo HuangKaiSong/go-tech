@@ -3,8 +3,12 @@ import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 import { type Rewrite } from 'next/dist/lib/load-custom-routes';
 
+const workspaceRoot = path.resolve(process.cwd(), '../..');
+
 const nextConfig: NextConfig = {
   /* config options here */
+  output: 'standalone',
+  outputFileTracingRoot: workspaceRoot,
   reactCompiler: true,
   reactStrictMode: false,
   cleanDistDir: true,
@@ -52,7 +56,7 @@ const nextConfig: NextConfig = {
   //   serverFunctions: true
   // },
   turbopack: {
-    root: path.join(/*turbopackIgnore: true*/ __dirname, '../../')
+    root: workspaceRoot
   }
 };
 
