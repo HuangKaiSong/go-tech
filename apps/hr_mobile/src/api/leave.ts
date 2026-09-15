@@ -21,3 +21,16 @@ export function getLeaveTypes() {
     params: { onlyEnabled: true },
   });
 }
+
+/** 当前员工某假别的可用额度（请假前预览剩余天数）。tracked=false 表示该假别不追踪额度 */
+export interface MyLeaveBalance {
+  tracked: boolean;
+  leaveCode?: string;
+  remaining?: number;
+}
+
+export function getMyLeaveBalance(leaveCode: string) {
+  return request.get<any, ApiResult<MyLeaveBalance>>("leave/balance/my", {
+    params: { leaveCode },
+  });
+}

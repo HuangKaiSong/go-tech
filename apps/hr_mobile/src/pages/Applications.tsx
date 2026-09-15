@@ -163,6 +163,16 @@ const Applications = () => {
     }
   };
 
+  // 由首頁「待辦事項」跳转而来：切到「待審批」Tab；带单号则直接打开该单审批详情
+  useEffect(() => {
+    const state = location.state as { openApprovalId?: number; openApprovalTab?: boolean } | null;
+    if (!state?.openApprovalId && !state?.openApprovalTab) return;
+    setActiveTab(1);
+    if (state.openApprovalId) openDetail(state.openApprovalId);
+    navigate(location.pathname, { replace: true, state: null });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state]);
+
   const handleBack = () => {
     setViewMode("list");
     setDetail(null);

@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "turbo run dev",
+    "dev:hr": "turbo run dev --filter=hr-admin --filter=hr_mobile",
     "build": "turbo run build",
     "db:seed": "tsx --env-file=apps/web-h5/.env apps/web-h5/db/seeds/index.ts",
     "lint": "oxlint",

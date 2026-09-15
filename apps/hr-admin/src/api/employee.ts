@@ -121,6 +121,11 @@ export function login(data: { password: string; phone: string }) {
   return request.post<any, ApiResult<LoginResult>>('employee/login', data);
 }
 
+/** 平台免密登錄：憑平台寫入 Redis 的一次性 code 換取登入態 */
+export function loginByCode(code: string) {
+  return request.get<any, ApiResult<LoginResult>>("employee/loginByCode", { params: { code } });
+}
+
 /** 分頁查詢員工列表 */
 export function getEmployeeList(params: EmployeePageParams) {
   return request.get<any, ApiResult<PageResult<Employee>>>('employee/list', { params });

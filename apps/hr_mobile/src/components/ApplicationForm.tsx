@@ -7,7 +7,7 @@ import {
   uploadAttachment,
 } from "@/api/approval";
 import { type EmployeeOption, getActiveEmployeeOptions } from "@/api/employee";
-import { getLeaveTypes } from "@/api/leave";
+import { getLeaveTypes, getMyLeaveBalance } from "@/api/leave";
 import { useQuery } from "@tanstack/react-query";
 
 export type { ApplicationTypeKey };
@@ -181,6 +181,13 @@ const ApplicationForm = ({ initial, onBack, onSubmit, typeKey }: Props) => {
       setLeaveType(leaveCategories[0]);
     }
   }, [leaveCategories, leaveType]);
+  // 选中假别的 code → 请假前预览可用额度（仅年假/补休等追踪额度的假别返回 tracked=true）
+  const selectedLeaveCode = leaveNameToCode[leaveType] ?? LEAVE_NAME_CODE_FALLBACK[leaveType] ?? leaveType;
+  const { data: myBalance } = useQuery({
+    queryKey: ["myLeaveBalance", selectedLeaveCode],
+    queryFn: async () => (await getMyLeaveBalance(selectedLeaveCode)).data,
+    enabled: typeKey === "leave" && !!selectedLeaveCode,
+  });
   const [leaveStart, setLeaveStart] = useState("");
   const [leaveEnd, setLeaveEnd] = useState("");
   const [leaveHalf, setLeaveHalf] = useState<"am" | "full" | "pm">("full");
@@ -276,6 +283,10 @@ const ApplicationForm = ({ initial, onBack, onSubmit, typeKey }: Props) => {
     if (typeKey === "leave") {
       if (!leaveStart || !leaveEnd) return err("請選擇起止日期");
       if (!leaveDays) return err("結束日期需不早於開始日期");
+      // 追蹤額度的假別（年假/補休）：提交前先擋，避免走完流程才報餘額不足
+      if (myBalance?.tracked && leaveDays > (myBalance.remaining ?? 0)) {
+        return err(`${leaveType}餘額不足，目前剩餘 ${myBalance.remaining ?? 0} 天，本次申請 ${leaveDays} 天`);
+      }
       if (!reason.trim()) return err("請填寫請假事由");
       const leaveCode = leaveNameToCode[leaveType] ?? LEAVE_NAME_CODE_FALLBACK[leaveType] ?? leaveType;
       return {
@@ -410,6 +421,12 @@ const ApplicationForm = ({ initial, onBack, onSubmit, typeKey }: Props) => {
           <>
             <Field label="請假類別" required>
               <ChipGroup options={leaveCategories} value={leaveType} onChange={setLeaveType} />
+              {myBalance?.tracked && (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  目前可用{leaveType}額度{" "}
+                  <span className="font-semibold text-primary">{myBalance.remaining ?? 0}</span> 天
+                </p>
+              )}
             </Field>
             <div className="grid grid-cols-2 gap-3">
               <Field label="開始日期" required>

@@ -124,7 +124,7 @@ const Dashboard = () => {
       <div className="px-5 mt-5">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-semibold text-foreground">待辦事項</h3>
-          <button onClick={() => navigate("/applications")} className="flex items-center text-xs text-primary">
+          <button onClick={() => navigate("/applications", { state: { openApprovalTab: true } })} className="flex items-center text-xs text-primary">
             查看全部 <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -148,7 +148,7 @@ const Dashboard = () => {
               return (
                 <button
                   key={item.id}
-                  onClick={() => navigate("/applications")}
+                  onClick={() => navigate("/applications", { state: { openApprovalId: item.id } })}
                   className="w-full text-left bg-card rounded-xl border border-border p-3.5 flex items-center gap-3 active:scale-[0.99] transition-transform"
                 >
                   <div className="flex-1 min-w-0">

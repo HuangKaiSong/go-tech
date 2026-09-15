@@ -547,14 +547,44 @@ export default function Offboarding() {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  // 從員工列表「辦理離職」跳轉：自動打開新增彈窗並預選該員工；隨後清除路由 state 避免刷新重觸發
+  // 從員工列表「辦理離職」跳轉：先判該員工是否仍在可建單的在職名單，
+  // 在名單才自動打開新增彈窗並預選；已建過離職單則不彈窗，直接停留在離職列表。
+  // 隨後清除路由 state 避免刷新重觸發。
   useEffect(() => {
     const st = location.state as { employeeId?: number | string; openAdd?: boolean } | null;
-    if (st?.openAdd) {
-      setPresetEmployeeId(st.employeeId ?? null);
+    if (!st?.openAdd) return;
+    const empId = st.employeeId ?? null;
+    navigate(location.pathname, { replace: true, state: null });
+    if (empId == null) {
+      setPresetEmployeeId(null);
       setAddOpen(true);
-      navigate(location.pathname, { replace: true, state: null });
+      return;
     }
+    getActiveEmployees()
+      .then(async res => {
+        const buildable = (res.data || []).some(e => String(e.id) === String(empId));
+        if (buildable) {
+          setPresetEmployeeId(empId);
+          setAddOpen(true);
+          return;
+        }
+        // 已建立離職單：定位該員工的離職單並直接跳到其詳情
+        try {
+          const listRes = await getOffboardingList({ current: 1, size: 200 });
+          const ticket = (listRes.data.records || []).find(it => String(it.employeeId) === String(empId));
+          if (ticket) {
+            navigate(`/employees/offboarding/${ticket.id}`);
+          } else {
+            toast.info(t('該員工已建立離職單，已為您開啟離職列表'));
+          }
+        } catch {
+          toast.info(t('該員工已建立離職單，已為您開啟離職列表'));
+        }
+      })
+      .catch(() => {
+        setPresetEmployeeId(empId);
+        setAddOpen(true);
+      });
     // oxlint-disable-next-line react/exhaustive-deps
   }, [location.state]);
 
