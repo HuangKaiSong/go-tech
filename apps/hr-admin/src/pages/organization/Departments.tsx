@@ -36,8 +36,12 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
+import { getActiveEmployeeOptions, type EmployeeOption } from '@/api/employee';
 import { hasPerm } from '@/lib/auth';
 import { DEPT_PERM } from '@/lib/perms';
+
+/** Select 的「暫不指派」哨兵值（Radix Select 不允许空字符串 value） */
+const NO_MANAGER = '__none__';
 
 const statusColors: Record<string, string> = {
   啟用: 'bg-success/10 text-success border-success/20',
@@ -50,6 +54,7 @@ const emptyForm = {
   name: '',
   code: '',
   parentId: undefined as number | undefined,
+  managerId: undefined as number | undefined,
   managerName: '',
   phone: '',
   email: '',
@@ -66,6 +71,7 @@ export default function Departments() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState({ ...emptyForm });
   const [confirmId, setConfirmId] = useState<number | null>(null);
+  const [emps, setEmps] = useState<EmployeeOption[]>([]);
 
   const reload = useCallback(() => {
     return getDepartmentList()
@@ -78,6 +84,10 @@ export default function Departments() {
     getDepartmentOptions()
       .then(res => setOptions(res.data ?? []))
       .catch(() => {});
+    // 部門主管候選：在職員工下拉
+    getActiveEmployeeOptions()
+      .then(res => setEmps(res.data ?? []))
+      .catch(() => setEmps([]));
   }, [reload]);
 
   const filtered = list.filter(
@@ -100,6 +110,7 @@ export default function Departments() {
       name: d.name,
       code: d.code,
       parentId: d.parentId,
+      managerId: d.managerId,
       managerName: d.managerName ?? '',
       phone: d.phone ?? '',
       email: d.email ?? '',
@@ -119,6 +130,7 @@ export default function Departments() {
         name: form.name.trim(),
         code: form.code.trim(),
         parentId: form.parentId,
+        managerId: form.managerId,
         managerName: form.managerName.trim() || undefined,
         phone: form.phone.trim() || undefined,
         email: form.email.trim() || undefined,
@@ -347,11 +359,26 @@ export default function Departments() {
               </div>
               <div className="space-y-2">
                 <Label>{t('部門主管')}</Label>
-                <Input
-                  placeholder={t('主管姓名')}
-                  value={form.managerName}
-                  onChange={e => setForm({ ...form, managerName: e.target.value })}
-                />
+                <Select
+                  value={form.managerId != null ? String(form.managerId) : NO_MANAGER}
+                  onValueChange={v => {
+                    const sel = v === NO_MANAGER ? undefined : emps.find(e => String(e.id) === v);
+                    setForm({ ...form, managerId: sel ? sel.id : undefined, managerName: sel ? sel.name : '' });
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('請選擇在職員工')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={NO_MANAGER}>{t('暫不指派')}</SelectItem>
+                    {emps.map(e => (
+                      <SelectItem key={e.id} value={String(e.id)}>
+                        {e.name}
+                        {e.employeeNo ? `（${e.employeeNo}）` : ''}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">

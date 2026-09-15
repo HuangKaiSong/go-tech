@@ -8,7 +8,7 @@ import { getMyProfile } from "@/api/employee";
 
 const menuItems = [
   { icon: FileText, label: "打卡記錄", path: "/clock" },
-  { icon: Shield, label: "安全設置", path: "#" },
+  { icon: Shield, label: "安全設置（修改密碼）", path: "/change-password" },
   { icon: Settings, label: "通知設置", path: "#" },
 ];
 

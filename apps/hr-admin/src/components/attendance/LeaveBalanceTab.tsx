@@ -59,6 +59,9 @@ export function LeaveBalanceTab() {
   const [adjustDays, setAdjustDays] = useState('');
   const [adjustExpire, setAdjustExpire] = useState('');
   const [adjustRemark, setAdjustRemark] = useState('');
+  // 本地今天 / 明天（YYYY-MM-DD）：過期日至少要明天，避免建立即過期的額度桶
+  const todayStr = new Date().toLocaleDateString('en-CA');
+  const minExpire = new Date(Date.now() + 86400000).toLocaleDateString('en-CA');
 
   const { data: balances = [], isLoading } = useQuery({
     queryKey: ['leaveBalances', leaveCode],
@@ -107,6 +110,11 @@ export function LeaveBalanceTab() {
     }
     if (!adjustRemark.trim()) {
       toast.error(t('請填寫調整原因'));
+      return;
+    }
+    // 補發時過期日必須晚於今天，否則額度一建立就過期、無法使用
+    if (days > 0 && adjustExpire && adjustExpire <= todayStr) {
+      toast.error(t('過期日必須晚於今天，請重新選擇'));
       return;
     }
     adjustMut.mutate({
@@ -332,7 +340,7 @@ export function LeaveBalanceTab() {
             {Number(adjustDays) > 0 && (
               <div className="space-y-2">
                 <Label>{t('過期日（留空=永不過期）')}</Label>
-                <Input type="date" value={adjustExpire} onChange={e => setAdjustExpire(e.target.value)} />
+                <Input type="date" min={minExpire} value={adjustExpire} onChange={e => setAdjustExpire(e.target.value)} />
               </div>
             )}
             <div className="space-y-2">

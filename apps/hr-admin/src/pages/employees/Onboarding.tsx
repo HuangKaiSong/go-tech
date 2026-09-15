@@ -451,14 +451,47 @@ export default function Onboarding() {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  // 從員工列表「辦理入職」跳轉：自動打開新增彈窗並預選該員工；隨後清除路由 state 避免刷新重觸發
+  // 從員工列表「辦理入職」跳轉：先判該員工是否仍在待入職名單，
+  // 在名單才自動打開新增彈窗並預選；已建過入職單則不彈窗，直接停留在入職列表。
+  // 隨後清除路由 state 避免刷新重觸發。
   useEffect(() => {
     const st = location.state as { employeeId?: number | string; openAdd?: boolean } | null;
-    if (st?.openAdd) {
-      setPresetEmployeeId(st.employeeId ?? null);
+    if (!st?.openAdd) return;
+    const empId = st.employeeId ?? null;
+    navigate(location.pathname, { replace: true, state: null });
+    if (empId == null) {
+      // 無指定員工：維持原「新增入職」行為
+      setPresetEmployeeId(null);
       setAddOpen(true);
-      navigate(location.pathname, { replace: true, state: null });
+      return;
     }
+    getPendingEmployees()
+      .then(async res => {
+        const inPending = (res.data || []).some(e => String(e.id) === String(empId));
+        if (inPending) {
+          setPresetEmployeeId(empId);
+          setAddOpen(true);
+          return;
+        }
+        // 已建立入職單：定位該員工的入職單並直接跳到其詳情
+        try {
+          const listRes = await getOnboardingList({ current: 1, size: 200 });
+          const ticket = (listRes.data.records || []).find(it => String(it.employeeId) === String(empId));
+          if (ticket) {
+            navigate(`/employees/onboarding/${ticket.id}`);
+          } else {
+            // 兜底：找不到單（可能已取消/超出首頁）則停留在列表並提示
+            toast.info(t('該員工已建立入職單，已為您開啟入職列表'));
+          }
+        } catch {
+          toast.info(t('該員工已建立入職單，已為您開啟入職列表'));
+        }
+      })
+      .catch(() => {
+        // 查名單失敗時退回原行為，讓彈窗內自身校驗兜底
+        setPresetEmployeeId(empId);
+        setAddOpen(true);
+      });
     // oxlint-disable-next-line react/exhaustive-deps
   }, [location.state]);
 

@@ -1,4 +1,6 @@
 {
+  "該員工已建立入職單，已為您開啟入職列表": "This employee already has an onboarding ticket; the onboarding list is now shown",
+  "該員工已建立離職單，已為您開啟離職列表": "This employee already has an offboarding ticket; the offboarding list is now shown",
   "例：60": "e.g. 60",
   "HR 管理系統": "HR Management System",
   "企業人力資源平台": "Enterprise HR Platform",
@@ -1861,5 +1863,9 @@
   "未上傳": "Not uploaded",
   "員工尚未上傳": "Not uploaded by employee",
   "該員工不在可建單的待入職名單中，可能已建立入職單": "This employee is not in the pending-onboarding list; an onboarding ticket may already exist",
-  "該員工不在可建單的在職名單中，可能已建立離職單": "This employee is not in the active-staff list; an offboarding ticket may already exist"
+  "該員工不在可建單的在職名單中，可能已建立離職單": "This employee is not in the active-staff list; an offboarding ticket may already exist",
+  "請選擇在職員工": "Select an active employee",
+  "清除選擇": "Clear selection",
+  "暫不指派": "Unassigned",
+  "過期日必須晚於今天，請重新選擇": "Expiry date must be later than today; please reselect"
 }

@@ -21,3 +21,18 @@ export interface LoginResult {
 export function login(data: { password: string; phone: string }) {
   return request.post<any, ApiResult<LoginResult>>("employee/login", data);
 }
+
+/** 当前登录员工修改密码（校验原密码后写入新密码） */
+export function changePassword(data: { newPassword: string; oldPassword: string }) {
+  return request.post<any, ApiResult<boolean>>("employee/changePassword", data);
+}
+
+/** 忘记密码-发送邮箱验证码 */
+export function sendResetCode(data: { email: string }) {
+  return request.post<any, ApiResult<boolean>>("employee/password/forgot/send", data);
+}
+
+/** 忘记密码-校验验证码并重置密码 */
+export function resetPassword(data: { code: string; email: string; newPassword: string }) {
+  return request.post<any, ApiResult<boolean>>("employee/password/forgot/reset", data);
+}

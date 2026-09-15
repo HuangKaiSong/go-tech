@@ -20,6 +20,8 @@ const Contacts = lazy(() => import('./pages/Contacts'));
 const KPI = lazy(() => import('./pages/KPI'));
 const Notifications = lazy(() => import('./pages/Notifications'));
 const Profile = lazy(() => import('./pages/Profile'));
+const ChangePassword = lazy(() => import('./pages/ChangePassword'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
 const Salary = lazy(() => import('./pages/Salary'));
 const Training = lazy(() => import('./pages/Training'));
 
@@ -41,6 +43,7 @@ const App = () => (
             <Suspense fallback={<PageLoading />}>
               <Routes>
                 <Route path="/" element={<Login />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
                 <Route path="/clock" element={<RequireAuth><ClockIn /></RequireAuth>} />
                 <Route path="/applications" element={<RequireAuth><Applications /></RequireAuth>} />
@@ -48,6 +51,7 @@ const App = () => (
                 <Route path="/kpi" element={<RequireAuth><KPI /></RequireAuth>} />
                 <Route path="/notifications" element={<RequireAuth><Notifications /></RequireAuth>} />
                 <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
+                <Route path="/change-password" element={<RequireAuth><ChangePassword /></RequireAuth>} />
                 <Route path="/training" element={<RequireAuth><Training /></RequireAuth>} />
                 <Route path="/contacts" element={<RequireAuth><Contacts /></RequireAuth>} />
                 <Route path="*" element={<NotFound />} />

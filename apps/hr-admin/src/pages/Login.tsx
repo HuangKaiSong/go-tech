@@ -1,8 +1,8 @@
 import { Building2, Loader2, Lock, LogIn, Phone } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { login } from '@/api/employee';
+import { login, loginByCode, type LoginResult } from '@/api/employee';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -14,7 +14,37 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{ password?: string; phone?: string }>({});
   const [loading, setLoading] = useState(false);
+  // 平台跳转免密登录中：显示整页加载态，避免闪出账号密码表单
+  const [ssoLoading, setSsoLoading] = useState(false);
   const navigate = useNavigate();
+
+  // 缓存登录态（token/用户/路由/权限），密码登录与免密登录共用
+  const applySession = (data: LoginResult) => {
+    setToken(`${data.tokenHead}${data.token}`);
+    setUser({ userId: data.userId, userName: data.userName, employeeNo: data.employeeNo });
+    setRoutes(data.routes);
+    setPerms(data.perms);
+  };
+
+  // 平台开通 HR 后携带一次性 code 跳转进来：读取 code 免密登录，成功后进首页
+  useEffect(() => {
+    const code = new URLSearchParams(window.location.search).get('code');
+    if (!code) return;
+    setSsoLoading(true);
+    loginByCode(code)
+      .then(res => {
+        applySession(res.data);
+        toast.success('登入成功');
+        navigate('/', { replace: true });
+      })
+      .catch((err: any) => {
+        toast.error(err.message || '免密登入失敗，請手動登入');
+        // 去掉 URL 上的 code，避免刷新重复用已失效的 code
+        window.history.replaceState(null, '', window.location.pathname);
+        setSsoLoading(false);
+      });
+    // oxlint-disable-next-line react/exhaustive-deps
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,15 +55,7 @@ export default function Login() {
     if (next.phone || next.password) return;
     setLoading(true);
     try {
-      const res = await login({ phone: phone.trim(), password });
-      // 存入完整 Authorization 值：tokenHead + token
-      setToken(`${res.data.tokenHead}${res.data.token}`);
-      // 緩存當前登入用戶信息，供「負責HR」等場景直接讀取，無需再調接口
-      setUser({ userId: res.data.userId, userName: res.data.userName, employeeNo: res.data.employeeNo });
-      // 緩存可存取菜單路由，供側邊欄按權限過濾
-      setRoutes(res.data.routes);
-      // 緩存權限碼集合，供頁簽可見/欄位編輯/敏感脫敏控制
-      setPerms(res.data.perms);
+      applySession(res.data);
       toast.success('登入成功');
       navigate('/', { replace: true });
     } catch (err: any) {
@@ -42,6 +64,15 @@ export default function Login() {
       setLoading(false);
     }
   };
+
+  if (ssoLoading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-muted/30">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-sm text-muted-foreground">正在登入，請稍候...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4">
