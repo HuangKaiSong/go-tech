@@ -25,11 +25,11 @@ const plan: PackageDraft = {
   detail: { dataCount: 50, originalPrice: 99, extraConfig: { enabled: true, quota: [1, 2] } }
 };
 
-const action: MenuNode = { children: [], id: 4, level: 3, title: '新增租約' };
-const feature: MenuNode = { children: [action], id: 3, level: 2, title: '租約管理' };
-const sibling: MenuNode = { children: [], id: 5, level: 2, title: '單位管理' };
-const group: MenuNode = { children: [feature, sibling], id: 2, level: 1, title: '物業管理' };
-const root: MenuNode = { children: [group], id: 1, level: 0, title: 'PMS' };
+const action: MenuNode = { children: [], menuId: 4, level: 3, menuTitle: '新增租約', parentId: 3 };
+const feature: MenuNode = { children: [action], menuId: 3, level: 2, menuTitle: '租約管理', parentId: 1 };
+const sibling: MenuNode = { children: [], menuId: 5, level: 2, menuTitle: '單位管理', parentId: 1 };
+const group: MenuNode = { children: [feature, sibling], menuId: 2, level: 1, menuTitle: '物業管理', parentId: 1 };
+const root: MenuNode = { children: [group], menuId: 1, level: 0, menuTitle: 'PMS', parentId: 0 };
 const tree = [root];
 
 test('round-trips detail extensions without leaking display fields into the top level', () => {
@@ -140,10 +140,10 @@ test('keeps the existing addon fields and fills parent relationships in each add
           dataCount: '4',
           features: ['行政管理', '打卡管理'],
           menu: [
-            { menuId: '1', menuTitle: root.title, level: 0 },
-            { menuId: '2', menuTitle: group.title, level: 1 },
-            { menuId: '3', menuTitle: feature.title, level: 2 },
-            { menuId: '4', menuTitle: action.title, level: 3 }
+            { menuId: '1', menuTitle: root.menuTitle, level: 0 },
+            { menuId: '2', menuTitle: group.menuTitle, level: 1 },
+            { menuId: '3', menuTitle: feature.menuTitle, level: 2 },
+            { menuId: '4', menuTitle: action.menuTitle, level: 3 }
           ],
           addonMeta: '保留',
           summary: '考勤、假期與審批一站處理'
@@ -190,9 +190,9 @@ test('validates addon name, quantity and price through their existing fields', (
 
 test('uses itemType to control addon quantity and menu requirements', () => {
   const selectedMenu = [
-    { menuId: 1, menuTitle: root.title, level: 0 },
-    { menuId: 2, menuTitle: group.title, level: 1 },
-    { menuId: 3, menuTitle: feature.title, level: 2 }
+    { menuId: 1, menuTitle: root.menuTitle, level: 0 },
+    { menuId: 2, menuTitle: group.menuTitle, level: 1 },
+    { menuId: 3, menuTitle: feature.menuTitle, level: 2 }
   ];
   const permission = buildPackagePayload(
     {
@@ -245,8 +245,8 @@ test('uses itemType to control addon quantity and menu requirements', () => {
 });
 
 test('normalizes menu identifiers before matching saved selections', () => {
-  const parsed = menuTreeSchema.parse([{ id: '4', title: action.title, level: '3', children: null }]);
-  const loaded = parsePackage({ ...plan, detail: { menu: [{ menuId: '4', menuTitle: action.title, level: 3 }] } });
+  const parsed = menuTreeSchema.parse([{ id: '4', title: action.menuTitle, level: '3', children: null }]);
+  const loaded = parsePackage({ ...plan, detail: { menu: [{ menuId: '4', menuTitle: action.menuTitle, level: 3 }] } });
   assert.equal(getMenuChecked(parsed[0], new Set(loaded.detail.menu?.map(item => item.menuId))), true);
 });
 
@@ -272,10 +272,10 @@ test('selects and clears every descendant, including deeply nested actions', () 
 
 test('fills parent relationships when saving an untouched legacy selection', () => {
   const menu = [
-    { menuId: 4, menuTitle: action.title, level: 3, isHighlight: true, permissions: ['create'] },
-    { menuId: 1, menuTitle: root.title, level: 0 },
-    { menuId: 3, menuTitle: feature.title, level: 2, parentId: 999, sortOrder: 7 },
-    { menuId: 2, menuTitle: group.title, level: 1 }
+    { menuId: 4, menuTitle: action.menuTitle, level: 3, isHighlight: true, permissions: ['create'] },
+    { menuId: 1, menuTitle: root.menuTitle, level: 0 },
+    { menuId: 3, menuTitle: feature.menuTitle, level: 2, parentId: 999, sortOrder: 7 },
+    { menuId: 2, menuTitle: group.menuTitle, level: 1 }
   ];
   const loaded = parsePackage({ ...plan, detail: { ...plan.detail, menu } });
   const payload = buildPackagePayload(loaded, tree);
@@ -289,7 +289,7 @@ test('fills parent relationships when saving an untouched legacy selection', () 
     ]
   );
   assert.equal(
-    payload.detail.menu?.some(item => item.menuId === sibling.id),
+    payload.detail.menu?.some(item => item.menuId === sibling.menuId),
     false
   );
   assert.equal(payload.detail.menu?.[0].isHighlight, true);
@@ -297,7 +297,7 @@ test('fills parent relationships when saving an untouched legacy selection', () 
   assert.equal(payload.detail.menu?.[2].sortOrder, 7);
   assert.equal(loaded.detail.menu?.[0].parentId, undefined);
   assert.equal(loaded.detail.menu?.[2].parentId, 999);
-  assert.deepEqual(getPackageFeatures(toPackageCardPlan(payload)), [action.title]);
+  assert.deepEqual(getPackageFeatures(toPackageCardPlan(payload)), [action.menuTitle]);
   const reloaded = parsePackage(JSON.parse(JSON.stringify(payload)));
   assert.deepEqual(reloaded.detail.menu, payload.detail.menu);
   assert.equal(getMenuChecked(feature, new Set(reloaded.detail.menu?.map(item => item.menuId))), true);
@@ -305,16 +305,18 @@ test('fills parent relationships when saving an untouched legacy selection', () 
 
 test('distinguishes parents at the same level across multiple roots, including id zero', () => {
   const firstRoot: MenuNode = {
-    children: [{ children: [], id: 10, level: 1, title: '新增' }],
-    id: 0,
+    children: [{ children: [], menuId: 10, level: 1, menuTitle: '新增', parentId: 1 }],
+    menuId: 1,
     level: 0,
-    title: '管理層'
+    menuTitle: '管理層',
+    parentId: 0
   };
   const secondRoot: MenuNode = {
-    children: [{ children: [], id: 20, level: 1, title: '新增' }],
-    id: 8,
+    children: [{ children: [], menuId: 20, level: 1, menuTitle: '新增', parentId: 8 }],
+    menuId: 8,
+    parentId: 0,
     level: 0,
-    title: '業務層'
+    menuTitle: '業務層'
   };
   const roots = [firstRoot, secondRoot];
   const first = toggleMenuSelection({ tree: roots, current: [], target: firstRoot, checked: true });
@@ -335,7 +337,7 @@ test('distinguishes parents at the same level across multiple roots, including i
 });
 
 test('normalizes and validates saved parent identifiers while accepting legacy snapshots', () => {
-  const menuItem = { menuId: '4', menuTitle: action.title, level: 3 };
+  const menuItem = { menuId: '4', menuTitle: action.menuTitle, level: 3 };
   for (const [raw, expected] of [
     ['3', 3],
     [0, 0],
@@ -382,7 +384,7 @@ test('preserves sibling metadata and saved menus absent from the fetched tree', 
   const selected = toggleMenuSelection({ tree, current, target: action, checked: true });
   assert.deepEqual(
     selected.find(item => item.menuId === 5),
-    { ...current[0], parentId: group.id }
+    { ...current[0], parentId: group.menuId }
   );
   assert.deepEqual(
     selected.find(item => item.menuId === 99),

@@ -16,21 +16,21 @@ interface MenuNodeProps {
 function MenuItemRow({ idPrefix, node, onToggle, selected }: MenuNodeProps) {
   const checked = getMenuChecked(node, selected);
   const actions = flattenMenu(node.children);
-  const actionCount = actions.filter(action => selected.has(action.id)).length;
+  const actionCount = actions.filter(action => selected.has(action.menuId)).length;
 
   return (
     <li className={`space-y-2 px-3 py-3 transition-colors ${checked !== false ? 'bg-primary/[0.03]' : ''}`}>
       <div className="flex flex-wrap items-center gap-2">
         <Checkbox
-          id={`${idPrefix}-menu-${node.id}`}
+          id={`${idPrefix}-menu-${node.menuId}`}
           checked={checked}
           onCheckedChange={value => onToggle(node, value === true)}
         />
         <Label
-          htmlFor={`${idPrefix}-menu-${node.id}`}
+          htmlFor={`${idPrefix}-menu-${node.menuId}`}
           className={`cursor-pointer text-sm ${checked !== false ? 'font-medium text-foreground' : 'font-normal text-muted-foreground'}`}
         >
-          {node.title}
+          {node.menuTitle}
         </Label>
         {actions.length > 0 && (
           <>
@@ -43,7 +43,7 @@ function MenuItemRow({ idPrefix, node, onToggle, selected }: MenuNodeProps) {
                 variant="ghost"
                 size="sm"
                 className="h-7 px-2 text-xs text-primary"
-                aria-label={`全選${node.title}的功能`}
+                aria-label={`全選${node.menuTitle}的功能`}
                 onClick={() => onToggle(node, true)}
               >
                 全選
@@ -53,7 +53,7 @@ function MenuItemRow({ idPrefix, node, onToggle, selected }: MenuNodeProps) {
                 variant="ghost"
                 size="sm"
                 className="h-7 px-2 text-xs text-muted-foreground"
-                aria-label={`取消${node.title}的全部功能`}
+                aria-label={`取消${node.menuTitle}的全部功能`}
                 onClick={() => onToggle(node, false)}
               >
                 全不選
@@ -68,7 +68,7 @@ function MenuItemRow({ idPrefix, node, onToggle, selected }: MenuNodeProps) {
             const actionChecked = getMenuChecked(action, selected);
             return (
               <button
-                key={action.id}
+                key={action.menuId}
                 type="button"
                 aria-pressed={actionChecked === 'indeterminate' ? 'mixed' : actionChecked}
                 onClick={() => onToggle(action, actionChecked !== true)}
@@ -80,7 +80,7 @@ function MenuItemRow({ idPrefix, node, onToggle, selected }: MenuNodeProps) {
                     : 'border-border bg-background text-muted-foreground hover:bg-muted/60'
                 )}
               >
-                {action.title}
+                {action.menuTitle}
               </button>
             );
           })}
@@ -95,7 +95,7 @@ function MenuGroup({ idPrefix, node, onToggle, selected }: MenuNodeProps) {
   const items = node.children.length ? node.children : [node];
   const selectedCount = items.filter(item => getMenuChecked(item, selected) !== false).length;
   const allChecked = items.every(item => getMenuChecked(item, selected) === true);
-  const contentId = `${idPrefix}-menu-group-${node.id}`;
+  const contentId = `${idPrefix}-menu-group-${node.menuId}`;
 
   return (
     <div className="overflow-hidden rounded-md border border-border">
@@ -112,7 +112,7 @@ function MenuGroup({ idPrefix, node, onToggle, selected }: MenuNodeProps) {
           ) : (
             <ChevronRight className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
           )}
-          <span>{node.title}</span>
+          <span>{node.menuTitle}</span>
           <Badge variant="secondary" className="font-normal">
             {selectedCount}/{items.length}
           </Badge>
@@ -122,7 +122,7 @@ function MenuGroup({ idPrefix, node, onToggle, selected }: MenuNodeProps) {
           variant="ghost"
           size="sm"
           className="h-7 shrink-0 px-2 text-xs text-primary"
-          aria-label={allChecked ? `取消${node.title}的全部功能` : `全選${node.title}的功能`}
+          aria-label={allChecked ? `取消${node.menuTitle}的全部功能` : `全選${node.menuTitle}的功能`}
           onClick={() => onToggle(node, !allChecked)}
         >
           {allChecked ? '全部取消' : '全選'}
@@ -130,7 +130,7 @@ function MenuGroup({ idPrefix, node, onToggle, selected }: MenuNodeProps) {
       </div>
       <ul id={contentId} hidden={!expanded} className="divide-y divide-border">
         {items.map(item => (
-          <MenuItemRow key={item.id} idPrefix={idPrefix} node={item} onToggle={onToggle} selected={selected} />
+          <MenuItemRow key={item.menuId} idPrefix={idPrefix} node={item} onToggle={onToggle} selected={selected} />
         ))}
       </ul>
     </div>
@@ -154,7 +154,7 @@ export function PackageMenuEditor({
   return (
     <div className="space-y-3">
       {tree.map(group => (
-        <MenuGroup key={group.id} idPrefix={idPrefix} node={group} selected={selected} onToggle={onToggle} />
+        <MenuGroup key={group.menuId} idPrefix={idPrefix} node={group} selected={selected} onToggle={onToggle} />
       ))}
     </div>
   );

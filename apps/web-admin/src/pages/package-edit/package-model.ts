@@ -10,10 +10,11 @@ export type PackageDraft = Omit<PackageItem, 'id' | PriceKey> & {
 
 export interface MenuNode {
   children: MenuNode[];
-  icon?: string;
-  id: number;
   level: number;
-  title: string;
+  menuIcon?: string;
+  menuId: number;
+  menuTitle: string;
+  parentId: number;
 }
 
 const numericValue = z.union([z.number(), z.string().trim().min(1).transform(Number)]).pipe(z.number().finite());
@@ -137,10 +138,11 @@ const menuNodeSchema: z.ZodType<MenuNode> = z.lazy(() =>
       .array(menuNodeSchema)
       .nullish()
       .transform(value => value ?? []),
-    icon: optionalText,
-    id: identifier,
+    menuIcon: optionalText,
+    menuId: identifier,
     level: numericValue.pipe(z.number().int()).default(0),
-    title: z.string()
+    menuTitle: z.string(),
+    parentId: identifier
   })
 );
 
@@ -250,8 +252,8 @@ function attachMenuParents<Item extends PackageMenuItem>(menu: Item[], tree: Men
   const parents = new Map<number, number | null>();
   const visit = (nodes: MenuNode[], parentId: number | null) => {
     for (const node of nodes) {
-      parents.set(node.id, parentId);
-      visit(node.children, node.id);
+      parents.set(node.menuId, parentId);
+      visit(node.children, node.menuId);
     }
   };
   visit(tree, null);
@@ -265,7 +267,7 @@ function attachMenuParents<Item extends PackageMenuItem>(menu: Item[], tree: Men
 
 export function getMenuChecked(node: MenuNode, selected: Set<number>): boolean | 'indeterminate' {
   const nodes = flattenMenu([node]);
-  const count = nodes.filter(item => selected.has(item.id)).length;
+  const count = nodes.filter(item => selected.has(item.menuId)).length;
   if (count === nodes.length) return true;
   return count > 0 ? 'indeterminate' : false;
 }
@@ -284,25 +286,25 @@ export function toggleMenuSelection({
 }): PackageMenuItem[] {
   const selected = new Map(current.map(item => [item.menuId, item]));
   const add = (node: MenuNode) =>
-    selected.set(node.id, {
+    selected.set(node.menuId, {
       level: node.level,
-      menuIcon: node.icon,
-      menuId: node.id,
-      menuTitle: node.title,
-      ...selected.get(node.id)
+      menuIcon: node.menuIcon,
+      menuId: node.menuId,
+      menuTitle: node.menuTitle,
+      ...selected.get(node.menuId)
     });
 
   flattenMenu([target]).forEach(node => {
     if (checked) add(node);
-    else selected.delete(node.id);
+    else selected.delete(node.menuId);
   });
 
   const updateAncestors = (node: MenuNode): boolean => {
-    if (node.id === target.id) return true;
+    if (node.menuId === target.menuId) return true;
     const containsTarget = node.children.map(updateAncestors).some(Boolean);
     if (containsTarget) {
-      if (flattenMenu(node.children).some(child => selected.has(child.id))) add(node);
-      else selected.delete(node.id);
+      if (flattenMenu(node.children).some(child => selected.has(child.menuId))) add(node);
+      else selected.delete(node.menuId);
     }
     return containsTarget;
   };
