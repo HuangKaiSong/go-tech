@@ -1,13 +1,13 @@
-import { Building2, Loader2, Lock, LogIn, Phone } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
-import { login, loginByCode, type LoginResult } from '@/api/employee';
+import { loginByCode, type LoginResult } from '@/api/employee';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { setPerms, setRoutes, setToken, setUser } from '@/lib/auth';
+import { Building2, Loader2, Lock, LogIn, Phone } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 export default function Login() {
   const [phone, setPhone] = useState('');
@@ -55,6 +55,7 @@ export default function Login() {
     if (next.phone || next.password) return;
     setLoading(true);
     try {
+      const res = await login({ phone: phone.trim(), password });
       applySession(res.data);
       toast.success('登入成功');
       navigate('/', { replace: true });
