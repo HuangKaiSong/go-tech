@@ -191,6 +191,7 @@
   },
   "Nav": {
     "gotoPms": "Go to GO-PMS",
+    "gotoProduct": "Go to {product}",
     "selectTenant": "Select Tenant",
     "coreAdvantages": "Core Advantages",
     "systemFeatures": "System Features",
@@ -288,6 +289,7 @@
     "backHome": "Back to home",
     "tenantsLoading": "Loading accounts...",
     "tenantsLoadFailed": "Failed to load accounts. Please try again.",
+    "noTenantForProduct": "No {product} account is available",
     "retry": "Try again",
     "noOrderId": "Invalid or missing orderId in current data!",
     "hrTrialHostMissing": "The HR system URL is not configured. Please contact an administrator.",

@@ -1,7 +1,6 @@
 'use client';
 
 import { Badge as CustomBadge } from '@go-tech-frontend/ui';
-import type { PackageBizCode } from '@go-tech/types';
 import { Button, toast } from '@go-tech/web-ui';
 import { Badge } from 'antd';
 import dayjs from 'dayjs';
@@ -11,8 +10,10 @@ import { useTheme } from 'next-themes';
 import { useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 import { useProgressRouter } from '@/app/hooks/use-progress-router';
+import { enterTenant, filterTenantsByBizCode } from '@/app/lib/go-now';
 import servicePlanBg from '@/assets/service-plan-bg.jpg';
 import { useAuth } from '@/contexts/AuthContext';
+import { useProductSelection } from '@/contexts/ProductSelectionContext';
 import { useTrialWindow } from '@/contexts/TrialWindowContext';
 import ThemeSchemaToggler from '../../components/ThemeSchemaToggler';
 import { accountGridGradient } from './account-grid-theme';
@@ -23,11 +24,13 @@ const SelectAccount = () => {
   const from = searchParams.get('from');
   const fromHeader = from && from === 'header';
   const { refetchTenants, tenants, tenantsStatus, token } = useAuth();
+  const { product } = useProductSelection();
   const { openPmsCallback: generateCallback } = useTrialWindow();
   const { resolvedTheme } = useTheme();
   const router = useProgressRouter();
-  const isTenantListPending = (tenantsStatus === 'idle' || tenantsStatus === 'loading') && tenants.length === 0;
-  const shouldShowTenantList = tenants.length > 0 || tenantsStatus === 'success';
+  const productTenants = filterTenantsByBizCode(tenants, product);
+  const isTenantListPending = (tenantsStatus === 'idle' || tenantsStatus === 'loading') && productTenants.length === 0;
+  const shouldShowTenantList = productTenants.length > 0 || tenantsStatus === 'success';
 
   const accountGridBackground = resolvedTheme === 'dark' ? accountGridGradient.dark : accountGridGradient.light;
 
@@ -42,33 +45,12 @@ const SelectAccount = () => {
   };
 
   const handleEnter = async (tenant: Tenant) => {
-    const response = await fetch(`/go-tech/platform/platformCustomer/gotoCode?tenantId=${tenant!.tenantId}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-        'User-type': 'platform_customer'
-      }
-    }).then(res => res.json());
-    if (response.code === 200) {
-      const bizCode: PackageBizCode = tenant.bizCode;
-      if (bizCode === 'pms') {
-        const uri = `tenantCallback?code=${response.data}`;
-        generateCallback(uri);
-        return;
-      }
-
-      if (bizCode === 'hr') {
-        const hrTrialHost = process.env.NEXT_PUBLIC_HR_TRIAL_HOST;
-        if (!hrTrialHost) {
-          toast.error(t('hrTrialHostMissing'));
-          return;
-        }
-
-        const targetUrl = new URL(hrTrialHost);
-        targetUrl.searchParams.set('code', String(response.data));
-        window.open(targetUrl.toString(), '_blank');
-      }
-    }
+    await enterTenant({
+      generateCallback,
+      onHrTrialHostMissing: () => toast.error(t('hrTrialHostMissing')),
+      tenant,
+      token
+    });
   };
 
   const handleClick = (tenant: Tenant) => {
@@ -119,17 +101,23 @@ const SelectAccount = () => {
             </div>
           ) : null}
 
-          {tenantsStatus === 'error' && tenants.length === 0 ? (
+          {tenantsStatus === 'error' && productTenants.length === 0 ? (
             <div className="rounded-2xl border border-destructive/30 bg-card p-8 text-center">
               <p className="mb-4 text-sm text-muted-foreground">{t('tenantsLoadFailed')}</p>
               <Button onClick={() => token && refetchTenants(token, { force: true })}>{t('retry')}</Button>
             </div>
           ) : null}
 
+          {tenantsStatus === 'success' && productTenants.length === 0 ? (
+            <div className="mb-6 rounded-2xl border border-primary/20 bg-card/70 p-6 text-center text-muted-foreground">
+              {t('noTenantForProduct', { product: product.toUpperCase() })}
+            </div>
+          ) : null}
+
           <div
             className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ${shouldShowTenantList ? '' : 'hidden'}`}
           >
-            {tenants.map(acc => {
+            {productTenants.map(acc => {
               const isActive = dayjs(acc.expireDate).isAfter(dayjs());
               const statusLabel = isActive ? t('inUse') : t('expired');
 

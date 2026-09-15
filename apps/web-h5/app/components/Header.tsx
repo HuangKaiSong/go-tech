@@ -18,13 +18,15 @@ import {
   SheetTitle,
   SheetTrigger
 } from '@go-tech-frontend/ui';
+import type { PackageBizCode } from '@go-tech/types';
+import { toast } from '@go-tech/web-ui';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { useProgressRouter } from '@/app/hooks/use-progress-router';
-import { goNow, startFreeTrial } from '@/app/lib/go-now';
+import { enterTenant, filterTenantsByBizCode, goNow, startFreeTrial } from '@/app/lib/go-now';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIframeContext } from '@/contexts/IframeContext';
-import { useOptionalProductSelection } from '@/contexts/ProductSelectionContext';
+import { useOptionalProductSelection, useProductSelection } from '@/contexts/ProductSelectionContext';
 import { useTrialWindow } from '@/contexts/TrialWindowContext';
 import { DynamicText } from './DynamicI18nText';
 import LocaleSwitcher from './LocaleSwitcher';
@@ -119,26 +121,29 @@ const HeaderHeroBackground = ({
   ));
 };
 
-const SelectTenant = ({ generateCallback }: { generateCallback: (uri: string) => void }) => {
+const SelectTenant = ({
+  generateCallback,
+  product,
+  tenants
+}: {
+  generateCallback: (uri: string) => void;
+  product: PackageBizCode;
+  tenants: Tenant[];
+}) => {
   const router = useProgressRouter();
   const t = useTranslations();
   const { hasIframe } = useIframeContext();
-  const { isLoggedIn, tenants, token } = useAuth();
+  const { isLoggedIn, token } = useAuth();
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const handleClick = async (tenant: Tenant) => {
-    const response = await fetch(`/go-tech/platform/platformCustomer/gotoPmsCode?tenantId=${tenant!.tenantId}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-        'User-type': 'platform_customer'
-      }
-    }).then(res => res.json());
-    if (response.code === 200) {
-      const uri = `tenantCallback?code=${response.data}`;
-      generateCallback(uri);
-      setIsOpen(false);
-    }
+    await enterTenant({
+      generateCallback,
+      onHrTrialHostMissing: () => toast.error(t('Account.hrTrialHostMissing')),
+      onPmsEntered: () => setIsOpen(false),
+      tenant,
+      token
+    });
   };
 
   return (
@@ -156,7 +161,7 @@ const SelectTenant = ({ generateCallback }: { generateCallback: (uri: string) =>
           // setIsOpen(true);
         }}
       >
-        {t('Nav.gotoPms')}
+        {t('Nav.gotoProduct', { product: product.toUpperCase() })}
       </div>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="w-3xl">
@@ -188,9 +193,10 @@ const SelectTenant = ({ generateCallback }: { generateCallback: (uri: string) =>
 const Header = ({ heroBg, initialBlocks }: { heroBg?: string | StaticImageData; initialBlocks?: PageBlock[] }) => {
   const t = useTranslations();
   const router = useProgressRouter();
+  const { product } = useProductSelection();
   const { hasIframe } = useIframeContext();
   const { openPmsCallback: generateCallback } = useTrialWindow();
-  const { isLoggedIn, logout, tenants, token, user } = useAuth();
+  const { isLoggedIn, logout, refetchTenants, tenants, tenantsStatus, token, user } = useAuth();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const configuredHeroBlock = initialBlocks?.find(block => block.type === 'hero');
   const defaultLogoSrc = '/images/Gotech_Logo.webp';
@@ -201,7 +207,22 @@ const Header = ({ heroBg, initialBlocks }: { heroBg?: string | StaticImageData; 
     phoneValue = '+852 5971 1918'
   } = block?.values || {};
 
-  const hasTenant = tenants && tenants.length > 0;
+  const productTenants = filterTenantsByBizCode(tenants, product);
+  const hasTenant = productTenants.length > 0;
+  // 用 if/else 展开多状态分支，替代嵌套三元表达式，提升可读性
+  let emptyTenantMessage: string;
+  if (tenantsStatus === 'success') {
+    emptyTenantMessage = t('Account.noTenantForProduct', { product: product.toUpperCase() });
+  } else if (tenantsStatus === 'error') {
+    emptyTenantMessage = t('Account.tenantsLoadFailed');
+  } else {
+    emptyTenantMessage = t('Account.tenantsLoading');
+  }
+
+  useEffect(() => {
+    // SSR 返回空数组时缓存保持 idle；先确认租户结果，再开放当前产品的免费试用入口。
+    if (token && tenantsStatus === 'idle') refetchTenants(token);
+  }, [refetchTenants, tenantsStatus, token]);
 
   const handleLogout = async () => {
     setIsSheetOpen(false);
@@ -351,12 +372,19 @@ const Header = ({ heroBg, initialBlocks }: { heroBg?: string | StaticImageData; 
             <div className="flex flex-row bg-background items-center rounded-l-sm rounded-r-lg justify-end">
               {hasTenant ? (
                 <>
-                  <SelectTenant generateCallback={generateCallback} />
+                  <SelectTenant generateCallback={generateCallback} product={product} tenants={productTenants} />
                   <Button
                     size="sm"
                     disabled={!isLoggedIn}
                     className="shadow-primary shadow-2xl"
-                    onClick={() => goNow({ generateCallback, tenants, token })}
+                    onClick={() =>
+                      goNow({
+                        generateCallback,
+                        onHrTrialHostMissing: () => toast.error(t('Account.hrTrialHostMissing')),
+                        tenants: productTenants,
+                        token
+                      })
+                    }
                   >
                     {t('Nav.goNow')}
                   </Button>
@@ -374,13 +402,20 @@ const Header = ({ heroBg, initialBlocks }: { heroBg?: string | StaticImageData; 
                       }
                     }}
                   >
-                    {t('Nav.clickToTrial')}
+                    {isLoggedIn ? emptyTenantMessage : t('Nav.clickToTrial')}
                   </div>
                   <Button
                     size="sm"
-                    disabled={!isLoggedIn}
+                    disabled={!isLoggedIn || tenantsStatus !== 'success'}
                     className="shadow-primary shadow-2xl"
-                    onClick={() => startFreeTrial({ generateCallback, token })}
+                    onClick={() =>
+                      startFreeTrial({
+                        generateCallback,
+                        bizCode: product,
+                        onHrTrialHostMissing: () => toast.error(t('Account.hrTrialHostMissing')),
+                        token
+                      })
+                    }
                   >
                     {t('Nav.freeTrial')}
                   </Button>

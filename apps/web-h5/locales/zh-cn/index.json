@@ -192,6 +192,7 @@
   },
   "Nav": {
     "gotoPms": "点击前往 GO-PMS",
+    "gotoProduct": "点击前往 {product}",
     "selectTenant": "选择租户",
     "coreAdvantages": "核心优势",
     "systemFeatures": "查看系统功能",
@@ -289,6 +290,7 @@
     "backHome": "返回首页",
     "tenantsLoading": "正在加载帐户...",
     "tenantsLoadFailed": "帐户加载失败，请稍后再试。",
+    "noTenantForProduct": "暂无 {product} 租户",
     "retry": "重新加载",
     "noOrderId": "当前数据无 orderId 或者 orderId 不合法!",
     "hrTrialHostMissing": "HR 系统地址尚未配置，请联系管理员。",

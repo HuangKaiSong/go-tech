@@ -192,6 +192,7 @@
   },
   "Nav": {
     "gotoPms": "點擊前往 GO-PMS",
+    "gotoProduct": "點擊前往 {product}",
     "selectTenant": "選擇租户",
     "coreAdvantages": "核心優勢",
     "systemFeatures": "查看系統功能",
@@ -287,6 +288,7 @@
     "ordersHint": "想要查看所有訂單詳情或續期？前往「我的訂單」頁面。",
     "viewMyOrders": "查看我的訂單",
     "backHome": "返回首頁",
+    "noTenantForProduct": "暫無 {product} 租戶",
     "noOrderId": "当前数据无 orderId 或者 orderId 不合法!",
     "vEmailRequired": "請輸入郵箱",
     "vEmailInvalid": "請輸入正確的郵箱",

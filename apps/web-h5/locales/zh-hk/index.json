@@ -192,6 +192,7 @@
 	},
 	"Nav": {
 		"gotoPms": "點擊前往 GO-PMS",
+		"gotoProduct": "點擊前往 {product}",
 		"selectTenant": "選擇租户",
 		"coreAdvantages": "核心優勢",
 		"systemFeatures": "查看系統功能",
@@ -289,6 +290,7 @@
 		"backHome": "返回首頁",
 		"tenantsLoading": "正在載入帳戶...",
 		"tenantsLoadFailed": "帳戶載入失敗，請稍後再試。",
+		"noTenantForProduct": "暫無 {product} 租戶",
 		"retry": "重新載入",
 		"noOrderId": "当前数据无 orderId 或者 orderId 不合法!",
 		"hrTrialHostMissing": "HR 系統地址尚未配置，請聯絡管理員。",
