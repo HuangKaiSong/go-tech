@@ -4,6 +4,7 @@ import { Provider, useAtomValue, useStore } from 'jotai';
 import { useHydrateAtoms } from 'jotai/utils';
 import { useRouter } from 'next/navigation';
 import { createContext, useContext, useRef, useState } from 'react';
+import { clientFetch } from '@/lib/client-http/client-fetch';
 import {
   type TenantCacheStatus,
   cancelTenantRequest,
@@ -88,7 +89,7 @@ const AuthProviderInner = ({ _tenants, _token, children, initialUser }: AuthProv
 
   const logout = async () => {
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
+      await clientFetch('/api/auth/logout', { method: 'POST' });
       setUser(null);
       setToken(undefined);
       router.replace('/');

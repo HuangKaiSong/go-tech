@@ -12,13 +12,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   Input,
-  Label
+  Label,
+  toast
 } from '@go-tech-frontend/ui';
 import { ChevronDown } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 import { useAuth } from '@/contexts/AuthContext';
+import { clientFetch } from '@/lib/client-http/client-fetch';
+import { isNotifiedClientHttpError } from '@/lib/client-http/client-http-error';
 
 const fmt = (n: number) =>
   n.toLocaleString('zh-Hant-HK', {
@@ -58,6 +61,7 @@ const Index = ({
   const brDialogDesc = useBatchTranslation('請輸入商業登記號碼，輸入後將會顯示於發票上。請注意，輸入後不能變更');
   const brPlaceholder = useBatchTranslation('例如：12345678-001， 請注意，輸入後不能變更');
   const confirmText = useBatchTranslation('確認');
+  const saveFailed = useBatchTranslation('保存失敗，請稍後重試');
 
   const orderItems = Array.isArray(invoice?.orderItems) ? invoice.orderItems : [];
   const subtotal = invoice.orderAmount;
@@ -151,14 +155,20 @@ const Index = ({
       'User-Type': 'platform_customer'
     });
 
-    await fetch('/go-tech/platform/packageOrder/setBusinessRegNo', {
-      method: 'POST',
-      headers: requestHeaders,
-      body: JSON.stringify({
-        id: invoice.id,
-        businessRegNo: brInput.trim()
-      })
-    }).then(res => res.json());
+    try {
+      await clientFetch('/go-tech/platform/packageOrder/setBusinessRegNo', {
+        method: 'POST',
+        headers: requestHeaders,
+        body: JSON.stringify({
+          id: invoice.id,
+          businessRegNo: brInput.trim()
+        })
+      });
+    } catch (error) {
+      if (!isNotifiedClientHttpError(error)) toast.error(saveFailed);
+      return;
+    }
+
     invoice.businessRegNo = brInput.trim();
     setDialogOpen(false);
     requestAnimationFrame(() => {

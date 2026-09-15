@@ -3,7 +3,6 @@
 import { useCountDown } from '@go-tech/hooks';
 import { Button, Input, toast } from '@go-tech/web-ui';
 import { CircleAlert, X } from 'lucide-react';
-import { useLocale } from 'next-intl';
 import Image from 'next/image';
 import { useState } from 'react';
 import z from 'zod';
@@ -11,10 +10,10 @@ import { DynamicText } from '@/app/components/DynamicI18nText.client';
 import Link from '@/app/components/Link';
 import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
-import { translateError } from '@/app/lib/translate-error';
+import { reportClientHttpError } from '@/app/lib/report-client-http-error';
 import authBgImg from '@/assets/background.webp';
-import { sendToBetterStack } from '@/lib/betterstack-logger';
-import { HttpError, httpFetch } from '@/lib/http-fetch';
+import { clientFetch } from '@/lib/client-http/client-fetch';
+import { isNotifiedClientHttpError } from '@/lib/client-http/client-http-error';
 
 const inputClassNames = {
   root: 'h-14 px-3 pr-12 border-border',
@@ -33,10 +32,9 @@ const ForgetPassword = () => {
   const [isSendingCode, setIsSendingCode] = useState(false);
   const [step, setStep] = useState(0);
 
-  const locale = useLocale();
-
   const codeSentMsg = useBatchTranslation('驗證碼已發送至您的郵箱');
   const codeFailMsg = useBatchTranslation('驗證碼發送失敗，請稍後再試');
+  const operationFailed = useBatchTranslation('操作失敗');
   const resetSuccessLoading = useBatchTranslation('重置密碼成功, 正在為您跳转登录页面...');
   const resetSuccessMsg = useBatchTranslation('跳轉成功, 請登入');
   const sendCodeText = useBatchTranslation('發送驗證碼');
@@ -111,26 +109,20 @@ const ForgetPassword = () => {
     try {
       setIsSendingCode(true);
 
-      const response = await httpFetch(`/go-tech/platform/platformCustomer/sendCode?email=${formData.account}`, {
+      const response = await clientFetch(`/go-tech/platform/platformCustomer/sendCode?email=${formData.account}`, {
         method: 'POST'
       });
       const fetchResult = await response.json();
 
-      if (fetchResult && fetchResult.code && fetchResult.code === 200) {
+      if (fetchResult?.code === 200) {
         toast.success(codeSentMsg);
         setTargetDate(Date.now() + 60 * 1000);
         return;
       }
-      toast.error((await translateError(fetchResult.message, locale)) || fetchResult.message);
+      throw new Error(codeFailMsg);
     } catch (err) {
-      if (err instanceof HttpError) {
-        sendToBetterStack('error', err.response.statusText, {
-          uri: `/go-tech/platform/platformCustomer/sendCode?email=${formData.account}`,
-          extra: err.data
-        });
-      }
-      // HttpError 的 message 已被 httpFetch 翻译
-      toast.error(err instanceof HttpError && err.message ? err.message : codeFailMsg);
+      reportClientHttpError(err, '/go-tech/platform/platformCustomer/sendCode');
+      if (!isNotifiedClientHttpError(err)) toast.error(err instanceof Error ? err.message : codeFailMsg);
     } finally {
       setIsSendingCode(false);
     }
@@ -148,7 +140,7 @@ const ForgetPassword = () => {
 
     try {
       setIsLoading(true);
-      const response = await httpFetch('/go-tech/platform/platformCustomer/forgetPwdVerify', {
+      const response = await clientFetch('/go-tech/platform/platformCustomer/forgetPwdVerify', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -161,22 +153,12 @@ const ForgetPassword = () => {
 
       const validatedResult = await response.json();
 
-      if (validatedResult.code !== 200) {
-        toast.error((await translateError(validatedResult.message, locale)) || validatedResult.message);
-        return;
-      }
+      if (validatedResult.code !== 200) throw new Error(operationFailed);
       setStep(1);
       setTargetDate(undefined);
     } catch (error) {
-      if (error instanceof HttpError) {
-        sendToBetterStack('error', error.response.statusText, {
-          uri: `/go-tech/platform/platformCustomer/forgetPwdVerify`,
-          extra: error.data,
-          body: result.data
-        });
-        // message 已被 httpFetch 翻译（此前由 code!==200 分支展示）
-        toast.error(error.message);
-      }
+      reportClientHttpError(error, '/go-tech/platform/platformCustomer/forgetPwdVerify');
+      if (!isNotifiedClientHttpError(error)) toast.error(error instanceof Error ? error.message : operationFailed);
     } finally {
       setIsLoading(false);
     }
@@ -195,7 +177,7 @@ const ForgetPassword = () => {
     try {
       setIsLoading(true);
 
-      const response = await httpFetch('/go-tech/platform/platformCustomer/resetPwd', {
+      const response = await clientFetch('/go-tech/platform/platformCustomer/resetPwd', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -207,10 +189,7 @@ const ForgetPassword = () => {
       });
 
       const resetResult = await response.json();
-      if (resetResult.code !== 200) {
-        toast.error((await translateError(resetResult.message, locale)) || resetResult.message);
-        return;
-      }
+      if (resetResult.code !== 200) throw new Error(operationFailed);
 
       toast.promise(
         new Promise<boolean>(resolve => {
@@ -229,15 +208,8 @@ const ForgetPassword = () => {
         }
       );
     } catch (err) {
-      if (err instanceof HttpError) {
-        sendToBetterStack('error', err.response.statusText, {
-          uri: `/go-tech/platform/platformCustomer/resetPwd`,
-          extra: err.data,
-          body: result.data
-        });
-        // message 已被 httpFetch 翻译（此前由 code!==200 分支展示）
-        toast.error(err.message);
-      }
+      reportClientHttpError(err, '/go-tech/platform/platformCustomer/resetPwd');
+      if (!isNotifiedClientHttpError(err)) toast.error(err instanceof Error ? err.message : operationFailed);
     } finally {
       setIsLoading(false);
     }

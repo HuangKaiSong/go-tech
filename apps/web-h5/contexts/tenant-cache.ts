@@ -1,4 +1,5 @@
 import { atom } from 'jotai';
+import { clientFetch } from '@/lib/client-http/client-fetch';
 
 export const TENANT_CACHE_STALE_TIME = 60_000;
 
@@ -61,17 +62,21 @@ export function requestTenants(voucher: string, ownerId: string) {
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(new Error('Tenant request timed out after 3000ms')), 3_000);
-  const request = fetch('/go-tech/platform/packageOrder/myTenants', {
-    headers: {
-      Authorization: `Bearer ${voucher}`
+  const request = clientFetch(
+    '/go-tech/platform/packageOrder/myTenants',
+    {
+      headers: {
+        Authorization: `Bearer ${voucher}`
+      },
+      signal: controller.signal
     },
-    signal: controller.signal
-  })
+    { feedback: 'silent' }
+  )
     .then(async response => {
       const result = (await response.json()) as TenantResponse;
 
-      if (!response.ok || (result.code !== undefined && result.code !== 200) || !Array.isArray(result.data)) {
-        throw new Error(result.message || `Failed to fetch tenants (${response.status})`);
+      if (!Array.isArray(result.data)) {
+        throw new TypeError(result.message || `Failed to fetch tenants (${response.status})`);
       }
 
       return result.data as Tenant[];

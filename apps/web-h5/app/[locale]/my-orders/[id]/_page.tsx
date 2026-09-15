@@ -4,7 +4,6 @@ import { Badge, Card, CardContent, CardHeader, Separator } from '@go-tech-fronte
 import { getPackageFeatures } from '@go-tech/package-ui/model';
 import { Button, toast } from '@go-tech/web-ui';
 import { ArrowLeft, CheckCircle, CreditCard, Download, RefreshCw, Settings, XCircle } from 'lucide-react';
-import { useLocale } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';
 import { DynamicText } from '@/app/components/DynamicI18nText.client';
 import Footer from '@/app/components/Footer';
@@ -22,8 +21,9 @@ import {
 } from '@/app/constants/payment';
 import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
-import { translateError } from '@/app/lib/translate-error';
 import { useAuth } from '@/contexts/AuthContext';
+import { clientFetch } from '@/lib/client-http/client-fetch';
+import { isNotifiedClientHttpError } from '@/lib/client-http/client-http-error';
 
 // 线上支付回跳后轮询配置
 const POLL_INTERVAL = 5000; // 每 5 秒查询一次
@@ -57,7 +57,6 @@ const goToThirdPartyPay = (data: OrderAddResponse) => {
 const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
   const router = useProgressRouter();
   const { token } = useAuth();
-  const locale = useLocale();
 
   const [order, setOrder] = useState(detail);
 
@@ -73,7 +72,6 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
   const orderCancelledStatus = useBatchTranslation('已取消');
   const cancelOrderFailed = useBatchTranslation('取消訂單失敗');
   const cancelOrderRetry = useBatchTranslation('取消訂單失敗，請稍後重試');
-  const interfaceNotYet = useBatchTranslation('接口尚未實現，請聯繫開發人員');
   const [isPolling, setIsPolling] = useState(false);
   const [pendingCashier, setPendingCashier] = useState<OrderAddResponse | null>(null);
 
@@ -111,14 +109,19 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
     const timer = setInterval(async () => {
       attempts += 1;
       try {
-        const res = await fetch(`/go-tech/platform/packageOrder/detail/${_orderId}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'User-Type': 'platform_customer',
-            Authorization: `Bearer ${token}`
-          }
-        }).then(r => r.json());
+        const response = await clientFetch(
+          `/go-tech/platform/packageOrder/detail/${_orderId}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'User-Type': 'platform_customer',
+              Authorization: `Bearer ${token}`
+            }
+          },
+          { feedback: 'silent' }
+        );
+        const res = await response.json();
 
         if (res.code === 200 && res.data && res.data.orderStatus !== OrderStatusEnum.WAIT_PAY) {
           // 状态已更新，保留服务端已过滤的套餐功能列表，刷新其余字段后停止轮询
@@ -155,21 +158,18 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
     if (!token) return;
     const toastId = toast.loading(fetchingPaymentInfo);
     try {
-      const response = await fetch(`/go-tech/platform/packageOrder/repay?id=${_orderId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'User-Type': 'platform_customer',
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        if (response.status === 404) {
-          toast.error(interfaceNotYet, { id: toastId });
-          return;
-        }
-      }
+      const response = await clientFetch(
+        `/go-tech/platform/packageOrder/repay?id=${_orderId}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Type': 'platform_customer',
+            Authorization: `Bearer ${token}`
+          }
+        },
+        { feedbackId: toastId }
+      );
 
       const res = await response.json();
       if (res.code === 200 && res.data) {
@@ -177,13 +177,10 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
         stashWebManagedCashier(res.data);
         goToThirdPartyPay(res.data);
       } else {
-        toast.error((await translateError(res.message, locale)) || res.message || fetchPaymentInfoFailed, {
-          id: toastId
-        });
+        throw new Error(fetchPaymentInfoFailed);
       }
     } catch (error) {
-      console.error(error);
-      toast.error(fetchPaymentInfoRetry, { id: toastId });
+      if (!isNotifiedClientHttpError(error)) toast.error(fetchPaymentInfoRetry, { id: toastId });
     }
   };
 
@@ -192,21 +189,18 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
     if (!token) return;
     const toastId = toast.loading(cancellingOrder);
     try {
-      const response = await fetch(`/go-tech/platform/packageOrder/cancel?id=${_orderId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'User-Type': 'platform_customer',
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        if (response.status === 404) {
-          toast.error(interfaceNotYet, { id: toastId });
-          return;
-        }
-      }
+      const response = await clientFetch(
+        `/go-tech/platform/packageOrder/cancel?id=${_orderId}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Type': 'platform_customer',
+            Authorization: `Bearer ${token}`
+          }
+        },
+        { feedbackId: toastId }
+      );
 
       const res = await response.json();
       if (res.code === 200) {
@@ -217,11 +211,10 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
           orderStatusName: orderCancelledStatus
         }));
       } else {
-        toast.error((await translateError(res.message, locale)) || res.message || cancelOrderFailed, { id: toastId });
+        throw new Error(cancelOrderFailed);
       }
     } catch (error) {
-      console.error(error);
-      toast.error(cancelOrderRetry, { id: toastId });
+      if (!isNotifiedClientHttpError(error)) toast.error(cancelOrderRetry, { id: toastId });
     }
   };
 

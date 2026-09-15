@@ -1,12 +1,11 @@
 'use client';
 
 import { Button, Dialog, DialogContent, Input, Textarea, toast } from '@go-tech-frontend/ui';
-import { useLocale } from 'next-intl';
 import { useState } from 'react';
 import Footer from '@/app/components/Footer';
 import Header from '@/app/components/Header';
-import { translateError } from '@/app/lib/translate-error';
-import { HttpError, httpFetch } from '@/lib/http-fetch';
+import { clientFetch } from '@/lib/client-http/client-fetch';
+import { isNotifiedClientHttpError } from '@/lib/client-http/client-http-error';
 import { DynamicText } from '../../components/DynamicI18nText.client';
 import { useBatchTranslation } from '../../hooks/useBatchTranslation';
 
@@ -19,11 +18,11 @@ const Page = () => {
   });
   const [showSuccess, setShowSuccess] = useState(false);
   const [pending, setPending] = useState(false);
-  const locale = useLocale();
   const namePlaceholder = useBatchTranslation('請輸入您的姓名');
   const emailPlaceholder = useBatchTranslation('請輸入您的電子郵箱');
   const phonePlaceholder = useBatchTranslation('請輸入您的聯繫電話');
   const messagePlaceholder = useBatchTranslation('請輸入您想對我們說的');
+  const submitFailed = useBatchTranslation('提交失敗，請稍後重試');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,7 +30,7 @@ const Page = () => {
     try {
       setPending(true);
 
-      const response = await httpFetch('/go-tech/platform/leaveMessage/add', {
+      const response = await clientFetch('/go-tech/platform/leaveMessage/add', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -40,19 +39,14 @@ const Page = () => {
       });
 
       const result = await response.json();
-      if (result && result.code && result.code === 200) {
-        // Show success dialog
-        setShowSuccess(true);
-        // Reset form
-        setFormData({ name: '', email: '', phone: '', message: '' });
-      } else {
-        toast.error((await translateError(result.message, locale)) || result.message);
-      }
+      if (result?.code !== 200) throw new Error(submitFailed);
+
+      // Show success dialog
+      setShowSuccess(true);
+      // Reset form
+      setFormData({ name: '', email: '', phone: '', message: '' });
     } catch (error) {
-      // httpFetch 已将服务端中文 message 翻译为当前语言
-      if (error instanceof HttpError) {
-        toast.error(error.message);
-      }
+      if (!isNotifiedClientHttpError(error)) toast.error(error instanceof Error ? error.message : submitFailed);
     } finally {
       setPending(false);
     }

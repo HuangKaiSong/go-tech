@@ -20,6 +20,8 @@ import Footer from '@/app/components/Footer';
 import Header from '@/app/components/Header';
 import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { useAuth } from '@/contexts/AuthContext';
+import { clientFetch } from '@/lib/client-http/client-fetch';
+import { isNotifiedClientHttpError } from '@/lib/client-http/client-http-error';
 import { DynamicText } from '../../components/DynamicI18nText.client';
 import { useBatchTranslation } from '../../hooks/useBatchTranslation';
 
@@ -54,7 +56,6 @@ const Settings = ({ token, user }: any) => {
   const enterNewPassword = useBatchTranslation('請輸入新密碼');
   const passwordMinLength = useBatchTranslation('新密碼長度至少為6個字符');
   const passwordsMismatch = useBatchTranslation('兩次輸入的新密碼不一致');
-  const apiNotFound = useBatchTranslation('接口 /go-tech/platform/platformCustomer/updatePwd 未定义');
   const passwordChanged = useBatchTranslation('密碼修改成功');
   const namePlaceholder = useBatchTranslation('請輸入您的姓名');
   const emailPlaceholder = useBatchTranslation('請輸入您的電子郵箱');
@@ -82,7 +83,7 @@ const Settings = ({ token, user }: any) => {
     setIsProfileLoading(true);
 
     try {
-      const response = await fetch('/go-tech/platform/platformCustomer/update', {
+      const response = await clientFetch('/go-tech/platform/platformCustomer/update', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -90,25 +91,19 @@ const Settings = ({ token, user }: any) => {
           Authorization: `Bearer ${token}`
         },
         body: JSON.stringify(profileData)
-      })
-        .then(res => res.json())
-        .catch(err => {
-          toast.error(err.message);
-        });
-      if (response.code === 200) {
-        fetch('/api/auth/signin', {
-          method: 'POST',
-          body: JSON.stringify(response.data)
-        })
-          .then(res => res.json())
-          .then(res => {
-            setUser(res.data);
-            toast.success(profileUpdated);
-          });
+      });
+      const result = await response.json();
+      const signinResponse = await clientFetch('/api/auth/signin', {
+        method: 'POST',
+        body: JSON.stringify(result.data)
+      });
+      const signinResult = await signinResponse.json();
+      setUser(signinResult.data);
+      toast.success(profileUpdated);
+    } catch (error) {
+      if (!isNotifiedClientHttpError(error)) {
+        toast.error(error instanceof Error ? error.message : 'Failed to update profile');
       }
-    } catch (error: any) {
-      toast.error(error.message);
-      console.log(error);
     } finally {
       setIsProfileLoading(false);
     }
@@ -139,7 +134,7 @@ const Settings = ({ token, user }: any) => {
 
     setIsPasswordLoading(true);
     try {
-      const response = await fetch('/go-tech/platform/platformCustomer/updatePwd', {
+      const response = await clientFetch('/go-tech/platform/platformCustomer/updatePwd', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -151,19 +146,6 @@ const Settings = ({ token, user }: any) => {
           newPassword: passwordData.newPassword
         })
       });
-      if (!response.ok) {
-        const statusCode = response.status;
-        if (statusCode === 404) {
-          toast.error(apiNotFound);
-        } else if (statusCode === 400) {
-          const result = await response.json();
-          toast.error(result.msg || result.message);
-        } else {
-          throw new Error(`API request failed: ${statusCode} ${response.statusText}`);
-        }
-        return;
-      }
-
       const result = await response.json();
 
       if (result && result.code === 200) {
@@ -174,9 +156,10 @@ const Settings = ({ token, user }: any) => {
         });
         toast.success(passwordChanged);
       }
-    } catch (error: any) {
-      toast.error(error.message);
-      console.log(error);
+    } catch (error) {
+      if (!isNotifiedClientHttpError(error)) {
+        toast.error(error instanceof Error ? error.message : 'Failed to update password');
+      }
     } finally {
       setIsPasswordLoading(false);
     }

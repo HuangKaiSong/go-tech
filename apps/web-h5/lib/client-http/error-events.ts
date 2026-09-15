@@ -2,7 +2,7 @@ import type { BusinessCode, ClientHttpError, ClientHttpErrorKind } from './clien
 
 export interface ClientHttpErrorEvent {
   businessCode?: BusinessCode;
-  id: string;
+  id: number | string;
   kind: ClientHttpErrorKind;
   status?: number;
   userMessage?: string;
@@ -21,12 +21,12 @@ export function subscribeClientHttpErrors(listener: ClientHttpErrorListener) {
 }
 
 /** 发布经过白名单筛选的错误字段，避免响应 payload、请求头或 token 进入 UI 事件。 */
-export function publishClientHttpError(error: ClientHttpError) {
+export function publishClientHttpError(error: ClientHttpError, feedbackId?: number | string) {
   error.markNotified();
   eventSequence += 1;
 
   const event: ClientHttpErrorEvent = {
-    id: `client-http-${Date.now()}-${eventSequence}`,
+    id: feedbackId ?? `client-http-${Date.now()}-${eventSequence}`,
     kind: error.kind
   };
 

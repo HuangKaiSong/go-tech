@@ -10,11 +10,12 @@ import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import z from 'zod';
 import { useProgressRouter } from '@/app/hooks/use-progress-router';
+import { reportClientHttpError } from '@/app/lib/report-client-http-error';
 // import Logo from "@/assets/Gotech_Logo.webp";
 import authBgImg from '@/assets/background.webp';
 import { useAuth } from '@/contexts/AuthContext';
-import { sendToBetterStack } from '@/lib/betterstack-logger';
-import { HttpError, httpFetch } from '@/lib/http-fetch';
+import { clientFetch } from '@/lib/client-http/client-fetch';
+import { isNotifiedClientHttpError } from '@/lib/client-http/client-http-error';
 
 const signinSchema = z.object({
   username: z.string(),
@@ -47,10 +48,9 @@ const Login = () => {
     }
 
     setIsLoading(true);
+    const uri = type === 'user' ? '/pms-admin/web-back/admin/accept' : '/go-tech/platform/platformCustomer/login';
 
     try {
-      const uri = type === 'user' ? '/pms-admin/web-back/admin/accept' : '/go-tech/platform/platformCustomer/login';
-
       const body =
         type === 'user'
           ? {
@@ -59,7 +59,7 @@ const Login = () => {
             }
           : result.data;
 
-      const response = await httpFetch(uri, {
+      const response = await clientFetch(uri, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -69,25 +69,20 @@ const Login = () => {
 
       const signResponse = await response.json();
       if (signResponse.code === 200) {
-        fetch('/api/auth/signin', {
+        const signinResponse = await clientFetch('/api/auth/signin', {
           method: 'POST',
           body: JSON.stringify(signResponse.data)
-        })
-          .then(res => res.json())
-          .then(res => {
-            setToken(signResponse.data.token);
-            setUser(res.data);
-            refetchTenants(signResponse.data.token);
-            toast.success(t('loginSuccess'));
-            router.replace(redirect || '/select-account');
-          });
+        });
+        const signinResult = await signinResponse.json();
+        setToken(signResponse.data.token);
+        setUser(signinResult.data);
+        refetchTenants(signResponse.data.token);
+        toast.success(t('loginSuccess'));
+        router.replace(redirect || '/select-account');
       }
     } catch (error) {
-      if (error instanceof HttpError) {
-        sendToBetterStack('error', error.response.statusText, { extra: error.data, body: result.data });
-        // httpFetch 已将服务端中文 message 翻译为当前语言
-        toast.error(error.message || t('loginFailed'));
-      }
+      reportClientHttpError(error, uri);
+      if (!isNotifiedClientHttpError(error)) toast.error(t('loginFailed'));
     } finally {
       setIsLoading(false);
     }

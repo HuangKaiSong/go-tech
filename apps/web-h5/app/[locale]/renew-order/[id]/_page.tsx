@@ -30,8 +30,9 @@ import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 import { usePromotions } from '@/app/hooks/usePromotions';
 import { getCreatedOrderId } from '@/app/lib/order-id';
-import { translateError } from '@/app/lib/translate-error';
 import { useAuth } from '@/contexts/AuthContext';
+import { clientFetch } from '@/lib/client-http/client-fetch';
+import { isNotifiedClientHttpError } from '@/lib/client-http/client-http-error';
 
 const PaymentPanel = dynamic(() => import('@/app/components/payment/Panel'), {
   ssr: false
@@ -292,40 +293,39 @@ const RenewOrderContent = ({ detail, promotions }: RenewOrderContentProps) => {
 
     try {
       // 创建订单
-      const orderResponse = await fetch('/go-tech/platform/packageOrder/add', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(orderInfo)
-      })
-        .then(res => res.json())
-        .catch(err => {
-          throw err;
-        });
-      if (orderResponse.code === 200) {
-        toast.success(renewOrderCreated, { id: toastId });
-        const orderId = getCreatedOrderId(orderResponse.data);
-        // 上传凭证
-        await fetch('/go-tech/platform/packageOrder/payEvidence', {
+      const response = await clientFetch(
+        '/go-tech/platform/packageOrder/add',
+        {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(orderInfo)
+        },
+        { feedbackId: toastId }
+      );
+      const orderResponse = await response.json();
+      if (orderResponse.code !== 200) throw new Error(renewOrderFailed);
+
+      toast.success(renewOrderCreated, { id: toastId });
+      const orderId = getCreatedOrderId(orderResponse.data);
+      // 上传凭证
+      await clientFetch(
+        '/go-tech/platform/packageOrder/payEvidence',
+        {
           method: 'POST',
           headers,
           body: JSON.stringify({
             id: orderId,
             payEvidence: voucherFile.url
           })
-        })
-          .catch(err => {
-            throw err;
-          })
-          .then(res => res.json());
+        },
+        { feedbackId: toastId }
+      );
 
-        setShowPaymentDialog(false);
-        router.push('/my-orders');
-        toast.success(renewEvidenceSubmitted, { id: toastId });
-      } else {
-        toast.error((await translateError(orderResponse.message, locale)) || orderResponse.message, { id: toastId });
-      }
+      setShowPaymentDialog(false);
+      router.push('/my-orders');
+      toast.success(renewEvidenceSubmitted, { id: toastId });
     } catch (error) {
-      console.log(error);
+      if (!isNotifiedClientHttpError(error)) toast.error(renewOrderFailed, { id: toastId });
     }
   };
 
@@ -336,16 +336,18 @@ const RenewOrderContent = ({ detail, promotions }: RenewOrderContentProps) => {
     const orderInfo = buildOrderInfo(PayTypeEnum.Online);
 
     try {
-      const orderResponse = await fetch('/go-tech/platform/packageOrder/add', {
-        method: 'POST',
-        headers: requestHeaders(),
-        body: JSON.stringify(orderInfo)
-      }).then(res => res.json());
+      const response = await clientFetch(
+        '/go-tech/platform/packageOrder/add',
+        {
+          method: 'POST',
+          headers: requestHeaders(),
+          body: JSON.stringify(orderInfo)
+        },
+        { feedbackId: toastId }
+      );
+      const orderResponse = await response.json();
 
-      if (orderResponse.code !== 200) {
-        toast.error((await translateError(orderResponse.message, locale)) || orderResponse.message, { id: toastId });
-        return;
-      }
+      if (orderResponse.code !== 200) throw new Error(renewOrderFailed);
 
       // 后端返回 OrderAddResponse（含签名等参数）；先跳转订单详情，再由详情页唤起第三方支付
       toast.success(orderCreatedRedirecting, { id: toastId });
@@ -354,8 +356,7 @@ const RenewOrderContent = ({ detail, promotions }: RenewOrderContentProps) => {
       stashWebManagedCashier(orderResponse.data);
       router.push(`/my-orders/${orderId}`);
     } catch (error) {
-      console.log(error);
-      toast.error(renewOrderFailed, { id: toastId });
+      if (!isNotifiedClientHttpError(error)) toast.error(renewOrderFailed, { id: toastId });
     }
   };
 

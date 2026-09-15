@@ -6,14 +6,21 @@ import { publishClientHttpError } from './error-events';
 
 export interface ClientFetchOptions {
   feedback?: 'auto' | 'silent';
+  /** 复用调用点已有反馈（例如 loading toast）的 id。 */
+  feedbackId?: number | string;
 }
 
 function isAbortError(error: unknown) {
   return typeof error === 'object' && error !== null && 'name' in error && error.name === 'AbortError';
 }
 
-function rejectRequest(error: ClientHttpError, feedback: ClientFetchOptions['feedback']): never {
-  if (feedback !== 'silent') publishClientHttpError(error);
+function isRequestAborted(input: RequestInfo | URL, init?: RequestInit) {
+  if (init?.signal?.aborted) return true;
+  return typeof Request !== 'undefined' && input instanceof Request && input.signal.aborted;
+}
+
+function rejectRequest(error: ClientHttpError, options: ClientFetchOptions): never {
+  if (options.feedback !== 'silent') publishClientHttpError(error, options.feedbackId);
   throw error;
 }
 
@@ -28,8 +35,8 @@ export async function clientFetch(
   try {
     response = await fetch(input, init);
   } catch (cause) {
-    if (isAbortError(cause)) throw cause;
-    return rejectRequest(new ClientHttpError({ cause, kind: 'network' }), options.feedback);
+    if (isAbortError(cause) || isRequestAborted(input, init)) throw cause;
+    return rejectRequest(new ClientHttpError({ cause, kind: 'network' }), options);
   }
 
   const classification = await classifyResponse(response);
@@ -43,6 +50,6 @@ export async function clientFetch(
       status: classification.status,
       userMessage: classification.userMessage
     }),
-    options.feedback
+    options
   );
 }

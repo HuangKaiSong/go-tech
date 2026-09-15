@@ -2,6 +2,8 @@ import { toast } from '@go-tech-frontend/ui';
 import { useEffect, useMemo, useState } from 'react';
 import { type PromotionOption, getPromotionDiscount, toArray } from '@/app/constants/promotion';
 import { translateError } from '@/app/lib/translate-error';
+import { clientFetch } from '@/lib/client-http/client-fetch';
+import { isNotifiedClientHttpError } from '@/lib/client-http/client-http-error';
 
 interface UsePromotionsParams {
   /** 优惠前的应付金额，用于计算折扣额与自动选最优 */
@@ -91,14 +93,12 @@ export const usePromotions = ({
     }
     setApplyingCode(true);
     try {
-      const res = await fetch(
+      const res = await clientFetch(
         `/go-tech/platform/promotion/search?promotionCode=${encodeURIComponent(code)}&packageId=${packageId}`,
         { headers: { Authorization: `Bearer ${token}`, 'User-Type': 'platform_customer' } }
       );
       const response = await res.json();
-      if (!res.ok || !response || response.code !== 200 || !response.data) {
-        throw new Error(response?.message || '優惠碼無效或不適用於該套餐');
-      }
+      if (!response?.data) throw new Error('優惠碼無效或不適用於該套餐');
       const valid = toArray<PromotionOption>(response.data).filter(p => String(p.packageId) === String(packageId));
       if (valid.length === 0) {
         throw new Error('優惠碼不適用於該套餐');
@@ -112,7 +112,8 @@ export const usePromotions = ({
       setPromotionCode('');
       toast.success((await translateError('優惠碼已應用', locale as string)) || '優惠碼已應用');
     } catch (error) {
-      const msg = (error as Error).message;
+      if (isNotifiedClientHttpError(error)) return;
+      const msg = error instanceof Error ? error.message : '優惠碼無效或不適用於該套餐';
       const translated = locale ? await translateError(msg, locale) : null;
       toast.error(translated || msg);
     } finally {

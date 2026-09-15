@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { afterEach, test } from 'node:test';
 import { clientFetch } from './client-fetch';
-import { ClientHttpError } from './client-http-error';
+import { ClientHttpError, isNotifiedClientHttpError } from './client-http-error';
 import { type ClientHttpErrorEvent, subscribeClientHttpErrors } from './error-events';
 
 const originalFetch = globalThis.fetch;
@@ -164,4 +164,39 @@ test('只检查顶层业务码，不把 data.code 当成响应码', async () => 
   const response = await clientFetch('/api/example');
 
   assert.deepEqual(await response.json(), { data: { code: 500, label: '业务数据' } });
+});
+
+test('只有已经发布全局反馈的客户端请求错误才跳过局部提示', () => {
+  const publishedError = new ClientHttpError({ kind: 'network' });
+  publishedError.markNotified();
+
+  assert.equal(isNotifiedClientHttpError(publishedError), true);
+  assert.equal(isNotifiedClientHttpError(new ClientHttpError({ kind: 'network' })), false);
+  assert.equal(isNotifiedClientHttpError(new Error('local validation failed')), false);
+});
+
+test('可复用调用方已有的反馈 id 替换 loading 提示', async () => {
+  const events = captureEvents();
+  globalThis.fetch = async () => jsonResponse({ code: 500, message: '支付失败' });
+
+  await assert.rejects(() => clientFetch('/api/pay', undefined, { feedbackId: 'payment-loading' }), ClientHttpError);
+
+  assert.equal(events[0].id, 'payment-loading');
+});
+
+test('自定义 signal 取消原因原样抛出且不发布错误事件', async () => {
+  const events = captureEvents();
+  const cancellation = new Error('request superseded');
+  const controller = new AbortController();
+  controller.abort(cancellation);
+  globalThis.fetch = async () => {
+    throw cancellation;
+  };
+
+  await assert.rejects(
+    () => clientFetch('/api/background', { signal: controller.signal }),
+    error => error === cancellation
+  );
+
+  assert.equal(events.length, 0);
 });

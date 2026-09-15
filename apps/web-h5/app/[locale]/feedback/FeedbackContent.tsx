@@ -26,6 +26,8 @@ import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProductSelection } from '@/contexts/ProductSelectionContext';
 import type { FbFeature, FeedbackSystem } from '@/db/scheam';
+import { clientFetch } from '@/lib/client-http/client-fetch';
+import { isNotifiedClientHttpError } from '@/lib/client-http/client-http-error';
 import { SERIF, statusMeta } from './data';
 import { formatDate, maskName, orderCommentsByThread } from './useFeedbackFeatures';
 import type { Feature } from './useFeedbackFeatures';
@@ -72,7 +74,6 @@ const FeedbackContent = ({ categoriesFromDB, featureCompleted, language }: Props
   const currentUser = user?.nickname ?? '';
   const router = useProgressRouter();
   const commentFailed = useBatchTranslation('留言失敗');
-  const contentRejected = useBatchTranslation('留言未通過安全審核，請修改後重試');
   const loginRequired = useBatchTranslation('請先登入後再操作');
   const operationFailed = useBatchTranslation('操作失敗');
   const replyText = useBatchTranslation('回覆');
@@ -110,7 +111,11 @@ const FeedbackContent = ({ categoriesFromDB, featureCompleted, language }: Props
     abortRef.current = controller;
     setApiLoading(true);
 
-    fetch(`/api/feedback/features?q=${encodeURIComponent(q)}&system=${activeSystem}`, { signal: controller.signal })
+    clientFetch(
+      `/api/feedback/features?q=${encodeURIComponent(q)}&system=${activeSystem}`,
+      { signal: controller.signal },
+      { feedback: 'silent' }
+    )
       .then(res => res.json())
       .then(json => {
         if (!controller.signal.aborted) {
@@ -137,12 +142,12 @@ const FeedbackContent = ({ categoriesFromDB, featureCompleted, language }: Props
     if (!requireLogin()) return;
 
     try {
-      const response = await fetch(`/api/feedback/features/${id}/vote`, { method: 'POST' });
+      const response = await clientFetch(`/api/feedback/features/${id}/vote`, { method: 'POST' });
       const result = (await response.json()) as {
         data?: { liked: boolean; likes: number; userName: string };
         message?: string;
       };
-      if (!response.ok || !result.data) throw new Error(result.message || operationFailed);
+      if (!result.data) throw new Error(result.message || operationFailed);
 
       const { liked, likes, userName } = result.data;
       setSearchResults(prev =>
@@ -159,6 +164,7 @@ const FeedbackContent = ({ categoriesFromDB, featureCompleted, language }: Props
         )
       );
     } catch (error) {
+      if (isNotifiedClientHttpError(error)) return;
       toast.error(error instanceof Error ? error.message : operationFailed);
     }
   };
@@ -167,28 +173,13 @@ const FeedbackContent = ({ categoriesFromDB, featureCompleted, language }: Props
     if (!requireLogin()) return false;
 
     try {
-      const response = await fetch(`/api/feedback/features/${featureId}/comments`, {
+      const response = await clientFetch(`/api/feedback/features/${featureId}/comments`, {
         body: JSON.stringify({ content, turnstileToken: token }),
         headers: { 'Content-Type': 'application/json' },
         method: 'POST'
       });
-      const result = (await response.json()) as {
-        code?:
-          | 'BOT_VERIFICATION_FAILED'
-          | 'BOT_VERIFICATION_UNAVAILABLE'
-          | 'CONTENT_MODERATION_FAILED'
-          | 'CONTENT_REJECTED';
-        data?: Feature['comments'][number];
-        message?: string;
-      };
-      if (result.code === 'CONTENT_REJECTED') {
-        toast.error(result.message || contentRejected);
-        return false;
-      }
-      if (!response.ok || !result.data) {
-        toast.error(result.message || commentFailed);
-        return false;
-      }
+      const result = (await response.json()) as { data?: Feature['comments'][number]; message?: string };
+      if (!result.data) throw new Error(result.message || commentFailed);
 
       const comment = result.data;
       setSearchResults(prev =>
@@ -198,6 +189,7 @@ const FeedbackContent = ({ categoriesFromDB, featureCompleted, language }: Props
       );
       return true;
     } catch (error) {
+      if (isNotifiedClientHttpError(error)) return false;
       toast.error(error instanceof Error ? error.message : commentFailed);
       return false;
     }

@@ -3,7 +3,7 @@
 ## 来源计划
 
 - [客户端请求错误反馈改造计划](../plans/client-fetch-feedback.plan.md)
-- 本轮只实施计划阶段 0–3：基础设施、全局通知器和 `go-now` 试点。
+- 第一轮实施阶段 0–3：基础设施、全局通知器和 `go-now` 试点；用户确认后继续实施阶段 4 客户端调用点迁移。
 
 ## 用户旅程
 
@@ -21,8 +21,11 @@
 | 状态码消息映射 | `lib/client-http/error-message.test.ts` | `Cannot find module './error-message'`，退出码 1 | 4/4 通过 |
 | go-now 统一错误反馈 | `app/lib/go-now.test.ts` | 业务失败和 HTTP 503 未 reject；断网仅抛原始 `TypeError`，3 个失败 | 接入 `clientFetch` 后 15/15 通过 |
 | go-now 未处理 Promise 收口 | `app/lib/go-now.test.ts` | 三个已通知请求错误继续向 React 点击处理器 reject，3 个失败 | 公共请求函数消费已通知错误后 15/15 通过；未知错误仍抛出 |
+| 局部重复提示防护 | `lib/client-http/client-fetch.test.ts` | `isNotifiedClientHttpError is not a function`，1 个失败 | 已通知错误可被调用点识别，12/12 通过 |
+| 支付 loading 提示复用 | `lib/client-http/client-fetch.test.ts` | 事件生成新 ID，没有复用 `payment-loading`，1 个失败 | `feedbackId` 原样透传，13/13 通过 |
+| 自定义取消原因保留 | `lib/client-http/client-fetch.test.ts` | 自定义取消被包装成 `ClientHttpError`，1 个失败 | 已中止 signal 原样抛出且无事件，14/14 通过 |
 
-仓库要求只有用户明确提出时才创建提交，因此没有创建 TDD checkpoint commit；RED/GREEN 证据保存在本报告中。
+RED/GREEN 过程先保存在本报告中；用户明确提出后，阶段 0–3 已提交为 `7082d2e`。
 
 ## 测试规格
 
@@ -40,12 +43,18 @@
 | 10 | go-now 的成功 URL、鉴权头和 PMS/HR 分流保持不变 | `app/lib/go-now.test.ts` | 集成 | PASS |
 | 11 | go-now 业务失败、HTTP 503、断网均发布一次反馈且不继续打开系统 | `app/lib/go-now.test.ts` | 集成 | PASS |
 | 12 | HR host 缺失的既有回调仍生效 | `app/lib/go-now.test.ts` | 回归 | PASS |
+| 13 | 已由全局层反馈的错误不会再触发局部错误 toast | `lib/client-http/client-fetch.test.ts` | 单元 | PASS |
+| 14 | 支付请求可复用 loading toast ID 展示全局错误 | `lib/client-http/client-fetch.test.ts` | 单元 | PASS |
+| 15 | AbortController 自定义取消原因保持原样且静默 | `lib/client-http/client-fetch.test.ts` | 单元 | PASS |
 
 ## 实际验证命令与结果
 
 ```text
 pnpm --filter web-h5 exec tsx --test app/lib/go-now.test.ts lib/client-http/client-fetch.test.ts lib/client-http/error-message.test.ts
-结果：30 tests，30 pass，0 fail。
+结果：33 tests，33 pass，0 fail。
+
+pnpm --filter web-h5 exec vitest run app/components/feedback/submission-lock.test.ts app/api/feedback/turnstile-policy.test.ts
+结果：2 files，5 tests，全部通过。
 
 pnpm --filter web-h5 type-check
 结果：通过。
@@ -64,13 +73,15 @@ pnpm --filter web-h5 exec node --import tsx --test --experimental-test-coverage 
 
 - 本地生产构建 `http://localhost:3200/zh-cn` 正常加载。
 - `NextIntlClientProvider` 页面正常渲染，Sonner Notifications 容器存在。
+- 阶段 4 后再次检查 `/zh-cn/account/login`、`/zh-cn/contact` 和 `/zh-cn/feedback`，页面均正常渲染且控制台无 error。
 - 未使用真实账号，也未提交或修改任何数据。
 - `go-now` 的真实触发入口需要登录。受只读 QA 和无测试账号限制，本轮未对真实业务失败 Toast 做浏览器端到端触发；该行为由请求事件单元测试、go-now 集成测试、类型检查和生产构建覆盖。
 
 ## 已知边界
 
-- 本轮没有迁移账户、订单、支付、反馈、轮询和预取请求。
+- 阶段 4 已迁移账户、设置、反馈、订单、支付、轮询、搜索和预取请求。
+- Server Component、Route Handler、服务端翻译、BetterStack 上报和第三方服务端请求继续使用原生 `fetch`。
 - `NEXT_PUBLIC_HR_TRIAL_HOST` 缺失不是 fetch 错误，继续使用现有 UI 回调。
-- 旧 `lib/http-fetch.ts` 未修改。
+- 旧 `lib/http-fetch.ts` 已无客户端消费者，但文件删除留待阶段 5。
 - `app/error.tsx` 的既有用户改动未修改。
 - 三个大型 locale JSON 存在历史格式问题；本轮只添加局部翻译区块，没有整文件格式化，避免无关 diff。

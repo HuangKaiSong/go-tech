@@ -39,3 +39,8 @@ export class ClientHttpError extends Error {
     this.notified = true;
   }
 }
+
+/** 已由全局监听器接管反馈的错误，不应再由调用点重复弹出错误提示。 */
+export function isNotifiedClientHttpError(error: unknown): error is ClientHttpError {
+  return error instanceof ClientHttpError && error.notified;
+}

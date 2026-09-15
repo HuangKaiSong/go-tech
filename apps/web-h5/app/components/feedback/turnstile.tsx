@@ -7,6 +7,7 @@ import Script from 'next/script';
 import { useEffect, useRef, useState } from 'react';
 import { DynamicText } from '@/app/components/DynamicI18nText.client';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
+import { clientFetch } from '@/lib/client-http/client-fetch';
 
 interface TurnstileApi {
   remove: (widgetId: string) => void;
@@ -65,9 +66,12 @@ const FallbackCaptcha = ({ action, onVerify, resetKey }: Props) => {
     setImage('');
     onVerify('');
 
-    fetch(`/api/feedback/captcha?action=${action}`, { cache: 'no-store', signal: controller.signal })
+    clientFetch(
+      `/api/feedback/captcha?action=${action}`,
+      { cache: 'no-store', signal: controller.signal },
+      { feedback: 'silent' }
+    )
       .then(response => {
-        if (!response.ok) throw new Error('Captcha request failed');
         return response.json() as Promise<CaptchaResponse>;
       })
       .then(result => {

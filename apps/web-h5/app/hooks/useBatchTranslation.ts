@@ -1,6 +1,7 @@
 import { useLocale } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { useDynamicMessages } from '@/app/components/DynamicI18nProvider';
+import { clientFetch } from '@/lib/client-http/client-fetch';
 
 type BatchItem = {
   locale: string;
@@ -32,11 +33,15 @@ function flushBatch(locale: any) {
   if (nonEmptyItems.length === 0) return;
 
   const texts = nonEmptyItems.map(item => item.text);
-  fetch('/api/translate/batch', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ texts, locale })
-  })
+  clientFetch(
+    '/api/translate/batch',
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ texts, locale })
+    },
+    { feedback: 'silent' }
+  )
     .then(res => res.json())
     .then(data => {
       const translations = data.translations || {};

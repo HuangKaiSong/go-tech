@@ -17,14 +17,16 @@ import dynamic from 'next/dynamic';
 import { type FC, useEffect, useState } from 'react';
 import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
+import { fetchPromotions } from '@/app/lib/client-promotions';
 import { getCreatedOrderId } from '@/app/lib/order-id';
-import { translateError } from '@/app/lib/translate-error';
 import { useAuth } from '@/contexts/AuthContext';
+import { clientFetch } from '@/lib/client-http/client-fetch';
+import { isNotifiedClientHttpError } from '@/lib/client-http/client-http-error';
 import { DynamicText } from '../../components/DynamicI18nText.client';
 import { OrderItemTypeEnum, OrderTypeEnum } from '../../constants/order';
 import type { MyOrder } from '../../constants/order-response';
 import { DAYSPERMONTH, PayTypeEnum, stashWebManagedCashier } from '../../constants/payment';
-import { type PromotionOption, fetchPromotions } from '../../constants/promotion';
+import { type PromotionOption } from '../../constants/promotion';
 import { usePromotions } from '../../hooks/usePromotions';
 import { PromotionSection } from './PromotionSection';
 const PaymentPanel = dynamic(() => import('../../components/payment/Panel'), {
@@ -217,41 +219,40 @@ export const AddService: FC<AddServiceProps> = ({
 
     try {
       // 创建订单
-      const orderResponse = await fetch('/go-tech/platform/packageOrder/add', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(orderInfo)
-      })
-        .then(res => res.json())
-        .catch(err => {
-          throw err;
-        });
-      if (orderResponse.code === 200) {
-        toast.success(addServiceOrderCreated, { id: toastId });
-        const orderId = getCreatedOrderId(orderResponse.data);
-        // 上传凭证
-        await fetch('/go-tech/platform/packageOrder/payEvidence', {
+      const response = await clientFetch(
+        '/go-tech/platform/packageOrder/add',
+        {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(orderInfo)
+        },
+        { feedbackId: toastId }
+      );
+      const orderResponse = await response.json();
+      if (orderResponse.code !== 200) throw new Error(addServiceOrderFailed);
+
+      toast.success(addServiceOrderCreated, { id: toastId });
+      const orderId = getCreatedOrderId(orderResponse.data);
+      // 上传凭证
+      await clientFetch(
+        '/go-tech/platform/packageOrder/payEvidence',
+        {
           method: 'POST',
           headers,
           body: JSON.stringify({
             id: orderId,
             payEvidence: voucherFile.url
           })
-        })
-          .catch(err => {
-            throw err;
-          })
-          .then(res => res.json());
+        },
+        { feedbackId: toastId }
+      );
 
-        router.push(`/my-orders/${orderId}`);
+      router.push(`/my-orders/${orderId}`);
 
-        setShowPaymentDialog(false);
-        toast.success(addServiceEvidenceSubmitted);
-      } else {
-        toast.error((await translateError(orderResponse.message, locale)) || orderResponse.message, { id: toastId });
-      }
+      setShowPaymentDialog(false);
+      toast.success(addServiceEvidenceSubmitted);
     } catch (error) {
-      console.log(error);
+      if (!isNotifiedClientHttpError(error)) toast.error(addServiceOrderFailed, { id: toastId });
     }
   };
 
@@ -262,16 +263,18 @@ export const AddService: FC<AddServiceProps> = ({
     const orderInfo = buildOrderInfo(PayTypeEnum.Online);
 
     try {
-      const orderResponse = await fetch('/go-tech/platform/packageOrder/add', {
-        method: 'POST',
-        headers: requestHeaders(),
-        body: JSON.stringify(orderInfo)
-      }).then(res => res.json());
+      const response = await clientFetch(
+        '/go-tech/platform/packageOrder/add',
+        {
+          method: 'POST',
+          headers: requestHeaders(),
+          body: JSON.stringify(orderInfo)
+        },
+        { feedbackId: toastId }
+      );
+      const orderResponse = await response.json();
 
-      if (orderResponse.code !== 200) {
-        toast.error((await translateError(orderResponse.message, locale)) || orderResponse.message, { id: toastId });
-        return;
-      }
+      if (orderResponse.code !== 200) throw new Error(addServiceOrderFailed);
 
       // 后端返回 OrderAddResponse（含签名等参数）；先跳转订单详情，再由详情页唤起第三方支付
       toast.success(orderCreatedRedirecting, { id: toastId });
@@ -280,8 +283,7 @@ export const AddService: FC<AddServiceProps> = ({
       stashWebManagedCashier(orderResponse.data);
       router.push(`/my-orders/${orderId}`);
     } catch (error) {
-      console.log(error);
-      toast.error(addServiceOrderFailed, { id: toastId });
+      if (!isNotifiedClientHttpError(error)) toast.error(addServiceOrderFailed, { id: toastId });
     }
   };
 

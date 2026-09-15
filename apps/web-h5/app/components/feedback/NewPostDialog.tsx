@@ -22,6 +22,8 @@ import type { Feature } from '@/app/[locale]/feedback/useFeedbackFeatures';
 import { DynamicText } from '@/app/components/DynamicI18nText.client';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 import { useAuth } from '@/contexts/AuthContext';
+import { clientFetch } from '@/lib/client-http/client-fetch';
+import { isNotifiedClientHttpError } from '@/lib/client-http/client-http-error';
 import { releaseSubmissionLock, tryAcquireSubmissionLock } from './submission-lock';
 import Turnstile from './turnstile';
 
@@ -97,7 +99,7 @@ const NewPostDialog = ({ categories, defaultCategory, defaultSubCategory, onCrea
     if (!tryAcquireSubmissionLock(submittingRef)) return;
     setSubmitting(true);
     try {
-      const response = await fetch('/api/feedback/features', {
+      const response = await clientFetch('/api/feedback/features', {
         body: JSON.stringify({
           category: cat,
           description: desc.trim(),
@@ -109,7 +111,7 @@ const NewPostDialog = ({ categories, defaultCategory, defaultSubCategory, onCrea
         method: 'POST'
       });
       const result = (await response.json()) as { data?: Feature; message?: string };
-      if (!response.ok || !result.data) throw new Error(result.message || postFailed);
+      if (!result.data) throw new Error(result.message || postFailed);
 
       onCreated(result.data);
       setTitle('');
@@ -117,7 +119,7 @@ const NewPostDialog = ({ categories, defaultCategory, defaultSubCategory, onCrea
       setOpen(false);
       toast.success(postSuccess);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : postFailed);
+      if (!isNotifiedClientHttpError(error)) toast.error(error instanceof Error ? error.message : postFailed);
       setTurnstileToken('');
       setTurnstileResetKey(key => key + 1);
     } finally {

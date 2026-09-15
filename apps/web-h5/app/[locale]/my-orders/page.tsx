@@ -14,15 +14,16 @@ import {
   toast
 } from '@go-tech-frontend/ui';
 import { ArrowUpCircle, Eye, Package, RefreshCw, Settings, ShoppingCart } from 'lucide-react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import { useEffect, useMemo, useState } from 'react';
 import Footer from '@/app/components/Footer';
 import Header from '@/app/components/Header';
 import Link from '@/app/components/Link';
 import { useProgressRouter } from '@/app/hooks/use-progress-router';
-import { translateError } from '@/app/lib/translate-error';
 import { useAuth } from '@/contexts/AuthContext';
+import { clientFetch } from '@/lib/client-http/client-fetch';
+import { isNotifiedClientHttpError } from '@/lib/client-http/client-http-error';
 import { DynamicText } from '../../components/DynamicI18nText.client';
 import { OrderItemTypeEnum, OrderStatusEnum } from '../../constants/order';
 import type { MyOrder, MyOrdersResponse } from '../../constants/order-response';
@@ -60,7 +61,6 @@ const MyOrders = () => {
   const { token } = useAuth();
   const router = useProgressRouter();
   const t = useTranslations('Order');
-  const locale = useLocale();
 
   const [isLoading, setIsLoading] = useState(true);
   const [loadFailed, setLoadFailed] = useState(false);
@@ -89,29 +89,33 @@ const MyOrders = () => {
     }
     const toastId = toast.loading(t('toast.submittingEvidence'));
     try {
-      const res = await fetch('/go-tech/platform/packageOrder/payEvidence', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-          'User-Type': 'platform_customer'
+      const response = await clientFetch(
+        '/go-tech/platform/packageOrder/payEvidence',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+            'User-Type': 'platform_customer'
+          },
+          body: JSON.stringify({
+            id: selectOrder.id,
+            payEvidence: file.url
+          })
         },
-        body: JSON.stringify({
-          id: selectOrder.id,
-          payEvidence: file.url
-        })
-      }).then(r => r.json());
+        { feedbackId: toastId }
+      );
+      const res = await response.json();
 
       if (res.code === 200) {
         toast.success(t('toast.evidenceSubmitted'), { id: toastId });
         setShowPaymentDialog(false);
         router.push(`/my-orders/${selectOrder.id}`);
       } else {
-        toast.error((await translateError(res.message, locale)) || res.message, { id: toastId });
+        throw new Error(t('toast.submitFailed'));
       }
     } catch (error) {
-      console.log(error);
-      toast.error(t('toast.submitFailed'), { id: toastId });
+      if (!isNotifiedClientHttpError(error)) toast.error(t('toast.submitFailed'), { id: toastId });
     }
   };
 
@@ -128,15 +132,20 @@ const MyOrders = () => {
     if (!token) return;
     const loadOrders = async () => {
       try {
-        const data: MyOrdersResponse = await fetch('/go-tech/platform/packageOrder/myOrders', {
-          signal: controller.signal,
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'User-Type': 'platform_customer',
-            Authorization: `Bearer ${token}`
-          }
-        }).then(res => res.json());
+        const response = await clientFetch(
+          '/go-tech/platform/packageOrder/myOrders',
+          {
+            signal: controller.signal,
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'User-Type': 'platform_customer',
+              Authorization: `Bearer ${token}`
+            }
+          },
+          { feedback: 'silent' }
+        );
+        const data = (await response.json()) as MyOrdersResponse;
         if (controller.signal.aborted) return;
         if (data.code !== 200 || (data.data !== null && !Array.isArray(data.data))) {
           throw new Error('Failed to load orders');

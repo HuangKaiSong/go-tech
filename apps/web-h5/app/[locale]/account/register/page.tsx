@@ -11,11 +11,12 @@ import { DynamicText } from '@/app/components/DynamicI18nText.client';
 import Link from '@/app/components/Link';
 import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
+import { reportClientHttpError } from '@/app/lib/report-client-http-error';
 import { translateError } from '@/app/lib/translate-error';
 // import Logo from "@/assets/Gotech_Logo.webp";
 import authBgImg from '@/assets/background.webp';
-import { sendToBetterStack } from '@/lib/betterstack-logger';
-import { HttpError, httpFetch } from '@/lib/http-fetch';
+import { clientFetch } from '@/lib/client-http/client-fetch';
+import { isNotifiedClientHttpError } from '@/lib/client-http/client-http-error';
 
 const parseEmailExists = (result: any) => {
   if (typeof result?.data === 'boolean') return !result.data;
@@ -43,6 +44,7 @@ const Register = () => {
   const codePlaceholder = useBatchTranslation('請輸入郵箱收到的驗證碼');
   const codeSentMsg = useBatchTranslation('驗證碼已發送至您的郵箱');
   const codeFailMsg = useBatchTranslation('驗證碼發送失敗，請稍後再試');
+  const operationFailed = useBatchTranslation('操作失敗');
   const regSuccessLoading = useBatchTranslation('注册成功, 正在為您跳转登录页面...');
   const regSuccessMsg = useBatchTranslation('跳轉成功, 請登入');
   const sendCodeText = useBatchTranslation('發送驗證碼');
@@ -160,7 +162,7 @@ const Register = () => {
 
     setEmailChecking(true);
     try {
-      const response = await httpFetch(
+      const response = await clientFetch(
         `/go-tech/platform/platformCustomer/emailExistVerify?email=${encodeURIComponent(email)}`,
         { method: 'POST' }
       );
@@ -180,12 +182,7 @@ const Register = () => {
       }
       return exists;
     } catch (err) {
-      if (err instanceof HttpError) {
-        sendToBetterStack('error', err.response.statusText, {
-          uri: `/go-tech/platform/platformCustomer/checkEmail?email=${email}`,
-          extra: err.data
-        });
-      }
+      reportClientHttpError(err, '/go-tech/platform/platformCustomer/emailExistVerify');
       return false;
     } finally {
       setEmailChecking(false);
@@ -217,26 +214,20 @@ const Register = () => {
 
     try {
       setPending(true);
-      const response = await httpFetch(`/go-tech/platform/platformCustomer/sendCode?email=${formData.email}`, {
+      const response = await clientFetch(`/go-tech/platform/platformCustomer/sendCode?email=${formData.email}`, {
         method: 'POST'
       });
       const fetchResult = await response.json();
 
-      if (fetchResult && fetchResult.code && fetchResult.code === 200) {
+      if (fetchResult?.code === 200) {
         toast.success(codeSentMsg);
         setTargetDate(Date.now() + 60 * 1000);
         return;
       }
-      toast.error((await translateError(fetchResult.message, locale)) || fetchResult.message);
+      throw new Error(codeFailMsg);
     } catch (err) {
-      if (err instanceof HttpError) {
-        sendToBetterStack('error', err.response.statusText, {
-          uri: `/go-tech/platform/platformCustomer/sendCode?email=${formData.email}`,
-          extra: err.data
-        });
-      }
-      // HttpError 的 message 已被 httpFetch 翻译
-      toast.error(err instanceof HttpError && err.message ? err.message : codeFailMsg);
+      reportClientHttpError(err, '/go-tech/platform/platformCustomer/sendCode');
+      if (!isNotifiedClientHttpError(err)) toast.error(err instanceof Error ? err.message : codeFailMsg);
     } finally {
       setPending(false);
     }
@@ -266,7 +257,7 @@ const Register = () => {
 
       const { company, email, name, phone, verificationCode } = result.data;
 
-      const response = await httpFetch('/go-tech/platform/platformCustomer/verify', {
+      const response = await clientFetch('/go-tech/platform/platformCustomer/verify', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -282,22 +273,12 @@ const Register = () => {
 
       const validatedResult = await response.json();
 
-      if (validatedResult.code !== 200) {
-        toast.error((await translateError(validatedResult.message, locale)) || validatedResult.message);
-        return;
-      }
+      if (validatedResult.code !== 200) throw new Error(operationFailed);
       setStep(1);
       setTargetDate(undefined);
     } catch (err) {
-      if (err instanceof HttpError) {
-        sendToBetterStack('error', err.response.statusText, {
-          uri: `/go-tech/platform/platformCustomer/verify`,
-          extra: err.data,
-          body: result.data
-        });
-        // message 已被 httpFetch 翻译（此前由 code!==200 分支展示）
-        toast.error(err.message);
-      }
+      reportClientHttpError(err, '/go-tech/platform/platformCustomer/verify');
+      if (!isNotifiedClientHttpError(err)) toast.error(err instanceof Error ? err.message : operationFailed);
     } finally {
       setValidatedPending(false);
     }
@@ -318,7 +299,7 @@ const Register = () => {
       const { company: companyName, email, name: custName, password, phone } = result.data;
       const type = new URLSearchParams(window.location.search).get('type') || undefined;
 
-      const response = await httpFetch('/go-tech/platform/platformCustomer/register', {
+      const response = await clientFetch('/go-tech/platform/platformCustomer/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -334,10 +315,7 @@ const Register = () => {
       });
 
       const signupResult = await response.json();
-      if (signupResult.code !== 200) {
-        toast.error((await translateError(signupResult.message, locale)) || signupResult.message);
-        return;
-      }
+      if (signupResult.code !== 200) throw new Error(operationFailed);
 
       toast.promise(
         new Promise<boolean>(resolve => {
@@ -356,15 +334,8 @@ const Register = () => {
         }
       );
     } catch (err) {
-      if (err instanceof HttpError) {
-        sendToBetterStack('error', err.response.statusText, {
-          uri: `/go-tech/platform/platformCustomer/register`,
-          extra: err.data,
-          body: result.data
-        });
-        // message 已被 httpFetch 翻译（此前由 code!==200 分支展示）
-        toast.error(err.message);
-      }
+      reportClientHttpError(err, '/go-tech/platform/platformCustomer/register');
+      if (!isNotifiedClientHttpError(err)) toast.error(err instanceof Error ? err.message : operationFailed);
     } finally {
       setSignupPending(false);
     }

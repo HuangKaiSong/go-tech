@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 import { useAuth } from '@/contexts/AuthContext';
+import { clientFetch } from '@/lib/client-http/client-fetch';
+import { isNotifiedClientHttpError } from '@/lib/client-http/client-http-error';
 
 export type Feature = {
   author: string;
@@ -46,7 +48,6 @@ export const orderCommentsByThread = (comments: Feature['comments']) => {
 export const useFeedbackFeatures = (_categoryName?: string, initialFeatures: Feature[] = []) => {
   const { isLoggedIn } = useAuth();
   const commentFailed = useBatchTranslation('留言失敗');
-  const contentRejected = useBatchTranslation('留言未通過安全審核，請修改後重試');
   const loginRequired = useBatchTranslation('請先登入後再操作');
   const operationFailed = useBatchTranslation('操作失敗');
   const [features, setFeatures] = useState<Feature[]>(initialFeatures);
@@ -61,12 +62,12 @@ export const useFeedbackFeatures = (_categoryName?: string, initialFeatures: Fea
     if (!requireLogin()) return;
 
     try {
-      const response = await fetch(`/api/feedback/features/${id}/vote`, { method: 'POST' });
+      const response = await clientFetch(`/api/feedback/features/${id}/vote`, { method: 'POST' });
       const result = (await response.json()) as {
         data?: { liked: boolean; likes: number; userName: string };
         message?: string;
       };
-      if (!response.ok || !result.data) throw new Error(result.message || operationFailed);
+      if (!result.data) throw new Error(result.message || operationFailed);
 
       const { liked, likes, userName } = result.data;
       setFeatures(prev =>
@@ -83,6 +84,7 @@ export const useFeedbackFeatures = (_categoryName?: string, initialFeatures: Fea
         )
       );
     } catch (error) {
+      if (isNotifiedClientHttpError(error)) return;
       toast.error(error instanceof Error ? error.message : operationFailed);
     }
   };
@@ -95,28 +97,13 @@ export const useFeedbackFeatures = (_categoryName?: string, initialFeatures: Fea
     if (!requireLogin()) return false;
 
     try {
-      const response = await fetch(`/api/feedback/features/${featureId}/comments`, {
+      const response = await clientFetch(`/api/feedback/features/${featureId}/comments`, {
         body: JSON.stringify({ content, turnstileToken }),
         headers: { 'Content-Type': 'application/json' },
         method: 'POST'
       });
-      const result = (await response.json()) as {
-        code?:
-          | 'BOT_VERIFICATION_FAILED'
-          | 'BOT_VERIFICATION_UNAVAILABLE'
-          | 'CONTENT_MODERATION_FAILED'
-          | 'CONTENT_REJECTED';
-        data?: Feature['comments'][number];
-        message?: string;
-      };
-      if (result.code === 'CONTENT_REJECTED') {
-        toast.error(result.message || contentRejected);
-        return false;
-      }
-      if (!response.ok || !result.data) {
-        toast.error(result.message || commentFailed);
-        return false;
-      }
+      const result = (await response.json()) as { data?: Feature['comments'][number]; message?: string };
+      if (!result.data) throw new Error(result.message || commentFailed);
 
       const comment = result.data;
       setFeatures(prev =>
@@ -126,6 +113,7 @@ export const useFeedbackFeatures = (_categoryName?: string, initialFeatures: Fea
       );
       return true;
     } catch (error) {
+      if (isNotifiedClientHttpError(error)) return false;
       toast.error(error instanceof Error ? error.message : commentFailed);
       return false;
     }
