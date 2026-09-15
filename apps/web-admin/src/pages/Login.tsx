@@ -102,7 +102,9 @@ const Login = () => {
   // const [effectType, setEffectType] = useState<AnimateType>(() => weightedRandom(animateType));
 
   // 获取来源页面路径
-  const from = location.state?.from || '/';
+  const stateFrom: unknown = location.state?.from;
+  const redirectFrom = typeof stateFrom === 'string' ? stateFrom : new URLSearchParams(location.search).get('from');
+  const from = redirectFrom?.startsWith('/') && !redirectFrom.startsWith('//') ? redirectFrom : '/';
 
   const loginMutation = useMutation({
     mutationFn: async () => {

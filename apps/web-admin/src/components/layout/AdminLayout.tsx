@@ -1,40 +1,14 @@
-import { toast } from '@go-tech-frontend/ui';
 import { useLayoutEffect } from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import { useAuth } from '@/hooks/use-auth';
 import AdminHeader from './AdminHeader';
 import AdminSidebar from './AdminSidebar';
 
 const AdminLayout = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { isAuthenticated, isExpired, token } = useAuth();
-  const originFetch = window.fetch;
+  const { token } = useAuth();
 
   useLayoutEffect(() => {
-    if (isExpired && token) {
-      toast.error('登录凭证已过期, 请重新登录');
-      requestAnimationFrame(() => {
-        navigate('/login', {
-          state: {
-            from: location.pathname
-          }
-        });
-      });
-      return;
-    }
-    if (!isAuthenticated) {
-      toast.error('请先登录');
-      requestAnimationFrame(() => {
-        navigate('/login', {
-          replace: true,
-          state: {
-            from: location.pathname
-          }
-        });
-      });
-      return;
-    }
+    const originFetch = window.fetch;
 
     // 在fetch中添加header头
     window.fetch = async (...args: [RequestInfo | URL, RequestInit?]) => {
@@ -68,7 +42,7 @@ const AdminLayout = () => {
     return () => {
       window.fetch = originFetch;
     };
-  }, [isExpired, isAuthenticated, token, navigate, originFetch]);
+  }, [token]);
 
   return (
     <div className="flex min-h-screen bg-background">

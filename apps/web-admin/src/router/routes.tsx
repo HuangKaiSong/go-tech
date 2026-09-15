@@ -1,4 +1,4 @@
-import { Navigate, type RouteObject } from 'react-router-dom';
+import { type LoaderFunction, Navigate, type RouteObject } from 'react-router-dom';
 import { lazyPage } from './lazy';
 
 import AdminLayout from '@/components/layout/AdminLayout';
@@ -30,12 +30,13 @@ const MessagePage = lazyPage(() => import('@/pages/MessagePage'));
 const FeedbackPage = lazyPage(() => import('@/pages/FeedbackPage'));
 const SettingI18n = lazyPage(() => import('@/pages/SettingI18n'));
 
-export const routes: RouteObject[] = [
+export const createRoutes = (authLoader: LoaderFunction): RouteObject[] => [
   {
     path: '/',
     element: <Navigate to="/orders" replace />
   },
   {
+    loader: authLoader,
     element: <AdminLayout />,
     children: [
       {

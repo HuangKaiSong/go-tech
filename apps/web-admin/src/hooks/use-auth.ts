@@ -47,7 +47,7 @@ function parseJwtPayload(token: string | null): any | null {
   }
 }
 
-function isTokenExpired(token: string | null): boolean {
+export function isTokenExpired(token: string | null): boolean {
   if (!token) return true;
 
   const payload = parseJwtPayload(token);
@@ -60,6 +60,18 @@ function isTokenExpired(token: string | null): boolean {
   const currentTime = Date.now();
 
   return currentTime >= expirationTime;
+}
+
+export function getStoredToken(): string | null {
+  try {
+    const storedToken = localStorage.getItem(TOKEN_KEY);
+    if (!storedToken) return null;
+
+    const token: unknown = JSON.parse(storedToken);
+    return typeof token === 'string' ? token : null;
+  } catch {
+    return null;
+  }
 }
 
 export function useAuth() {
