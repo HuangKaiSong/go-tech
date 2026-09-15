@@ -10,6 +10,7 @@ import type { Locale } from '@/i18n/config';
 import { routing } from '@/i18n/routing';
 import { getBaseUrl } from '@/lib/http';
 import { getLocalizedAlternates } from '@/lib/seo';
+import { ClientHttpErrorNotifier } from '../components/client-http-error-notifier';
 import { DynamicI18nProvider } from '../components/DynamicI18nProvider';
 import { HtmlLangSync } from '../components/html-lang-sync';
 import Layout from '../components/Layout';
@@ -96,6 +97,7 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider>
+      <ClientHttpErrorNotifier />
       <HtmlLangSync locale={locale} />
       <ProductSelectionProvider>
         <DynamicI18nProvider messages={dynamicMessages}>

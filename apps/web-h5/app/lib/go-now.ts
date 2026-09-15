@@ -1,4 +1,6 @@
 import type { PackageBizCode } from '@go-tech/types';
+import { clientFetch } from '@/lib/client-http/client-fetch';
+import { ClientHttpError } from '@/lib/client-http/client-http-error';
 
 interface CallbackOptions {
   generateCallback?: (uri: string) => void;
@@ -47,14 +49,20 @@ function completeCallback(uri: string, generateCallback?: (uri: string) => void)
   window.open(`${trialHost}/oauth/${uri}`, '_blank');
 }
 
-function requestPlatformCode(url: string, token: string | undefined) {
-  return fetch(url, {
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-      'User-type': 'platform_customer'
-    }
-  });
+async function requestPlatformCode(url: string, token: string | undefined) {
+  try {
+    return await clientFetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+        'User-type': 'platform_customer'
+      }
+    });
+  } catch (error) {
+    // 请求层已给用户反馈时只终止本次操作，避免 React 事件处理器产生未处理 Promise。
+    if (error instanceof ClientHttpError && error.notified) return undefined;
+    throw error;
+  }
 }
 
 function openHrTrial(code: unknown, onHrTrialHostMissing?: () => void) {
@@ -96,10 +104,13 @@ export async function enterTenant({
   tenant,
   token
 }: EnterTenantOptions) {
-  const response = await requestPlatformCode(
+  const codeResponse = await requestPlatformCode(
     `/go-tech/platform/platformCustomer/gotoCode?tenantId=${tenant.tenantId}`,
     token
-  ).then(res => res.json());
+  );
+  if (!codeResponse) return;
+
+  const response = await codeResponse.json();
 
   if (response.code !== 200) return;
 
@@ -128,6 +139,7 @@ export async function startFreeTrial({
 }: TrialCallbackOptions) {
   // 未传业务类型的旧入口仍进入 PMS，显式传值的入口则按当前选择进入对应产品。
   const response = await requestPlatformCode(`/go-tech/platform/platformCustomer/trialCode?bizCode=${bizCode}`, token);
+  if (!response) return;
 
   if (response.ok) {
     const result = await response.json();

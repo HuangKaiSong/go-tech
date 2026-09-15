@@ -11,6 +11,19 @@
     "pricingScheme": "查看完整的定价方案",
     "freeTrial": "立即开始14天免费试用"
   },
+  "RequestError": {
+    "badRequest": "请求参数不正确",
+    "business": "操作失败（业务码：{code}）",
+    "forbidden": "您没有权限执行此操作",
+    "network": "网络连接失败，请检查网络后重试",
+    "notFound": "请求的资源不存在",
+    "requestFailed": "请求失败（{status}）",
+    "serverError": "服务器发生错误，请稍后重试",
+    "serviceUnavailable": "服务暂时不可用，请稍后重试",
+    "timeout": "请求超时，请稍后重试",
+    "tooManyRequests": "操作过于频繁，请稍后重试",
+    "unauthorized": "登录状态已失效，请重新登录"
+  },
   "StatsSection": {
     "semibold": "挥别租务公司的烦恼",
     "title": "GOTECH租务系统",

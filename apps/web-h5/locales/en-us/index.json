@@ -11,6 +11,19 @@
     "pricingScheme": "查看完整的定價方案",
     "freeTrial": "立即開始14天免費試用"
   },
+  "RequestError": {
+    "badRequest": "The request parameters are invalid",
+    "business": "The operation failed (business code: {code})",
+    "forbidden": "You do not have permission to perform this operation",
+    "network": "Unable to connect. Check your network and try again",
+    "notFound": "The requested resource was not found",
+    "requestFailed": "The request failed ({status})",
+    "serverError": "The server encountered an error. Try again later",
+    "serviceUnavailable": "The service is temporarily unavailable. Try again later",
+    "timeout": "The request timed out. Try again",
+    "tooManyRequests": "Too many requests. Try again later",
+    "unauthorized": "Your session has expired. Sign in again"
+  },
   "StatsSection": {
     "semibold": "Say goodbye to the hassles of leasing companies",
     "title": "GOTECH Rental System!",

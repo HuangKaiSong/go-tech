@@ -1,14 +1,24 @@
 import assert from 'node:assert/strict';
 import { afterEach, test } from 'node:test';
+import { type ClientHttpErrorEvent, subscribeClientHttpErrors } from '@/lib/client-http/error-events';
 import { enterOrStartTrial, enterTenant, filterTenantsByBizCode, goNow, startFreeTrial } from './go-now';
 
 const originalFetch = globalThis.fetch;
 const originalWindow = Object.getOwnPropertyDescriptor(globalThis, 'window');
 const originalHrTrialHost = process.env.NEXT_PUBLIC_HR_TRIAL_HOST;
 const originalPmsTrialHost = process.env.NEXT_PUBLIC_PMS_TRIAL_HOST;
+const cleanups: Array<() => void> = [];
 
-function jsonResponse(body: unknown, ok = true) {
-  return { json: async () => body, ok } as Response;
+function jsonResponse(body: unknown, init: ResponseInit = {}) {
+  const headers = new Headers(init.headers);
+  headers.set('Content-Type', 'application/json');
+  return new Response(JSON.stringify(body), { ...init, headers });
+}
+
+function captureEvents() {
+  const events: ClientHttpErrorEvent[] = [];
+  cleanups.push(subscribeClientHttpErrors(event => events.push(event)));
+  return events;
 }
 
 function installWindow(open: (url?: string | URL, target?: string) => unknown) {
@@ -21,6 +31,7 @@ function installWindow(open: (url?: string | URL, target?: string) => unknown) {
 
 afterEach(() => {
   globalThis.fetch = originalFetch;
+  cleanups.splice(0).forEach(cleanup => cleanup());
 
   if (originalWindow) {
     Object.defineProperty(globalThis, 'window', originalWindow);
@@ -197,21 +208,47 @@ test('startFreeTrial 未指定业务类型时保持既有 PMS 试用行为', asy
   assert.equal(callbackUri, 'tryCallback?code=trial-code');
 });
 
-test('startFreeTrial 在 HTTP 请求失败时不解析响应内容', async () => {
-  let jsonWasRead = false;
+test('enterTenant 遇到非 200 业务码时发布业务说明且不进入系统', async () => {
+  const events = captureEvents();
+  let callbackCalls = 0;
+  globalThis.fetch = async () => jsonResponse({ code: 40301, message: '该账户无权进入' });
 
-  globalThis.fetch = async () =>
-    ({
-      json: async () => {
-        jsonWasRead = true;
-        return { code: 200, data: 'unexpected-code' };
-      },
-      ok: false
-    }) as Response;
+  await enterTenant({
+    generateCallback: () => {
+      callbackCalls += 1;
+    },
+    tenant: { bizCode: 'pms', tenantId: 'pms-tenant', tenantName: 'PMS' },
+    token: 'access-token'
+  });
+
+  assert.equal(callbackCalls, 0);
+  assert.equal(events.length, 1);
+  assert.equal(events[0].userMessage, '该账户无权进入');
+});
+
+test('startFreeTrial 遇到空 HTTP 错误响应时发布状态码', async () => {
+  const events = captureEvents();
+  globalThis.fetch = async () => new Response(null, { status: 503 });
 
   await startFreeTrial({ bizCode: 'pms', token: 'access-token' });
 
-  assert.equal(jsonWasRead, false);
+  assert.equal(events.length, 1);
+  assert.equal(events[0].status, 503);
+});
+
+test('goNow 遇到网络失败时发布网络错误', async () => {
+  const events = captureEvents();
+  globalThis.fetch = async () => {
+    throw new TypeError('Failed to fetch');
+  };
+
+  await goNow({
+    tenants: [{ bizCode: 'pms', tenantId: 'pms-tenant', tenantName: 'PMS' }],
+    token: 'access-token'
+  });
+
+  assert.equal(events.length, 1);
+  assert.equal(events[0].kind, 'network');
 });
 
 test('startFreeTrial 在 HR 试用地址缺失时通知调用方', async () => {
