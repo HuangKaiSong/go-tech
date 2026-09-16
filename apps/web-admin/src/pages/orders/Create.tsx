@@ -49,7 +49,7 @@ interface CustomerOption {
 /** 优惠查询接口返回的单条优惠（已按套餐拍平，ruleType 1=滿減 2=按百分比） */
 interface PromotionOption {
   discountValue?: number;
-  packageId: number | string;
+  packageCode: number | string;
   packageName?: string;
   promotionDesc?: string;
   promotionId: number;
@@ -406,8 +406,8 @@ const CreateOrder = () => {
     for (const promotion of [...activityPromotions, ...appliedCodePromotions]) {
       const id = promotion?.promotionId;
       const matchesPackage =
-        String(promotion?.packageId) === String(selectedPlan?.packageCode) ||
-        String(promotion?.packageId) === String(selectedPlan?.id);
+        String(promotion?.packageCode) === String(selectedPlan?.packageCode) ||
+        String(promotion?.packageCode) === String(selectedPlan?.id);
       if (typeof id === 'number' && matchesPackage && !seen.has(id)) {
         seen.add(id);
         list.push(promotion);
@@ -446,8 +446,8 @@ const CreateOrder = () => {
       }
       const valid = toArray<PromotionOption>(response.data).filter(
         promotion =>
-          String(promotion.packageId) === String(selectedPlan.packageCode) ||
-          String(promotion.packageId) === String(selectedPlan.id)
+          String(promotion.packageCode) === String(selectedPlan.packageCode) ||
+          String(promotion.packageCode) === String(selectedPlan.id)
       );
       if (valid.length === 0) {
         throw new Error('優惠碼不適用於該套餐');
