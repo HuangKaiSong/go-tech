@@ -32,35 +32,47 @@ test('configured monthly prices and savings follow all duration boundaries witho
     [12, 1600],
     [15, 1600]
   ]) {
-    const result = getPurchaseTotals(plan, months, {});
+    const result = getPurchaseTotals(plan, months, { selection: {} });
     assert.equal(result.basePayable, unitPrice * months);
     assert.equal(result.savings, (2000 - unitPrice) * months);
   }
-  assert.equal(getPurchaseTotals({ ...plan, priceC: 0 }, 12, {}).basePayable, 0);
-  assert.equal(getPurchaseTotals({ ...plan, priceA: undefined }, 3, {}).savings, 0);
+  assert.equal(getPurchaseTotals({ ...plan, priceC: 0 }, 12, { selection: {} }).basePayable, 0);
+  assert.equal(getPurchaseTotals({ ...plan, priceA: undefined }, 3, { selection: {} }).savings, 0);
 });
 
 test('selected modules follow purchased quantity and months without a capacity limit', () => {
   assert.equal(DEFAULT_ADDON_QUANTITY, 1);
-  const result = getPurchaseTotals(plan, 12, { [key]: 20 });
+  const result = getPurchaseTotals(plan, 12, { selection: { [key]: 20 } });
   assert.equal(result.addonsTotal, 7200);
   assert.equal(result.total, 26400);
   assert.equal(result.originalTotal, 31200);
   assert.equal(result.savings, 4800);
-  assert.equal(getPurchaseTotals(plan, 6, { [key]: 5 }).addonsTotal, 900);
-  assert.equal(getPurchaseTotals(plan, 12, { [key]: 100 }).lines[0].quantity, 100);
-  assert.equal(getPurchaseTotals(plan, 12, {}).addonsTotal, 0);
-  assert.equal(getPurchaseTotals(plan, 12, {}).total, 19200);
-  assert.equal(getPurchaseTotals({ ...plan, detail: { dataCount: 0 } }, 12, { [key]: 20 }).lines.length, 1);
+  assert.equal(getPurchaseTotals(plan, 6, { selection: { [key]: 5 } }).addonsTotal, 900);
+  assert.equal(getPurchaseTotals(plan, 12, { selection: { [key]: 100 } }).lines[0].quantity, 100);
+  assert.equal(getPurchaseTotals(plan, 12, { selection: {} }).addonsTotal, 0);
+  assert.equal(getPurchaseTotals(plan, 12, { selection: {} }).total, 19200);
+  assert.equal(
+    getPurchaseTotals({ ...plan, detail: { dataCount: 0 } }, 12, { selection: { [key]: 20 } }).lines.length,
+    1
+  );
+});
+
+test('promotion discount is included in the payable total', () => {
+  const result = getPurchaseTotals(plan, 12, { promotionDiscount: 1200.55, selection: { [key]: 20 } });
+  assert.equal(result.promotionDiscount, 1200.55);
+  assert.equal(result.total, 25199.45);
+  assert.equal(getPurchaseTotals(plan, 1, { promotionDiscount: 3000, selection: {} }).total, 0);
+  assert.equal(getPurchaseTotals(plan, 1, { promotionDiscount: -100, selection: {} }).promotionDiscount, 0);
+  assert.equal(getPurchaseTotals(plan, 1, { promotionDiscount: Number.NaN, selection: {} }).total, 2000);
 });
 
 test('isolates other plans, allows id-less modules, and avoids decimal accumulation', () => {
   const other = { ...plan, id: 11, packageCode: 'other' };
-  assert.equal(getPurchaseTotals(other, 12, { [key]: 20 }).lines.length, 0);
+  assert.equal(getPurchaseTotals(other, 12, { selection: { [key]: 20 } }).lines.length, 0);
   const secondKey = getPurchaseAddonKey(plan, addons[1], 1);
   assert.notEqual(key, secondKey);
   const decimal = { ...plan, additionalItems: [{ ...addons[0], price: 0.1 }] };
-  assert.equal(getPurchaseTotals(decimal, 3, { [key]: 3 }).addonsTotal, 0.9);
+  assert.equal(getPurchaseTotals(decimal, 3, { selection: { [key]: 3 } }).addonsTotal, 0.9);
   assert.equal(normalizeQuantity(Number.NaN), 1);
   assert.equal(normalizeQuantity(3.8), 3);
 });
@@ -75,8 +87,11 @@ test('all product and item types start at one and allow quantities above dataCou
         additionalItems: [{ ...addons[0], itemType, detail: { dataCount: 500 } }]
       };
       const serviceKey = getPurchaseAddonKey(variant, variant.additionalItems[0], 0);
-      assert.equal(getPurchaseTotals(variant, 12, { [serviceKey]: DEFAULT_ADDON_QUANTITY }).addonsTotal, 360);
-      assert.equal(getPurchaseTotals(variant, 12, { [serviceKey]: 600 }).addonsTotal, 216000);
+      assert.equal(
+        getPurchaseTotals(variant, 12, { selection: { [serviceKey]: DEFAULT_ADDON_QUANTITY } }).addonsTotal,
+        360
+      );
+      assert.equal(getPurchaseTotals(variant, 12, { selection: { [serviceKey]: 600 } }).addonsTotal, 216000);
     }
   }
 });

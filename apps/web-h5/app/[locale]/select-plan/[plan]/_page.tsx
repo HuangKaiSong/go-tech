@@ -92,7 +92,9 @@ const SelectPlan = ({ plan: inputPlan, planId }: { plan: Packages; planId?: stri
   const [selectedMonths, setSelectedMonths] = useAtom(selectedMonthsAtom);
   const [customPeriod, setCustomPeriod] = useState(!periods.includes(selectedMonths));
   const [selectedServices, setSelectedServices] = useAtom(selectedServicesAtom);
-  const totals = getPurchaseTotals(plan, selectedMonths, needAddons ? selectedServices : {});
+  const totals = getPurchaseTotals(plan, selectedMonths, {
+    selection: needAddons ? selectedServices : {}
+  });
   const baseFeatures = getBaseFeatures(plan);
   const selectedCount = totals.lines.length;
 

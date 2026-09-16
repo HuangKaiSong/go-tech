@@ -2,6 +2,11 @@ import type { PackageAddon, Packages } from '@go-tech/types';
 
 export type ServiceSelection = Record<string, number>;
 
+interface PurchaseTotalsOptions {
+  promotionDiscount?: number;
+  selection: ServiceSelection;
+}
+
 export const getPurchasePlanKey = (plan: Packages) => `${plan.bizCode ?? 'pms'}:${plan.packageCode || plan.id}`;
 
 export const getPurchaseAddonKey = (plan: Packages, addon: PackageAddon, index: number) =>
@@ -33,14 +38,32 @@ export function getSelectedAddonLines(plan: Packages, selection: ServiceSelectio
   });
 }
 
-export function getPurchaseTotals(plan: Packages | undefined, months: number, selection: ServiceSelection) {
+export function getPurchaseTotals(
+  plan: Packages | undefined,
+  months: number,
+  { promotionDiscount = 0, selection }: PurchaseTotalsOptions
+) {
   if (!plan)
-    return { addonsTotal: 0, baseOriginal: 0, basePayable: 0, lines: [], originalTotal: 0, savings: 0, total: 0 };
+    return {
+      addonsTotal: 0,
+      baseOriginal: 0,
+      basePayable: 0,
+      lines: [],
+      originalTotal: 0,
+      promotionDiscount: 0,
+      savings: 0,
+      total: 0
+    };
   const lines = getSelectedAddonLines(plan, selection, months);
   const baseOriginal = computeServiceTotal(plan.price, 1, months);
   const basePayable = computeServiceTotal(getPlanUnitPrice(plan, months), 1, months);
   const addonsTotal = lines.reduce((sum, line) => sum + Math.round(line.total * 100), 0) / 100;
   const savings = Math.max(0, Math.round((baseOriginal - basePayable) * 100)) / 100;
+  const subtotalInCents = Math.round(basePayable * 100) + Math.round(addonsTotal * 100);
+  const promotionDiscountInCents = Math.min(
+    subtotalInCents,
+    Math.max(0, Number.isFinite(promotionDiscount) ? Math.round(promotionDiscount * 100) : 0)
+  );
 
   return {
     addonsTotal,
@@ -48,8 +71,9 @@ export function getPurchaseTotals(plan: Packages | undefined, months: number, se
     basePayable,
     lines,
     originalTotal: (Math.round(baseOriginal * 100) + Math.round(addonsTotal * 100)) / 100,
+    promotionDiscount: promotionDiscountInCents / 100,
     savings,
     months,
-    total: (Math.round(basePayable * 100) + Math.round(addonsTotal * 100)) / 100
+    total: (subtotalInCents - promotionDiscountInCents) / 100
   };
 }

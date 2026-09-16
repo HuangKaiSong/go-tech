@@ -84,11 +84,17 @@ export const PriceSummary = ({ plan, totals }: PriceSummaryProps) => {
             <dd>−${money(totals.savings)} HKD</dd>
           </div>
         )}
+        {totals.promotionDiscount > 0 && (
+          <div className="flex justify-between text-primary">
+            <dt>活動優惠</dt>
+            <dd>−${money(totals.promotionDiscount)} HKD</dd>
+          </div>
+        )}
       </dl>
       <div className="px-6 py-4 border-t-2 border-primary/30  flex items-center justify-between" aria-live="polite">
         <dt className="text-lg font-bold">應付總額</dt>
         <dd className="flex items-baseline gap-2">
-          {totals.savings > 0 && (
+          {(totals.savings > 0 || totals.promotionDiscount > 0) && (
             <div className="text-sm text-muted-foreground line-through">${money(totals.originalTotal)}</div>
           )}
           <div className="text-3xl font-bold text-primary">${money(totals.total)}</div>

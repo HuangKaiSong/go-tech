@@ -123,14 +123,15 @@ const ConfirmOrder = ({
     setShowPaymentDialog(true);
   };
 
-  const purchase = getPurchaseTotals(selectedPlan, month, needAddons ? selectedServicesSafe : {});
+  const selectedPurchaseServices = needAddons ? selectedServicesSafe : {};
+  const purchaseBeforePromotion = getPurchaseTotals(selectedPlan, month, { selection: selectedPurchaseServices });
 
   // ---------------------------------------------------------------------------
   // 优惠活动 / 优惠码
   // ---------------------------------------------------------------------------
 
   /** 优惠前的应付金额（套餐费 + 增值服务 - 时长折扣） */
-  const promotionBaseAmount = purchase.total;
+  const promotionBaseAmount = purchaseBeforePromotion.total;
 
   const {
     applyingCode,
@@ -150,7 +151,7 @@ const ConfirmOrder = ({
     locale
   });
 
-  const totalPrice = Math.max(0, purchase.total - promotionDiscount);
+  const purchase = getPurchaseTotals(selectedPlan, month, { promotionDiscount, selection: selectedPurchaseServices });
 
   const requestHeaders = () =>
     new Headers({
@@ -468,7 +469,7 @@ const ConfirmOrder = ({
       <PaymentPanel
         open={showPaymentDialog}
         onOpenChange={setShowPaymentDialog}
-        price={totalPrice}
+        price={purchase.total}
         handleBackToPaymentMethods={handleBackToPaymentMethods}
         handleFpsPaymentConfirm={handleFpsPaymentConfirm}
         handleOnlinePaymentConfirm={handleOnlinePaymentConfirm}
