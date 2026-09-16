@@ -27,7 +27,7 @@ export const WithIframeRestriction: React.FC<Props> = ({ children }) => {
         router.events.off('routeChangeStart', handleRouteChange);
       };
     }
-  }, [hasIframe, router]);
+  }, [hasIframe, router, iframeRouteWarning]);
 
   return children;
 };
