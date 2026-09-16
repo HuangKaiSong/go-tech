@@ -42,7 +42,7 @@ export interface PromotionDetail {
   promotionItems?: Array<{
     checked?: boolean;
     discountValue?: string | number;
-    packageId: number;
+    packageCode: string;
     packageName?: string;
     ruleType?: 1 | 2;
     thresholdAmount?: string | number;
@@ -61,6 +61,7 @@ export interface PromotionDetail {
 /** 套餐接口返回的单条数据 */
 interface Plan {
   id: number;
+  packageCode: string;
   packageName: string;
   [key: string]: unknown;
 }
@@ -78,7 +79,7 @@ const ruleTypeSchema = z.union([z.literal(RuleType.amount), z.literal(RuleType.p
 
 const discountItemSchema = z.object({
   ruleType: ruleTypeSchema,
-  packageId: z.number(),
+  packageCode: z.string(),
   packageName: z.string(),
   checked: z.boolean(),
   /** 滿減门槛（仅 discountMethod === "amount" 时有效） */
@@ -402,11 +403,11 @@ const PromoCodesPage = () => {
     const toText = (value: unknown) => (value === undefined || value === null ? '' : String(value));
 
     const data: DiscountItem[] = plans.map(plan => {
-      const existing = existingDiscounts.find(d => d.packageId === plan.id);
+      const existing = existingDiscounts.find(d => d.packageCode === plan.packageCode);
       if (existing) {
         return {
           ruleType: existing.ruleType ?? RuleType[discountMethod],
-          packageId: plan.id,
+          packageCode: plan.packageCode,
           packageName: plan.packageName,
           checked: existing.checked ?? true,
           thresholdAmount: toText(existing.thresholdAmount),
@@ -415,7 +416,7 @@ const PromoCodesPage = () => {
       }
       return {
         ruleType: RuleType[discountMethod],
-        packageId: plan.id,
+        packageCode: plan.packageCode,
         packageName: plan.packageName,
         checked: false,
         thresholdAmount: '',
