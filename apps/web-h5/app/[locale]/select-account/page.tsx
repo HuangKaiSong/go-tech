@@ -186,7 +186,7 @@ const SelectAccount = () => {
                           <Package className="w-4 h-4 text-primary" />
                           <span className="text-foreground font-medium">{acc.tenantName}</span>
                           <span>·</span>
-                          <span>{t('maxUnits', { count: acc.unitCount })}</span>
+                          <span>{t('maxUnits', { count: acc.dataCount })}</span>
                         </div>
                       </div>
                     </div>
