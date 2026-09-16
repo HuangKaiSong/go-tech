@@ -26,6 +26,7 @@ export interface Order {
 }
 
 export interface OrderDetail {
+  activateDate: string;
   bizCode: PackageBizCode;
   createTime: string;
   createUser: number;

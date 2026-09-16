@@ -128,6 +128,10 @@ const OrderDetailPage = () => {
               <span className="font-medium">{orderDetail.payTime || '-'}</span>
             </div>
             <div className="flex items-center gap-2">
+              <span className="text-muted-foreground">開通時間：</span>
+              <span className="font-medium">{orderDetail.activateDate || '-'}</span>
+            </div>
+            <div className="flex items-center gap-2">
               <span className="text-muted-foreground">訂單狀態：</span>
               {getStatusBadge(orderDetail.orderStatus)}
             </div>
