@@ -9,9 +9,12 @@ export default async function Page({ params }: { params: { id: string } }) {
 
   try {
     const data = await httpClient.get(`/go-tech/platform/packageOrder/detail/${id}`);
+    if (data && data.code && data.code !== 200) {
+      throw new Error(data.data);
+    }
     invoice = data.data;
-    if (invoice.platformPackageDto?.packageItemList) {
-      invoice.platformPackageDto.packageItemList = invoice.platformPackageDto.packageItemList.filter((item: any) => {
+    if (invoice.packageDetail?.detail) {
+      invoice.packageDetail.detail.menu = invoice.packageDetail.detail.menu.filter((item: any) => {
         return item.level <= 1;
       });
     }
