@@ -38,6 +38,7 @@ export type OrderItemsType = {
   amount?: number;
   count?: number;
   days?: number;
+  id?: number;
   itemCode?: string;
   itemName?: string;
   itemType: OrderItemTypeEnum;
