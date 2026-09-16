@@ -10,7 +10,7 @@ export enum OrderTypeEnum {
 }
 
 export const OrderTypeLabel: Record<OrderTypeEnum, string> = {
-  [OrderTypeEnum.PURCHASE]: '新買',
+  [OrderTypeEnum.PURCHASE]: '訂閱',
   [OrderTypeEnum.RENEWAL]: '續費',
   [OrderTypeEnum.ADDITION]: '增值',
   [OrderTypeEnum.UPGRADE]: '升級'

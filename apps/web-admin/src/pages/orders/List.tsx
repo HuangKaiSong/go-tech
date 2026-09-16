@@ -94,13 +94,24 @@ const OrdersPage = () => {
   /** 预览图片 */
 
   const { data, refetch } = useQuery<Reponse>({
-    queryKey: ['platform/packageOrder/page', currentPage.toString(), pageSize.toString()],
+    queryKey: [
+      'platform/packageOrder/page',
+      currentPage.toString(),
+      pageSize.toString(),
+      orderStatus.toString(),
+      orderType.toString()
+    ],
     queryFn: async () => {
       try {
         const url = new URL(`${import.meta.env.VITE_PROXY_PREFIX}/go-tech/platform/packageOrder/page`, location.origin);
         url.searchParams.append('current', currentPage.toString());
         url.searchParams.append('size', pageSize.toString());
-        url.searchParams.append('orderStatus', orderStatus.toString());
+        if (orderStatus) {
+          url.searchParams.append('orderStatus', orderStatus.toString());
+        }
+        if (orderType) {
+          url.searchParams.append('orderType', orderType.toString());
+        }
 
         const res = await fetch(url.toString());
         const response = await res.json();
@@ -275,7 +286,13 @@ const OrdersPage = () => {
               <SelectTrigger className="w-32">
                 <SelectValue placeholder="請選擇" />
               </SelectTrigger>
-              <SelectContent />
+              <SelectContent>
+                {Object.entries(OrderTypeLabel).map(([key, value]) => (
+                  <SelectItem key={key} value={key}>
+                    {value}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </div>
           <div className="flex items-center gap-2">
@@ -319,7 +336,8 @@ const OrdersPage = () => {
               <TableHead className="text-center font-medium">客戶名稱</TableHead>
               <TableHead className="text-center font-medium">電話號碼</TableHead>
               <TableHead className="text-center font-medium">電子郵箱</TableHead>
-              <TableHead className="text-center font-medium">套餐類型</TableHead>
+              <TableHead className="text-center font-medium">套餐名稱</TableHead>
+              <TableHead className="text-center font-medium">訂單類型</TableHead>
               <TableHead className="text-center font-medium">訂單金額</TableHead>
               <TableHead className="text-center font-medium">支付方式</TableHead>
               <TableHead className="text-center font-medium">支付時間</TableHead>
@@ -335,6 +353,7 @@ const OrdersPage = () => {
                 <TableCell className="text-center">{order.custPhone}</TableCell>
                 <TableCell className="text-center">{order.custEmail}</TableCell>
                 <TableCell className="text-center">{order.packageName}</TableCell>
+                <TableCell className="text-center">{OrderTypeLabel[order.orderType]}</TableCell>
                 <TableCell className="text-center">{order.finalAmount}</TableCell>
                 <TableCell className="text-center">{PayTypelabel[order.payType]}</TableCell>
                 <TableCell className="text-center">{order.payTime}</TableCell>

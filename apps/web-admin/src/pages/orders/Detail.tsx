@@ -4,7 +4,7 @@ import { Image as ImageEl } from 'antd';
 import { ArrowLeft, FileText, Image } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { OrderStatusEnum } from '@/constants/order';
+import { OrderStatusEnum, OrderTypeLabel } from '@/constants/order';
 import { PayTypelabel } from '@/constants/payment';
 import { type OrderDetail as Detail } from '@/mocks/orders';
 
@@ -82,6 +82,9 @@ const OrderDetailPage = () => {
   const hasPaymentInfo = orderDetail.payTime || orderDetail.payEvidence;
   const orderPackage = orderDetail.orderItems?.find(item => item.itemType === 1);
   const otherService = orderDetail.orderItems?.filter(item => item.itemType !== 1);
+  const packageInfo = orderDetail.packageDetail;
+
+  const orderType = OrderTypeLabel[orderDetail.orderType];
 
   return (
     <div className="space-y-6">
@@ -105,7 +108,9 @@ const OrderDetailPage = () => {
         <div className="px-6 py-4 border-b border-border">
           <div className="flex items-center gap-2 mb-4">
             <div className="w-1 h-5 bg-primary rounded-full" />
-            <h3 className="text-base font-medium">訂單信息</h3>
+            <h3 className="text-base font-medium">
+              訂單信息 - <span>{orderType}订单</span>
+            </h3>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-y-4 gap-x-8">
             <div className="flex items-center gap-2">
@@ -114,7 +119,9 @@ const OrderDetailPage = () => {
             </div>
             <div className="flex items-center gap-2">
               <span className="text-muted-foreground">支付方式：</span>
-              <span className="font-medium">{PayTypelabel[orderDetail.payType as keyof typeof PayTypelabel] || '-'}</span>
+              <span className="font-medium">
+                {PayTypelabel[orderDetail.payType as keyof typeof PayTypelabel] || '-'}
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-muted-foreground">支付時間：</span>
@@ -223,25 +230,10 @@ const OrderDetailPage = () => {
             <div>
               <span className="text-sm text-muted-foreground">套餐內容</span>
               <span className="text-primary ml-4 text-sm">
-                最多可創建{orderDetail.platformPackageDto?.unitCount}個單位
+                {orderDetail.bizCode === 'pms'
+                  ? `最多可創建${packageInfo?.detail?.dataCount}個單位`
+                  : `最多可添加${packageInfo?.detail?.dataCount}個員工`}
               </span>
-            </div>
-
-            <div>
-              <span className="text-sm text-muted-foreground mb-2 block">包含功能</span>
-              <div className="flex flex-wrap gap-2">
-                {orderDetail.platformPackageDto?.packageItemList?.map((feature, index) => {
-                  return feature.level <= 1 ? (
-                    <Badge
-                      key={index}
-                      variant="outline"
-                      className="bg-background border-border text-foreground font-normal px-3 py-1.5 rounded-md"
-                    >
-                      {feature.menuTitle}
-                    </Badge>
-                  ) : null;
-                })}
-              </div>
             </div>
           </div>
         </div>

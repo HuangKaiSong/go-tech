@@ -1,3 +1,4 @@
+import type { PackageBizCode } from '@go-tech/types';
 import { OrderTypeEnum } from '@/constants/order';
 import { PayTypeEnum } from '@/constants/payment';
 
@@ -25,6 +26,7 @@ export interface Order {
 }
 
 export interface OrderDetail {
+  bizCode: PackageBizCode;
   createTime: string;
   createUser: number;
   custCode: string;
@@ -50,13 +52,10 @@ export interface OrderDetail {
   orderStatus: number;
   orderType: OrderTypeEnum;
   originalOrder: null;
-  payEvidence: string;
-  payTime: PayTypeEnum;
-  payType: number;
-  platformPackageDto: {
-    accountingSysPrice: number;
-    addUnitPrice: number;
-    custServiceSysPrice: number;
+  packageDetail: {
+    detail: {
+      dataCount: number;
+    };
     id: number;
     packageItemList: {
       id: number;
@@ -68,9 +67,9 @@ export interface OrderDetail {
     }[];
     packageName: string;
     price: number;
-    rentSysPrice: number;
     status: number;
-    unitCount: number;
-    venueSysPrice: number;
   };
+  payEvidence: string;
+  payTime: PayTypeEnum;
+  payType: number;
 }
