@@ -37,7 +37,11 @@ export function TrialWindowProvider({ children }: { children: ReactNode }) {
   const applyAction = useCallback(
     (action: PmsWindowAction) => {
       if (action === 'trial-env') {
-        startFreeTrial({ generateCallback: openPmsCallback, token });
+        startFreeTrial({
+          generateCallback: openPmsCallback,
+          onTrialExpired: () => router.push('/service-plan'),
+          token
+        });
         return;
       }
       if (action === 'service-plan') {

@@ -10,6 +10,7 @@ interface CallbackOptions {
 
 interface TrialCallbackOptions extends CallbackOptions {
   bizCode?: PackageBizCode;
+  onTrialExpired?: () => void;
 }
 
 interface GoNowOptions extends CallbackOptions {
@@ -18,6 +19,7 @@ interface GoNowOptions extends CallbackOptions {
 
 interface EnterOrStartTrialOptions extends GoNowOptions {
   bizCode?: PackageBizCode;
+  onTrialExpired?: () => void;
 }
 
 interface EnterTenantOptions extends CallbackOptions {
@@ -49,7 +51,11 @@ function completeCallback(uri: string, generateCallback?: (uri: string) => void)
   window.open(`${trialHost}/oauth/${uri}`, '_blank');
 }
 
-async function requestPlatformCode(url: string, token: string | undefined) {
+async function requestPlatformCode(
+  url: string,
+  token: string | undefined,
+  onNotifiedError?: (error: ClientHttpError) => void
+) {
   try {
     return await clientFetch(url, {
       headers: {
@@ -60,7 +66,10 @@ async function requestPlatformCode(url: string, token: string | undefined) {
     });
   } catch (error) {
     // 请求层已给用户反馈时只终止本次操作，避免 React 事件处理器产生未处理 Promise。
-    if (error instanceof ClientHttpError && error.notified) return undefined;
+    if (error instanceof ClientHttpError && error.notified) {
+      onNotifiedError?.(error);
+      return undefined;
+    }
     throw error;
   }
 }
@@ -135,10 +144,17 @@ export async function startFreeTrial({
   bizCode = 'pms',
   generateCallback,
   onHrTrialHostMissing,
+  onTrialExpired,
   token
 }: TrialCallbackOptions) {
   // 未传业务类型的旧入口仍进入 PMS，显式传值的入口则按当前选择进入对应产品。
-  const response = await requestPlatformCode(`/go-tech/platform/platformCustomer/trialCode?bizCode=${bizCode}`, token);
+  const response = await requestPlatformCode(
+    `/go-tech/platform/platformCustomer/trialCode?bizCode=${bizCode}`,
+    token,
+    error => {
+      if (String(error.businessCode) === '403') onTrialExpired?.();
+    }
+  );
   if (!response) return;
 
   if (response.ok) {

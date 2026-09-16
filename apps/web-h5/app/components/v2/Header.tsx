@@ -140,6 +140,7 @@ const Header = () => {
                           generateCallback,
                           bizCode: product,
                           onHrTrialHostMissing: () => toast.error(t('Account.hrTrialHostMissing')),
+                          onTrialExpired: () => router.push('/service-plan'),
                           token
                         });
                   }}

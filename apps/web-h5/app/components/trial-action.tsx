@@ -2,6 +2,7 @@
 
 import { buttonVariants } from '@go-tech-frontend/ui';
 import type { ComponentProps, MouseEvent } from 'react';
+import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { enterOrStartTrial } from '@/app/lib/go-now';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProductSelection } from '@/contexts/ProductSelectionContext';
@@ -12,6 +13,7 @@ type TrialActionProps = Omit<ComponentProps<typeof Link>, 'href' | 'onClick'> & 
 };
 
 export function TrialAction({ appearance = 'link', children, className, ...props }: TrialActionProps) {
+  const router = useProgressRouter();
   const { isLoggedIn, token } = useAuth();
   const { product } = useProductSelection();
 
@@ -20,7 +22,12 @@ export function TrialAction({ appearance = 'link', children, className, ...props
 
     event.preventDefault();
 
-    enterOrStartTrial({ bizCode: product, tenants: [], token });
+    enterOrStartTrial({
+      bizCode: product,
+      onTrialExpired: () => router.push('/service-plan'),
+      tenants: [],
+      token
+    });
   };
 
   return (

@@ -413,6 +413,7 @@ const Header = ({ heroBg, initialBlocks }: { heroBg?: string | StaticImageData; 
                         generateCallback,
                         bizCode: product,
                         onHrTrialHostMissing: () => toast.error(t('Account.hrTrialHostMissing')),
+                        onTrialExpired: () => router.push('/service-plan'),
                         token
                       })
                     }

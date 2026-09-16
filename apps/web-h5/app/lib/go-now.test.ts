@@ -208,6 +208,30 @@ test('startFreeTrial 未指定业务类型时保持既有 PMS 试用行为', asy
   assert.equal(callbackUri, 'tryCallback?code=trial-code');
 });
 
+test('startFreeTrial 遇到业务码 403 时通知调用方跳转购买套餐且不打开试用环境', async () => {
+  const events = captureEvents();
+  let callbackCalls = 0;
+  let trialExpiredCalls = 0;
+
+  globalThis.fetch = async () => jsonResponse({ code: 403, message: '免费试用已结束' });
+
+  await startFreeTrial({
+    bizCode: 'pms',
+    generateCallback: () => {
+      callbackCalls += 1;
+    },
+    onTrialExpired: () => {
+      trialExpiredCalls += 1;
+    },
+    token: 'access-token'
+  });
+
+  assert.equal(callbackCalls, 0);
+  assert.equal(trialExpiredCalls, 1);
+  assert.equal(events.length, 1);
+  assert.equal(events[0].businessCode, 403);
+});
+
 test('enterTenant 遇到非 200 业务码时发布业务说明且不进入系统', async () => {
   const events = captureEvents();
   let callbackCalls = 0;
