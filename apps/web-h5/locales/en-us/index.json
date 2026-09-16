@@ -285,6 +285,7 @@
     "signInSuccess": "Signed in",
     "selectAccountTitle": "Select the plan account to enter",
     "selectAccountDesc": "You have multiple purchased plans. Please choose the account to manage.",
+    "selectSystem": "Select a system",
     "inUse": "Active",
     "expired": "Expired",
     "maxUnits": "Up to {count} units",

@@ -286,6 +286,7 @@
     "signInSuccess": "登入成功",
     "selectAccountTitle": "选择要进入的套餐帐户",
     "selectAccountDesc": "您名下有多个已购买的套餐，请选择要管理的帐户。 ",
+    "selectSystem": "选择系统",
     "inUse": "使用中",
     "expired": "已过期",
     "maxUnits": "最多 {count} 个单位",
