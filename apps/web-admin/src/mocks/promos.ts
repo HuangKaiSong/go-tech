@@ -19,7 +19,7 @@ export const mockPromoCodes = [
     promotionItems: [
       {
         ruleType: 1,
-        packageId: 7,
+        packageCode: '1117',
         packageName: '升级版',
         checked: true,
         thresholdAmount: '1000',

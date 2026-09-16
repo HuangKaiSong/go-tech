@@ -425,7 +425,7 @@ const OrdersPage = () => {
               </div>
               <div>
                 <span className="text-muted-foreground">訂單金額：</span>
-                <span className="font-medium text-primary">{selectedOrder.orderAmount}</span>
+                <span className="font-medium text-primary">{selectedOrder.finalAmount}</span>
               </div>
               <div>
                 <span className="text-muted-foreground">支付方式：</span>

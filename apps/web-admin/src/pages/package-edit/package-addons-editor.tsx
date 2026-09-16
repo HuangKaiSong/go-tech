@@ -15,7 +15,7 @@ import {
   Textarea
 } from '@go-tech-frontend/ui';
 import { PackageCard } from '@go-tech/package-ui';
-import { formatPackagePrice } from '@go-tech/package-ui/model';
+import { formatPackagePrice, getAddonBillingLabel } from '@go-tech/package-ui/model';
 import type { PackageBizCode } from '@go-tech/types';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { useId, useState } from 'react';
@@ -26,6 +26,7 @@ import { splitFeatures } from './package-model';
 import type { MenuNode } from './package-model';
 
 type AddonFormValue = {
+  bizCode?: PackageBizCode;
   detail: PackageAddonItem['detail'];
   id?: number;
   itemName: string;
@@ -158,8 +159,6 @@ export function PackageAddonsEditor({
     );
     closeDialog();
   };
-
-  const amount = getAmount(formValue.detail.dataCount, formValue.price);
 
   return (
     <div className="space-y-3">
@@ -322,9 +321,13 @@ export function PackageAddonsEditor({
             </div>
             {usesQuantity(formValue.itemType) && (
               <div className="flex items-center justify-between rounded-lg bg-primary/5 px-4 py-3 text-sm">
-                <span className="text-muted-foreground">數量 × 價格</span>
                 <output aria-live="polite" className="font-semibold tabular-nums text-primary">
-                  HK$ {formatPackagePrice(amount ?? undefined) ?? '—'}
+                  + ${formatPackagePrice(formValue.price)} HKD /{' '}
+                  {getAddonBillingLabel({
+                    billingMode: formValue.bizCode === 'hr' ? 'employee_month' : 'unit_month',
+                    itemType: Number.parseInt(formValue.itemType, 10),
+                    count: formValue.detail.dataCount
+                  })}
                 </output>
               </div>
             )}
