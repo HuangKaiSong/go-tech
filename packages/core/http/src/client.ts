@@ -4,9 +4,7 @@ import type { HttpAdapter, RequestOptions } from './types';
 
 const normalizeBaseUrl = (url: string) => (url.endsWith('/') ? url.slice(0, -1) : url);
 
-const resolveHeaders = async (
-  source: HttpAdapter['defaultHeaders']
-): Promise<Record<string, string> | undefined> => {
+const resolveHeaders = async (source: HttpAdapter['defaultHeaders']): Promise<Record<string, string> | undefined> => {
   if (typeof source === 'function') {
     return source();
   }
@@ -14,10 +12,9 @@ const resolveHeaders = async (
 };
 
 /**
- * Runtime-agnostic HTTP client built on the global `fetch`. All
- * platform-specific behavior (base URL, auth token, error handling) is
- * supplied through an injected {@link HttpAdapter}, so the same kernel runs
- * under Next.js (server) and Vite (browser).
+ * Runtime-agnostic HTTP client built on the global `fetch`. All platform-specific behavior (base URL, auth token, error
+ * handling) is supplied through an injected {@link HttpAdapter}, so the same kernel runs under Next.js (server) and Vite
+ * (browser).
  */
 export class HttpClient {
   private readonly adapter: HttpAdapter;
@@ -68,7 +65,10 @@ export class HttpClient {
     }
 
     if (!response.ok && !this.adapter.returnErrorBody) {
-      const payload = await response.clone().json().catch(() => undefined);
+      const payload = await response
+        .clone()
+        .json()
+        .catch(() => undefined);
       const error = new HttpError(`Request failed with status ${response.status}`, {
         status: response.status,
         payload
@@ -84,11 +84,7 @@ export class HttpClient {
     return this.request<HttpBaseResponse<T>>(endpoint, { method: 'GET', params });
   }
 
-  post<T = any>(
-    endpoint: string,
-    data?: unknown,
-    params?: Record<string, string>
-  ): Promise<HttpBaseResponse<T>> {
+  post<T = any>(endpoint: string, data?: unknown, params?: Record<string, string>): Promise<HttpBaseResponse<T>> {
     return this.request<HttpBaseResponse<T>>(endpoint, { method: 'POST', body: data, params });
   }
 
