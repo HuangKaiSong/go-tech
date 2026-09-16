@@ -1,7 +1,7 @@
 /** 优惠查询接口返回的单条优惠（已按套餐拍平，ruleType 1=滿減 2=按百分比） */
 export interface PromotionOption {
   discountValue?: number;
-  packageId: number;
+  packageCode: string;
   packageName?: string;
   promotionDesc?: string;
   promotionId: number;

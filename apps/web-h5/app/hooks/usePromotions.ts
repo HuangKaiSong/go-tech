@@ -56,7 +56,7 @@ export const usePromotions = ({
     const seen = new Set<number>();
     for (const promotion of [...promotions, ...appliedCodePromotions]) {
       const id = promotion?.promotionId;
-      const matchesPackage = String(promotion?.packageId) === String(packageId);
+      const matchesPackage = String(promotion?.packageCode) === String(packageId);
       if (typeof id === 'number' && matchesPackage && !seen.has(id)) {
         seen.add(id);
         list.push(promotion);
@@ -99,7 +99,7 @@ export const usePromotions = ({
       );
       const response = await res.json();
       if (!response?.data) throw new Error('優惠碼無效或不適用於該套餐');
-      const valid = toArray<PromotionOption>(response.data).filter(p => String(p.packageId) === String(packageId));
+      const valid = toArray<PromotionOption>(response.data).filter(p => String(p.packageCode) === String(packageId));
       if (valid.length === 0) {
         throw new Error('優惠碼不適用於該套餐');
       }
