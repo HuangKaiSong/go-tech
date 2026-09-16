@@ -204,13 +204,14 @@ const RenewOrderContent = ({ detail, promotions }: RenewOrderContentProps) => {
   const selectedOption = renewalOptions.find(opt => opt.id === selectedPeriod)!;
   const selectedMonths = selectedOption.id === 'custom' ? customMonths : selectedOption.months;
   const months = selectedMonths;
-  const { addService, addServicePrice, discountAmount, orderPackage, originalPrice, yearlyPrice } =
-    getRenewalOrderPricing(order, months);
+  const { addService, addServicePrice, discountAmount, originalPrice, yearlyPrice } = getRenewalOrderPricing(
+    order,
+    months
+  );
 
   // ---------------------------------------------------------------------------
   // 优惠活动 / 优惠码
   // ---------------------------------------------------------------------------
-  const packageId = orderPackage?.id;
 
   /** 优惠前的应付金额（套餐费 + 增值服务 - 时长折扣） */
   const promotionBaseAmount = Math.max(0, addServicePrice + originalPrice - discountAmount);
@@ -225,7 +226,13 @@ const RenewOrderContent = ({ detail, promotions }: RenewOrderContentProps) => {
     selectedPromotionId,
     setPromotionCode,
     setSelectedPromotionId
-  } = usePromotions({ baseAmount: promotionBaseAmount, packageId, promotions, token, locale });
+  } = usePromotions({
+    baseAmount: promotionBaseAmount,
+    packageId: order.packageDetail.packageCode,
+    promotions,
+    token,
+    locale
+  });
 
   const finalPrice = Math.max(0, promotionBaseAmount - promotionDiscount);
 

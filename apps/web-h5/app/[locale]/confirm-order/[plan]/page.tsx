@@ -30,15 +30,13 @@ export default async function ConfirmOrderPage({ params }: { params: { plan: str
   // 获取当前套餐可用的优惠活动
   let promotions: PromotionOption[] = [];
   try {
-    const promotionResponse = (await fetch(`${baseUrl}/go-tech/platform/promotion/search?packageId=${plan}`, {
+    const promotionResponse = (await fetch(`${baseUrl}/go-tech/platform/promotion/search?packageCode=${plan}`, {
       headers: { Authorization: `Bearer ${token}`, 'User-Type': 'platform_customer' }
     }).then(res => res.json())) as HttpBaseResponse<PromotionOption | PromotionOption[]>;
     promotions = toArray<PromotionOption>(promotionResponse?.data);
   } catch {
     // 忽略：优惠获取失败不影响下单
   }
-
-  console.log(packagesData);
 
   return <PageClient planId={plan} data={packagesData} promotions={promotions} />;
 }

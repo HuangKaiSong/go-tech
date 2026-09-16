@@ -141,7 +141,13 @@ const ConfirmOrder = ({
     selectedPromotionId,
     setPromotionCode,
     setSelectedPromotionId
-  } = usePromotions({ baseAmount: promotionBaseAmount, packageId: selectedPlan?.id, promotions, token, locale });
+  } = usePromotions({
+    baseAmount: promotionBaseAmount,
+    packageId: selectedPlan?.packageCode,
+    promotions,
+    token,
+    locale
+  });
 
   const totalPrice = Math.max(0, purchase.total - promotionDiscount);
 

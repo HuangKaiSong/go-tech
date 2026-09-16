@@ -158,7 +158,13 @@ export const AddService: FC<AddServiceProps> = ({
     selectedPromotionId,
     setPromotionCode,
     setSelectedPromotionId
-  } = usePromotions({ baseAmount: addonsBaseAmount, packageId, promotions, token, locale });
+  } = usePromotions({
+    baseAmount: addonsBaseAmount,
+    packageId: currentOrder.packageDetail?.packageCode,
+    promotions,
+    token,
+    locale
+  });
 
   // 优惠后实付金额
   const finalTotal = Math.max(0, addonsBaseAmount - promotionDiscount);
