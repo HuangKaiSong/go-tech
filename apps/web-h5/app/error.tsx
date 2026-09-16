@@ -1,7 +1,7 @@
 'use client';
 
 import React, { Component, type ErrorInfo, type ReactNode } from 'react';
-import { sendToBetterStack } from '@/lib/betterstack-logger';
+// import { sendToBetterStack } from '@/lib/betterstack-logger';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -27,7 +27,7 @@ export class GracefullyDegradingErrorBoundary extends Component<ErrorBoundaryPro
 
   override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     if (this.props.onError) {
-      sendToBetterStack('error', error.message, errorInfo);
+      // sendToBetterStack('error', error.message, errorInfo);
       this.props.onError(error, errorInfo);
     }
   }
