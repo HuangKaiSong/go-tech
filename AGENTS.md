@@ -91,6 +91,29 @@ internal/
 - 本目录有更深层的 `apps/web-h5/AGENTS.md`。修改 Next.js 代码前必须先读取它，并按要求优先查阅本地
   `node_modules/next/dist/docs/`，不要依赖旧版 Next.js 经验。
 
+#### 客户端请求与错误反馈
+
+- 浏览器内、由本应用控制的 HTTP 请求统一使用 `@/lib/client-http/client-fetch`。不要在 Client Component、
+  客户端 Hook 或 Context 中新增原生 `fetch`，也不要使用旧 `@/lib/http-fetch`；后者依赖服务端翻译入口，不属于
+  客户端边界。
+- `clientFetch` 保持原生 `fetch` 的参数和 `Response` 返回方式，但会检查 JSON 顶层 `code`：数字 `200` 和字符串
+  `'200'` 视为成功，其他数字或字符串视为业务失败。只检查顶层 `code`，不得把 `data.code` 当作响应码。
+- 业务失败、非 2xx HTTP 响应和网络错误由全局 `ClientHttpErrorNotifier` 统一展示。调用点仍应 `catch` 以终止成功
+  流程；若 `isNotifiedClientHttpError(error)` 为真，不要再调用 `toast.error`，避免重复提示。表单校验、loading 和
+  success 提示仍由具体交互负责。
+- 已存在 loading toast 的操作将其 ID 作为 `feedbackId` 传给 `clientFetch`，让全局错误直接替换该提示，不要在
+  catch 中另外 dismiss 后再创建错误 toast。
+- 用户主动点击、提交、登录、下单或支付等 `interactive` 请求默认使用自动反馈。搜索、预取、轮询、动态翻译、
+  缓存刷新和验证码加载等 `background` 请求必须显式传入 `{ feedback: 'silent' }`，并继续通过页面状态、空态或
+  重试入口反馈失败。
+- `AbortController` 取消属于控制流，不应显示错误提示。Effect 中的请求必须传递 signal 并在 cleanup 中取消；不要
+  把自定义 abort reason 改写成网络错误。
+- Server Component、Route Handler、Server Action、服务端翻译、BetterStack 上报和第三方服务端协议继续使用其
+  服务端请求入口或原生 `fetch`，不得导入 `clientFetch`。跨端共享的常量/模型模块也不得反向依赖客户端请求模块；
+  客户端请求函数应放在单独的 client-only 文件中。
+- 请求核心和事件总线不得导入 toast/UI 组件，不得 monkey-patch `globalThis.fetch`。错误事件只传递业务码、HTTP
+  状态、用户可见消息和反馈 ID，不得传递响应 payload、Authorization、token、密码或表单内容。
+
 ### `apps/web-admin`
 
 - 包名 `web-admin`；Vite、React 19、React Router、TanStack Query、Tailwind CSS 4。
