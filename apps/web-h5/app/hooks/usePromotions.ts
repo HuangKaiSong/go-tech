@@ -1,4 +1,4 @@
-import { toast } from '@go-tech-frontend/ui';
+import { toast } from '@go-tech/web-ui';
 import { useEffect, useMemo, useState } from 'react';
 import { type PromotionOption, getPromotionDiscount, toArray } from '@/app/constants/promotion';
 import { translateError } from '@/app/lib/translate-error';
@@ -94,7 +94,7 @@ export const usePromotions = ({
     setApplyingCode(true);
     try {
       const res = await clientFetch(
-        `/go-tech/platform/promotion/search?promotionCode=${encodeURIComponent(code)}&packageId=${packageId}`,
+        `/go-tech/platform/promotion/search?promotionCode=${encodeURIComponent(code)}&packageCode=${packageId}`,
         { headers: { Authorization: `Bearer ${token}`, 'User-Type': 'platform_customer' } }
       );
       const response = await res.json();
