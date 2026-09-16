@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import { db } from '@/db';
 import { fbCategory, fbFeature, fbSubCategory } from '@/db/scheam';
-import Header from '../../components/Header';
+import Header from '../../components/v2/Header';
 import FeedbackContent from './FeedbackContent';
 
 export const metadata: Metadata = {

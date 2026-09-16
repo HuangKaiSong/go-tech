@@ -3,7 +3,7 @@
 import { Button, Dialog, DialogContent, Input, Textarea, toast } from '@go-tech-frontend/ui';
 import { useState } from 'react';
 import Footer from '@/app/components/Footer';
-import Header from '@/app/components/Header';
+import Header from '@/app/components/v2/Header';
 import { clientFetch } from '@/lib/client-http/client-fetch';
 import { isNotifiedClientHttpError } from '@/lib/client-http/client-http-error';
 import { DynamicText } from '../../components/DynamicI18nText.client';

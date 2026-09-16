@@ -9,7 +9,7 @@ import { SmallOfficialAvatar, SmallUserAvatar } from '@/app/components/feedback/
 import NewPostDialog from '@/app/components/feedback/NewPostDialog';
 import Turnstile from '@/app/components/feedback/turnstile';
 import Footer from '@/app/components/Footer';
-import Header from '@/app/components/Header';
+import Header from '@/app/components/v2/Header';
 import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 import { useAuth } from '@/contexts/AuthContext';

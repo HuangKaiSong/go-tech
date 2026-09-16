@@ -1,6 +1,6 @@
 import type { PackageBizCode } from '@go-tech/types';
 import Footer from '@/app/components/Footer';
-import Header from '@/app/components/Header';
+import Header from '@/app/components/v2/Header';
 import { buildPackageCatalog } from '@/app/lib/package-catalog';
 import servicePlanBg from '@/assets/service-plan-bg.jpg';
 import { getBaseUrl } from '@/lib/http';

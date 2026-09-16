@@ -2,7 +2,7 @@ import type { PackageBizCode } from '@go-tech/types';
 import { ChevronDown } from 'lucide-react';
 import Image from 'next/image';
 import Footer from '@/app/components/Footer';
-import Header from '@/app/components/Header';
+import Header from '@/app/components/v2/Header';
 import { defaultTargetAudience } from '../../components/blockDefaults';
 import { DynamicText } from '../../components/DynamicI18nText';
 import HeroSection from '../../components/HeroSection';
@@ -14,13 +14,12 @@ const TargetAudience = async ({ searchParams }: { searchParams: Promise<{ produc
   const requestedProduct = Array.isArray(query.product) ? query.product[0] : query.product;
   const product: PackageBizCode = requestedProduct === 'hr' ? 'hr' : 'pms';
   const content = targetAudienceContent[product];
-  const heroBackground = blocks?.find(block => block.type === 'hero')?.backgroundImage || '';
 
   const hasIframe = false;
 
   return (
     <div className="min-h-screen bg-background">
-      <Header heroBg={heroBackground} initialBlocks={blocks} />
+      <Header />
       <main data-product={product}>
         {/* Hero Section */}
         <HeroSection

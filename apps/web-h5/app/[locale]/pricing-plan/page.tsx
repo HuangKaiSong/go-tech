@@ -5,7 +5,7 @@ import type { PackageBizCode } from '@go-tech/types';
 import { Building2, Check, Minus, Users } from 'lucide-react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import Footer from '@/app/components/Footer';
-import Header from '@/app/components/Header';
+import Header from '@/app/components/v2/Header';
 import { DynamicText } from '../../components/DynamicI18nText.client';
 import type { PricingPlanData } from './types';
 

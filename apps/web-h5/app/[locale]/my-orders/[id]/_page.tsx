@@ -7,8 +7,8 @@ import { ArrowLeft, CheckCircle, CreditCard, Download, RefreshCw, Settings, XCir
 import { useEffect, useMemo, useState } from 'react';
 import { DynamicText } from '@/app/components/DynamicI18nText.client';
 import Footer from '@/app/components/Footer';
-import Header from '@/app/components/Header';
 import Link from '@/app/components/Link';
+import Header from '@/app/components/v2/Header';
 import { OrderStatusEnum } from '@/app/constants/order';
 import {
   type OrderAddResponse,

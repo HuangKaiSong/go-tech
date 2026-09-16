@@ -17,7 +17,7 @@ import {
 import { ArrowLeft, Eye, EyeOff, Lock, User } from 'lucide-react';
 import { useState } from 'react';
 import Footer from '@/app/components/Footer';
-import Header from '@/app/components/Header';
+import Header from '@/app/components/v2/Header';
 import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { clientFetch } from '@/lib/client-http/client-fetch';

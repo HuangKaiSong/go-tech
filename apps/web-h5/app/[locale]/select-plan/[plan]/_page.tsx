@@ -8,7 +8,7 @@ import { Check, Minus, Plus } from 'lucide-react';
 import { useState } from 'react';
 import { DynamicText } from '@/app/components/DynamicI18nText.client';
 import Footer from '@/app/components/Footer';
-import Header from '@/app/components/Header';
+import Header from '@/app/components/v2/Header';
 import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import {
   DEFAULT_ADDON_QUANTITY,

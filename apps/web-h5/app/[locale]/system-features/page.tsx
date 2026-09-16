@@ -4,8 +4,8 @@ import { defaultSystemFeaturesBlocks } from '@/app/components/blockDefaults';
 import { loadPageBlocks } from '@/app/lib/pageBlocks';
 import { DynamicText } from '../../components/DynamicI18nText';
 import Footer from '../../components/Footer';
-import Header from '../../components/Header';
 import HeroSection from '../../components/HeroSection';
+import Header from '../../components/v2/Header';
 import PmsPreviewSections from './pms-preview-sections';
 import { getSystemFeaturesContent } from './system-features-content';
 
@@ -18,11 +18,9 @@ const SystemFeatures = async ({ searchParams }: { searchParams: Promise<{ produc
   const product: PackageBizCode = requestedProduct === 'hr' ? 'hr' : 'pms';
   const c = getSystemFeaturesContent(product, blocks);
 
-  const heroBackground = blocks?.find(block => block.type === 'hero')?.backgroundImage || '';
-
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <Header heroBg={heroBackground} initialBlocks={blocks} />
+      <Header />
       <main data-product={product}>
         <HeroSection initialBlocks={blocks} page="system-features" renderOnly="hero" />
 

@@ -22,7 +22,7 @@ import { useProductSelection } from '@/contexts/ProductSelectionContext';
 import { clientFetch } from '@/lib/client-http/client-fetch';
 import { isNotifiedClientHttpError } from '@/lib/client-http/client-http-error';
 import Footer from '../../../components/Footer';
-import Header from '../../../components/Header';
+import Header from '../../../components/v2/Header';
 import { type OrderInfoType, OrderItemTypeEnum, OrderTypeEnum } from '../../../constants/order';
 import { DAYSPERMONTH, PayTypeEnum, stashWebManagedCashier } from '../../../constants/payment';
 

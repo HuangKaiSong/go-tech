@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import Footer from '@/app/components/Footer';
-import Header from '@/app/components/Header';
+import Header from '@/app/components/v2/Header';
 import advantage1 from '@/assets/advantage-1.jpg';
 import advantage2 from '@/assets/advantage-2.jpg';
 import advantage3 from '@/assets/advantage-3.jpg';
@@ -217,7 +217,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ p
 
   return (
     <div className="min-h-screen bg-background">
-      <Header initialBlocks={blocks} />
+      <Header />
 
       {/* Hero Section */}
       <HeroSection initialBlocks={blocks} page="core-advantages" />
