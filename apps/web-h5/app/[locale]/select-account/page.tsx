@@ -24,7 +24,7 @@ const SelectAccount = () => {
   const from = searchParams.get('from');
   const fromHeader = from && from === 'header';
   const { refetchTenants, tenants, tenantsStatus, token } = useAuth();
-  const { product } = useProductSelection();
+  const { product, selectProduct } = useProductSelection();
   const { openPmsCallback: generateCallback } = useTrialWindow();
   const { resolvedTheme } = useTheme();
   const router = useProgressRouter();
@@ -86,6 +86,38 @@ const SelectAccount = () => {
           )}
           <h1 className="text-3xl md:text-4xl font-bold text-primary mb-2">{t('selectAccountTitle')}</h1>
           <p className="text-sm md:text-base text-muted-foreground">{t('selectAccountDesc')}</p>
+          <div
+            aria-label={t('selectSystem')}
+            className="mt-6 inline-flex rounded-full border border-primary/25 bg-card/80 p-1 shadow-sm backdrop-blur-sm"
+            role="group"
+          >
+            <button
+              aria-pressed={product === 'pms'}
+              className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold transition-colors ${
+                product === 'pms'
+                  ? 'bg-primary text-primary-foreground shadow'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+              onClick={() => selectProduct('pms')}
+              type="button"
+            >
+              <Building aria-hidden="true" className="h-4 w-4" />
+              GO-PMS
+            </button>
+            <button
+              aria-pressed={product === 'hr'}
+              className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold transition-colors ${
+                product === 'hr'
+                  ? 'bg-primary text-primary-foreground shadow'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+              onClick={() => selectProduct('hr')}
+              type="button"
+            >
+              <Users aria-hidden="true" className="h-4 w-4" />
+              GO-HR
+            </button>
+          </div>
         </div>
       </section>
 
