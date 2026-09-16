@@ -14,7 +14,9 @@ const buttonVariants = cva(
         outline: 'border border-input bg-background hover:bg-accent hover:text-accent-foreground active:bg-accent/70',
         secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 active:bg-secondary/70',
         ghost: 'hover:bg-accent hover:text-accent-foreground active:bg-accent/80',
-        link: 'text-primary hover:text-primary/90 active:text-primary/80'
+        link: 'text-primary hover:text-primary/90 active:text-primary/80',
+        trial:
+          'relative overflow-hidden font-semibold tracking-wide bg-primary text-primary-foreground bg-[image:var(--gradient-trial)] shadow-[var(--shadow-trial)] ring-1 ring-inset ring-white/25 transition-all duration-300 hover:shadow-[var(--shadow-trial-hover)] hover:-translate-y-0.5 active:translate-y-0 after:pointer-events-none after:absolute after:inset-0 after:-translate-x-full after:bg-gradient-to-r after:from-transparent after:via-white/35 after:to-transparent after:transition-transform after:duration-700 hover:after:translate-x-full'
       },
       size: {
         default: 'h-10 px-4 py-2',

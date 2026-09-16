@@ -198,14 +198,14 @@ function HrBasePlan(props: PackageCardProps) {
               HK$ {formatPackagePrice(plan.originalPrice)}
             </p>
           )}
-          <div className="mt-2 text-xs text-muted-foreground">
+          {/* <div className="mt-2 text-xs text-muted-foreground">
             <Text text={getCapacityLabel(plan, 'hr')} />
             {Boolean(plan.addUnitPrice) && (
               <span>
                 ，+ HK$ {formatPackagePrice(plan.addUnitPrice)} / <Text text="超額員工 / 月" />
               </span>
             )}
-          </div>
+          </div> */}
         </div>
         {plan.summary && (
           <p className="text-xs leading-5 text-muted-foreground">

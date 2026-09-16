@@ -2,7 +2,6 @@ import type { PackageBillingMode, PackageBizCode, PackageItem, PackageKind } fro
 
 /** Presentation data only. Applications adapt their API fields to this contract. */
 export interface PackageCardPlan {
-  addUnitPrice?: number;
   badge?: string;
   billingLabel?: string;
   billingMode?: PackageBillingMode;
