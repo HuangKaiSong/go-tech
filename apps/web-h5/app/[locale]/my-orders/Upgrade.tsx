@@ -20,6 +20,7 @@ import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 import { fetchPromotions } from '@/app/lib/client-promotions';
 import { getCreatedOrderId } from '@/app/lib/order-id';
+import { buildOrderInfo } from '@/app/lib/order-info';
 import { useAuth } from '@/contexts/AuthContext';
 import { clientFetch } from '@/lib/client-http/client-fetch';
 import { isNotifiedClientHttpError } from '@/lib/client-http/client-http-error';
@@ -217,55 +218,24 @@ export const Upgrade: FC<UpgradeProps> = ({
     });
 
   /** 构建升级订单数据（FPS 与线上支付一致，仅 payType 不同） */
-  const buildOrderInfo = (payType: PayTypeEnum) => {
-    const plan = upgradePlans.find(p => p.packageCode === selectedUpgradePlan);
-    const orderPackageInfo = data.orderItems.find(item => item.itemType === OrderItemTypeEnum.PACKAGE);
-    const orderInfo: any = {
+  const createOrderInfo = (payType: PayTypeEnum) =>
+    buildOrderInfo({
+      additionalServiceSelection: upgradeSelectedServices,
       orderType: OrderTypeEnum.UPGRADE,
-      payType,
-      originalOrder: currentOrder.orderNo,
-      orderItems: [
-        {
-          itemType: OrderItemTypeEnum.PACKAGE,
-          packageItemId: plan?.id,
-          itemName: plan?.itemName,
-          packageCode: plan?.packageCode,
-          price: plan!.price!,
-          count: orderPackageInfo?.count,
-          days: orderPackageInfo?.days
-        }
-      ]
-    };
-
-    Object.entries(upgradeSelectedServices).map(([serviceId, quantity]) => {
-      const service = valueAddedServices.find(s => s.id === serviceId);
-      if (!service) return null;
-      const serviceTotalPrice = service.price;
-
-      orderInfo.orderItems.push({
-        itemType: OrderItemTypeEnum.ADDITION,
-        count: quantity,
-        price: serviceTotalPrice,
-        packageId: currentOrder.packageDetail?.id,
-        itemName: service.name,
-        itemCode: service.packageCode,
-        packageItemId: Number(service.id)
-      });
-      return null;
+      otherOrderInfo: {
+        availablePlans: upgradePlans,
+        order: data,
+        promotionId: selectedPromotion?.promotionId,
+        selectedPlanCode: selectedUpgradePlan
+      },
+      payType
     });
-
-    // 优惠活动 / 优惠码
-    if (selectedPromotion) {
-      orderInfo.promotionId = selectedPromotion.promotionId;
-    }
-    return orderInfo;
-  };
 
   const handleFpsPaymentConfirm = async (voucherFile: UploadedFile) => {
     toast.dismiss();
     const toastId = toast.loading(upgradeOrderCreating);
     const headers = requestHeaders();
-    const orderInfo = buildOrderInfo(PayTypeEnum.FPS);
+    const orderInfo = createOrderInfo(PayTypeEnum.FPS);
 
     try {
       // 创建订单
@@ -310,7 +280,7 @@ export const Upgrade: FC<UpgradeProps> = ({
   const handleOnlinePaymentConfirm = async () => {
     toast.dismiss();
     const toastId = toast.loading(upgradeOrderCreating);
-    const orderInfo = buildOrderInfo(PayTypeEnum.Online);
+    const orderInfo = createOrderInfo(PayTypeEnum.Online);
 
     try {
       const response = await clientFetch(

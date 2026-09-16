@@ -30,6 +30,7 @@ import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 import { usePromotions } from '@/app/hooks/usePromotions';
 import { getCreatedOrderId } from '@/app/lib/order-id';
+import { buildOrderInfo } from '@/app/lib/order-info';
 import { useAuth } from '@/contexts/AuthContext';
 import { clientFetch } from '@/lib/client-http/client-fetch';
 import { isNotifiedClientHttpError } from '@/lib/client-http/client-http-error';
@@ -256,46 +257,21 @@ const RenewOrderContent = ({ detail, promotions }: RenewOrderContentProps) => {
     });
 
   /** 构建续费订单数据（FPS 与线上支付一致，仅 payType 不同） */
-  const buildOrderInfo = (payType: PayTypeEnum) => {
-    const orderInfo: any = {
+  const createOrderInfo = (payType: PayTypeEnum) =>
+    buildOrderInfo({
       orderType: OrderTypeEnum.RENEWAL,
-      payType,
-      originalOrder: detail.orderNo,
-      orderItems: [
-        {
-          packageId: detail.packageDetail?.id,
-          itemType: OrderItemTypeEnum.PACKAGE,
-          itemName: detail?.packageDetail?.packageName,
-          price: detail?.packageDetail?.price,
-          count: months,
-          days: months * DAYSPERMONTH
-        }
-      ]
-    };
-    if (addService.length) {
-      addService.map(item => {
-        orderInfo.orderItems.push({
-          packageId: detail.packageDetail?.id,
-          itemType: OrderItemTypeEnum.ADDITION,
-          itemCode: item.itemCode,
-          itemName: item.itemName!,
-          price: item.price!,
-          count: item.count
-        });
-        return null;
-      });
-    }
-    // 优惠活动 / 优惠码
-    if (selectedPromotion) {
-      orderInfo.promotionId = selectedPromotion.promotionId;
-    }
-    return orderInfo;
-  };
+      otherOrderInfo: {
+        months,
+        order: detail,
+        promotionId: selectedPromotion?.promotionId
+      },
+      payType
+    });
 
   const handleFpsPaymentConfirm = async (voucherFile: UploadedFile) => {
     toast.dismiss();
     const toastId = toast.loading(renewOrderCreating);
-    const orderInfo = buildOrderInfo(PayTypeEnum.FPS);
+    const orderInfo = createOrderInfo(PayTypeEnum.FPS);
     const headers = requestHeaders();
 
     try {
@@ -340,7 +316,7 @@ const RenewOrderContent = ({ detail, promotions }: RenewOrderContentProps) => {
   const handleOnlinePaymentConfirm = async () => {
     toast.dismiss();
     const toastId = toast.loading(renewOrderCreating);
-    const orderInfo = buildOrderInfo(PayTypeEnum.Online);
+    const orderInfo = createOrderInfo(PayTypeEnum.Online);
 
     try {
       const response = await clientFetch(

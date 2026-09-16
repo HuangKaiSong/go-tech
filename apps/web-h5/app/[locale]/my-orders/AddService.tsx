@@ -19,6 +19,7 @@ import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 import { fetchPromotions } from '@/app/lib/client-promotions';
 import { getCreatedOrderId } from '@/app/lib/order-id';
+import { buildOrderInfo } from '@/app/lib/order-info';
 import { useAuth } from '@/contexts/AuthContext';
 import { clientFetch } from '@/lib/client-http/client-fetch';
 import { isNotifiedClientHttpError } from '@/lib/client-http/client-http-error';
@@ -185,43 +186,22 @@ export const AddService: FC<AddServiceProps> = ({
     });
 
   /** 构建增值服务订单数据（FPS 与线上支付一致，仅 payType 不同） */
-  const buildOrderInfo = (payType: PayTypeEnum) => {
-    const orderInfo: any = {
+  const createOrderInfo = (payType: PayTypeEnum) =>
+    buildOrderInfo({
+      additionalServiceSelection: selectedServices,
       orderType: OrderTypeEnum.ADDITION,
-      payType,
-      originalOrder: currentOrder.orderNo,
-      orderItems: []
-    };
-
-    Object.entries(selectedServices).map(([serviceId, quantity]) => {
-      const service = valueAddedServices.find(s => s.id === serviceId);
-      if (!service) return null;
-      const serviceTotalPrice = service.price;
-
-      orderInfo.orderItems.push({
-        itemType: OrderItemTypeEnum.ADDITION,
-        count: quantity,
-        price: serviceTotalPrice,
-        packageId: data.packageDetail?.id,
-        itemName: service.name,
-        itemCode: service.packageCode,
-        packageItemId: Number(service.id)
-      });
-      return null;
+      otherOrderInfo: {
+        order: data,
+        promotionId: selectedPromotion?.promotionId
+      },
+      payType
     });
-
-    // 优惠活动 / 优惠码
-    if (selectedPromotion) {
-      orderInfo.promotionId = selectedPromotion.promotionId;
-    }
-    return orderInfo;
-  };
 
   const handleFpsPaymentConfirm = async (voucherFile: UploadedFile) => {
     toast.dismiss();
     const toastId = toast.loading(addServiceOrderCreating);
     const headers = requestHeaders();
-    const orderInfo = buildOrderInfo(PayTypeEnum.FPS);
+    const orderInfo = createOrderInfo(PayTypeEnum.FPS);
 
     try {
       // 创建订单
@@ -266,7 +246,7 @@ export const AddService: FC<AddServiceProps> = ({
   const handleOnlinePaymentConfirm = async () => {
     toast.dismiss();
     const toastId = toast.loading(addServiceOrderCreating);
-    const orderInfo = buildOrderInfo(PayTypeEnum.Online);
+    const orderInfo = createOrderInfo(PayTypeEnum.Online);
 
     try {
       const response = await clientFetch(

@@ -42,7 +42,9 @@ export type OrderItemsType = {
   itemCode?: string;
   itemName?: string;
   itemType: OrderItemTypeEnum;
+  packageCode?: string;
   packageId?: string | number;
+  packageItemId?: number;
   price: number;
 };
 
@@ -50,6 +52,7 @@ export type OrderInfoType = {
   invoiceHeader?: string;
   orderItems: OrderItemsType[];
   orderType: OrderTypeEnum;
+  originalOrder?: string;
   payType: PayTypeEnum | null;
   promotionId?: number;
 };

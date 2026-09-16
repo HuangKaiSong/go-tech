@@ -14,6 +14,7 @@ import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 import { usePromotions } from '@/app/hooks/usePromotions';
 import { getCreatedOrderId } from '@/app/lib/order-id';
+import { buildOrderInfo } from '@/app/lib/order-info';
 import { getPurchaseTotals } from '@/app/lib/package-purchase';
 import servicePlanBg from '@/assets/service-plan-bg.jpg';
 import { useAuth } from '@/contexts/AuthContext';
@@ -23,8 +24,8 @@ import { clientFetch } from '@/lib/client-http/client-fetch';
 import { isNotifiedClientHttpError } from '@/lib/client-http/client-http-error';
 import Footer from '../../../components/Footer';
 import Header from '../../../components/v2/Header';
-import { type OrderInfoType, OrderItemTypeEnum, OrderTypeEnum } from '../../../constants/order';
-import { DAYSPERMONTH, PayTypeEnum, stashWebManagedCashier } from '../../../constants/payment';
+import { type OrderInfoType, OrderTypeEnum } from '../../../constants/order';
+import { PayTypeEnum, stashWebManagedCashier } from '../../../constants/payment';
 
 const money = (value: number) => formatPackagePrice(value) ?? '—';
 
@@ -158,53 +159,24 @@ const ConfirmOrder = ({
       'User-Type': 'platform_customer'
     });
 
-  /** 构建增值服务订单数据（FPS 与线上支付一致，仅 payType 不同） */
-  const buildOrderInfo = (payType: PayTypeEnum) => {
-    const orderInfo: any = {
+  /** 构建购买订单数据（FPS 与线上支付一致，仅 payType 不同） */
+  const createOrderInfo = (payType: PayTypeEnum) =>
+    buildOrderInfo({
+      additionalServiceSelection: needAddons ? selectedServicesSafe : {},
       orderType: OrderTypeEnum.PURCHASE,
-      payType,
-      orderItems: [
-        {
-          itemType: OrderItemTypeEnum.PACKAGE,
-          packageItemId: selectedPlan?.id,
-          itemName: selectedPlan?.itemName,
-          packageCode: selectedPlan?.packageCode,
-          price: selectedPlan!.price!,
-          count: month,
-          days: month * DAYSPERMONTH
-        }
-      ]
-    };
-    if (needInvoice) {
-      // 发票抬头
-      orderInfo.invoiceHeader = invoiceName;
-    }
-
-    // 优惠活动 / 优惠码
-    if (selectedPromotion) {
-      orderInfo.promotionId = selectedPromotion.promotionId;
-    }
-
-    // 附加服务
-    for (const line of purchase.lines) {
-      orderInfo.orderItems.push({
-        itemType: OrderItemTypeEnum.ADDITION,
-        count: line.quantity,
-        price: line.service.price,
-        packageCode: selectedPlan?.packageCode,
-        itemName: line.service.itemName,
-        packageItemId: line.service.id,
-        itemCode: line.service.packageCode,
-        days: month * DAYSPERMONTH
-      });
-    }
-    return orderInfo;
-  };
+      otherOrderInfo: {
+        invoiceHeader: needInvoice ? invoiceName : undefined,
+        months: month,
+        plan: selectedPlan,
+        promotionId: selectedPromotion?.promotionId
+      },
+      payType
+    });
 
   const handleFpsPaymentConfirm = async (voucherFile: UploadedFile) => {
     toast.dismiss();
     const toastId = toast.loading(orderCreating);
-    const orderInfo: OrderInfoType = buildOrderInfo(PayTypeEnum.FPS);
+    const orderInfo: OrderInfoType = createOrderInfo(PayTypeEnum.FPS);
     const headers = requestHeaders();
 
     try {
@@ -254,7 +226,7 @@ const ConfirmOrder = ({
   const handleOnlinePaymentConfirm = async () => {
     toast.dismiss();
     const toastId = toast.loading(orderCreating);
-    const orderInfo = buildOrderInfo(PayTypeEnum.Online);
+    const orderInfo = createOrderInfo(PayTypeEnum.Online);
 
     try {
       const response = await clientFetch(
