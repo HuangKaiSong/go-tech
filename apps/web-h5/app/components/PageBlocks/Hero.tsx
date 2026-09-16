@@ -56,6 +56,17 @@ export type HeroBlock = BlockBase & {
   variant?: 'default' | 'product-switcher';
 };
 
+export type TestimonialBlock = BlockBase & {
+  products?: {
+    description: string;
+    image: string;
+    items: string[];
+    key: HeroProductKey;
+    title: string;
+  }[];
+  type: 'testimonial';
+};
+
 const cursorClass = (hasIframe: boolean) => (hasIframe ? 'cursor-editor' : '');
 
 function RenderBlock({ block, hasIframe: _hasIframe, seq }: { block: HeroBlock; hasIframe: boolean; seq: number }) {

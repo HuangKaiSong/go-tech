@@ -4,6 +4,7 @@ import { defaultHomeBlocks } from '@/app/components/blockDefaults';
 import FeaturedPricingSection from '@/app/components/featured-pricing-section';
 import Footer from '@/app/components/Footer';
 import PricingSectionSkeleton from '@/app/components/pricing-section-skeleton';
+// import Header from '@/app/components/Header';
 import Header from '@/app/components/v2/Header';
 import { loadPageBlocks } from '@/app/lib/pageBlocks';
 import HeroSection from '../components/HeroSection';
@@ -29,9 +30,8 @@ export default async function Home() {
         <TargetAudienceSection initialBlocks={blocks} />
         <StepsSection />
         <StatsSection />
-        <TestimonialSection initialBlocks={blocks} />
+        <TestimonialSection />
       </main>
-
       <Footer />
     </div>
   );

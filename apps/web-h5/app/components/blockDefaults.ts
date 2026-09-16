@@ -87,6 +87,34 @@ export const defaultHomeBlocks: PageBlock[] = [
     ],
     title: '租務管理系統，一站式解決方案！',
     intro: '簡化繳費、帳單及收款，通過分類輕鬆管理查詢、自動提醒及批量通知到期，省心管理、協心合作。'
+  },
+  {
+    id: 'home-testimonial',
+    type: 'testimonial',
+    products: [
+      {
+        key: 'pms',
+        title: '更標準，更高效的管理方式',
+        description: '業務流程更規範、更專業，讓租務管理有章可循、執行一致。',
+        image: 'https://go-techs.com/_next/static/media/home-office.2-1ffaor7knpq.jpg',
+        items: [
+          '資訊集中與同步：所有物業、租約、收租、維修與文件資料統一管理，減少四處翻查與重複輸入。',
+          '多終端使用：支援電腦與手機等多裝置操作，隨時查看與跟進。',
+          '節省人力成本：以清晰流程與集中管理減少人手投入，提升整體處理效率，讓租務管理更便捷、更高效。'
+        ]
+      },
+      {
+        key: 'hr',
+        title: '更標準，更高效的管理方式',
+        description: '業務流程更規範、更專業，讓租務管理有章可循、執行一致。',
+        image: 'https://go-techs.com/_next/static/media/home-office.2-1ffaor7knpq.jpg',
+        items: [
+          '資訊集中與同步：所有物業、租約、收租、維修與文件資料統一管理，減少四處翻查與重複輸入。',
+          '多終端使用：支援電腦與手機等多裝置操作，隨時查看與跟進。',
+          '節省人力成本：以清晰流程與集中管理減少人手投入，提升整體處理效率，讓租務管理更便捷、更高效。'
+        ]
+      }
+    ]
   }
 ];
 

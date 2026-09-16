@@ -20,7 +20,7 @@ import {
 import type { CSSProperties, ReactNode } from 'react';
 import Link from '@/app/components/Link';
 import { DynamicText } from '../DynamicI18nText.client';
-import Hero, { type HeroBlock } from './Hero';
+import Hero, { type HeroBlock, type TestimonialBlock } from './Hero';
 
 type BlockBase = {
   id: string;
@@ -102,6 +102,7 @@ export type PageBlock =
   | FeatureGridBlock
   | TextBlock
   | ButtonBlock
+  | TestimonialBlock
   | ImageBlock;
 
 const iconMap = {
