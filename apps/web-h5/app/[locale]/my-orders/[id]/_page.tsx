@@ -21,14 +21,18 @@ import {
 } from '@/app/constants/payment';
 import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
-import { shouldPollOrderActivation, shouldSyncTenantsForOrder } from '@/app/lib/order-activation';
+import {
+  createVisibilityAwarePoller,
+  shouldPollOrderActivation,
+  shouldSyncTenantsForOrder
+} from '@/app/lib/order-activation';
 import { useAuth } from '@/contexts/AuthContext';
 import { clientFetch } from '@/lib/client-http/client-fetch';
 import { isNotifiedClientHttpError } from '@/lib/client-http/client-http-error';
 
 // 线上支付回跳后轮询配置
 const POLL_INTERVAL = 5000; // 每 5 秒查询一次
-const POLL_MAX_ATTEMPTS = 60; // 最多 60 次（约 5 分钟）
+const POLL_TIMEOUT = 5 * 60 * 1000; // 最多轮询 5 分钟（包含页面休眠时间）
 
 /** 订单支付过期时间（分钟），超过此时间未支付的订单视为已过期 */
 const ORDER_PAYMENT_TIMEOUT_MINUTES = 30;
@@ -104,16 +108,18 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
     const fromKpay = new URLSearchParams(window.location.search).get('from') === 'kpay';
     const shouldPoll = shouldPollOrderActivation({
       fromKpay,
-      orderStatus: order?.orderStatus,
-      payType: order?.payType
+      orderStatus: detail?.orderStatus,
+      payType: detail?.payType
     });
     if (!shouldPoll) return;
 
     setIsPolling(true);
-    let attempts = 0;
-    const timer = setInterval(async () => {
-      attempts += 1;
-      try {
+    const poller = createVisibilityAwarePoller({
+      intervalMs: POLL_INTERVAL,
+      isVisible: () => document.visibilityState === 'visible',
+      onError: error => console.error(error),
+      onStop: () => setIsPolling(false),
+      poll: async signal => {
         const response = await clientFetch(
           `/go-tech/platform/packageOrder/detail/${_orderId}`,
           {
@@ -122,39 +128,35 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
               'Content-Type': 'application/json',
               'User-Type': 'platform_customer',
               Authorization: `Bearer ${token}`
-            }
+            },
+            signal
           },
           { feedback: 'silent' }
         );
         const res = await response.json();
 
-        if (res.code === 200 && res.data) {
-          // 保留服务端已过滤的套餐功能列表；待开通仍需继续轮询，直到订单进入终态。
-          setOrder((prev: any) => ({ ...res.data, platformPackageDto: prev?.platformPackageDto }));
-          const shouldContinuePolling = shouldPollOrderActivation({
-            fromKpay,
-            orderStatus: res.data.orderStatus,
-            payType: res.data.payType
-          });
-          if (!shouldContinuePolling) {
-            clearInterval(timer);
-            setIsPolling(false);
-          }
-        }
-      } catch (error) {
-        console.error(error);
-      }
-      if (attempts >= POLL_MAX_ATTEMPTS) {
-        clearInterval(timer);
-        setIsPolling(false);
-      }
-    }, POLL_INTERVAL);
+        if (res.code !== 200 || !res.data) return true;
+
+        // 保留服务端已过滤的套餐功能列表；待开通仍需继续轮询，直到订单进入终态。
+        setOrder((prev: any) => ({ ...res.data, platformPackageDto: prev?.platformPackageDto }));
+        return shouldPollOrderActivation({
+          fromKpay,
+          orderStatus: res.data.orderStatus,
+          payType: res.data.payType
+        });
+      },
+      timeoutMs: POLL_TIMEOUT
+    });
+    const handleVisibilityChange = () => poller.handleVisibilityChange();
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    poller.start();
 
     return () => {
-      clearInterval(timer);
-      setIsPolling(false);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      poller.stop();
     };
-  }, [token, _orderId, order?.payType, order?.orderStatus]);
+  }, [token, _orderId, detail?.payType, detail?.orderStatus]);
 
   useEffect(() => {
     if (!token || syncedTenantOrderIdRef.current === _orderId) return;
