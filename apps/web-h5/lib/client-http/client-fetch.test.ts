@@ -5,10 +5,16 @@ import { ClientHttpError, isNotifiedClientHttpError } from './client-http-error'
 import { type ClientHttpErrorEvent, subscribeClientHttpErrors } from './error-events';
 
 const originalFetch = globalThis.fetch;
+const originalWindowDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'window');
 const cleanups: Array<() => void> = [];
 
 afterEach(() => {
   globalThis.fetch = originalFetch;
+  if (originalWindowDescriptor) {
+    Object.defineProperty(globalThis, 'window', originalWindowDescriptor);
+  } else {
+    Reflect.deleteProperty(globalThis, 'window');
+  }
   cleanups.splice(0).forEach(cleanup => cleanup());
 });
 
@@ -22,6 +28,27 @@ function captureEvents() {
   const events: ClientHttpErrorEvent[] = [];
   cleanups.push(subscribeClientHttpErrors(event => events.push(event)));
   return events;
+}
+
+function captureLoginRedirect(currentHref: string) {
+  const currentUrl = new URL(currentHref);
+  const redirectedTo: string[] = [];
+
+  Object.defineProperty(globalThis, 'window', {
+    configurable: true,
+    value: {
+      location: {
+        hash: currentUrl.hash,
+        href: currentUrl.href,
+        origin: currentUrl.origin,
+        pathname: currentUrl.pathname,
+        replace: (href: string) => redirectedTo.push(href),
+        search: currentUrl.search
+      }
+    }
+  });
+
+  return redirectedTo;
 }
 
 test('HTTP 200 和业务码 200 成功，并保留原始响应 body', async () => {
@@ -72,6 +99,43 @@ test('字符串业务码也会作为业务错误处理', async () => {
 
   assert.equal(events[0].businessCode, 'CONTENT_REJECTED');
   assert.equal(events[0].userMessage, '内容不符合要求');
+});
+
+test('业务码 401 跳转登录页并携带当前路由', async () => {
+  const redirects = captureLoginRedirect('https://example.com/en-us/my-orders?page=2#pending');
+  globalThis.fetch = async () => jsonResponse({ code: '401', message: '登录已失效' });
+
+  await assert.rejects(
+    () => clientFetch('/api/example'),
+    error => error instanceof ClientHttpError && error.businessCode === '401'
+  );
+
+  assert.equal(redirects.length, 1);
+  const loginUrl = new URL(redirects[0]);
+  assert.equal(loginUrl.pathname, '/en-us/account/login');
+  assert.equal(loginUrl.searchParams.get('redirect'), '/en-us/my-orders?page=2#pending');
+});
+
+test('HTTP 401 跳转登录页', async () => {
+  const redirects = captureLoginRedirect('https://example.com/settings?tab=security');
+  globalThis.fetch = async () => jsonResponse({ message: 'Unauthorized' }, { status: 401 });
+
+  await assert.rejects(
+    () => clientFetch('/api/example'),
+    error => error instanceof ClientHttpError && error.status === 401
+  );
+
+  assert.equal(redirects.length, 1);
+  assert.equal(redirects[0], 'https://example.com/account/login?redirect=%2Fsettings%3Ftab%3Dsecurity');
+});
+
+test('登录页请求返回 401 时不重复跳转', async () => {
+  const redirects = captureLoginRedirect('https://example.com/zh-cn/account/login?redirect=%2Fzh-cn%2Fsettings');
+  globalThis.fetch = async () => jsonResponse({ code: 401, message: '账号或密码错误' });
+
+  await assert.rejects(() => clientFetch('/api/login'), ClientHttpError);
+
+  assert.equal(redirects.length, 0);
 });
 
 test('HTTP 错误存在 JSON 消息时优先发布响应消息', async () => {

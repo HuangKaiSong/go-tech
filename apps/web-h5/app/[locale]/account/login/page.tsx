@@ -14,6 +14,7 @@ import { reportClientHttpError } from '@/app/lib/report-client-http-error';
 // import Logo from "@/assets/Gotech_Logo.webp";
 import authBgImg from '@/assets/background.webp';
 import { useAuth } from '@/contexts/AuthContext';
+import { getSafePostLoginPath } from '@/lib/auth/auth-redirect';
 import { clientFetch } from '@/lib/client-http/client-fetch';
 import { isNotifiedClientHttpError } from '@/lib/client-http/client-http-error';
 
@@ -26,7 +27,7 @@ const Login = () => {
   const searchParams = useSearchParams();
   const email = searchParams.get('email');
   const type = searchParams.get('type');
-  const redirect = searchParams.get('redirect');
+  const redirect = getSafePostLoginPath(searchParams.get('redirect'));
 
   const t = useTranslations('Account');
   const router = useProgressRouter();

@@ -1,5 +1,6 @@
 'use client';
 
+import { runAuthResponseMiddleware } from './auth-response-middleware';
 import { classifyResponse } from './classify-response';
 import { ClientHttpError } from './client-http-error';
 import { publishClientHttpError } from './error-events';
@@ -40,6 +41,7 @@ export async function clientFetch(
   }
 
   const classification = await classifyResponse(response);
+  runAuthResponseMiddleware(response, classification);
   if (classification.ok) return response;
 
   return rejectRequest(

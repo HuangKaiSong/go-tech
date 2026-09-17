@@ -1,6 +1,7 @@
 import createMiddleware from 'next-intl/middleware';
-import type { NextRequest } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { routing } from './i18n/routing';
+import { AUTH_TOKEN_COOKIE, buildLoginRedirectUrl, isProtectedPagePathname } from './lib/auth/auth-redirect';
 
 const handleI18nRouting = createMiddleware(routing);
 
@@ -13,6 +14,10 @@ export const config = {
 };
 
 export default function proxy(request: NextRequest) {
+  if (isProtectedPagePathname(request.nextUrl.pathname) && !request.cookies.get(AUTH_TOKEN_COOKIE)?.value) {
+    return NextResponse.redirect(buildLoginRedirectUrl(request.nextUrl));
+  }
+
   request.headers.set('x-go-tech-pathname', request.nextUrl.pathname);
 
   return handleI18nRouting(request);
