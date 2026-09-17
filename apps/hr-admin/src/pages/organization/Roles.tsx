@@ -20,7 +20,7 @@ import { type DepartmentOption, getDepartmentOptions } from '@/api/department';
 import { getMenuTree, getPositionMenuIds, type MenuTreeNode } from '@/api/menu';
 import { deletePosition, getPositionList, type Position, savePosition } from '@/api/position';
 import { AssignMenuDialog } from '@/components/organization/AssignMenuDialog';
-import { countNodes, MenuTreePicker } from '@/components/organization/MenuTreePicker';
+import { collectAllIds, countNodes, MenuTreePicker } from '@/components/organization/MenuTreePicker';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -448,9 +448,25 @@ export default function Roles() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label>{t('可存取菜單')}</Label>
-                <span className="text-xs text-muted-foreground">
-                  {t('已選 {{checked}} / {{total}}', { checked: menuChecked.size, total: countNodes(menuTree) })}
-                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    className="text-xs text-primary hover:underline"
+                    onClick={() => setMenuChecked(new Set(collectAllIds(menuTree)))}
+                  >
+                    {t('全選')}
+                  </button>
+                  <button
+                    type="button"
+                    className="text-xs text-primary hover:underline"
+                    onClick={() => setMenuChecked(new Set())}
+                  >
+                    {t('全不選')}
+                  </button>
+                  <span className="text-xs text-muted-foreground">
+                    {t('已選 {{checked}} / {{total}}', { checked: menuChecked.size, total: countNodes(menuTree) })}
+                  </span>
+                </div>
               </div>
               <div className="max-h-56 overflow-y-auto border rounded p-2">
                 <MenuTreePicker tree={menuTree} checked={menuChecked} onChange={setMenuChecked} />

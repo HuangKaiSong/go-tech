@@ -17,13 +17,36 @@ const tMsg = (msg?: string, fallback = '請求失敗') => {
   return direct;
 };
 
+/** 後端業務碼：基礎服務已到期（見 ResultCode.SERVICE_EXPIRED） */
+const SERVICE_EXPIRED_CODE = 402;
+/** 服務到期廣播事件名（全局遮罩組件監聽） */
+export const SERVICE_EXPIRED_EVENT = 'hr:service-expired';
+
+// 到期後只廣播一次；後續請求一律掛起（永不 resolve），避免各頁面 catch 反覆 toast 刷屏
+let serviceExpired = false;
+const markServiceExpired = () => {
+  if (!serviceExpired) {
+    serviceExpired = true;
+    window.dispatchEvent(new CustomEvent(SERVICE_EXPIRED_EVENT));
+  }
+  // 掛起當前請求：不 resolve、不 reject → 調用方 await 不會進入 catch，不彈 toast
+  return new Promise<never>(() => {});
+};
+
 const request = axios.create({
   baseURL: '/hr-manage',
   timeout: 10000
 });
 
+// 到期后仍需放行的接口（遮罩要靠 expiry 拿 renewUrl 等信息展示）
+const EXPIRED_ALLOW = ['service/expiry'];
+
 // 请求拦截器：自动带上登录 token
 request.interceptors.request.use(config => {
+  // 已判定到期：拦截后续业务请求，避免无谓报错；但放行到期查询等白名单接口
+  if (serviceExpired && !EXPIRED_ALLOW.some(u => config.url?.includes(u))) {
+    return new Promise<never>(() => {}) as never;
+  }
   const token = getToken();
   if (token) {
     // 攔截器拿到的是 InternalAxiosRequestConfig，headers 必定存在（AxiosHeaders 實例），直接賦值。
@@ -40,6 +63,10 @@ request.interceptors.response.use(
       return response;
     }
     const res = response.data;
+    // 服务已到期：显示全屏遮罩并挂起请求（避免 toast 刷屏）
+    if (res.code === SERVICE_EXPIRED_CODE) {
+      return markServiceExpired();
+    }
     // 未登录 / token 失效：清除并跳转登录页
     if (res.code === 401) {
       clearToken();
@@ -57,6 +84,10 @@ request.interceptors.response.use(
   error => {
     // 后端业务异常（如 400 用户名或密码错误）会把提示放在响应体的 message 里
     const data = error.response?.data;
+    // 服务已到期（后端返回 HTTP 400 + body.code=402）：全屏遮罩并挂起请求
+    if (data?.code === SERVICE_EXPIRED_CODE) {
+      return markServiceExpired();
+    }
     if (data?.code === 401 || error.response?.status === 401) {
       clearToken();
       if (window.location.pathname !== '/login') {

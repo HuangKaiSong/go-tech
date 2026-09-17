@@ -19,6 +19,13 @@ export function collectIds(node: MenuTreeNode, acc: number[] = []): number[] {
   return acc;
 }
 
+/** 收集整棵树所有节点 id（用于全选） */
+export function collectAllIds(tree: MenuTreeNode[]): number[] {
+  const acc: number[] = [];
+  tree.forEach(n => collectIds(n, acc));
+  return acc;
+}
+
 /** 统计整棵树的节点总数 */
 export function countNodes(tree: MenuTreeNode[]): number {
   let n = 0;

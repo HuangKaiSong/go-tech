@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertCircle, Bell, CheckCheck, Clock, DollarSign, Info, Loader2, UserPlus } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   type AppNotification,
@@ -10,6 +10,7 @@ import {
   markNotificationRead
 } from '@/api/notification';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { SERVICE_EXPIRED_EVENT } from '@/lib/request';
 
 /** 通知类型 → 图标与配色 */
 const typeMeta: Record<string, { color: string; icon: React.ElementType }> = {
@@ -39,12 +40,21 @@ function relativeTime(s?: string): string {
 export function NotificationBell() {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  // 服务到期后停止轮询，避免持续请求已被拦截的接口、刷屏后端日志
+  const [expired, setExpired] = useState(false);
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const onExpired = () => setExpired(true);
+    window.addEventListener(SERVICE_EXPIRED_EVENT, onExpired);
+    return () => window.removeEventListener(SERVICE_EXPIRED_EVENT, onExpired);
+  }, []);
 
   const { data: unread = 0 } = useQuery({
     queryKey: ['notifUnread'],
     queryFn: async () => (await getUnreadCount()).data ?? 0,
-    refetchInterval: 30000
+    enabled: !expired,
+    refetchInterval: expired ? false : 30000
   });
 
   const { data: list = [], isLoading } = useQuery({

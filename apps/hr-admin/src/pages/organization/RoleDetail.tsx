@@ -18,7 +18,7 @@ import { toast } from 'sonner';
 import { type DepartmentOption, getDepartmentOptions } from '@/api/department';
 import { assignPositionMenus, getMenuTree, getPositionMenuIds, type MenuTreeNode } from '@/api/menu';
 import { getPositionById, getPositionMembers, type Position, type PositionMember, savePosition } from '@/api/position';
-import { countNodes, MenuTreePicker } from '@/components/organization/MenuTreePicker';
+import { collectAllIds, countNodes, MenuTreePicker } from '@/components/organization/MenuTreePicker';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -528,6 +528,24 @@ export default function RoleDetail() {
                   <span className="text-xs font-normal text-muted-foreground">
                     {t('已選 {{checked}} / {{total}}', { checked: menuChecked.size, total: countNodes(menuTree) })}
                   </span>
+                  {hasPerm(POSITION_PERM.ASSIGN_MENU) && (
+                    <>
+                      <button
+                        type="button"
+                        className="text-xs font-normal text-primary hover:underline"
+                        onClick={() => setMenuChecked(new Set(collectAllIds(menuTree)))}
+                      >
+                        {t('全選')}
+                      </button>
+                      <button
+                        type="button"
+                        className="text-xs font-normal text-primary hover:underline"
+                        onClick={() => setMenuChecked(new Set())}
+                      >
+                        {t('全不選')}
+                      </button>
+                    </>
+                  )}
                 </span>
                 {hasPerm(POSITION_PERM.ASSIGN_MENU) && (
                   <Button size="sm" onClick={handleSaveMenus} disabled={menuSaving}>

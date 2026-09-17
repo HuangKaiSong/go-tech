@@ -26,6 +26,7 @@ import {
   getDepartmentOptions,
   saveDepartment
 } from '@/api/department';
+import { getActiveEmployeeOptions, type EmployeeOption } from '@/api/employee';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -55,12 +56,16 @@ const sideNav = [
   { id: 'kpi', label: '部門 KPI', icon: Target }
 ];
 
+/** Select 的「暫不指派」哨兵值（Radix Select 不允许空字符串 value） */
+const NO_MANAGER = '__none__';
+
 /** 编辑表单结构 */
 interface EditForm {
   budget: string;
   code: string;
   description: string;
   email: string;
+  managerId?: number;
   managerName: string;
   name: string;
   parentId?: number;
@@ -73,6 +78,7 @@ function toForm(d: Department): EditForm {
     name: d.name,
     code: d.code,
     parentId: d.parentId,
+    managerId: d.managerId,
     managerName: d.managerName ?? '',
     phone: d.phone ?? '',
     email: d.email ?? '',
@@ -98,6 +104,8 @@ export default function DepartmentDetail() {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<EditForm | null>(null);
   const [saving, setSaving] = useState(false);
+  // 部門主管候選：在職員工下拉
+  const [emps, setEmps] = useState<EmployeeOption[]>([]);
 
   const loadDept = useCallback(() => {
     return getDepartmentById(id)
@@ -125,7 +133,10 @@ export default function DepartmentDetail() {
         .catch(() => setMembers([])),
       getDepartmentOptions(id)
         .then(res => setDeptOptions(res.data ?? []))
-        .catch(() => {})
+        .catch(() => {}),
+      getActiveEmployeeOptions()
+        .then(res => setEmps(res.data ?? []))
+        .catch(() => setEmps([]))
     ]).finally(() => setLoading(false));
   }, [id, loadDept, loadChildren]);
 
@@ -153,6 +164,7 @@ export default function DepartmentDetail() {
         name: form.name.trim(),
         code: form.code.trim(),
         parentId: form.parentId,
+        managerId: form.managerId,
         managerName: form.managerName.trim() || undefined,
         phone: form.phone.trim() || undefined,
         email: form.email.trim() || undefined,
@@ -382,10 +394,29 @@ export default function DepartmentDetail() {
                       </span>
                     }
                     edit={
-                      <Input
-                        value={form?.managerName ?? ''}
-                        onChange={e => setForm(f => f && { ...f, managerName: e.target.value })}
-                      />
+                      <Select
+                        value={form?.managerId != null ? String(form.managerId) : NO_MANAGER}
+                        onValueChange={v =>
+                          setForm(f => {
+                            if (!f) return f;
+                            const sel = v === NO_MANAGER ? undefined : emps.find(e => String(e.id) === v);
+                            return { ...f, managerId: sel ? sel.id : undefined, managerName: sel ? sel.name : '' };
+                          })
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder={t('請選擇在職員工')} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value={NO_MANAGER}>{t('暫不指派')}</SelectItem>
+                          {emps.map(e => (
+                            <SelectItem key={e.id} value={String(e.id)}>
+                              {e.name}
+                              {e.employeeNo ? `（${e.employeeNo}）` : ''}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     }
                   />
                   <Field

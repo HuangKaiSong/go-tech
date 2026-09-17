@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { assignPositionMenus, getMenuTree, getPositionMenuIds, type MenuTreeNode } from '@/api/menu';
-import { countNodes, MenuTreePicker } from '@/components/organization/MenuTreePicker';
+import { collectAllIds, countNodes, MenuTreePicker } from '@/components/organization/MenuTreePicker';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -76,6 +76,22 @@ export function AssignMenuDialog({
             })}
           </DialogDescription>
         </DialogHeader>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            className="text-xs text-primary hover:underline"
+            onClick={() => setChecked(new Set(collectAllIds(tree)))}
+          >
+            {t('全選')}
+          </button>
+          <button
+            type="button"
+            className="text-xs text-primary hover:underline"
+            onClick={() => setChecked(new Set())}
+          >
+            {t('全不選')}
+          </button>
+        </div>
         <div className="flex-1 overflow-y-auto border rounded p-2">
           <MenuTreePicker tree={tree} checked={checked} onChange={setChecked} loading={loading} />
         </div>
