@@ -75,7 +75,7 @@ const ConfirmOrder = ({
   const router = useProgressRouter();
   const { product } = useProductSelection();
   const { planId } = { planId: planIdFromQuery };
-  const { token, user } = useAuth();
+  const { startTenantActivationSync, token, user } = useAuth();
   const locale = useLocale();
 
   const selectedPlan = data;
@@ -211,6 +211,7 @@ const ConfirmOrder = ({
           { feedbackId: toastId }
         );
 
+        startTenantActivationSync(orderId, PayTypeEnum.FPS);
         router.push(`/my-orders/${orderId}`);
       }
 
@@ -247,6 +248,7 @@ const ConfirmOrder = ({
       toast.success(redirectingToCashier, { id: toastId });
       setShowPaymentDialog(false);
       const orderId = getCreatedOrderId(orderResponse.data);
+      startTenantActivationSync(orderId, PayTypeEnum.Online);
       stashWebManagedCashier(orderResponse.data);
       router.push(`/my-orders/${orderId}`);
       // openWebManagedCashier(orderResponse.data);

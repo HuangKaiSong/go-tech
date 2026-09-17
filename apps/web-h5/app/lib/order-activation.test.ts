@@ -2,7 +2,15 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { OrderStatusEnum, OrderTypeEnum } from '../constants/order';
 import { PayTypeEnum } from '../constants/payment';
-import { createVisibilityAwarePoller, shouldPollOrderActivation, shouldSyncTenantsForOrder } from './order-activation';
+import {
+  clearPendingTenantActivation,
+  createVisibilityAwarePoller,
+  getTenantActivationPollingConfig,
+  readPendingTenantActivation,
+  shouldPollOrderActivation,
+  shouldSyncTenantsForOrder,
+  stashPendingTenantActivation
+} from './order-activation';
 
 interface Deferred<T> {
   promise: Promise<T>;
@@ -40,6 +48,22 @@ function createTestScheduler() {
       nextId += 1;
       jobs.set(id, { callback, delay });
       return id;
+    }
+  };
+}
+
+function createMemoryStorage() {
+  const values = new Map<string, string>();
+
+  return {
+    getItem(key: string) {
+      return values.get(key) ?? null;
+    },
+    removeItem(key: string) {
+      values.delete(key);
+    },
+    setItem(key: string, value: string) {
+      values.set(key, value);
     }
   };
 }
@@ -116,6 +140,53 @@ test('只有已完成的购买订单需要同步租户', () => {
     }),
     false
   );
+});
+
+test('线上购买会保存全局租户同步标记，清除标记后不再读取到任务', () => {
+  const storage = createMemoryStorage();
+  const pending = stashPendingTenantActivation(
+    {
+      orderId: 83,
+      ownerId: 'user:7',
+      payType: PayTypeEnum.Online
+    },
+    { now: () => 1_000, storage }
+  );
+
+  assert.deepEqual(pending, {
+    expiresAt: 301_000,
+    orderId: 83,
+    ownerId: 'user:7',
+    payType: PayTypeEnum.Online
+  });
+  assert.deepEqual(readPendingTenantActivation({ storage }), pending);
+  assert.deepEqual(getTenantActivationPollingConfig(pending, 1_000), {
+    intervalMs: 5_000,
+    timeoutMs: 300_000
+  });
+
+  clearPendingTenantActivation({ storage });
+  assert.equal(readPendingTenantActivation({ storage }), null);
+});
+
+test('FPS 购买使用低频长时同步，并拒绝损坏的租户同步标记', () => {
+  const storage = createMemoryStorage();
+  const pending = stashPendingTenantActivation(
+    {
+      orderId: 84,
+      ownerId: 'user:8',
+      payType: PayTypeEnum.FPS
+    },
+    { now: () => 2_000, storage }
+  );
+
+  assert.deepEqual(getTenantActivationPollingConfig(pending, 2_000), {
+    intervalMs: 60_000,
+    timeoutMs: 86_400_000
+  });
+
+  storage.setItem('GO_TECH_PENDING_TENANT_ACTIVATION', '{invalid');
+  assert.equal(readPendingTenantActivation({ storage }), null);
 });
 
 test('轮询请求完成后才安排下一次请求，避免异步请求重叠', async () => {

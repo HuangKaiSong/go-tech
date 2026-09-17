@@ -3,7 +3,16 @@
 import { Provider, useAtomValue, useStore } from 'jotai';
 import { useHydrateAtoms } from 'jotai/utils';
 import { useRouter } from 'next/navigation';
-import { createContext, useContext, useRef, useState } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { PayTypeEnum } from '@/app/constants/payment';
+import {
+  type PendingTenantActivation,
+  clearPendingTenantActivation,
+  createVisibilityAwarePoller,
+  getTenantActivationPollingConfig,
+  readPendingTenantActivation,
+  stashPendingTenantActivation
+} from '@/app/lib/order-activation';
 import { clientFetch } from '@/lib/client-http/client-fetch';
 import {
   type TenantCacheStatus,
@@ -17,6 +26,7 @@ import {
 
 interface RefetchTenantsOptions {
   force?: boolean;
+  signal?: AbortSignal;
 }
 
 type AuthContextType = {
@@ -25,6 +35,7 @@ type AuthContextType = {
   refetchTenants: (token: string, options?: RefetchTenantsOptions) => Promise<Tenant[]>;
   setToken: (token: string | undefined) => void;
   setUser: (user: User | null) => void;
+  startTenantActivationSync: (orderId: number, payType: PayTypeEnum) => void;
   tenants: Tenant[];
   tenantsError: string | null;
   tenantsStatus: TenantCacheStatus;
@@ -60,6 +71,7 @@ const AuthProviderInner = ({ _tenants, _token, children, initialUser }: AuthProv
   const tenantCache = useAtomValue(tenantCacheAtom);
   const [userState, setUserState] = useState<User | null>(initialUser);
   const [tokenState, setTokenState] = useState<string | undefined>(_token);
+  const [pendingTenantActivation, setPendingTenantActivation] = useState<PendingTenantActivation | null>(null);
   const userRef = useRef<User | null>(initialUser);
 
   const resetTenants = (ownerId: string | null = null) => {
@@ -75,6 +87,8 @@ const AuthProviderInner = ({ _tenants, _token, children, initialUser }: AuthProv
 
     if (previousOwnerId !== nextOwnerId) {
       cancelTenantRequest(previousOwnerId);
+      clearPendingTenantActivation();
+      setPendingTenantActivation(null);
       resetTenants(nextOwnerId);
     }
   };
@@ -83,6 +97,8 @@ const AuthProviderInner = ({ _tenants, _token, children, initialUser }: AuthProv
     setTokenState(nextToken);
     if (!nextToken) {
       cancelTenantRequest(getUserIdentity(userRef.current));
+      clearPendingTenantActivation();
+      setPendingTenantActivation(null);
       resetTenants();
     }
   };
@@ -124,7 +140,7 @@ const AuthProviderInner = ({ _tenants, _token, children, initialUser }: AuthProv
     });
 
     try {
-      const data = await requestTenants(voucher, ownerId);
+      const data = await requestTenants(voucher, ownerId, options.signal);
       const latestCache = store.get(tenantCacheAtom);
 
       if (latestCache.ownerId === ownerId) {
@@ -140,7 +156,14 @@ const AuthProviderInner = ({ _tenants, _token, children, initialUser }: AuthProv
       return data;
     } catch (error) {
       const latestCache = store.get(tenantCacheAtom);
-      if (isTenantRequestCancellation(error)) {
+      if (options.signal?.aborted || isTenantRequestCancellation(error)) {
+        if (latestCache.ownerId === ownerId) {
+          store.set(tenantCacheAtom, {
+            ...latestCache,
+            error: null,
+            status: latestCache.data.length > 0 ? 'success' : 'idle'
+          });
+        }
         return latestCache.ownerId === ownerId ? latestCache.data : [];
       }
 
@@ -157,6 +180,72 @@ const AuthProviderInner = ({ _tenants, _token, children, initialUser }: AuthProv
     }
   };
 
+  const refetchTenantsRef = useRef(refetchTenants);
+  refetchTenantsRef.current = refetchTenants;
+
+  const startTenantActivationSync = (orderId: number, payType: PayTypeEnum) => {
+    const ownerId = getUserIdentity(userRef.current);
+    if (!ownerId || store.get(tenantCacheAtom).data.length > 0) return;
+
+    const pending = stashPendingTenantActivation({ orderId, ownerId, payType });
+    setPendingTenantActivation(pending);
+  };
+
+  const currentOwnerId = getUserIdentity(userState);
+
+  useEffect(() => {
+    if (!tokenState || !currentOwnerId) return;
+
+    const pending = pendingTenantActivation ?? readPendingTenantActivation();
+    if (!pending) return;
+    if (pending.ownerId !== currentOwnerId) {
+      clearPendingTenantActivation();
+      setPendingTenantActivation(null);
+      return;
+    }
+    if (tenantCache.data.length > 0) {
+      clearPendingTenantActivation();
+      setPendingTenantActivation(null);
+      return;
+    }
+
+    const { intervalMs, timeoutMs } = getTenantActivationPollingConfig(pending);
+    if (timeoutMs <= 0) {
+      clearPendingTenantActivation();
+      setPendingTenantActivation(null);
+      return;
+    }
+
+    const poller = createVisibilityAwarePoller({
+      intervalMs,
+      isVisible: () => document.visibilityState === 'visible',
+      onStop: () => {
+        if (Date.now() >= pending.expiresAt) {
+          clearPendingTenantActivation();
+          setPendingTenantActivation(null);
+        }
+      },
+      poll: async signal => {
+        const tenants = await refetchTenantsRef.current(tokenState, { force: true, signal });
+        if (tenants.length === 0) return true;
+
+        clearPendingTenantActivation();
+        setPendingTenantActivation(null);
+        return false;
+      },
+      timeoutMs
+    });
+    const handleVisibilityChange = () => poller.handleVisibilityChange();
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    poller.start();
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      poller.stop();
+    };
+  }, [currentOwnerId, pendingTenantActivation, tenantCache.data.length, tokenState]);
+
   return (
     <AuthContext.Provider
       value={{
@@ -169,7 +258,8 @@ const AuthProviderInner = ({ _tenants, _token, children, initialUser }: AuthProv
         tenants: tenantCache.data,
         tenantsError: tenantCache.error,
         tenantsStatus: tenantCache.status,
-        refetchTenants
+        refetchTenants,
+        startTenantActivationSync
       }}
     >
       {children}

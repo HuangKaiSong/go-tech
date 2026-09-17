@@ -56,11 +56,15 @@ export function isTenantCacheFresh(cache: TenantCacheState, ownerId: string) {
   );
 }
 
-export function requestTenants(voucher: string, ownerId: string) {
+export function requestTenants(voucher: string, ownerId: string, signal?: AbortSignal) {
   const pendingRequest = inFlightRequests.get(ownerId);
   if (pendingRequest) return pendingRequest.promise;
 
   const controller = new AbortController();
+  const cancelFromCaller = () => controller.abort(signal?.reason);
+  if (signal?.aborted) cancelFromCaller();
+  else signal?.addEventListener('abort', cancelFromCaller, { once: true });
+
   const timeoutId = setTimeout(() => controller.abort(new Error('Tenant request timed out after 3000ms')), 3_000);
   const request = clientFetch(
     '/go-tech/platform/packageOrder/myTenants',
@@ -83,6 +87,7 @@ export function requestTenants(voucher: string, ownerId: string) {
     })
     .finally(() => {
       clearTimeout(timeoutId);
+      signal?.removeEventListener('abort', cancelFromCaller);
       if (inFlightRequests.get(ownerId)?.promise === request) {
         inFlightRequests.delete(ownerId);
       }
