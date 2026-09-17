@@ -408,7 +408,7 @@ const RenewOrderContent = ({ detail, promotions }: RenewOrderContentProps) => {
                   {(order.packageDetail.detail?.menu || [])?.map((feature: any) => {
                     if (feature.level >= 2) return null;
                     return (
-                      <div key={feature.id} className="flex items-center gap-2 py-1.5 px-2 rounded bg-[#FAEEEB]">
+                      <div key={feature.menuId} className="flex items-center gap-2 py-1.5 px-2 rounded bg-[#FAEEEB]">
                         {feature.menuIcon && (
                           <svg className="svg-icon w-4 h-4 text-primary mr-1" aria-hidden="true">
                             <use href={`#icon-${feature.menuIcon}`} xlinkHref={`#icon-${feature.menuIcon}`} />
