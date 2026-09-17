@@ -17,6 +17,7 @@ const purchasePlan = {
     }
   ],
   id: 10,
+  itemType: 1,
   itemName: 'HR 基础版',
   packageCode: 'hr-base',
   packageName: 'HR 基础版',
@@ -37,7 +38,7 @@ const sourceOrder = {
       count: 2,
       id: 21,
       itemName: '发薪管理',
-      itemType: OrderItemTypeEnum.ADDITION,
+      itemType: 2,
       price: 30
     }
   ],
@@ -77,7 +78,7 @@ test('购买订单根据套餐和选择记录在公共方法内生成全部订�
         days: 360,
         itemCode: 'payroll',
         itemName: '发薪管理',
-        itemType: OrderItemTypeEnum.ADDITION,
+        itemType: 2,
         packageCode: 'hr-base',
         packageItemId: 21,
         price: 30
@@ -105,7 +106,7 @@ test('增值订单根据原订单套餐和选择记录查找增值服务', () =>
       {
         count: 2,
         itemName: '发薪管理',
-        itemType: OrderItemTypeEnum.ADDITION,
+        itemType: 2,
         packageCode: 'payroll',
         packageId: 10,
         packageItemId: 21,

@@ -6,6 +6,7 @@ import { type ServiceSelection, getSelectedAddonLines } from './package-purchase
 type OrderSourceAdditionalService = {
   id?: number;
   itemName: string;
+  itemType: number;
   packageCode?: string;
   price: number;
 };
@@ -14,6 +15,7 @@ type OrderSourcePackage = {
   additionalItems?: readonly OrderSourceAdditionalService[];
   id: number;
   itemName?: string;
+  itemType?: number;
   packageCode?: string;
   price: number;
 };
@@ -105,7 +107,7 @@ const buildSelectedAdditionalItems = (order: OrderSource, selection: ServiceSele
       {
         count,
         itemName: service.itemName,
-        itemType: OrderItemTypeEnum.ADDITION,
+        itemType: service.itemType!,
         packageCode: service.packageCode,
         packageId: order.packageDetail?.id,
         packageItemId: service.id,
@@ -126,7 +128,7 @@ export const buildOrderInfo = (options: BuildOrderInfoOptions): OrderInfoType =>
           days: months * DAYSPERMONTH,
           itemCode: service.packageCode,
           itemName: service.itemName,
-          itemType: OrderItemTypeEnum.ADDITION,
+          itemType: service.itemType,
           packageCode: plan.packageCode,
           packageItemId: service.id,
           price: service.price
@@ -139,7 +141,7 @@ export const buildOrderInfo = (options: BuildOrderInfoOptions): OrderInfoType =>
             count: months,
             days: months * DAYSPERMONTH,
             itemName: plan.itemName,
-            itemType: OrderItemTypeEnum.PACKAGE,
+            itemType: plan.itemType || OrderItemTypeEnum.PACKAGE,
             packageCode: plan.packageCode,
             packageItemId: plan.id,
             price: plan.price
@@ -174,7 +176,7 @@ export const buildOrderInfo = (options: BuildOrderInfoOptions): OrderInfoType =>
             count: orderPackageInfo?.count,
             days: orderPackageInfo?.days,
             itemName: plan.itemName,
-            itemType: OrderItemTypeEnum.PACKAGE,
+            itemType: plan.itemType || OrderItemTypeEnum.PACKAGE,
             packageCode: plan.packageCode,
             packageItemId: plan.id,
             price: plan.price
@@ -193,11 +195,11 @@ export const buildOrderInfo = (options: BuildOrderInfoOptions): OrderInfoType =>
       const plan = order.packageDetail;
       if (!plan) throw new Error('未找到续费套餐');
       const additionalItems = order.orderItems
-        .filter(item => item.itemType === OrderItemTypeEnum.ADDITION)
+        .filter(item => item.itemType !== OrderItemTypeEnum.PACKAGE)
         .map(item => ({
           count: item.count,
           itemName: item.itemName,
-          itemType: OrderItemTypeEnum.ADDITION,
+          itemType: item.itemType,
           packageCode: plan.packageCode,
           packageItemId: item.id,
           price: item.price
@@ -208,7 +210,7 @@ export const buildOrderInfo = (options: BuildOrderInfoOptions): OrderInfoType =>
             count: months,
             days: months * DAYSPERMONTH,
             itemName: plan.itemName,
-            itemType: OrderItemTypeEnum.PACKAGE,
+            itemType: plan.itemType || OrderItemTypeEnum.PACKAGE,
             packageCode: plan.packageCode,
             packageItemId: plan.id,
             price: plan.price

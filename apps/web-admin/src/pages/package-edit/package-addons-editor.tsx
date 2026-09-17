@@ -37,14 +37,12 @@ type AddonFormValue = {
 const createAddon = (): AddonFormValue => ({
   detail: { dataCount: 0, features: [], menu: [], packageKind: 'addon', summary: '' },
   itemName: '',
-  itemType: '2',
+  itemType: '3',
   price: 0
 });
 
-const usesMenu = (itemType: number | string) =>
-  itemType === 1 || itemType === 3 || itemType === '1' || itemType === '3';
-const usesQuantity = (itemType: number | string) =>
-  itemType === 2 || itemType === 3 || itemType === '2' || itemType === '3';
+const usesMenu = (itemType: number | string) => itemType === 2 || itemType === '2';
+const usesQuantity = (itemType: number | string) => itemType === 3 || itemType === '3';
 const addonItemTypes = new Set([1, 2, 3]);
 
 const getAmount = (dataCount: number, price: number) => {
@@ -285,9 +283,9 @@ export function PackageAddonsEditor({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="1">權限</SelectItem>
-                  <SelectItem value="2">數量</SelectItem>
-                  <SelectItem value="3">權限／數量</SelectItem>
+                  <SelectItem value="2">權限</SelectItem>
+                  <SelectItem value="3">數量</SelectItem>
+                  {/* <SelectItem value="3">權限／數量</SelectItem> */}
                 </SelectContent>
               </Select>
             </div>

@@ -109,10 +109,10 @@ const addonItemSchema = z
   })
   .loose()
   .superRefine((addon, context) => {
-    if (addon.itemType !== 1 && addon.itemType !== 2 && addon.itemType !== 3) {
+    if (addon.itemType !== 2 && addon.itemType !== 3) {
       context.addIssue({ code: 'custom', message: 'Invalid item type', path: ['itemType'] });
     }
-    if ((addon.itemType === 1 || addon.itemType === 3) && addon.detail.menu.length === 0) {
+    if (addon.itemType === 2 && addon.detail.menu.length === 0) {
       context.addIssue({ code: 'custom', message: 'Menu is required', path: ['detail', 'menu'] });
     }
   });
@@ -161,6 +161,7 @@ export function parsePackage(value: unknown): PackageItem {
     }, detailSchema)
   });
   const result = responseSchema.safeParse(value);
+
   console.log(result);
 
   if (!result.success) throw new Error('套餐資料格式不正確，請檢查接口回傳的欄位');
@@ -207,7 +208,7 @@ export function buildPackagePayload(draft: PackageDraft, menuTree: MenuNode[] = 
     bizCode: payload.bizCode,
     detail: {
       ...addon.detail,
-      dataCount: addon.itemType === 1 ? 0 : addon.detail.dataCount,
+      dataCount: addon.itemType === 3 ? 0 : addon.detail.dataCount,
       menu: addon.itemType === 2 ? [] : attachMenuParents(addon.detail.menu, menuTree)
     }
   }));
