@@ -4,7 +4,7 @@ import { Badge, Card, CardContent, CardHeader, Separator } from '@go-tech-fronte
 import { getPackageFeatures } from '@go-tech/package-ui/model';
 import { Button, toast } from '@go-tech/web-ui';
 import { ArrowLeft, CheckCircle, CreditCard, Download, RefreshCw, Settings, XCircle } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { DynamicText } from '@/app/components/DynamicI18nText.client';
 import Footer from '@/app/components/Footer';
 import Link from '@/app/components/Link';
@@ -21,6 +21,7 @@ import {
 } from '@/app/constants/payment';
 import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
+import { shouldPollOrderActivation, shouldSyncTenantsForOrder } from '@/app/lib/order-activation';
 import { useAuth } from '@/contexts/AuthContext';
 import { clientFetch } from '@/lib/client-http/client-fetch';
 import { isNotifiedClientHttpError } from '@/lib/client-http/client-http-error';
@@ -56,9 +57,10 @@ const goToThirdPartyPay = (data: OrderAddResponse) => {
 // oxlint-disable-next-line complexity
 const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
   const router = useProgressRouter();
-  const { token } = useAuth();
+  const { refetchTenants, token } = useAuth();
 
   const [order, setOrder] = useState(detail);
+  const syncedTenantOrderIdRef = useRef<string | null>(null);
 
   const features = getPackageFeatures(order.packageDetail?.detail ?? []);
 
@@ -90,7 +92,7 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
    *
    * 1. 回跳来源 from=kpay
    * 2. 支付方式为线上支付（payType=Online）
-   * 3. 当前订单状态为待付款（WAIT_PAY） 一旦状态变更（支付成功/失败等）或达到最大次数即停止。
+   * 3. 当前订单仍处于待支付、待确认或待开通状态。订单进入完成、取消或拒绝等终态后停止。
    */
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -100,8 +102,11 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
     if (!token) return;
 
     const fromKpay = new URLSearchParams(window.location.search).get('from') === 'kpay';
-    const shouldPoll =
-      fromKpay && order?.payType === PayTypeEnum.Online && order?.orderStatus === OrderStatusEnum.WAIT_PAY;
+    const shouldPoll = shouldPollOrderActivation({
+      fromKpay,
+      orderStatus: order?.orderStatus,
+      payType: order?.payType
+    });
     if (!shouldPoll) return;
 
     setIsPolling(true);
@@ -123,11 +128,18 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
         );
         const res = await response.json();
 
-        if (res.code === 200 && res.data && res.data.orderStatus !== OrderStatusEnum.WAIT_PAY) {
-          // 状态已更新，保留服务端已过滤的套餐功能列表，刷新其余字段后停止轮询
+        if (res.code === 200 && res.data) {
+          // 保留服务端已过滤的套餐功能列表；待开通仍需继续轮询，直到订单进入终态。
           setOrder((prev: any) => ({ ...res.data, platformPackageDto: prev?.platformPackageDto }));
-          clearInterval(timer);
-          setIsPolling(false);
+          const shouldContinuePolling = shouldPollOrderActivation({
+            fromKpay,
+            orderStatus: res.data.orderStatus,
+            payType: res.data.payType
+          });
+          if (!shouldContinuePolling) {
+            clearInterval(timer);
+            setIsPolling(false);
+          }
         }
       } catch (error) {
         console.error(error);
@@ -143,6 +155,14 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
       setIsPolling(false);
     };
   }, [token, _orderId, order?.payType, order?.orderStatus]);
+
+  useEffect(() => {
+    if (!token || syncedTenantOrderIdRef.current === _orderId) return;
+    if (!shouldSyncTenantsForOrder({ orderStatus: order?.orderStatus, orderType: order?.orderType })) return;
+
+    syncedTenantOrderIdRef.current = _orderId;
+    refetchTenants(token, { force: true });
+  }, [refetchTenants, token, _orderId, order?.orderStatus, order?.orderType]);
 
   /** 判断订单是否已过支付有效期 */
   const isExpired = useMemo(() => {
