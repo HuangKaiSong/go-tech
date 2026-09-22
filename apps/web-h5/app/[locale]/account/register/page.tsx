@@ -482,7 +482,60 @@ const Register = () => {
                           />
                         </path>
                       </svg>
-                    ) : null}
+                    ) : (
+                      <svg key={checkedEmail} viewBox="0 0 24 24" className="h-5 w-5">
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="9"
+                          fill="none"
+                          stroke="#ef4444"
+                          strokeWidth="2"
+                          strokeDasharray="57"
+                          strokeDashoffset="57"
+                        >
+                          <animate attributeName="stroke-dashoffset" from="57" to="0" dur="0.22s" fill="freeze" />
+                        </circle>
+                        <path
+                          d="M9 9L15 15"
+                          fill="none"
+                          stroke="#ef4444"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeDasharray="9"
+                          strokeDashoffset="9"
+                        >
+                          <animate
+                            attributeName="stroke-dashoffset"
+                            from="9"
+                            to="0"
+                            begin="0.16s"
+                            dur="0.16s"
+                            fill="freeze"
+                          />
+                        </path>
+                        <path
+                          d="M15 9L9 15"
+                          fill="none"
+                          stroke="#ef4444"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeDasharray="9"
+                          strokeDashoffset="9"
+                        >
+                          <animate
+                            attributeName="stroke-dashoffset"
+                            from="9"
+                            to="0"
+                            begin="0.30s"
+                            dur="0.16s"
+                            fill="freeze"
+                          />
+                        </path>
+                      </svg>
+                    )}
                   </span>
                 </div>
               </div>
