@@ -16,7 +16,7 @@ import { translateError } from '@/app/lib/translate-error';
 // import Logo from "@/assets/Gotech_Logo.webp";
 import authBgImg from '@/assets/background.webp';
 import { clientFetch } from '@/lib/client-http/client-fetch';
-import { isNotifiedClientHttpError } from '@/lib/client-http/client-http-error';
+import { ClientHttpError, isNotifiedClientHttpError } from '@/lib/client-http/client-http-error';
 
 const parseEmailExists = (result: any) => {
   if (typeof result?.data === 'boolean') return !result.data;
@@ -266,6 +266,12 @@ const Register = () => {
       return exists;
     } catch (err) {
       reportClientHttpError(err, '/go-tech/platform/platformCustomer/emailExistVerify');
+      if (err instanceof ClientHttpError) {
+        if (err.kind === 'business' && err.businessCode === 400) {
+          setEmailExists(true);
+          return false;
+        }
+      }
       return false;
     } finally {
       setEmailChecking(false);
