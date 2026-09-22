@@ -62,8 +62,8 @@ export function TrialWindowProvider({ children }: { children: ReactNode }) {
         return;
       }
       if (action === 'service-plan') {
-        pm2Window.current = window.open('/service-plan', '_blank');
-        router.replace('/service-plan');
+        pm2Window.current = window.open('/service-plan?product=pms', '_blank');
+        router.replace('/service-plan?product=pms');
         return;
       }
       if (action === 'renew') {
@@ -78,7 +78,7 @@ export function TrialWindowProvider({ children }: { children: ReactNode }) {
           { feedback: 'silent' }
         );
         const result = await response.json();
-        if (result.code !== 200) throw new Error('123');
+        if (result.code !== 200) throw new Error(result.message || result.msg || response.text);
         const orderId = resolveOrderId(result.data);
         const href = orderId ? `/renew-order/${orderId}?product=pms` : '/my-orders?product=pms';
         pm2Window.current = window.open(href, '_blank');
