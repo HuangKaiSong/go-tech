@@ -329,7 +329,7 @@ const Header = ({ heroBg, initialBlocks }: { heroBg?: string | StaticImageData; 
                         </div>
                         <div className="text-left">
                           <p className="font-semibold">{user.nickname}</p>
-                          <p className="text-sm text-muted-foreground">{user.sub}</p>
+                          <p className="text-sm text-muted-foreground">{user.email}</p>
                         </div>
                       </SheetTitle>
                     </SheetHeader>
