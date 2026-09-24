@@ -65,7 +65,7 @@ const SelectAccount = () => {
 
   useEffect(() => {
     if (token) {
-      refetchTenants(token);
+      refetchTenants(token, { force: true });
     }
     // oxlint-disable react-hook/exhaustive-deps
   }, [token]);
@@ -181,7 +181,7 @@ const SelectAccount = () => {
                       </div> */}
                       <div>
                         {/* Company */}
-                        <h3 className="text-lg font-bold text-foreground leading-snug mb-1">{acc.company}</h3>
+                        <h3 className="text-lg font-bold text-foreground leading-snug mb-1">{acc.companyName}</h3>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
                           <Package className="w-4 h-4 text-primary" />
                           <span className="text-foreground font-medium">{acc.tenantName}</span>

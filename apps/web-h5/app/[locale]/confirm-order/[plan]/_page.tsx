@@ -85,13 +85,13 @@ const ConfirmOrder = ({
   const [selectedServices, setSelectedServices] = useAtom(selectedServicesAtom);
 
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
-  // Customer info state
-  // const [customerInfo, setCustomerInfo] = useState({
-  //   name: user?.nickname,
-  //   email: user?.sub,
-  //   phone: '',
-  //   company: ''
-  // });
+
+  const [customerInfo, setCustomerInfo] = useState({
+    name: user!.nickname,
+    email: user!.email,
+    phone: user!.phone,
+    company: user!.companyName
+  });
   const storedMonths = useAtomValue(selectedMonthsAtom);
   const [month, setMonth] = useState<number>(1);
   useEffect(() => {
@@ -99,7 +99,7 @@ const ConfirmOrder = ({
   }, [storedMonths]);
 
   const [needInvoice, setNeedInvoice] = useState<boolean>(true);
-  const [invoiceName, setInvoiceName] = useState<string>(user?.nickname || '');
+  const [invoiceName, setInvoiceName] = useState<string>(user!.nickname || '');
 
   // i18n messages
   const orderCreating = useBatchTranslation('创建订单中...');
@@ -178,6 +178,7 @@ const ConfirmOrder = ({
     toast.dismiss();
     const toastId = toast.loading(orderCreating);
     const orderInfo: OrderInfoType = createOrderInfo(PayTypeEnum.FPS);
+    orderInfo.companyName = customerInfo.company;
     const headers = requestHeaders();
 
     try {
@@ -280,6 +281,52 @@ const ConfirmOrder = ({
           <p className="text-center text-sm text-muted-foreground mb-6">
             <DynamicText text="! 為確保您的發票有效，請提供與貴公司營業登記相符的公司名稱，如需修改請點擊修改按鈕" />
           </p>
+
+          <div className="bg-white rounded-lg border border-border p-6 mb-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-1 h-6 bg-primary rounded-full" />
+              <h2 className="text-lg font-bold text-gray-700">
+                <DynamicText text="客户信息" />
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-sm text-muted-foreground">客戶名稱：</label>
+                <Input
+                  value={customerInfo.name}
+                  onChange={e => setCustomerInfo({ ...customerInfo, name: e.target.value })}
+                  className="h-9"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-sm text-muted-foreground">電子郵箱：</label>
+                <Input
+                  type="email"
+                  value={customerInfo.email}
+                  onChange={e => setCustomerInfo({ ...customerInfo, email: e.target.value })}
+                  className="h-9"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-sm text-muted-foreground">聯繫電話：</label>
+                <Input
+                  type="tel"
+                  value={customerInfo.phone}
+                  onChange={e => setCustomerInfo({ ...customerInfo, phone: e.target.value })}
+                  className="h-9"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-sm text-muted-foreground">公司名稱：</label>
+                <Input
+                  value={customerInfo.company}
+                  onChange={e => setCustomerInfo({ ...customerInfo, company: e.target.value })}
+                  className="h-9"
+                />
+              </div>
+            </div>
+          </div>
 
           <div className="bg-white rounded-lg border border-border p-6 mb-6">
             <div className="flex items-center gap-3 mb-4">

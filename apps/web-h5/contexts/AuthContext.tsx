@@ -33,6 +33,7 @@ type AuthContextType = {
   isLoggedIn: boolean;
   logout: () => void;
   refetchTenants: (token: string, options?: RefetchTenantsOptions) => Promise<Tenant[]>;
+  refetchUser: () => void;
   setToken: (token: string | undefined) => void;
   setUser: (user: User | null) => void;
   startTenantActivationSync: (orderId: number, payType: PayTypeEnum) => void;
@@ -55,7 +56,6 @@ interface AuthProviderProps {
 function getUserIdentity(user: User | null) {
   if (!user) return null;
   if (user.userId !== undefined && user.userId !== null) return `user:${user.userId}`;
-  if (user.sub) return `sub:${user.sub}`;
 
   return null;
 }
@@ -109,6 +109,26 @@ const AuthProviderInner = ({ _tenants, _token, children, initialUser }: AuthProv
       setUser(null);
       setToken(undefined);
       router.replace('/');
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
+  };
+
+  const refetchUser = async () => {
+    try {
+      const response = await clientFetch(
+        '/go-tech/platform/platformCustomer/getInfo',
+        {
+          headers: new Headers({
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${tokenState}`,
+            'User-Type': 'platform_customer'
+          })
+        },
+        { feedback: 'silent' }
+      );
+      const result = (await response.json()) as User;
+      setUser(result);
     } catch (error) {
       console.error('Error during logout:', error);
     }
@@ -259,7 +279,8 @@ const AuthProviderInner = ({ _tenants, _token, children, initialUser }: AuthProv
         tenantsError: tenantCache.error,
         tenantsStatus: tenantCache.status,
         refetchTenants,
-        startTenantActivationSync
+        startTenantActivationSync,
+        refetchUser
       }}
     >
       {children}

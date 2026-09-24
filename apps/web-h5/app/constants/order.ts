@@ -49,6 +49,7 @@ export type OrderItemsType = {
 };
 
 export type OrderInfoType = {
+  companyName?: string;
   invoiceHeader?: string;
   orderItems: OrderItemsType[];
   orderType: OrderTypeEnum;

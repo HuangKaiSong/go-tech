@@ -1,10 +1,16 @@
 export interface User {
+  companyName: string;
+  custCode: string;
+  email: string;
   exp: number;
   nickname: string;
-  sub: string;
+  phone: string;
+  registerTime: string;
   tenantId: string;
   userId: number;
   username: string;
+  userType: number;
+  vipLevel: number;
 }
 
 export interface Tenant {
