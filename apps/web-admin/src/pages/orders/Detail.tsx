@@ -159,7 +159,7 @@ const OrderDetailPage = () => {
             </div>
             <div className="flex items-center gap-2">
               <span className="text-muted-foreground">公司名稱：</span>
-              <span className="font-medium"> -{/* {orderDetail?.companyName || "-"} */}</span>
+              <span className="font-medium"> {orderDetail.companyName || '-'}</span>
             </div>
           </div>
         </div>
