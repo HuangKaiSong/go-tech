@@ -1,58 +1,40 @@
 import { Button, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@go-tech-frontend/ui';
+import { useQuery } from '@tanstack/react-query';
+import { Result, Skeleton } from 'antd';
 import { ArrowLeft, ExternalLink, Users } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { z } from 'zod';
+import { OrderStatusEnum, OrderStatusLabel } from '@/constants/order';
+import { PayTypeEnum, PayTypelabel } from '@/constants/payment';
 
-// Mock customer data
-const mockCustomerDetail = {
-  id: 'TC000001',
-  name: '张大龍',
-  phone: '98253973',
-  idNumber: '**********',
-  type: '個人/公司'
-};
+const OrderSch = z
+  .object({
+    id: z.int(),
+    orderNo: z.string(),
+    packageName: z.string(),
+    finalAmount: z.string(),
+    payType: z.enum(PayTypeEnum),
+    orderStatus: z.enum(OrderStatusEnum),
+    additionalInfo: z.string(),
+    payTime: z.iso.datetime().nullable()
+  })
+  .array();
 
-// Mock orders data
-const mockCustomerOrders = [
-  {
-    id: 'TC000001',
-    packageType: '黃金套餐',
-    addons: '租務系統；會計系統',
-    amount: '$1080',
-    paymentMethod: '轉賬',
-    paymentTime: '12/08/2025 10:00',
-    status: '已支付'
-  },
-  {
-    id: 'TC000002',
-    packageType: '白金套餐',
-    addons: '場務系統；增加單位*10',
-    amount: '$3280',
-    paymentMethod: '網銀',
-    paymentTime: '12/08/2025 10:00',
-    status: '已支付'
-  },
-  {
-    id: 'TC000003',
-    packageType: '鑽石套餐',
-    addons: '租務系統；會計系統',
-    amount: '$12080',
-    paymentMethod: '',
-    paymentTime: '',
-    status: '未支付'
-  },
-  {
-    id: 'TC000004',
-    packageType: '白金套餐',
-    addons: '場務系統；增加單位*10',
-    amount: '$3280',
-    paymentMethod: '網銀',
-    paymentTime: '12/08/2025 10:00',
-    status: '已支付'
-  }
-];
+const Detailresponse = z.object({
+  id: z.number(),
+  custCode: z.string(),
+  custName: z.string(),
+  phone: z.string(),
+  email: z.email(),
+  companyName: z.string(),
+  registerTime: z.iso.datetime(),
+  orders: OrderSch
+});
 
-const getStatusClass = (status: string) => {
-  if (status === '已支付') {
+type DetailType = z.infer<typeof Detailresponse>;
+
+const getStatusClass = (status: OrderStatusEnum) => {
+  if (status === OrderStatusEnum.COMPLETED) {
     return 'text-success';
   }
   return 'text-primary';
@@ -62,9 +44,35 @@ const CustomerDetailPage = () => {
   const navigate = useNavigate();
   const { id: _id } = useParams();
 
+  const { data, error, isError, isLoading } = useQuery<DetailType>({
+    queryKey: ['platform/platformPackage', _id?.toString()],
+    queryFn: async () => {
+      try {
+        const url = new URL(
+          `${import.meta.env.VITE_PROXY_PREFIX}/go-tech/platform/platformCustomer/detail/${_id}`,
+          location.origin
+        );
+        const res = await fetch(url.toString());
+        const response = await res.json();
+        if (!response || !response.code || response.code !== 200) {
+          throw new Error('Failed to fetch data');
+        }
+
+        return response.data;
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    enabled: Boolean(_id)
+  });
+
   const handleBack = () => {
     navigate('/customers');
   };
+
+  if (isError) {
+    return <Result status="error" title="查詢會員資料失敗" subTitle={error?.message} />;
+  }
 
   return (
     <div className="space-y-6">
@@ -97,23 +105,33 @@ const CustomerDetailPage = () => {
         <div className="px-6 py-4 flex flex-wrap items-center gap-x-12 gap-y-2 border-b border-border bg-muted/30">
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground">客戶編號：</span>
-            <span className="font-medium">{mockCustomerDetail.id}</span>
+            <Skeleton loading={isLoading} active>
+              <span className="font-medium">{data?.custCode}</span>
+            </Skeleton>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground">客人名稱：</span>
-            <span className="font-medium">{mockCustomerDetail.name}</span>
+            <Skeleton loading={isLoading} active>
+              <span className="font-medium">{data?.custName}</span>
+            </Skeleton>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground">聯絡電話：</span>
-            <span className="font-medium">{mockCustomerDetail.phone}</span>
+            <Skeleton loading={isLoading} active>
+              <span className="font-medium">{data?.phone}</span>
+            </Skeleton>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">證件號碼：</span>
-            <span className="font-medium">{mockCustomerDetail.idNumber}</span>
+            <span className="text-muted-foreground">郵箱</span>
+            <Skeleton loading={isLoading} active>
+              <span className="font-medium">{data?.email}</span>
+            </Skeleton>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">客戶類型：</span>
-            <span className="font-medium">{mockCustomerDetail.type}</span>
+            <span className="text-muted-foreground">公司：</span>
+            <Skeleton loading={isLoading} active>
+              <span className="font-medium">{data?.companyName}</span>
+            </Skeleton>
           </div>
         </div>
 
@@ -122,8 +140,7 @@ const CustomerDetailPage = () => {
           <TableHeader>
             <TableRow className="bg-table-header hover:bg-table-header">
               <TableHead className="text-center font-medium">訂單編號</TableHead>
-              <TableHead className="text-center font-medium">套餐類型</TableHead>
-              <TableHead className="text-center font-medium">附加內容</TableHead>
+              <TableHead className="text-center font-medium">套餐名稱</TableHead>
               <TableHead className="text-center font-medium">訂單金額</TableHead>
               <TableHead className="text-center font-medium">支付方式</TableHead>
               <TableHead className="text-center font-medium">支付時間</TableHead>
@@ -132,26 +149,29 @@ const CustomerDetailPage = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {mockCustomerOrders.map((order, index) => (
-              <TableRow key={index} className="hover:bg-table-hover">
-                <TableCell className="text-center">{order.id}</TableCell>
-                <TableCell className="text-center">{order.packageType}</TableCell>
-                <TableCell className="text-center">{order.addons}</TableCell>
-                <TableCell className="text-center">{order.amount}</TableCell>
-                <TableCell className="text-center">{order.paymentMethod}</TableCell>
-                <TableCell className="text-center">{order.paymentTime}</TableCell>
-                <TableCell className={`text-center ${getStatusClass(order.status)}`}>{order.status}</TableCell>
-                <TableCell className="text-center">
-                  <Button
-                    variant="link"
-                    className="text-primary p-0 h-auto"
-                    onClick={() => navigate(`/orders/${order.id}`)}
-                  >
-                    查看
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
+            <Skeleton loading={isLoading} paragraph={{ rows: 4 }}>
+              {(data?.orders || []).map((order, index) => (
+                <TableRow key={index} className="hover:bg-table-hover">
+                  <TableCell className="text-center">{order.orderNo}</TableCell>
+                  <TableCell className="text-center">{order.packageName}</TableCell>
+                  <TableCell className="text-center">{order.finalAmount}</TableCell>
+                  <TableCell className="text-center">{PayTypelabel[order.payType]}</TableCell>
+                  <TableCell className="text-center">{order.payTime}</TableCell>
+                  <TableCell className={`text-center ${getStatusClass(order.orderStatus)}`}>
+                    {OrderStatusLabel[order.orderStatus]}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <Button
+                      variant="link"
+                      className="text-primary p-0 h-auto"
+                      onClick={() => navigate(`/orders/${order.id}`)}
+                    >
+                      查看
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </Skeleton>
           </TableBody>
         </Table>
       </div>
