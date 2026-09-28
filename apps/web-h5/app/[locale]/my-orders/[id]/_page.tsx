@@ -181,7 +181,7 @@ const OrderDetail = ({ detail, id: _orderId }: { detail: any; id: string }) => {
     const toastId = toast.loading(fetchingPaymentInfo);
     try {
       const response = await clientFetch(
-        `/go-tech/platform/packageOrder/repay?id=${_orderId}`,
+        `/go-tech/platform/packageOrder/repay?orderId=${_orderId}`,
         {
           method: 'POST',
           headers: {
