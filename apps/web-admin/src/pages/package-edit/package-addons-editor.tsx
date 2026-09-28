@@ -109,8 +109,6 @@ export function PackageAddonsEditor({
   product: PackageBizCode;
   tree: MenuNode[];
 }) {
-  console.log(additionalItems);
-
   const [open, setOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [formValue, setFormValue] = useState<AddonFormValue>(createAddon);

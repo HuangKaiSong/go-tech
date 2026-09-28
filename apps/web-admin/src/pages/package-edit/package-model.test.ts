@@ -127,6 +127,33 @@ test('normalizes the current numeric detail fields before saving', () => {
   assert.equal(payload.detail.dataCount, 50);
 });
 
+test('preserves saved permission addon menus in the update payload', () => {
+  const savedMenus = [
+    { menuId: 1, menuTitle: root.menuTitle, level: 0 },
+    { menuId: 2, menuTitle: group.menuTitle, level: 1 },
+    { menuId: 3, menuTitle: feature.menuTitle, level: 2, isHighlight: true }
+  ];
+  const loaded = parsePackage({
+    ...plan,
+    packageCode: 'PLAN_1',
+    additionalItems: [
+      { id: 8, itemName: '權限功能', itemType: 2, price: 20, detail: { dataCount: 0, menu: savedMenus } }
+    ]
+  });
+
+  const payload = buildPackagePayload({ ...loaded, packageName: '修改後的套餐' }, tree);
+
+  assert.equal(payload.packageCode, 'PLAN_1');
+  assert.deepEqual(
+    payload.additionalItems[0].detail.menu.map(({ isHighlight, menuId, parentId }) => [menuId, parentId, isHighlight]),
+    [
+      [1, null, undefined],
+      [2, 1, undefined],
+      [3, 2, true]
+    ]
+  );
+});
+
 test('keeps the existing addon fields and fills parent relationships in each addon menu', () => {
   const loaded = parsePackage({
     ...plan,
@@ -177,12 +204,18 @@ test('keeps the existing addon fields and fills parent relationships in each add
 });
 
 test('validates addon name, quantity and price through their existing fields', () => {
-  const addon = { itemName: '額外功能', itemType: 2, price: 10, detail: { dataCount: 2, menu: [] } };
+  const addon = {
+    itemName: '額外功能',
+    itemType: 2,
+    price: 10,
+    detail: { dataCount: 2, menu: [{ menuId: 1, menuTitle: root.menuTitle, level: 0 }] }
+  };
   const payload = buildPackagePayload({ ...plan, additionalItems: [addon] });
   assert.equal(payload.additionalItems[0].bizCode, plan.bizCode);
   assert.throws(() => buildPackagePayload({ ...plan, additionalItems: [{ ...addon, itemName: '' }] }), /功能名稱/);
   assert.throws(
-    () => buildPackagePayload({ ...plan, additionalItems: [{ ...addon, detail: { dataCount: 1.5, menu: [] } }] }),
+    () =>
+      buildPackagePayload({ ...plan, additionalItems: [{ ...addon, detail: { ...addon.detail, dataCount: 1.5 } }] }),
     /數量.*非負整數/
   );
   assert.throws(() => buildPackagePayload({ ...plan, additionalItems: [{ ...addon, price: -1 }] }), /單價.*非負金額/);
@@ -197,7 +230,7 @@ test('uses itemType to control addon quantity and menu requirements', () => {
   const permission = buildPackagePayload(
     {
       ...plan,
-      additionalItems: [{ itemName: '權限功能', itemType: 1, price: 20, detail: { dataCount: 9, menu: selectedMenu } }]
+      additionalItems: [{ itemName: '權限功能', itemType: 2, price: 20, detail: { dataCount: 9, menu: selectedMenu } }]
     },
     tree
   ).additionalItems[0];
@@ -207,33 +240,31 @@ test('uses itemType to control addon quantity and menu requirements', () => {
   const quantity = buildPackagePayload(
     {
       ...plan,
-      additionalItems: [{ itemName: '數量功能', itemType: 2, price: 20, detail: { dataCount: 9, menu: selectedMenu } }]
+      additionalItems: [{ itemName: '數量功能', itemType: 3, price: 20, detail: { dataCount: 9, menu: [] } }]
     },
     tree
   ).additionalItems[0];
   assert.equal(quantity.detail.dataCount, 9);
   assert.deepEqual(quantity.detail.menu, []);
 
-  const combined = buildPackagePayload(
+  const legacyCombined = buildPackagePayload(
     {
       ...plan,
       additionalItems: [{ itemName: '混合功能', itemType: 3, price: 20, detail: { dataCount: 9, menu: selectedMenu } }]
     },
     tree
   ).additionalItems[0];
-  assert.equal(combined.detail.dataCount, 9);
-  assert.equal(combined.detail.menu.length, 3);
+  assert.equal(legacyCombined.detail.dataCount, 9);
+  assert.equal(legacyCombined.detail.menu.length, 3);
 
-  for (const itemType of [1, 3]) {
-    assert.throws(
-      () =>
-        buildPackagePayload({
-          ...plan,
-          additionalItems: [{ itemName: '缺少菜單', itemType, price: 20, detail: { dataCount: 1, menu: [] } }]
-        }),
-      /綁定功能/
-    );
-  }
+  assert.throws(
+    () =>
+      buildPackagePayload({
+        ...plan,
+        additionalItems: [{ itemName: '缺少菜單', itemType: 2, price: 20, detail: { dataCount: 1, menu: [] } }]
+      }),
+    /綁定功能/
+  );
   assert.throws(
     () =>
       buildPackagePayload({
@@ -245,7 +276,9 @@ test('uses itemType to control addon quantity and menu requirements', () => {
 });
 
 test('normalizes menu identifiers before matching saved selections', () => {
-  const parsed = menuTreeSchema.parse([{ id: '4', title: action.menuTitle, level: '3', children: null }]);
+  const parsed = menuTreeSchema.parse([
+    { menuId: '4', menuTitle: action.menuTitle, parentId: '3', level: '3', children: null }
+  ]);
   const loaded = parsePackage({ ...plan, detail: { menu: [{ menuId: '4', menuTitle: action.menuTitle, level: 3 }] } });
   assert.equal(getMenuChecked(parsed[0], new Set(loaded.detail.menu?.map(item => item.menuId))), true);
 });
@@ -305,8 +338,8 @@ test('fills parent relationships when saving an untouched legacy selection', () 
 
 test('distinguishes parents at the same level across multiple roots, including id zero', () => {
   const firstRoot: MenuNode = {
-    children: [{ children: [], menuId: 10, level: 1, menuTitle: '新增', parentId: 1 }],
-    menuId: 1,
+    children: [{ children: [], menuId: 10, level: 1, menuTitle: '新增', parentId: 0 }],
+    menuId: 0,
     level: 0,
     menuTitle: '管理層',
     parentId: 0

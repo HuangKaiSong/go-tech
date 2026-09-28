@@ -162,8 +162,6 @@ export function parsePackage(value: unknown): PackageItem {
   });
   const result = responseSchema.safeParse(value);
 
-  console.log(result);
-
   if (!result.success) throw new Error('套餐資料格式不正確，請檢查接口回傳的欄位');
   return {
     ...result.data,
@@ -208,8 +206,8 @@ export function buildPackagePayload(draft: PackageDraft, menuTree: MenuNode[] = 
     bizCode: payload.bizCode,
     detail: {
       ...addon.detail,
-      dataCount: addon.itemType === 3 ? 0 : addon.detail.dataCount,
-      menu: addon.itemType === 2 ? [] : attachMenuParents(addon.detail.menu, menuTree)
+      dataCount: addon.itemType === 2 ? 0 : addon.detail.dataCount,
+      menu: attachMenuParents(addon.detail.menu, menuTree)
     }
   }));
 
