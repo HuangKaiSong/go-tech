@@ -3,10 +3,7 @@ import { CalendarClock, ShieldCheck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getServiceExpiry } from '@/api/service';
 
-/**
- * 顶栏基础服务有效期横幅：有套餐記錄即常顯，臨近到期(warning)轉琥珀、已過期轉紅色。
- * 整條通欄，置於頂部 header 上方。
- */
+/** 顶栏基础服务有效期横幅：有套餐記錄即常顯，臨近到期(warning)轉琥珀、已過期轉紅色。 整條通欄，置於頂部 header 上方。 */
 export function ServiceExpiryBanner() {
   const { t } = useTranslation();
   const { data } = useQuery({
@@ -44,7 +41,7 @@ export function ServiceExpiryBanner() {
 
   return (
     <div
-      className={`flex items-center gap-3 border-b bg-gradient-to-r px-4 py-2.5 text-sm text-foreground/80 ${tone.bar}`}
+      className={`flex items-center gap-3 border-b bg-gradient-to-r px-4 py-2.5 text-sm text-foreground/80 md:pr-48 ${tone.bar}`}
     >
       <span
         className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ${tone.badge}`}

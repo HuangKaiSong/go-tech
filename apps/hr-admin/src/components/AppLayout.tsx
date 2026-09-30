@@ -1,3 +1,7 @@
+import { LogOut, ShieldAlert } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { AppSidebar } from '@/components/AppSidebar';
 import { NotificationBell } from '@/components/NotificationBell';
 import { ServiceExpiryBanner } from '@/components/ServiceExpiryBanner';
@@ -12,13 +16,10 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { VersionSwitcher } from '@/components/version-switcher';
 import { LanguageSwitcher } from '@/i18n/LanguageSwitcher';
 import { clearToken, getUser } from '@/lib/auth';
 import { isRouteAllowed } from '@/lib/menuRoutes';
-import { LogOut, ShieldAlert } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
 
 /** 无权限占位：路径归属的菜单不在当前职位授权范围内时展示 */
 function Forbidden() {
@@ -54,11 +55,12 @@ export function AppLayout() {
 
   return (
     <SidebarProvider>
+      <VersionSwitcher />
       <div className="min-h-screen flex w-full">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
           <ServiceExpiryBanner />
-          <header className="h-14 border-b bg-card flex items-center justify-between px-4 shrink-0">
+          <header className="h-14 border-b bg-card flex items-center justify-between px-4 shrink-0 md:pr-48">
             <div className="flex items-center gap-3">
               <SidebarTrigger />
             </div>
