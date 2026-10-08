@@ -1,5 +1,5 @@
-import react from '@vitejs/plugin-react-swc';
 import path, { resolve } from 'node:path';
+import react from '@vitejs/plugin-react-swc';
 import { defineConfig } from 'vite';
 
 // https://vitejs.dev/config/
@@ -13,7 +13,7 @@ export default defineConfig(() => ({
     proxy: {
       // 手机端与 PC 端共用同一套后端(pms-hr)，接口前缀 /hr-manage 转发到本地后端
       '/hr-manage': {
-        target: 'http://localhost:7079',
+        target: 'https://hrm.go-techs.com',
         changeOrigin: true
       }
     }
@@ -29,26 +29,26 @@ export default defineConfig(() => ({
       input: {
         index: resolve(__dirname, '', 'index.html')
       },
-       output: {
-          chunkFileNames: 'static/js/[name]-[hash].js',
-          entryFileNames: 'static/js/[name]-[hash].js',
-          assetFileNames: 'static/[ext]/[name]-[hash].[ext]',
-          manualChunks: (moduleId) => {
-            if (['react', 'react-dom'].includes(moduleId)) {
-              return 'react'
-            }
-            if (['react-router-dom'].includes(moduleId)) {
-              return 'router'
-            }
-            if (['@go-tech-frontend/ui'].includes(moduleId)) {
-              return 'ui'
-            }
-            if (['lucide-react'].includes(moduleId)) {
-              return 'icon'
-            }
-            return 'vendor'
+      output: {
+        chunkFileNames: 'static/js/[name]-[hash].js',
+        entryFileNames: 'static/js/[name]-[hash].js',
+        assetFileNames: 'static/[ext]/[name]-[hash].[ext]',
+        manualChunks: moduleId => {
+          if (['react', 'react-dom'].includes(moduleId)) {
+            return 'react';
           }
+          if (['react-router-dom'].includes(moduleId)) {
+            return 'router';
+          }
+          if (['@go-tech-frontend/ui'].includes(moduleId)) {
+            return 'ui';
+          }
+          if (['lucide-react'].includes(moduleId)) {
+            return 'icon';
+          }
+          return 'vendor';
         }
+      }
     }
   }
 }));
