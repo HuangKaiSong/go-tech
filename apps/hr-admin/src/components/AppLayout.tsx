@@ -55,12 +55,11 @@ export function AppLayout() {
 
   return (
     <SidebarProvider>
-      <VersionSwitcher />
       <div className="min-h-screen flex w-full">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
           <ServiceExpiryBanner />
-          <header className="h-14 border-b bg-card flex items-center justify-between px-4 shrink-0 md:pr-48">
+          <header className="h-14 border-b bg-card flex items-center justify-between px-4 shrink-0">
             <div className="flex items-center gap-3">
               <SidebarTrigger />
             </div>
@@ -89,6 +88,7 @@ export function AppLayout() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+              <VersionSwitcher />
             </div>
           </header>
           <main className="flex-1 overflow-auto p-6 bg-background">{allowed ? <Outlet /> : <Forbidden />}</main>

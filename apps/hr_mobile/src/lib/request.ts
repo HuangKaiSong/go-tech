@@ -10,8 +10,15 @@ const request = axios.create({
   timeout: 10000,
 });
 
+// 公开接口（登录/免密登录/忘记密码）：无需登录态，一律不带 Authorization，
+// 避免切换版本后带着旧 token 请求登录，触发后端租户解析异常
+const NO_AUTH = ["employee/login", "employee/loginByCode", "employee/password/forgot"];
+
 // 请求拦截器：自动带上登录 token；本地已过期的 token 先清掉，避免带废 token 请求（含登录）
 request.interceptors.request.use((config) => {
+  if (NO_AUTH.some((u) => config.url?.includes(u))) {
+    return config;
+  }
   let token = getToken();
   if (token && isTokenExpired(token)) {
     clearToken();

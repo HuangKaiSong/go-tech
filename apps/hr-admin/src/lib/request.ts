@@ -41,11 +41,19 @@ const request = axios.create({
 // 到期后仍需放行的接口（遮罩要靠 expiry 拿 renewUrl 等信息展示）
 const EXPIRED_ALLOW = ['service/expiry'];
 
+// 公开接口（登录/免密登录）：无需登录态，一律不带 Authorization，
+// 避免带着旧 token 请求登录，触发后端租户解析异常
+const NO_AUTH = ['employee/login', 'employee/loginByCode'];
+
 // 请求拦截器：自动带上登录 token
 request.interceptors.request.use(config => {
   // 已判定到期：拦截后续业务请求，避免无谓报错；但放行到期查询等白名单接口
   if (serviceExpired && !EXPIRED_ALLOW.some(u => config.url?.includes(u))) {
     return new Promise<never>(() => {}) as never;
+  }
+  // 公开接口不带 token，避免旧 token 干扰登录
+  if (NO_AUTH.some(u => config.url?.includes(u))) {
+    return config;
   }
   let token = getToken();
   // 本地已过期的 token 先清掉，避免带废 token 请求（含登录），也免后端刷过期日志

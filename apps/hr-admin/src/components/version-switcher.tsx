@@ -7,7 +7,7 @@ export function VersionSwitcher() {
   return (
     <nav
       aria-label={t('版本切換')}
-      className="fixed right-4 top-2 z-40 hidden items-center gap-0.5 rounded-full border bg-card/95 p-1 text-xs shadow-md md:flex"
+      className="hidden items-center gap-0.5 rounded-full border bg-card/95 p-1 text-xs md:flex"
     >
       <span
         aria-current="page"
