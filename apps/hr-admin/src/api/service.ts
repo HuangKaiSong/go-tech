@@ -15,6 +15,8 @@ export interface ServiceExpiry {
   warning: boolean;
   /** 续费跳转链接（跳平台首页，用户自行续费） */
   renewUrl?: string;
+  /** 是否为试用租户（租户ID=000000），顶栏展示试用提示 */
+  trial?: boolean;
 }
 
 /** 查询当前租户基础服务到期信息（顶栏提示用）。无套餐记录时 data 为 null */

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { clearToken, getToken } from "./auth";
+import { clearToken, getToken, isTokenExpired } from "./auth";
 
 /** 手机端与 PC 端共用同一套后端；登录页为 "/"（不同于 PC 的 /login） */
 const LOGIN_PATH = "/";
@@ -10,9 +10,13 @@ const request = axios.create({
   timeout: 10000,
 });
 
-// 请求拦截器：自动带上登录 token
+// 请求拦截器：自动带上登录 token；本地已过期的 token 先清掉，避免带废 token 请求（含登录）
 request.interceptors.request.use((config) => {
-  const token = getToken();
+  let token = getToken();
+  if (token && isTokenExpired(token)) {
+    clearToken();
+    token = null;
+  }
   if (token) {
     config.headers = config.headers ?? {};
     config.headers.Authorization = token;

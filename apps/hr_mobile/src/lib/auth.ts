@@ -45,3 +45,24 @@ export function clearUser() {
 export function isLoggedIn(): boolean {
   return Boolean(getToken());
 }
+
+/**
+ * 本地判断 Authorization 值（"Bearer xxx"）里的 JWT 是否已过期。
+ * 解析失败/无 exp 时按「未过期」处理（交给后端判定），只在能确定过期时返回 true。
+ */
+export function isTokenExpired(authValue: string | null): boolean {
+  if (!authValue) return false;
+  const jwt = authValue.replace(/^Bearer\s+/i, "").trim();
+  const parts = jwt.split(".");
+  if (parts.length < 2) return false;
+  try {
+    // base64url → base64
+    const b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const payload = JSON.parse(decodeURIComponent(escape(atob(b64)))) as { exp?: number };
+    if (!payload.exp) return false;
+    // exp 为秒；留 5 秒缓冲避免临界误差
+    return payload.exp * 1000 <= Date.now() + 5000;
+  } catch {
+    return false;
+  }
+}

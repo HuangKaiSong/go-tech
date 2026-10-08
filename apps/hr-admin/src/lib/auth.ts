@@ -100,3 +100,23 @@ export function clearUser() {
 export function isLoggedIn(): boolean {
   return Boolean(getToken());
 }
+
+/**
+ * 本地判斷 Authorization 值（"Bearer xxx"）裡的 JWT 是否已過期。
+ * 解析失敗/無 exp 時按「未過期」處理（交給後端判定），只在能確定過期時返回 true。
+ */
+export function isTokenExpired(authValue: string | null): boolean {
+  if (!authValue) return false;
+  const jwt = authValue.replace(/^Bearer\s+/i, '').trim();
+  const parts = jwt.split('.');
+  if (parts.length < 2) return false;
+  try {
+    const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const payload = JSON.parse(decodeURIComponent(escape(atob(b64)))) as { exp?: number };
+    if (!payload.exp) return false;
+    // exp 為秒；留 5 秒緩衝避免臨界誤差
+    return payload.exp * 1000 <= Date.now() + 5000;
+  } catch {
+    return false;
+  }
+}

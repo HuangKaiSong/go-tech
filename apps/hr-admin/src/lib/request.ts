@@ -1,7 +1,7 @@
 import axios from 'axios';
 import i18n from 'i18next';
 import { translateDynamic } from '../i18n/backendDynamic';
-import { clearToken, getToken } from './auth';
+import { clearToken, getToken, isTokenExpired } from './auth';
 
 /**
  * 後端返回的提示文案（繁體）過一遍 i18n： - en：命中 en.json 的後端消息鍵則譯為英文；未命中靜態鍵時再試動態拼接模板 （backendDynamic），仍未命中才回退繁體原文； - zh-Hans：由 opencc
@@ -47,7 +47,12 @@ request.interceptors.request.use(config => {
   if (serviceExpired && !EXPIRED_ALLOW.some(u => config.url?.includes(u))) {
     return new Promise<never>(() => {}) as never;
   }
-  const token = getToken();
+  let token = getToken();
+  // 本地已过期的 token 先清掉，避免带废 token 请求（含登录），也免后端刷过期日志
+  if (token && isTokenExpired(token)) {
+    clearToken();
+    token = null;
+  }
   if (token) {
     // 攔截器拿到的是 InternalAxiosRequestConfig，headers 必定存在（AxiosHeaders 實例），直接賦值。
     config.headers.Authorization = token;
