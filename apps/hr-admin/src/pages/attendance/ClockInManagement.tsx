@@ -9,8 +9,7 @@ import {
   Search,
   Settings2,
   Shield,
-  Trash2,
-  Wifi
+  Trash2
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -238,14 +237,6 @@ function LocationDialog({
                 type="number"
                 value={form.radius}
                 onChange={e => setForm(p => ({ ...p, radius: Number(e.target.value) }))}
-              />
-            </div>
-            <div>
-              <Label>{t('Wi-Fi SSID（選填）')}</Label>
-              <Input
-                value={form.wifiSsid}
-                onChange={e => setForm(p => ({ ...p, wifiSsid: e.target.value }))}
-                placeholder={t('辦公室 Wi-Fi 名稱')}
               />
             </div>
           </div>
@@ -660,7 +651,6 @@ export default function ClockInManagement() {
                     <TableHead>{t('地址')}</TableHead>
                     <TableHead>{t('座標')}</TableHead>
                     <TableHead>{t('有效範圍')}</TableHead>
-                    <TableHead>Wi-Fi SSID</TableHead>
                     <TableHead>{t('關聯規則')}</TableHead>
                     <TableHead>{t('狀態')}</TableHead>
                     <TableHead className="text-right">{t('操作')}</TableHead>
@@ -677,16 +667,6 @@ export default function ClockInManagement() {
                         {loc.lat != null && loc.lng != null ? `${loc.lat}, ${loc.lng}` : '—'}
                       </TableCell>
                       <TableCell>{t('{{n}} 公尺', { n: loc.radius })}</TableCell>
-                      <TableCell>
-                        {loc.wifiSsid ? (
-                          <Badge variant="outline" className="gap-1">
-                            <Wifi className="h-3 w-3" />
-                            {loc.wifiSsid}
-                          </Badge>
-                        ) : (
-                          <span className="text-muted-foreground">—</span>
-                        )}
-                      </TableCell>
                       <TableCell>
                         {loc.ruleName ? (
                           <Badge variant="outline" className="gap-1">

@@ -10,6 +10,8 @@ export function ServiceExpiryBanner() {
     queryKey: ['service-expiry'],
     queryFn: () => getServiceExpiry().then(res => res.data ?? null),
     staleTime: 5 * 60 * 1000,
+    // 每次挂载（含每次登录进入应用）都重新请求，保证按当前租户拿最新到期状态
+    refetchOnMount: 'always',
     refetchOnWindowFocus: false
   });
 
@@ -21,7 +23,7 @@ export function ServiceExpiryBanner() {
       if (data.renewUrl) window.open(data.renewUrl, '_blank', 'noopener');
     };
     return (
-      <div className="flex items-center gap-3 border-b border-primary/20 bg-gradient-to-r from-primary/10 to-transparent px-4 py-2.5 text-sm text-foreground/80">
+      <div className="flex items-center gap-3 border-b border-primary/20 bg-gradient-to-r from-primary/10 to-transparent px-4 py-2.5 text-sm text-foreground/80 md:pr-48">
         <span className="inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-0.5 text-xs font-medium text-primary-foreground">
           <Sparkles className="h-3.5 w-3.5" />
           {t('試用版')}

@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => ({
     },
     proxy: {
       '/hr-manage': {
-        target: 'https://hrm.go-techs.com',
+        target: 'http://127.0.0.1:7079',
         changeOrigin: true
       }
     }

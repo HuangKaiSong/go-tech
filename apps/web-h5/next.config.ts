@@ -1,7 +1,7 @@
-import path from 'node:path';
 import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 import { type Rewrite } from 'next/dist/lib/load-custom-routes';
+import path from 'node:path';
 
 const workspaceRoot = path.resolve(process.cwd(), '../..');
 

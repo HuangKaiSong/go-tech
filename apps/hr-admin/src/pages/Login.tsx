@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { login, loginByCode, type LoginResult } from '@/api/employee';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,6 +18,7 @@ export default function Login() {
   // 平台跳转免密登录中：显示整页加载态，避免闪出账号密码表单
   const [ssoLoading, setSsoLoading] = useState(false);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   // 缓存登录态（token/用户/路由/权限），密码登录与免密登录共用
   const applySession = (data: LoginResult) => {
@@ -24,6 +26,9 @@ export default function Login() {
     setUser({ userId: data.userId, userName: data.userName, employeeNo: data.employeeNo });
     setRoutes(data.routes);
     setPerms(data.perms);
+    // 清空上一次会话的查询缓存：避免换账号/租户后沿用旧缓存（如 service/expiry 到期信息），
+    // 保证进入应用后按当前租户重新请求
+    queryClient.clear();
   };
 
   // 平台开通 HR 后携带一次性 code 跳转进来：读取 code 免密登录，成功后进首页
