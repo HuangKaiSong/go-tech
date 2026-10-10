@@ -46,6 +46,8 @@ const allowedAttributes = new Set([
   'aria-hidden',
   'aria-expanded',
   'aria-disabled',
+  'aria-pressed',
+  'aria-selected',
   'tabindex',
   'rr_width',
   'rr_height',
@@ -53,6 +55,47 @@ const allowedAttributes = new Set([
   'rr_scrollTop',
   'rr_open_mode'
 ]);
+
+// Presentation state participates in CSS selectors and container breakpoints.
+// Keep only known values; arbitrary data-* attributes may contain business data.
+const presentationAttributes = new Map<string, ReadonlySet<string>>([
+  ['data-view-mode', new Set(['auto', 'pc', 'mobile'])],
+  ['data-view-frame', new Set(['', 'true'])],
+  ['data-view-scroll-root', new Set(['', 'true'])],
+  ['data-view-portal-root', new Set(['', 'true'])],
+  [
+    'data-state',
+    new Set([
+      'open',
+      'closed',
+      'checked',
+      'unchecked',
+      'indeterminate',
+      'active',
+      'inactive',
+      'on',
+      'off',
+      'visible',
+      'hidden',
+      'delayed-open',
+      'instant-open'
+    ])
+  ],
+  ['data-side', new Set(['top', 'right', 'bottom', 'left'])],
+  ['data-align', new Set(['start', 'center', 'end'])],
+  ['data-orientation', new Set(['horizontal', 'vertical'])],
+  ['data-disabled', new Set(['', 'true', 'false'])],
+  ['data-highlighted', new Set(['', 'true', 'false'])],
+  ['dir', new Set(['ltr', 'rtl', 'auto'])]
+]);
+
+function allowedAttribute(name: string, value: unknown) {
+  if (allowedAttributes.has(name)) return true;
+  if (name === 'lang')
+    return value === null || (typeof value === 'string' && /^[a-z]{2,8}(-[a-z0-9]{1,8})*$/i.test(value));
+  const values = presentationAttributes.get(name);
+  return values !== undefined && (value === null || (typeof value === 'string' && values.has(value)));
+}
 
 function css(value: string) {
   return value
@@ -78,7 +121,7 @@ function sanitize(value: unknown, key = ''): Json {
   const result: Record<string, Json> = {};
   for (const [name, child] of Object.entries(value)) {
     const safeKey = !['__proto__', 'constructor', 'prototype'].includes(name);
-    if (safeKey && (key !== 'attributes' || allowedAttributes.has(name))) {
+    if (safeKey && (key !== 'attributes' || allowedAttribute(name, child))) {
       result[name] = sanitizeProperty(child, name, { parent: value, parentKey: key });
     }
   }

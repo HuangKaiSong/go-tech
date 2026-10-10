@@ -132,6 +132,75 @@ describe('browser monitor', () => {
     expect(JSON.stringify(changedText)).not.toContain('contact@example.com');
     expect(JSON.stringify(changedText)).not.toContain('secret');
   });
+  it('retains bounded CSS presentation attributes in snapshots and mode changes', () => {
+    const snapshot = sanitizeRecording({
+      type: 2,
+      timestamp: 1,
+      data: {
+        node: {
+          attributes: {
+            'data-view-frame': '',
+            'data-view-mode': 'mobile',
+            'data-view-scroll-root': '',
+            'data-view-portal-root': '',
+            'data-state': 'open',
+            'data-side': 'right',
+            dir: 'ltr',
+            lang: 'zh-HK',
+            'data-token': 'secret',
+            'data-user-id': 'private',
+            'data-align': 'secret'
+          }
+        }
+      }
+    });
+    expect(snapshot.data).toEqual({
+      node: {
+        attributes: {
+          'data-view-frame': '',
+          'data-view-mode': 'mobile',
+          'data-view-scroll-root': '',
+          'data-view-portal-root': '',
+          'data-state': 'open',
+          'data-side': 'right',
+          dir: 'ltr',
+          lang: 'zh-HK'
+        }
+      }
+    });
+    const mutation = sanitizeRecording({
+      type: 3,
+      timestamp: 2,
+      data: {
+        source: 0,
+        attributes: [
+          {
+            id: 10,
+            attributes: {
+              'data-view-mode': 'pc',
+              'data-state': null,
+              'data-user-id': 'private',
+              lang: 'token=secret'
+            }
+          }
+        ]
+      }
+    });
+    expect(mutation.data).toEqual({
+      source: 0,
+      attributes: [
+        {
+          id: 10,
+          attributes: {
+            'data-view-mode': 'pc',
+            'data-state': null
+          }
+        }
+      ]
+    });
+    expect(JSON.stringify(snapshot)).not.toContain('secret');
+    expect(JSON.stringify(mutation)).not.toContain('private');
+  });
   it('captures errors with pre/post snapshots, deduplicates and stops listeners', async () => {
     vi.useFakeTimers();
     const reports: MonitorReport[] = [];
