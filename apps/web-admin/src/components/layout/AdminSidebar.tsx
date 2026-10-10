@@ -1,5 +1,6 @@
 import { cn } from '@go-tech/utils';
 import {
+  Activity,
   ChevronDown,
   ChevronRight,
   FileText,
@@ -27,6 +28,7 @@ const menuItems: MenuItem[] = [
   // { title: "系統用戶列表", path: "/system-users", icon: UserCog },
   { title: '留言管理', path: '/messages', icon: MessageSquare },
   { title: '需求反饋', path: '/feedback', icon: Lightbulb },
+  { title: '網頁監控', path: '/monitor', icon: Activity },
   {
     title: '優惠管理',
     icon: Gift,
@@ -60,7 +62,7 @@ const AdminSidebar = () => {
 
   const isActive = (path?: string) => {
     if (!path) return false;
-    return location.pathname === path;
+    return location.pathname === path || (path === '/monitor' && location.pathname.startsWith('/monitor/'));
   };
 
   const isChildActive = (children?: { path: string; title: string }[]) => {

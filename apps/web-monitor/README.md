@@ -1,6 +1,6 @@
 # Web Monitor
 
-`web-h5` 的浏览器错误、rrweb JSON 和 Web Vitals 接收服务。当前使用单进程、本地 JSON 文件存储；管理后台可以通过查询接口接入。此阶段提供采集和接口，尚未增加管理后台播放器或视频转码。
+`web-h5` 的浏览器错误、rrweb JSON 和 Web Vitals 接收服务。当前使用单进程、本地 JSON 文件存储；`web-admin` 的「網頁監控」页面支持查看记录和播放 rrweb 回放。视频转码暂未接入。
 
 ## 启动
 
@@ -21,6 +21,7 @@ NEXT_PUBLIC_BROWSER_MONITOR_ENABLED=true
 NEXT_PUBLIC_BROWSER_MONITOR_RELEASE=local
 BROWSER_MONITOR_SERVICE_URL=http://127.0.0.1:8200
 BROWSER_MONITOR_INGEST_TOKEN=<与 MONITOR_INGEST_TOKEN 相同>
+BROWSER_MONITOR_QUERY_TOKEN=<与 MONITOR_QUERY_TOKEN 相同>
 ```
 
 分别启动两个终端：
@@ -52,6 +53,18 @@ pnpm --filter web-monitor start
 5. 没有上传请求时检查浏览器控制台中的 `[browser-monitor] Initialization failed`；上传失败在开发环境输出不含凭据的提示。
 
 服务启动本身不会产生 JSON 文件；错误报告和变化的性能指标上传成功后才落盘。`MONITOR_DATA_DIR` 的相对路径以监控服务工作目录为准，使用上述 pnpm 命令时为 `apps/web-monitor`。
+
+## 管理后台查看
+
+1. 在 H5 服务端设置 `BROWSER_MONITOR_QUERY_TOKEN`，与监控服务的 `MONITOR_QUERY_TOKEN` 相同，修改后重启 H5。
+2. 本地开发在 `apps/web-admin/.env.local` 设置 `VITE_H5_SITE_URL=http://localhost:3001`，然后运行 `pnpm dev:admin`。
+3. 用正常管理员账号登录，从侧栏进入「網頁監控」，路由为 `/monitor`。错误详情和回放路由为 `/monitor/:id`；性能列表可直接访问 `/monitor?view=performance`。
+
+查询经过管理后台的 `/h5-hook` 代理和 H5 的 `/api/browser-monitor/admin` 接口，沿用现有管理员 JWT 验签与有效管理员校验。浏览器只使用登录凭证，监控 query token 留在 H5 服务端；不要添加 `VITE_MONITOR_QUERY_TOKEN`。
+
+生产部署需将管理后台同源的 `/h5-hook/*` 反向代理到 H5，去掉 `/h5-hook` 前缀，保留管理员 Authorization。Vite 的开发代理不会自动进入生产静态产物。
+
+页面支持路径/会话筛选、加载更多、刷新、错误堆栈、上下文、操作时间线、播放/暂停、进度拖动、倍速、跳至错误和 JSON 下载。性能概览是已加载记录按页面访问去重后的 p75，不是服务端全量统计。
 
 ## 接口
 
@@ -91,7 +104,9 @@ curl -H "Authorization: Bearer $MONITOR_QUERY_TOKEN" \
 
 ## 回放范围与数据过滤
 
-默认掩码所有文本和输入值，过滤 DOM 属性，仅保留布局和样式相关字段；文档 URL 移除查询串和 fragment，样式 URL 移除查询参数。不开启 console/network payload 插件，不收集 cookie、请求头、表单对象和响应 payload。错误消息与堆栈过滤常见 token、邮箱和 URL 参数，业务错误只记录分类、业务码及状态。
+保留普通页面文字、按钮文案和 placeholder；所有输入值与 contenteditable 内容继续遮罩。敏感文字区域可加 `data-monitor-mask`、`.monitor-mask` 或 rrweb 默认的 `.rr-mask`；包含个人资料的展示区域应显式标记。文字过滤常见 token、邮箱和 URL 参数，DOM 属性仅保留布局、样式和少量展示字段；文档 URL 移除查询串和 fragment，样式 URL 移除查询参数。不开启 console/network payload 插件，不收集 cookie、请求头、表单对象和响应 payload。业务错误只记录分类、业务码及状态。
+
+鼠标移动按 50 ms 采样，回放视口与鼠标使用同一缩放和坐标原点。可见页面每约 10 秒补充完整快照，错误结束时补充时间标记，因此没有 DOM 变化的等待时间也计入回放。旧记录里已被替换成星号的文字和未采集的鼠标移动无法恢复；更新后刷新 H5 页面并重新触发错误，才能验证新录制效果。
 
 敏感区域可加 `data-monitor-block` 或 `.monitor-block` 完全屏蔽。图片、SVG、Canvas、视频和 iframe 默认屏蔽。CSSOM、样式表和 DOM 变化会录制；跨域不可读取的样式表、失效的外部字体/资源可能影响还原。回放重建页面状态，不重新执行原业务逻辑，也不保存 React state 或 JS 堆内存。
 

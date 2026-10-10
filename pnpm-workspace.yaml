@@ -179,6 +179,7 @@ catalogs:
   web:
     '@better-scroll/core': ^2.5.1
     '@rrweb/record': 2.1.7
+    '@rrweb/replay': 2.1.7
     '@svgr/core': ^8.1.0
     '@svgr/plugin-jsx': ^8.1.0
     '@tanstack/devtools-vite': ^0.7.0

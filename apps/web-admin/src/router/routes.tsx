@@ -29,6 +29,8 @@ const MessageBoard = lazyPage(() => import('@/pages/MessageBoard'));
 const MessagePage = lazyPage(() => import('@/pages/MessagePage'));
 const FeedbackPage = lazyPage(() => import('@/pages/FeedbackPage'));
 const SettingI18n = lazyPage(() => import('@/pages/SettingI18n'));
+const MonitorListPage = lazyPage(() => import('@/pages/monitor/monitor-list-page'));
+const MonitorDetailPage = lazyPage(() => import('@/pages/monitor/monitor-detail-page'));
 
 export const createRoutes = (authLoader: LoaderFunction): RouteObject[] => [
   {
@@ -39,6 +41,8 @@ export const createRoutes = (authLoader: LoaderFunction): RouteObject[] => [
     loader: authLoader,
     element: <AdminLayout />,
     children: [
+      { path: '/monitor', element: <MonitorListPage /> },
+      { path: '/monitor/:id', element: <MonitorDetailPage /> },
       {
         path: '/orders/create',
         element: <CreateOrderPage />

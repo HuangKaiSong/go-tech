@@ -9,12 +9,13 @@ export const umsAdmin = mysqlTable(
     password: varchar({ length: 64 }),
     icon: varchar({ length: 500 }),
     email: varchar({ length: 80 }),
+    phone: varchar({ length: 20 }),
     nickName: varchar('nick_name', { length: 200 }),
     createTime: datetime('create_time', { mode: 'string' }),
     loginTime: datetime('login_time', { mode: 'string' }),
     status: int().default(1)
   },
-  table => [primaryKey({ columns: [table.id], name: 'ums_admin_id' })]
+  table => [primaryKey({ columns: [table.id], name: 'platform_admin_id' })]
 );
 
 export type UmsAdmin = typeof umsAdmin.$inferSelect;

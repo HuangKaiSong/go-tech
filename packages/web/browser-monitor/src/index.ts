@@ -86,6 +86,15 @@ export function startBrowserMonitor(options: BrowserMonitorOptions): BrowserMoni
     if (!incident) return;
     clearTimeout(incident.timer);
     pending.delete(id);
+    const end: ErrorReport['replay']['events'][number] = {
+      type: 5,
+      timestamp: Date.now(),
+      data: { tag: 'monitor-clip-end', payload: {} }
+    };
+    const size = new TextEncoder().encode(JSON.stringify(end)).length;
+    if (incident.bytes + size <= 2500000 && incident.report.replay.events.length < 29000) {
+      incident.report.replay.events.push(end);
+    }
     send(incident.report);
   }
 
@@ -133,11 +142,10 @@ export function startBrowserMonitor(options: BrowserMonitorOptions): BrowserMoni
   }
 
   function errorSnapshot(now: number) {
-    // rrweb checkout is event-driven. Refresh a stale scene after a long idle period
-    // so replay does not begin hours before an otherwise isolated error.
-    if (now - buffer.lastEventAt > 60000) {
+    // Refresh by snapshot age, rather than the most recent mouse/DOM event.
+    if (buffer.lastSnapshotAt && now - buffer.lastSnapshotAt >= 10000) {
       try {
-        record.takeFullSnapshot();
+        record.takeFullSnapshot(true);
       } catch {
         recordingFailed = true;
       }
@@ -199,12 +207,12 @@ export function startBrowserMonitor(options: BrowserMonitorOptions): BrowserMoni
       checkoutEveryNms: 10000,
       recordAfter: 'DOMContentLoaded',
       maskAllInputs: true,
-      maskTextSelector: '*',
+      maskTextSelector: '[data-monitor-mask], .monitor-mask, [contenteditable]',
       blockSelector: '[data-monitor-block], .monitor-block, img, svg, video, audio, canvas, iframe, object, embed',
       slimDOMOptions: 'all',
       inlineStylesheet: true,
       recordCanvas: false,
-      sampling: { mousemove: false, scroll: 200, input: 'last' },
+      sampling: { mousemove: 50, scroll: 200, input: 'last' },
       errorHandler: () => {
         recordingFailed = true;
         return true;
@@ -213,6 +221,17 @@ export function startBrowserMonitor(options: BrowserMonitorOptions): BrowserMoni
   } catch {
     recordingFailed = true;
   }
+  // rrweb's checkoutEveryNms only runs when events arrive. A timer also bounds
+  // quiet recordings; hidden tabs refresh synchronously on the next error.
+  const snapshotInterval = setInterval(() => {
+    if (stopped || document.visibilityState === 'hidden' || !buffer.lastSnapshotAt) return;
+    if (Date.now() - buffer.lastSnapshotAt < 10000) return;
+    try {
+      record.takeFullSnapshot(true);
+    } catch {
+      recordingFailed = true;
+    }
+  }, 10000);
 
   function metric(value: Metric) {
     if (stopped || !Number.isFinite(value.value) || value.value < 0) return;
@@ -268,6 +287,7 @@ export function startBrowserMonitor(options: BrowserMonitorOptions): BrowserMoni
       flush();
       stopped = true;
       clearInterval(interval);
+      clearInterval(snapshotInterval);
       stopRecord?.();
       buffer.clear();
       window.removeEventListener('error', onError, true);

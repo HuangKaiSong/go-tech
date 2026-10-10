@@ -31,6 +31,10 @@ const allowedAttributes = new Set([
   'style',
   '_cssText',
   'type',
+  'placeholder',
+  'title',
+  'alt',
+  'aria-label',
   'width',
   'height',
   'checked',
@@ -69,15 +73,27 @@ function sanitize(value: unknown, key = ''): Json {
   if (value === null || value === undefined) return null;
   if (typeof value === 'boolean' || typeof value === 'number') return value;
   if (typeof value === 'string') return sanitizeString(value, key);
-  if (Array.isArray(value)) return value.map(item => sanitize(item));
+  if (Array.isArray(value)) return value.map(item => sanitize(item, key === 'texts' ? 'dom-text' : ''));
   if (typeof value !== 'object') return null;
   const result: Record<string, Json> = {};
   for (const [name, child] of Object.entries(value)) {
     const safeKey = !['__proto__', 'constructor', 'prototype'].includes(name);
-    if (safeKey && (key !== 'attributes' || allowedAttributes.has(name))) result[name] = sanitize(child, name);
+    if (safeKey && (key !== 'attributes' || allowedAttributes.has(name))) {
+      result[name] = sanitizeProperty(child, name, { parent: value, parentKey: key });
+    }
   }
   if ('property' in value && value.property === 'content' && 'value' in result) result.value = '"***"';
   return result;
+}
+
+function sanitizeProperty(value: unknown, key: string, context: { parent: object; parentKey: string }): Json {
+  if (typeof value === 'string') {
+    if (key === 'textContent') {
+      return 'isStyle' in context.parent && context.parent.isStyle === true ? css(value) : redactText(value, 10000);
+    }
+    if (context.parentKey === 'dom-text' && key === 'value') return css(redactText(value, value.length));
+  }
+  return sanitize(value, key);
 }
 
 function sanitizeString(value: string, key: string) {
@@ -90,7 +106,8 @@ function sanitizeString(value: string, key: string) {
     }
   }
   if (key === 'text') return '*'.repeat(Math.min(value.length, 1000));
-  if (['textContent', '_cssText', 'style', 'rule', 'replace', 'replaceSync', 'value'].includes(key)) return css(value);
+  if (['placeholder', 'title', 'alt', 'aria-label'].includes(key)) return redactText(value, 1000);
+  if (['_cssText', 'style', 'rule', 'replace', 'replaceSync', 'value'].includes(key)) return css(value);
   return value;
 }
 

@@ -6,11 +6,18 @@ import { startBrowserMonitor } from '../src/index';
 import { sanitizeRecording } from '../src/privacy';
 import { ReplayBuffer } from '../src/replay-buffer';
 
-vi.mock('@rrweb/record', () => ({ record: vi.fn(() => vi.fn()) }));
+vi.mock('@rrweb/record', () => ({
+  record: Object.assign(
+    vi.fn(() => vi.fn()),
+    { takeFullSnapshot: vi.fn() }
+  )
+}));
 vi.mock('web-vitals', () => ({ onCLS: vi.fn(), onFCP: vi.fn(), onINP: vi.fn(), onLCP: vi.fn(), onTTFB: vi.fn() }));
 afterEach(() => {
   vi.useRealTimers();
   vi.clearAllMocks();
+  vi.mocked(record.takeFullSnapshot).mockReset();
+  vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
 
@@ -103,6 +110,27 @@ describe('browser monitor', () => {
       }
     });
     expect(JSON.stringify(declaration)).not.toContain('private content');
+    const text = sanitizeRecording({
+      type: 2,
+      timestamp: 4,
+      data: {
+        node: { textContent: '登入帳號 contact@example.com token=secret' },
+        attributes: { placeholder: '請輸入帳號', 'aria-label': '登入', value: 'private input' }
+      }
+    });
+    expect(JSON.stringify(text)).toContain('登入帳號');
+    expect(JSON.stringify(text)).toContain('請輸入帳號');
+    expect(JSON.stringify(text)).not.toContain('contact@example.com');
+    expect(JSON.stringify(text)).not.toContain('secret');
+    expect(JSON.stringify(text)).not.toContain('private input');
+    const changedText = sanitizeRecording({
+      type: 3,
+      timestamp: 5,
+      data: { source: 0, texts: [{ id: 10, value: '登入成功 contact@example.com token=secret' }] }
+    });
+    expect(JSON.stringify(changedText)).toContain('登入成功');
+    expect(JSON.stringify(changedText)).not.toContain('contact@example.com');
+    expect(JSON.stringify(changedText)).not.toContain('secret');
   });
   it('captures errors with pre/post snapshots, deduplicates and stops listeners', async () => {
     vi.useFakeTimers();
@@ -135,13 +163,49 @@ describe('browser monitor', () => {
     expect(JSON.stringify(reports[0])).not.toContain('secret');
     const first = reports[0];
     if (first.kind !== 'error') throw new Error('Expected error report');
-    expect(first.replay.events.map(event => event.type)).toEqual([4, 2, 3]);
+    expect(first.replay.events.map(event => event.type)).toEqual([4, 2, 3, 5]);
     const remove = vi.spyOn(window, 'removeEventListener');
     monitor.stop();
     expect(remove.mock.calls.some(([name]) => name === 'error')).toBe(true);
     expect(remove.mock.calls.some(([name]) => name === 'unhandledrejection')).toBe(true);
     await vi.advanceTimersByTimeAsync(100);
     expect(reports).toHaveLength(1);
+  });
+  it('bounds a quiet recording and preserves its post-error duration without DOM changes', async () => {
+    vi.useFakeTimers();
+    vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('visible');
+    const reports: MonitorReport[] = [];
+    const monitor = startBrowserMonitor({
+      transport: async report => {
+        reports.push(report);
+      }
+    });
+    try {
+      const options = vi.mocked(record).mock.calls.at(-1)?.[0];
+      const snapshot = () => {
+        options?.emit?.({ type: 4, timestamp: Date.now(), data: { href: '/', width: 375, height: 812 } });
+        options?.emit?.({
+          type: 2,
+          timestamp: Date.now(),
+          data: { node: { type: 0, id: 1, childNodes: [] }, initialOffset: { top: 0, left: 0 } }
+        });
+      };
+      vi.mocked(record.takeFullSnapshot).mockImplementation(snapshot);
+      snapshot();
+      await vi.advanceTimersByTimeAsync(170000);
+      const errorAt = Date.now();
+      monitor.captureError(new Error('quiet error'));
+      await vi.advanceTimersByTimeAsync(5000);
+      const report = reports.find(value => value.kind === 'error');
+      if (!report || report.kind !== 'error') throw new Error('Missing error report');
+      expect(report.replay.events[0].timestamp).toBeGreaterThanOrEqual(errorAt - 60000);
+      expect(report.replay.events.at(-1)?.timestamp).toBe(errorAt + 5000);
+      expect(report.replay.events.at(-1)?.type).toBe(5);
+      expect(reportSchema.safeParse(report).success).toBe(true);
+    } finally {
+      monitor.stop();
+    }
+    expect(vi.getTimerCount()).toBe(0);
   });
   it('reports Web Vitals without errors and isolates transport failure', async () => {
     vi.useFakeTimers();

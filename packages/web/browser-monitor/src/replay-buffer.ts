@@ -9,6 +9,7 @@ interface Segment {
 /** Eviction always removes whole snapshot segments so incremental events retain their base. */
 export class ReplayBuffer {
   lastEventAt = 0;
+  lastSnapshotAt = 0;
   private segments: Segment[] = [];
   private meta: ReplayEvent | undefined;
   limited = false;
@@ -25,6 +26,7 @@ export class ReplayBuffer {
       return;
     }
     if (event.type === 2) {
+      this.lastSnapshotAt = event.timestamp;
       const events = this.meta ? [{ ...this.meta, timestamp: event.timestamp }, event] : [event];
       this.segments.push({
         events,
@@ -38,7 +40,7 @@ export class ReplayBuffer {
       last.events.push(event);
       last.bytes += new TextEncoder().encode(JSON.stringify(event)).length;
     }
-    while (this.segments.length > 1 && this.segments[1].timestamp <= event.timestamp - this.durationMs) {
+    while (this.segments.length > 1 && this.segments[0].timestamp < event.timestamp - this.durationMs) {
       this.segments.shift();
     }
     while (
@@ -56,5 +58,7 @@ export class ReplayBuffer {
   clear() {
     this.segments = [];
     this.meta = undefined;
+    this.lastEventAt = 0;
+    this.lastSnapshotAt = 0;
   }
 }

@@ -402,6 +402,9 @@ catalogs:
     '@rrweb/record':
       specifier: 2.1.7
       version: 2.1.7
+    '@rrweb/replay':
+      specifier: 2.1.7
+      version: 2.1.7
     '@tanstack/devtools-vite':
       specifier: ^0.7.0
       version: 0.7.2
@@ -893,6 +896,9 @@ importers:
       '@go-tech-frontend/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@go-tech/monitor-contract':
+        specifier: workspace:*
+        version: link:../../packages/shared/monitor-contract
       '@go-tech/package-ui':
         specifier: workspace:*
         version: link:../../packages/web/package-ui
@@ -902,6 +908,9 @@ importers:
       '@hookform/resolvers':
         specifier: 'catalog:'
         version: 3.10.0(react-hook-form@7.71.1(react@19.2.7))
+      '@rrweb/replay':
+        specifier: catalog:web
+        version: 2.1.7
       '@tanstack/react-query':
         specifier: catalog:core
         version: 5.101.2(react@19.2.7)
@@ -7299,6 +7308,9 @@ packages:
 
   '@rrweb/record@2.1.7':
     resolution: {integrity: sha512-lIAbWdH8JwRuujURxTBtgrlsPvyBUGXUa9aB5hK8s5DdHgagyLFkIaAWhtthuOwT3o4o4+w38yUVPLc3W2oOrw==}
+
+  '@rrweb/replay@2.1.7':
+    resolution: {integrity: sha512-KqS3iUxafAL8dO8fwCEydrOc3rYbGwnV73wac4JO5s1I7fgd6toX3tJFKnAuIUnbAcgSO+DQZ7GrsGX8hOAODQ==}
 
   '@rrweb/types@2.1.7':
     resolution: {integrity: sha512-fNua4du3xvMlC5iK8lYU1CEg+9wsA7FXUzahVBBVGBKqVPSifROLVh3mfV90hhsfAcs4jAvLbl23v28hXrxZWg==}
@@ -18424,6 +18436,11 @@ snapshots:
     dependencies:
       '@rrweb/types': 2.1.7
       '@rrweb/utils': 2.1.7
+      rrweb: 2.1.7
+
+  '@rrweb/replay@2.1.7':
+    dependencies:
+      '@rrweb/types': 2.1.7
       rrweb: 2.1.7
 
   '@rrweb/types@2.1.7': {}
