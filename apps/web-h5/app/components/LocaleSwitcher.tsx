@@ -2,7 +2,7 @@
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@go-tech-frontend/ui';
 import { useLocale } from 'next-intl';
-import { useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { withProductQuery } from '@/app/lib/product-navigation';
 import { useIframeContext } from '@/contexts/IframeContext';
 import { useOptionalProductSelection } from '@/contexts/ProductSelectionContext';
@@ -26,6 +26,14 @@ export default function LocaleSwitcher({ type = 'select' }: LocaleSwitcherProps)
   const { hasIframe } = useIframeContext();
   const productSelection = useOptionalProductSelection();
   const [isPending, startTransition] = useTransition();
+  const [pointerFocus, setPointerFocus] = useState(false);
+
+  useEffect(() => {
+    if (!pointerFocus) return;
+    const restoreKeyboardFocus = () => setPointerFocus(false);
+    document.addEventListener('keydown', restoreKeyboardFocus, true);
+    return () => document.removeEventListener('keydown', restoreKeyboardFocus, true);
+  }, [pointerFocus]);
 
   const switchLocale = (value: string) => {
     const nextLocale = options.find(option => option.code === value)?.code;
@@ -43,14 +51,19 @@ export default function LocaleSwitcher({ type = 'select' }: LocaleSwitcherProps)
     return (
       <Select value={locale} onValueChange={switchLocale} disabled={hasIframe || isPending}>
         <SelectTrigger
-          className="h-8 w-auto rounded-full border-white/30 bg-transparent text-xs text-white [&>svg]:hidden"
+          className={`h-8 w-auto rounded-full border-white/30 bg-transparent text-xs text-white focus:ring-0 focus:ring-offset-0 [&>svg]:hidden ${pointerFocus ? '' : 'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'}`}
+          onPointerDownCapture={() => setPointerFocus(true)}
           aria-label="切換語言"
           aria-busy={isPending}
           title={hasIframe ? '在 iframe 中不可用' : undefined}
         >
           <SelectValue />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent
+          // Radix restores focus on close; browsers can retain :focus-visible after mixed keyboard/pointer input.
+          onPointerDownCapture={() => setPointerFocus(true)}
+          onPointerDownOutside={() => setPointerFocus(true)}
+        >
           {options.map(opt => (
             <SelectItem key={opt.code} value={opt.code}>
               {/* {localeNames[opt.code]} */}

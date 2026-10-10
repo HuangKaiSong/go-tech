@@ -25,7 +25,7 @@ import Link from '@/app/components/Link';
 import { Button, Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@go-tech-frontend/ui';
 import { toast } from '@go-tech/web-ui';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { filterTenantsByBizCode, startFreeTrial } from '@/app/lib/go-now';
 import { useAuth } from '@/contexts/AuthContext';
@@ -53,6 +53,8 @@ const Header = () => {
   const { isLoggedIn, logout, refetchTenants, tenants, tenantsStatus, token, user } = useAuth();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const accountTrigger = useRef<HTMLButtonElement>(null);
+  const menuTrigger = useRef<HTMLButtonElement>(null);
   const { isMobile, setMode } = useViewMode();
 
   const productTenants = filterTenantsByBizCode(tenants, product);
@@ -171,11 +173,18 @@ const Header = () => {
                 >
                   {hasTenant ? <DynamicText text="選擇系統" /> : <DynamicText text="立即試用" />}
                 </Button>
+                <span className="flex md:hidden items-center gap-2 text-white">
+                  <span className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                    <User className="w-4 h-4 text-primary" />
+                  </span>
+                  <span className="text-sm font-medium">{user?.nickname}</span>
+                </span>
                 <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                   <SheetTrigger asChild>
                     <button
+                      ref={accountTrigger}
                       aria-label="帳戶選單"
-                      className="flex items-center gap-2 text-white hover:text-primary transition-colors cursor-pointer"
+                      className="hidden md:flex shrink-0 items-center gap-2 whitespace-nowrap text-white hover:text-primary transition-colors cursor-pointer"
                     >
                       <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
                         <User className="w-4 h-4 text-primary" />
@@ -184,7 +193,16 @@ const Header = () => {
                       <Crown className="w-4 h-4 text-yellow-400" />
                     </button>
                   </SheetTrigger>
-                  <SheetContent side="right" className="w-80 bg-background" aria-describedby={undefined}>
+                  <SheetContent
+                    side="right"
+                    className="w-80 bg-background"
+                    aria-describedby={undefined}
+                    onCloseAutoFocus={event => {
+                      // Radix's default focus scrolls the frame to the sticky header's original position.
+                      event.preventDefault();
+                      accountTrigger.current?.focus({ preventScroll: true });
+                    }}
+                  >
                     <SheetHeader className="border-b pb-4">
                       <SheetTitle className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
@@ -231,10 +249,7 @@ const Header = () => {
                   </Button>
                 </Link>
                 <Link href="/account/login" aria-label={t('Common.login')}>
-                  <span className="flex md:hidden h-8 w-8 items-center justify-center rounded-full bg-primary/20">
-                    <User className="w-4 h-4 text-primary" />
-                  </span>
-                  <Button size="sm" className="hidden md:inline-flex">
+                  <Button size="sm" className="inline-flex">
                     {t('Common.login')}
                   </Button>
                 </Link>
@@ -243,7 +258,7 @@ const Header = () => {
             <LocaleSwitcher />
             <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
               <SheetTrigger asChild>
-                <button className="md:hidden order-last p-2 text-white" aria-label="選單">
+                <button ref={menuTrigger} className="md:hidden order-last p-2 text-white" aria-label="選單">
                   <Menu className="w-6 h-6" />
                 </button>
               </SheetTrigger>
@@ -251,6 +266,10 @@ const Header = () => {
                 side="right"
                 className="w-72 max-w-full bg-background overflow-y-auto"
                 aria-describedby={undefined}
+                onCloseAutoFocus={event => {
+                  event.preventDefault();
+                  menuTrigger.current?.focus({ preventScroll: true });
+                }}
               >
                 <SheetHeader className="border-b pb-4">
                   <SheetTitle>選單</SheetTitle>
