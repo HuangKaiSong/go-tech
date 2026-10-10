@@ -42,7 +42,7 @@ const AcceptInvite = () => {
   //         priority
   //     />
   //       <div className="absolute inset-0 bg-foreground/30 backdrop-blur-sm" />
-  //       <div className="relative bg-background rounded-2xl shadow-2xl w-full max-w-md p-8 md:p-12 text-center">
+  //       <div className="relative bg-background rounded-2xl shadow-2xl w-full max-w-md p-8 @@md:p-12 text-center">
   //         <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-4">
   //           <span className="text-3xl">⚠️</span>
   //         </div>

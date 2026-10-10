@@ -121,7 +121,7 @@ function PmsPlanCard(props: PackageCardProps) {
 
   return (
     <Card
-      className={`relative flex h-full flex-col overflow-hidden border transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${
+      className={`relative flex flex-col overflow-hidden border transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${
         plan.isRecommended ? 'border-primary shadow-lg shadow-primary/10' : 'border-border hover:border-primary/60'
       }`}
     >
@@ -170,7 +170,7 @@ function HrBasePlan(props: PackageCardProps) {
   const price = formatPackagePrice(plan.price);
   const features = getPackageFeatures(plan);
   return (
-    <Card className="flex h-full min-w-0 flex-col overflow-hidden border-primary/40 bg-linear-to-br from-primary/5 via-background to-background shadow-lg">
+    <Card className="flex h-fit min-w-0 flex-col overflow-hidden border-primary/40 bg-linear-to-br from-primary/5 via-background to-background shadow-lg">
       <CardContent className="flex flex-1 flex-col gap-4 p-6">
         <div>
           <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
@@ -243,7 +243,7 @@ function AddonCard(props: PackageCardProps) {
   return (
     <Card
       className={cn(
-        'relative flex h-full min-w-0 flex-col overflow-hidden bg-card transition-all duration-300 hover:-translate-y-1 hover:shadow-lg',
+        'relative flex  min-w-0 flex-col overflow-hidden bg-card transition-all duration-300 hover:-translate-y-1 hover:shadow-lg',
         compact ? 'border-border hover:border-primary/60' : 'border-primary'
       )}
     >

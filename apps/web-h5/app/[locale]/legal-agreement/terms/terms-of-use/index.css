@@ -1,5 +1,5 @@
 .privacy-page {
-  min-height: 100vh;
+  min-height: var(--view-height, 100vh);
   background: #f4f6f9;
 }
 
@@ -91,7 +91,7 @@
   top: 13px;
 }
 
-@media (max-width: 768px) {
+@container view (width <= 48rem) {
   .privacy-wrapper {
     padding: 20px 12px 40px;
   }

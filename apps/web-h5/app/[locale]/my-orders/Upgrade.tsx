@@ -341,7 +341,7 @@ export const Upgrade: FC<UpgradeProps> = ({
   return (
     <>
       <Dialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>
-        <DialogContent className="sm:max-w-lg max-h-[calc(100dvh-2rem)] flex flex-col overflow-hidden">
+        <DialogContent className="sm:max-w-lg max-h-[calc(var(--view-height,100dvh)-2rem)] flex flex-col overflow-hidden">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <ArrowUpCircle className="w-5 h-5 text-primary" />

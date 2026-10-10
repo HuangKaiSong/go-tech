@@ -25,7 +25,7 @@ export default async function Page({ params }: { params: { id: string } }) {
 
   if (!detail) {
     return (
-      <main className="min-h-screen bg-muted/30 py-8 px-4 min-w-191.5">
+      <main className="min-h-screen bg-muted/30 py-8 px-4 min-w-0">
         <article className="mx-auto max-w-3xl bg-background shadow-sm border border-border p-8">
           <h1 className="text-lg font-bold mb-2">INVOICE</h1>
           <p className="text-sm text-foreground/80">Invoice data is unavailable.</p>

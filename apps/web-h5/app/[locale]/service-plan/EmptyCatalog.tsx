@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { DynamicText } from '@/app/components/DynamicI18nText.client';
 import Link from '@/app/components/Link';
+import SwipeRow from '@/app/components/SwipeRow';
 
 const systemPlan = [
   {
@@ -120,7 +121,7 @@ export default function Page() {
             <DynamicText text="兩套系統各自獨立訂閱，選擇後即可查看完整服務計劃與功能明細，並可隨時切換比較。" />
           </p>
         </div>
-        <div className="grid lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+        <SwipeRow className="flex md:grid md:grid-cols-2 gap-8 max-w-6xl mx-auto overflow-x-auto md:overflow-visible snap-x snap-mandatory px-4 md:mx-0 md:px-0 pb-3 md:pb-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&>*]:shrink-0 [&>*]:basis-[85%] [&>*]:snap-center md:[&>*]:basis-auto">
           {systemPlan.map(plan => (
             <Link
               href={`/service-plan?product=${plan.mark}`}
@@ -189,7 +190,7 @@ export default function Page() {
               </div>
             </Link>
           ))}
-        </div>
+        </SwipeRow>
         <div className="mt-14 max-w-6xl mx-auto grid sm:grid-cols-3 gap-4">
           <div className="flex items-start gap-3 p-5 rounded-xl bg-card border border-border">
             <Clock className="w-5 h-5 text-primary mt-0.5" />

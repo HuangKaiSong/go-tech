@@ -276,7 +276,7 @@ export const AddService: FC<AddServiceProps> = ({
   return (
     <>
       <Dialog open={showAddonsDialog} onOpenChange={setShowAddonsDialog}>
-        <DialogContent className="sm:max-w-lg max-h-[calc(100dvh-2rem)] flex flex-col overflow-hidden">
+        <DialogContent className="sm:max-w-lg max-h-[calc(var(--view-height,100dvh)-2rem)] flex flex-col overflow-hidden">
           <DialogHeader>
             <DialogTitle>
               <DynamicText text="購買增值服務" />

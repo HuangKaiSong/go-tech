@@ -75,7 +75,7 @@ const HeroSection = ({
       className={
         blocks.some(block => block.type === 'hero' && block.productSwitcherPlacement === 'below-hero')
           ? undefined
-          : 'min-h-150'
+          : 'min-h-112 md:min-h-150'
       }
     >
       <PageBlocks blocks={blocks} hasIframe={hasIframe} renderOnly={renderOnly} />

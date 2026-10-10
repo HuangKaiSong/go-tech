@@ -209,7 +209,11 @@ const Index = ({
           </form>
         </DialogContent>
       </Dialog>
-      <main className="min-h-screen bg-muted/30 py-8 px-4  min-w-191.5">
+      <main
+        className="min-h-screen min-w-0 overflow-x-auto bg-muted/30 py-8 px-4"
+        tabIndex={0}
+        aria-label="發票預覽，可橫向捲動"
+      >
         <style jsx global>{`
           @media print {
             @page {
@@ -248,7 +252,7 @@ const Index = ({
         `}</style>
         <h1 className="sr-only">發票預覽 - Go Techs Limited</h1>
 
-        <article id="invoice" className="mx-auto max-w-3xl bg-background shadow-sm border border-border">
+        <article id="invoice" className="mx-auto min-w-191.5 max-w-3xl bg-background shadow-sm border border-border">
           {/* PAID banner */}
           <div
             className="bg-primary text-primary-foreground text-center py-3 font-semibold tracking-wide"

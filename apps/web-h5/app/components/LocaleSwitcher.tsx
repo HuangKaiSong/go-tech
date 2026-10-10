@@ -29,13 +29,25 @@ export default function LocaleSwitcher() {
   // }
 
   return (
-    <div className="flex flex-row gap-1 text-white text-sm items-center">
-      {options.map((opt, index) => (
-        <Link key={opt.code} className="flex items-center gap-1" href={{ pathname }} locale={opt.code} replace>
-          <span className={`cursor-pointer ${locale === opt.code ? 'text-primary' : ''}`}>{opt.label}</span>
-          {index < options.length - 1 ? <span className="opacity-40">|</span> : null}
-        </Link>
-      ))}
+    <div className="flex items-center gap-2 sm:gap-3">
+      <div
+        className="md:hidden order-last flex items-center rounded-full border border-white/30 p-0.5 text-xs"
+        role="group"
+        aria-label="切換語言"
+      >
+        {options.map(opt => (
+          <Link
+            key={opt.code}
+            className={`flex items-center justify-center gap-1 cursor-pointer w-7 h-6 rounded-full font-medium transition-colors ${locale === opt.code ? 'bg-primary text-primary-foreground' : 'text-white/80'}`}
+            href={{ pathname }}
+            locale={opt.code}
+            replace
+            aria-pressed={locale === opt.code}
+          >
+            <span>{opt.label}</span>
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }

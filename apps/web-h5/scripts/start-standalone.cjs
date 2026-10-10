@@ -1,0 +1,22 @@
+const { cpSync, existsSync } = require('node:fs');
+const path = require('node:path');
+
+const appRoot = path.resolve(__dirname, '..');
+const standaloneRoot = path.join(appRoot, '.next/standalone/apps/web-h5');
+const serverPath = path.join(standaloneRoot, 'server.js');
+
+if (!existsSync(serverPath)) {
+  throw new Error('Standalone build not found. Run pnpm build:h5 before starting H5.');
+}
+
+// Next.js does not include these assets in standalone output by default.
+const publicRoot = path.join(appRoot, 'public');
+if (existsSync(publicRoot)) {
+  cpSync(publicRoot, path.join(standaloneRoot, 'public'), { recursive: true });
+}
+cpSync(path.join(appRoot, '.next/static'), path.join(standaloneRoot, '.next/static'), { recursive: true });
+
+process.env.PORT ??= '3200';
+process.env.HOSTNAME = '0.0.0.0';
+
+require(serverPath);

@@ -16,8 +16,8 @@ import { clientFetch } from '@/lib/client-http/client-fetch';
 import { isNotifiedClientHttpError } from '@/lib/client-http/client-http-error';
 
 const inputClassNames = {
-  root: 'h-14 px-3 pr-12 border-border',
-  control: 'md:text-sm text-base text-foreground caret-foreground'
+  root: 'min-w-0 flex-1 h-14 px-3 pr-12 border-border',
+  control: 'w-full min-w-0 md:text-sm text-base text-foreground caret-foreground'
 };
 
 const ForgetPassword = () => {
@@ -226,7 +226,7 @@ const ForgetPassword = () => {
       <div className="absolute inset-0 bg-foreground/30 backdrop-blur-sm" />
 
       {/* Register Card */}
-      <div className="relative bg-background rounded-2xl shadow-2xl w-full max-w-xl p-8 md:p-12 my-8 min-w-fit">
+      <div className="relative bg-background rounded-2xl shadow-2xl w-full max-w-xl min-w-0 p-6 md:p-12 my-8">
         {/* Close Button */}
         <Link href="/" className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors">
           <X className="w-6 h-6" />
@@ -293,29 +293,29 @@ const ForgetPassword = () => {
                   value={formData.account}
                   onChange={handleChange('account')}
                   classNames={{
-                    root: 'h-14 px-3 pr-12 border-border',
-                    control: 'md:text-sm text-base text-foreground caret-foreground'
+                    root: 'min-w-0 flex-1 h-14 px-3 pr-12 border-border',
+                    control: 'w-full min-w-0 md:text-sm text-base text-foreground caret-foreground'
                   }}
                 />
               </div>
 
-              <div className="flex items-center gap-3">
-                <span className="text-sm text-muted-foreground whitespace-nowrap">{codeLabel}</span>
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="w-full sm:w-auto text-sm text-muted-foreground whitespace-nowrap">{codeLabel}</span>
                 <Input
                   type="text"
                   placeholder={codePlaceholder}
                   value={formData.verificationCode}
                   onChange={handleChange('verificationCode')}
                   classNames={{
-                    root: 'h-14 px-3 pr-12 border-border',
-                    control: 'md:text-sm text-base text-foreground caret-foreground'
+                    root: 'min-w-0 flex-1 h-14 px-3 pr-12 border-border',
+                    control: 'w-full min-w-0 md:text-sm text-base text-foreground caret-foreground'
                   }}
                 />
                 <Button
                   type="button"
                   onClick={handleSendCode}
                   disabled={isCodeButtonDisabled}
-                  className="h-12 px-6 bg-primary text-primary-foreground hover:bg-primary/90 whitespace-nowrap"
+                  className="h-12 px-3 md:px-6 bg-primary text-primary-foreground hover:bg-primary/90 whitespace-nowrap"
                 >
                   {sendCodeLabel}
                 </Button>

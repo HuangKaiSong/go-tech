@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import Footer from '@/app/components/Footer';
+import SwipeRow from '@/app/components/SwipeRow';
 import Header from '@/app/components/v2/Header';
 import advantage1 from '@/assets/advantage-1.jpg';
 import advantage2 from '@/assets/advantage-2.jpg';
@@ -253,7 +254,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ p
               </div>
 
               {/* Right Column - Feature Cards */}
-              <div className="space-y-6">
+              <SwipeRow className="flex md:block md:space-y-6 overflow-x-auto md:overflow-visible snap-x snap-mandatory -mx-4 px-4 md:mx-0 md:px-0 gap-4 pb-3 md:pb-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&>*]:shrink-0 [&>*]:basis-[85%] [&>*]:snap-center md:[&>*]:basis-auto">
                 {c.introCards.map(card => (
                   <div className="bg-card p-6 rounded-lg border border-border shadow-sm" key={card.title}>
                     <div className="flex items-start gap-4">
@@ -271,7 +272,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ p
                     </div>
                   </div>
                 ))}
-              </div>
+              </SwipeRow>
             </div>
           </div>
         </div>
@@ -326,7 +327,9 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ p
             <DynamicText text={c.gridHeading} />
           </h2>
 
-          <div className={`grid md:grid-cols-2 lg:grid-cols-3 gap-10 ${hasIframe ? 'cursor-editor' : ''}`}>
+          <SwipeRow
+            className={`flex md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-10 overflow-x-auto md:overflow-visible snap-x snap-mandatory -mx-4 px-4 md:mx-0 md:px-0 gap-4 pb-3 md:pb-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&>*]:shrink-0 [&>*]:basis-[85%] [&>*]:snap-center md:[&>*]:basis-auto ${hasIframe ? 'cursor-editor' : ''}`}
+          >
             {c.advantages.map(advantage => (
               <div
                 key={advantage.title}
@@ -363,7 +366,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ p
                 </div>
               </div>
             ))}
-          </div>
+          </SwipeRow>
           {'extraHighlights' in c && (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10 mt-10">
               {c.extraHighlights.map(h => (

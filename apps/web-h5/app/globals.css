@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
+@import './view-mode.css';
 
 @plugin '@go-tech/tailwind-plugin' {
   color: 'orange';
@@ -8,6 +9,11 @@
 @source "../../../packages/web/ui/shadcn/src/**/*.{ts,tsx}";
 @source "../../../packages/ui/src/**/*.{ts,tsx}";
 @source "../../../packages/web/package-ui/src/**/*.{ts,tsx}";
+
+/* 应用本地品牌色，配合 bg-[hsl(var(--whatsapp))] 使用 */
+:root {
+  --whatsapp: 142 70% 45%;
+}
 
 [data-iframe='true'] .restricted-element {
   opacity: 0.6;

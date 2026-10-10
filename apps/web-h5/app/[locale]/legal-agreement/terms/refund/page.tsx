@@ -26,7 +26,7 @@ export default async function Refund() {
       {/* oxlint-disable-next-line react/iframe-missing-sandbox */}
       {/* <iframe
         src={`https://docs.google.com/viewerng/viewer?url=/terms/${fileName}&embedded=true`}
-        style={{ width: '100%', height: '100vh' }}
+        style={{ width: '100%', height: 'var(--view-height, 100vh)' }}
         frameBorder="0"
       /> */}
 

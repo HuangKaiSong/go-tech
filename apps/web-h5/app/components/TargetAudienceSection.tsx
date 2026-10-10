@@ -9,6 +9,7 @@ import { useIframeContext } from '@/contexts/IframeContext';
 import { useOptionalProductSelection } from '@/contexts/ProductSelectionContext';
 import { DynamicText } from './DynamicI18nText.client';
 import { type AudienceBlock, type AudienceItem, type PageBlock } from './PageBlocks';
+import SwipeRow from './SwipeRow';
 
 const resolveAudiences = (blocks: PageBlock[], productKey: 'hr' | 'pms') => {
   const block = blocks.find(
@@ -58,8 +59,8 @@ const TargetAudienceSection = ({ initialBlocks }: { initialBlocks?: PageBlock[] 
           </Link>
         </div>
 
-        <div
-          className={`space-y-8 ${hasIframe ? 'cursor-editor' : ''}`}
+        <SwipeRow
+          className={`flex md:block md:space-y-8 overflow-x-auto md:overflow-visible snap-x snap-mandatory -mx-4 px-4 md:mx-0 md:px-0 gap-4 pb-3 md:pb-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&>*]:shrink-0 [&>*]:basis-[85%] [&>*]:snap-center md:[&>*]:basis-auto animate-fade-in ${hasIframe ? 'cursor-editor' : ''}`}
           data-block-id="audiences"
           data-block-role="Target Audience"
           data-product-key={productKey}
@@ -112,7 +113,7 @@ const TargetAudienceSection = ({ initialBlocks }: { initialBlocks?: PageBlock[] 
               </div>
             </div>
           ))}
-        </div>
+        </SwipeRow>
       </div>
     </section>
   );

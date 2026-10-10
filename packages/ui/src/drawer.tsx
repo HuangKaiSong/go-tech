@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Drawer as DrawerPrimitive } from 'vaul';
+import { createScopedPortal } from './portal-container';
 
 import { cn } from '@go-tech/utils';
 
@@ -10,7 +11,7 @@ Drawer.displayName = 'Drawer';
 
 const DrawerTrigger = DrawerPrimitive.Trigger;
 
-const DrawerPortal = DrawerPrimitive.Portal;
+const DrawerPortal = createScopedPortal(DrawerPrimitive.Portal);
 
 const DrawerClose = DrawerPrimitive.Close;
 

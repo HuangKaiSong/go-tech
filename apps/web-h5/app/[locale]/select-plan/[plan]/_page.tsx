@@ -176,7 +176,7 @@ const SelectPlan = ({ plan: inputPlan, planId }: { plan: Packages; planId?: stri
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-4 border-t border-border/60 pt-4">
-              <span className="min-w-15 text-sm font-medium text-muted-foreground">
+              <span className="text-sm font-medium text-muted-foreground min-w-[60px]">
                 <DynamicText text="開通月份" />
               </span>
               <div className="flex flex-1 flex-wrap gap-2">
@@ -217,7 +217,7 @@ const SelectPlan = ({ plan: inputPlan, planId }: { plan: Packages; planId?: stri
                   />
                 )}
               </div>
-              <div className="text-right" aria-live="polite">
+              <div className="basis-full md:text-right sm:basis-auto" aria-live="polite">
                 <span className="text-xs text-muted-foreground">
                   <DynamicText text="套餐小計：" />
                 </span>

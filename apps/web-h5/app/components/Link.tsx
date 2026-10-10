@@ -46,6 +46,7 @@ export const Link: React.FC<RestrictedLinkProps> = ({ children, className = '', 
       aria-disabled={isIframeRestricted || undefined}
       href={productHref}
       onClick={handleClick}
+      scroll={false}
       {...rest}
       className={`${className}${isIframeRestricted ? ' cursor-not-allowed opacity-60' : ''}`}
       tabIndex={isIframeRestricted ? -1 : rest.tabIndex}

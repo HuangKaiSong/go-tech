@@ -499,7 +499,7 @@ const ConfirmOrder = ({
           </div>
 
           {/* Navigation Buttons */}
-          <div className="flex justify-center gap-4">
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Button
               variant="outline"
               onClick={handleGoBack}

@@ -9,6 +9,7 @@ import { getFeaturedHrPlan, toAddonCardPlan, toPackageCardPlan } from '@/app/lib
 import type { PackageCatalog } from '@/app/lib/package-catalog';
 import { useProductSelection } from '@/contexts/ProductSelectionContext';
 import { DynamicText } from './DynamicI18nText.client';
+import SwipeRow from './SwipeRow';
 import { TrialAction } from './trial-action';
 
 const productContent = {
@@ -72,13 +73,13 @@ const PricingSection = ({ catalog }: { catalog: PackageCatalog }) => {
 
   return (
     <section className="bg-background pb-10" data-package-product={product}>
-      <div className="mx-auto w-[1280px] min-w-[1280px] max-w-[1280px] px-0">
+      <div className="container mx-auto px-4">
         {renderHeader()}
 
         {plans.length === 0 ? <EmptyCatalog product={product} /> : null}
 
         {product === 'pms' && plans.length > 0 ? (
-          <div className="grid grid-cols-3 items-stretch max-w-5xl gap-5 mx-auto">
+          <SwipeRow className="flex md:grid overflow-x-auto md:overflow-visible snap-x snap-mandatory -mx-4 px-4 md:mx-auto pb-3 md:pb-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&>*]:shrink-0 [&>*]:basis-[85%] [&>*]:snap-center md:[&>*]:basis-auto md:grid-cols-3 gap-5 max-w-5xl animate-fade-in items-stretch">
             {plans.map((plan, i) => (
               <PackageCard
                 key={plan.packageCode ?? i}
@@ -88,7 +89,7 @@ const PricingSection = ({ catalog }: { catalog: PackageCatalog }) => {
                 LinkComponent={Link}
               />
             ))}
-          </div>
+          </SwipeRow>
         ) : null}
 
         {product === 'hr' && featuredHrPlan ? (
@@ -117,7 +118,7 @@ const PricingSection = ({ catalog }: { catalog: PackageCatalog }) => {
               </div>
 
               {addons.length > 0 ? (
-                <div className="grid flex-1 auto-rows-fr grid-cols-[repeat(auto-fit,minmax(170px,1fr))] gap-3">
+                <SwipeRow className="mt-3 flex md:grid md:grid-cols-3 md:gap-3 flex-1 overflow-x-auto md:overflow-visible snap-x snap-mandatory -mx-4 px-4 md:mx-auto md:px-0 gap-4 pb-3 md:pb-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&>*]:shrink-0 [&>*]:basis-[85%] [&>*]:snap-center md:[&>*]:basis-auto">
                   {addons.map((addon, index) => (
                     <PackageCard
                       key={addon.id ?? `${addon.itemName}-${index}`}
@@ -127,7 +128,7 @@ const PricingSection = ({ catalog }: { catalog: PackageCatalog }) => {
                       LinkComponent={Link}
                     />
                   ))}
-                </div>
+                </SwipeRow>
               ) : (
                 <div className="rounded-2xl border border-dashed border-border bg-muted/20 px-8 py-10 text-center text-sm text-muted-foreground">
                   <DynamicText text="附加模組資料準備中，啟用後將在此顯示。" />

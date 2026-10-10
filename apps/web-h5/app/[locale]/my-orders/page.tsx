@@ -310,7 +310,7 @@ const MyOrders = () => {
                     </div>
 
                     {/* 操作按鈕 */}
-                    <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-foreground/30">
+                    <div className="flex flex-wrap justify-end gap-3 mt-6 pt-4 border-t border-foreground/30">
                       <Link href={`/my-orders/${order.id}`}>
                         <Button variant="outline" size="sm" className="gap-2">
                           <Eye className="w-4 h-4" />

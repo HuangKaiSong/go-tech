@@ -3,11 +3,13 @@
 import { Button, Card, CardContent, CardHeader } from '@go-tech-frontend/ui';
 import type { PackageBizCode, Packages } from '@go-tech/types';
 import { ArrowLeft, Building2, Settings, Users } from 'lucide-react';
+import SwipeRow from '@/app/components/SwipeRow';
 import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { getFeaturedHrPlan } from '@/app/lib/package-card-plan';
 import { DynamicText } from '../../components/DynamicI18nText.client';
 import { HrServicePackages } from './hr-service-packages';
 
+import { cn } from '@go-tech/web-ui';
 import type { ExtendedPackages } from './service-plan-data';
 
 const getIconHref = (value: string) => {
@@ -38,21 +40,25 @@ export default function Page({ packages, product }: { packages: ExtendedPackages
     <section className="pt-10 bg-background">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 max-w-6xl mx-auto">
-          <Button className={product === 'pms' ? 'mb-6' : undefined} variant="ghost" onClick={handleReselect}>
+          <Button
+            className={cn('self-start', product === 'pms' ? 'mb-6' : '')}
+            variant="ghost"
+            onClick={handleReselect}
+          >
             <ArrowLeft />
             <DynamicText text="重新選擇系統" />
           </Button>
           <div
             role="tablist"
             aria-label="選擇系統"
-            className="inline-flex rounded-full border border-border bg-muted/50 p-1"
+            className="w-fit self-center flex rounded-full border border-border bg-muted/50 p-1"
           >
             <button
               type="button"
               role="tab"
               aria-selected={product === 'pms'}
               onClick={() => router.replace('/service-plan?product=pms')}
-              className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold transition-colors ${
+              className={`flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold transition-colors ${
                 product === 'pms' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
               }`}
             >
@@ -64,7 +70,7 @@ export default function Page({ packages, product }: { packages: ExtendedPackages
               role="tab"
               aria-selected={product === 'hr'}
               onClick={() => router.replace('/service-plan?product=hr')}
-              className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold transition-colors ${
+              className={`flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold transition-colors ${
                 product === 'hr' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
               }`}
             >
@@ -97,7 +103,7 @@ export default function Page({ packages, product }: { packages: ExtendedPackages
         {hrPlan ? <HrServicePackages plan={hrPlan} onSelect={handleSelectPlan} /> : null}
         {product === 'pms' && packages.length > 0 ? (
           <div className="py-16 bg-background">
-            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <SwipeRow className="flex md:grid md:grid-cols-3 gap-8 max-w-6xl mx-auto overflow-x-auto md:overflow-visible snap-x snap-mandatory px-4 md:mx-0 md:px-0 pb-3 md:pb-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&>*]:shrink-0 [&>*]:basis-[85%] [&>*]:snap-center md:[&>*]:basis-auto">
               {packages.map((plan, index) => {
                 // Button colors for each plan
                 const buttonColors = [
@@ -206,7 +212,7 @@ export default function Page({ packages, product }: { packages: ExtendedPackages
                   </Card>
                 );
               })}
-            </div>
+            </SwipeRow>
           </div>
         ) : null}
       </div>

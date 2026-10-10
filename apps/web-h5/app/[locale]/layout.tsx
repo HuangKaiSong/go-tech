@@ -1,4 +1,4 @@
-import { Sonner, TooltipProvider } from '@go-tech/web-ui';
+import { TooltipProvider } from '@go-tech/web-ui';
 import { decodeJwt } from 'jose';
 import type { Metadata } from 'next';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
@@ -10,6 +10,7 @@ import type { Locale } from '@/i18n/config';
 import { routing } from '@/i18n/routing';
 import { getBaseUrl } from '@/lib/http';
 import { getLocalizedAlternates } from '@/lib/seo';
+import { VIEW_MODE_COOKIE, parseViewMode } from '@/lib/view-mode';
 import { ClientHttpErrorNotifier } from '../components/client-http-error-notifier';
 import { DynamicI18nProvider } from '../components/DynamicI18nProvider';
 import { HtmlLangSync } from '../components/html-lang-sync';
@@ -118,9 +119,8 @@ export default async function LocaleLayout({
         <DynamicI18nProvider messages={dynamicMessages}>
           <TooltipProvider>
             <AuthProvider _tenants={tenants} initialUser={user} _token={token}>
-              <Layout>{children}</Layout>
+              <Layout initialViewMode={parseViewMode(cookiesStore.get(VIEW_MODE_COOKIE)?.value)}>{children}</Layout>
             </AuthProvider>
-            <Sonner className="toaster group" position="top-right" richColors />
           </TooltipProvider>
         </DynamicI18nProvider>
       </ProductSelectionProvider>

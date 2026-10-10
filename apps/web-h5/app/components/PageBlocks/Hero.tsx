@@ -214,7 +214,7 @@ function ProductHeroContent({
           data-block-seq={seq}
           data-block-role="title"
           data-product-key={activeProduct.key}
-          className={`font-bold text-white mb-4 whitespace-pre-line ${switcherBelowHero ? 'text-4xl md:text-5xl' : 'text-5xl leading-none'}`}
+          className={`font-bold text-white mb-4 whitespace-pre-line ${switcherBelowHero ? 'text-3xl md:text-5xl' : 'text-2xl md:text-5xl leading-snug md:leading-none'}`}
           dangerouslySetInnerHTML={{ __html: blockTitle }}
         />
       ) : null}
@@ -224,7 +224,7 @@ function ProductHeroContent({
           data-block-seq={seq}
           data-block-role="titleSecondary"
           data-product-key={activeProduct.key}
-          className="text-3xl leading-9 font-bold text-primary mb-6"
+          className="text-2xl md:text-3xl leading-9 font-bold text-primary mb-6"
           dangerouslySetInnerHTML={{ __html: titleSecondary }}
         />
       ) : null}
@@ -234,7 +234,11 @@ function ProductHeroContent({
           data-block-seq={seq}
           data-block-role="subtitle"
           data-product-key={activeProduct.key}
-          className={switcherBelowHero ? 'text-white/80 text-xl' : 'text-white/90 text-lg mb-8 leading-relaxed'}
+          className={
+            switcherBelowHero
+              ? 'text-white/80 text-base md:text-xl'
+              : 'text-white/90 text-sm md:text-lg mb-8 leading-relaxed'
+          }
         >
           <DynamicText text={activeProduct.subtitle} />
         </p>
@@ -362,7 +366,7 @@ function ProductHero({ block, hasIframe, seq }: { block: HeroBlock; hasIframe: b
         data-block-role="hero"
         data-hero-variant="product-switcher"
         data-switcher-placement={switcherBelowHero ? 'below-hero' : 'hero'}
-        className={`relative w-full overflow-hidden ${switcherBelowHero ? 'py-24 md:py-32' : 'min-h-150 flex items-center pt-16'} ${cursorClass(hasIframe)}`}
+        className={`relative w-full overflow-hidden ${switcherBelowHero ? 'py-24 md:py-32' : 'min-h-112 md:min-h-150 flex items-center py-12 md:pt-16 md:pb-0'} ${cursorClass(hasIframe)}`}
       >
         {products.map(product => (
           <div
@@ -389,9 +393,7 @@ function ProductHero({ block, hasIframe, seq }: { block: HeroBlock; hasIframe: b
           }}
         />
 
-        <div
-          className={`relative z-10 mx-auto ${switcherBelowHero ? 'container px-4 text-center' : 'w-[1280px] min-w-[1280px] max-w-[1280px]'}`}
-        >
+        <div className={`relative z-10 mx-auto px-4 ${switcherBelowHero ? 'container px-4 text-center' : 'w-full'}`}>
           {!switcherBelowHero && productSwitcher}
 
           <ProductHeroContent

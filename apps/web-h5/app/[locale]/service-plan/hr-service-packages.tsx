@@ -3,6 +3,7 @@ import { formatPackagePrice, getAddonBillingLabel, getPackageFeatures } from '@g
 import type { Packages } from '@go-tech/types';
 import { ArrowRight, MousePointerClick, Settings, SquareCheckBig } from 'lucide-react';
 import { DynamicText } from '@/app/components/DynamicI18nText.client';
+import SwipeRow from '@/app/components/SwipeRow';
 import { toAddonCardPlan } from '@/app/lib/package-card-plan';
 
 function FeatureIcon({ icon }: { icon?: string }) {
@@ -102,7 +103,7 @@ export function HrServicePackages({ onSelect, plan }: { onSelect: (plan: Package
           </p>
         </div>
         {addons.length > 0 ? (
-          <div className="grid auto-rows-fr gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          <SwipeRow className="flex md:grid md:grid-cols-3 md:gap-5 overflow-x-auto md:overflow-visible snap-x snap-mandatory -mx-4 px-4 md:mx-auto md:px-0 gap-4 pb-3 md:pb-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&>*]:shrink-0 [&>*]:basis-[85%] [&>*]:snap-center md:[&>*]:basis-auto">
             {addons.map((addon, index) => {
               const card = toAddonCardPlan(addon, 'hr');
               const addonPrice = formatPackagePrice(card.price);
@@ -148,7 +149,7 @@ export function HrServicePackages({ onSelect, plan }: { onSelect: (plan: Package
                 </Card>
               );
             })}
-          </div>
+          </SwipeRow>
         ) : (
           <div className="rounded-lg border border-dashed border-border bg-muted/20 px-6 py-12 text-center text-sm text-muted-foreground">
             <DynamicText text="附加模塊資料準備中" />

@@ -25,7 +25,7 @@ export default async function Page({ params }: { params: { id: string } }) {
 
   if (!invoice) {
     return (
-      <main className="min-h-screen bg-muted/30 py-8 px-4 min-w-191.5">
+      <main className="min-h-screen bg-muted/30 py-8 px-4 min-w-0">
         <article className="mx-auto max-w-3xl bg-background shadow-sm border border-border p-8">
           <h1 className="text-lg font-bold mb-2">INVOICE</h1>
           <p className="text-sm text-foreground/80">Invoice data is unavailable.</p>
@@ -41,8 +41,8 @@ export default async function Page({ params }: { params: { id: string } }) {
   const invoiceNo = invoice?.invoiceNo ?? '-';
 
   return (
-    <main className="min-h-screen bg-muted/30 min-w-191.5">
-      <article id="invoice" className="mx-auto max-w-3xl">
+    <main className="min-h-screen min-w-0 overflow-x-auto bg-muted/30" tabIndex={0} aria-label="發票預覽，可橫向捲動">
+      <article id="invoice" className="mx-auto min-w-191.5 max-w-3xl">
         {/* PAID banner */}
         <div
           className="bg-primary text-primary-foreground text-center py-3 font-semibold tracking-wide"

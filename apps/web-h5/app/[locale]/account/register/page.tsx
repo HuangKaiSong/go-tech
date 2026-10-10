@@ -440,7 +440,7 @@ const Register = () => {
       <Image src={authBgImg} alt="Background" loading="eager" fill priority />
       <div className="absolute inset-0 bg-foreground/30 backdrop-blur-sm" />
       {/* Register Card */}
-      <div className="relative bg-background rounded-2xl shadow-2xl w-full max-w-xl p-8 md:p-12 my-8 min-w-fit">
+      <div className="relative bg-background rounded-2xl shadow-2xl w-full max-w-xl min-w-0 p-6 md:p-12 my-8">
         {/* Close Button */}
 
         <Link href="/" className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors">
@@ -475,8 +475,8 @@ const Register = () => {
                     value={formData.password}
                     onChange={handleChange('password')}
                     classNames={{
-                      root: 'h-14 px-3 pr-12 border-border',
-                      control: 'md:text-sm text-base text-foreground caret-foreground'
+                      root: 'min-w-0 flex-1 h-14 px-3 pr-12 border-border',
+                      control: 'w-full min-w-0 md:text-sm text-base text-foreground caret-foreground'
                     }}
                   />
                 </div>
@@ -493,8 +493,8 @@ const Register = () => {
                   value={formData.confirmPassword}
                   onChange={handleChange('confirmPassword')}
                   classNames={{
-                    root: 'h-14 px-3 pr-12 border-border',
-                    control: 'md:text-sm text-base text-foreground caret-foreground'
+                    root: 'min-w-0 flex-1 h-14 px-3 pr-12 border-border',
+                    control: 'w-full min-w-0 md:text-sm text-base text-foreground caret-foreground'
                   }}
                 />
               </div>
@@ -516,15 +516,15 @@ const Register = () => {
                   value={formData.name}
                   onChange={handleChange('name')}
                   classNames={{
-                    root: 'h-14 px-3 pr-12 border-border',
-                    control: 'md:text-sm text-base text-foreground caret-foreground'
+                    root: 'min-w-0 flex-1 h-14 px-3 pr-12 border-border',
+                    control: 'w-full min-w-0 md:text-sm text-base text-foreground caret-foreground'
                   }}
                 />
               </div>
 
               <div className="flex items-center gap-2">
                 <span className="text-destructive">*</span>
-                <div className="relative flex-1">
+                <div className="relative min-w-0 flex-1">
                   <Input
                     type="email"
                     placeholder={emailPlaceholder}
@@ -532,8 +532,8 @@ const Register = () => {
                     onChange={handleChange('email')}
                     onBlur={handleEmailBlur}
                     classNames={{
-                      root: 'h-14 px-3 pr-12 border-border',
-                      control: 'md:text-sm text-base text-foreground caret-foreground'
+                      root: 'min-w-0 flex-1 h-14 px-3 pr-12 border-border',
+                      control: 'w-full min-w-0 md:text-sm text-base text-foreground caret-foreground'
                     }}
                   />
                   <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
@@ -554,8 +554,8 @@ const Register = () => {
                   value={formData.phone}
                   onChange={handleChange('phone')}
                   classNames={{
-                    root: 'h-14 px-3 pr-12 border-border',
-                    control: 'md:text-sm text-base text-foreground caret-foreground'
+                    root: 'min-w-0 flex-1 h-14 px-3 pr-12 border-border',
+                    control: 'w-full min-w-0 md:text-sm text-base text-foreground caret-foreground'
                   }}
                 />
               </div>
@@ -568,29 +568,29 @@ const Register = () => {
                   value={formData.company}
                   onChange={handleChange('company')}
                   classNames={{
-                    root: 'h-14 px-3 pr-12 border-border',
-                    control: 'md:text-sm text-base text-foreground caret-foreground'
+                    root: 'min-w-0 flex-1 h-14 px-3 pr-12 border-border',
+                    control: 'w-full min-w-0 md:text-sm text-base text-foreground caret-foreground'
                   }}
                 />
               </div>
 
-              <div className="flex items-center gap-3">
-                <span className="text-sm text-muted-foreground whitespace-nowrap">{codeLabel}</span>
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="w-full sm:w-auto text-sm text-muted-foreground whitespace-nowrap">{codeLabel}</span>
                 <Input
                   type="text"
                   placeholder={codePlaceholder}
                   value={formData.verificationCode}
                   onChange={handleChange('verificationCode')}
                   classNames={{
-                    root: 'h-14 px-3 pr-12 border-border',
-                    control: 'md:text-sm text-base text-foreground caret-foreground'
+                    root: 'min-w-0 flex-1 h-14 px-3 pr-12 border-border',
+                    control: 'w-full min-w-0 md:text-sm text-base text-foreground caret-foreground'
                   }}
                 />
                 <Button
                   type="button"
                   onClick={handleSendCode}
                   disabled={isCodeButtonDisabled}
-                  className="h-12 px-6 bg-primary text-primary-foreground hover:bg-primary/90 whitespace-nowrap"
+                  className="h-12 px-3 md:px-6 bg-primary text-primary-foreground hover:bg-primary/90 whitespace-nowrap"
                 >
                   {sendCodeLabel}
                 </Button>

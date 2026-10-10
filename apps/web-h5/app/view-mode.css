@@ -1,0 +1,251 @@
+/* Existing viewport utility names query the named application frame. Outside the frame, keep viewport behavior. */
+@utility container {
+  @container view (width >= 40rem) {
+    max-width: 40rem;
+  }
+  @container view (width >= 48rem) {
+    max-width: 48rem;
+  }
+  @container view (width >= 64rem) {
+    max-width: 64rem;
+  }
+  @container view (width >= 80rem) {
+    max-width: 80rem;
+  }
+  @container view (width >= 96rem) {
+    max-width: 96rem;
+  }
+}
+
+@custom-variant sm {
+  @container view (width >= 40rem) {
+    @slot;
+  }
+  @media (width >= 40rem) {
+    &:where(:not([data-view-frame], [data-view-frame] *)) {
+      @slot;
+    }
+  }
+}
+
+@custom-variant max-sm {
+  @container view (width < 40rem) {
+    @slot;
+  }
+  @media (width < 40rem) {
+    &:where(:not([data-view-frame], [data-view-frame] *)) {
+      @slot;
+    }
+  }
+}
+
+@custom-variant md {
+  @container view (width >= 48rem) {
+    @slot;
+  }
+  @media (width >= 48rem) {
+    &:where(:not([data-view-frame], [data-view-frame] *)) {
+      @slot;
+    }
+  }
+}
+
+@custom-variant max-md {
+  @container view (width < 48rem) {
+    @slot;
+  }
+  @media (width < 48rem) {
+    &:where(:not([data-view-frame], [data-view-frame] *)) {
+      @slot;
+    }
+  }
+}
+
+@custom-variant lg {
+  @container view (width >= 64rem) {
+    @slot;
+  }
+  @media (width >= 64rem) {
+    &:where(:not([data-view-frame], [data-view-frame] *)) {
+      @slot;
+    }
+  }
+}
+
+@custom-variant max-lg {
+  @container view (width < 64rem) {
+    @slot;
+  }
+  @media (width < 64rem) {
+    &:where(:not([data-view-frame], [data-view-frame] *)) {
+      @slot;
+    }
+  }
+}
+
+@custom-variant xl {
+  @container view (width >= 80rem) {
+    @slot;
+  }
+  @media (width >= 80rem) {
+    &:where(:not([data-view-frame], [data-view-frame] *)) {
+      @slot;
+    }
+  }
+}
+
+@custom-variant max-xl {
+  @container view (width < 80rem) {
+    @slot;
+  }
+  @media (width < 80rem) {
+    &:where(:not([data-view-frame], [data-view-frame] *)) {
+      @slot;
+    }
+  }
+}
+
+@custom-variant 2xl {
+  @container view (width >= 96rem) {
+    @slot;
+  }
+  @media (width >= 96rem) {
+    &:where(:not([data-view-frame], [data-view-frame] *)) {
+      @slot;
+    }
+  }
+}
+
+@custom-variant max-2xl {
+  @container view (width < 96rem) {
+    @slot;
+  }
+  @media (width < 96rem) {
+    &:where(:not([data-view-frame], [data-view-frame] *)) {
+      @slot;
+    }
+  }
+}
+
+@utility h-screen {
+  height: var(--view-height, 100vh);
+}
+@utility min-h-screen {
+  min-height: var(--view-height, 100vh);
+}
+@utility h-dvh {
+  height: var(--view-height, 100dvh);
+}
+@utility min-h-dvh {
+  min-height: var(--view-height, 100dvh);
+}
+
+.view-mode-stage {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  background: hsl(var(--muted));
+}
+.view-mode-frame {
+  position: relative;
+  width: 100%;
+  height: 100dvh;
+  flex: none;
+  contain: layout paint;
+  isolation: isolate;
+  transform-origin: top left;
+  background: hsl(var(--background));
+}
+.view-mode-stage[data-view-mode='pc'] {
+  justify-content: flex-start;
+}
+.view-mode-stage[data-view-mode='mobile'] .view-mode-frame {
+  max-width: 430px;
+  box-shadow: 0 0 24px #0002;
+}
+.view-mode-scroll {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scroll-padding-top: 100px;
+  padding-bottom: 0;
+}
+.view-mode-portals {
+  position: absolute;
+  inset: 0;
+  z-index: 80;
+  pointer-events: none;
+}
+.view-mode-portals > * {
+  pointer-events: auto;
+}
+.view-mode-controls {
+  position: absolute;
+  inset: 0 var(--view-scrollbar, 0px) 0 0;
+  contain: layout;
+  pointer-events: none;
+}
+.view-mode-controls > * {
+  pointer-events: auto;
+}
+.view-mode-frame [data-sonner-toaster] {
+  max-width: calc(100% - 2rem);
+}
+.view-mode-switcher {
+  position: fixed;
+  top: 4px;
+  right: 8px;
+  z-index: 100;
+  display: flex;
+  border: 1px solid hsl(var(--border));
+  border-radius: 9999px;
+  padding: 2px;
+  background: hsl(var(--background) / 0.95);
+  box-shadow: 0 2px 10px #0002;
+  font-size: 12px;
+}
+
+@container view (width < 48rem) {
+  .view-mode-scroll {
+    padding-bottom: calc(56px + env(safe-area-inset-bottom));
+    scroll-padding-top: 64px;
+  }
+}
+@media (width < 64rem) {
+  .view-mode-stage[data-view-mode='mobile'] {
+    justify-content: flex-start;
+  }
+  .view-mode-stage[data-view-mode='mobile'] .view-mode-frame {
+    max-width: none;
+  }
+}
+@media (width < 48rem) {
+  .view-mode-switcher {
+    display: none;
+  }
+  .view-mode-stage[data-view-mode='pc'] .view-mode-switcher {
+    display: flex;
+  }
+  .view-mode-stage[data-view-mode='pc'] .view-mode-switcher button {
+    min-height: 40px;
+  }
+}
+@media print {
+  .view-mode-stage,
+  .view-mode-frame,
+  .view-mode-scroll {
+    position: static;
+    overflow: visible;
+    contain: none;
+    height: auto !important;
+    width: auto !important;
+    transform: none !important;
+  }
+  .view-mode-switcher,
+  .view-mode-portals {
+    display: none;
+  }
+}

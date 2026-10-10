@@ -18,6 +18,7 @@ export * from './input';
 export * from './input-otp';
 export * from './label';
 export * from './pagination';
+export * from './portal-container';
 export * from './progress';
 export * from './radio-group';
 export * from './scroll-area';

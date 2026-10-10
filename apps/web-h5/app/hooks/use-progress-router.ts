@@ -48,14 +48,18 @@ export function useProgressRouter() {
     },
     push(href: string, options: ProgressNavigationOptions = {}) {
       const { preserveProduct = true, ...routerOptions } = options;
-      runNavigation(() => router.push(resolveNavigationHref(href, preserveProduct), routerOptions));
+      runNavigation(() =>
+        router.push(resolveNavigationHref(href, preserveProduct), { scroll: false, ...routerOptions })
+      );
     },
     refresh() {
       runNavigation(() => router.refresh());
     },
     replace(href: string, options: ProgressNavigationOptions = {}) {
       const { preserveProduct = true, ...routerOptions } = options;
-      runNavigation(() => router.replace(resolveNavigationHref(href, preserveProduct), routerOptions));
+      runNavigation(() =>
+        router.replace(resolveNavigationHref(href, preserveProduct), { scroll: false, ...routerOptions })
+      );
     }
   };
 }

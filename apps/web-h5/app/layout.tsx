@@ -4,11 +4,9 @@ import type { Metadata } from 'next';
 import { hasLocale } from 'next-intl';
 import { ThemeProvider } from 'next-themes';
 import { headers } from 'next/headers';
-import { Suspense } from 'react';
 import { routing } from '@/i18n/routing';
 import { siteUrl } from '@/lib/seo';
 import { createSvgSpriteHtml } from '@/plugins/createSvgIcons';
-import { NavigationProgress } from './components/navigation-progress';
 // oxlint-disable import/no-unassigned-import
 import './globals.css';
 
@@ -30,12 +28,9 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 
   return (
     <html lang={language} suppressHydrationWarning>
-      <body className="min-w-[1280px]">
+      <body className="w-full">
         <div aria-hidden="true" dangerouslySetInnerHTML={{ __html: svgSpriteHtml }} />
         <ThemeProvider attribute="class" enableSystem={false}>
-          <Suspense fallback={null}>
-            <NavigationProgress />
-          </Suspense>
           {children}
         </ThemeProvider>
       </body>

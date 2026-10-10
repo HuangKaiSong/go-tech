@@ -4,12 +4,15 @@
 import {
   Briefcase,
   Crown,
+  Home,
   LayoutGrid,
   Lightbulb,
   LogOut,
   Mail,
   MapPin,
+  Menu,
   MessageCircle,
+  Monitor,
   Package,
   Phone,
   Settings,
@@ -28,7 +31,19 @@ import { filterTenantsByBizCode, startFreeTrial } from '@/app/lib/go-now';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProductSelection } from '@/contexts/ProductSelectionContext';
 import { useTrialWindow } from '@/contexts/TrialWindowContext';
+import { useViewMode } from '@/contexts/view-mode-context';
 import { DynamicText } from '../DynamicI18nText';
+import LocaleSwitcher from '../LocaleSwitcher';
+
+const mobileMenuItems = [
+  ['/', Home, '首頁'],
+  ['/core-advantages', Sparkles, '核心優勢'],
+  ['/system-features', LayoutGrid, '查看系統功能'],
+  ['/service-plan', Briefcase, '服務計劃'],
+  ['/target-audience', Users, '適合人群'],
+  ['/contact', MessageCircle, '聯繫我們'],
+  ['/feedback', Lightbulb, '需求反饋']
+] as const;
 
 const Header = () => {
   const t = useTranslations();
@@ -37,6 +52,8 @@ const Header = () => {
   const { openPmsCallback: generateCallback } = useTrialWindow();
   const { isLoggedIn, logout, refetchTenants, tenants, tenantsStatus, token, user } = useAuth();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { isMobile, setMode } = useViewMode();
 
   const productTenants = filterTenantsByBizCode(tenants, product);
   const hasTenant = productTenants.length > 0;
@@ -46,24 +63,31 @@ const Header = () => {
     if (token && tenantsStatus === 'idle') refetchTenants(token);
   }, [refetchTenants, tenantsStatus, token]);
 
+  useEffect(() => {
+    if (!isMobile) {
+      setIsMenuOpen(false);
+      setIsSheetOpen(false);
+    }
+  }, [isMobile]);
+
   const handleLogout = async () => {
     setIsSheetOpen(false);
     logout();
   };
 
   return (
-    <div className="h-25 min-w-[1280px] backdrop-blur-xl bg-foreground/80 text-white/70 overflow-hidden relative select-none">
-      <div className="bg-foreground/80 backdrop-blur-sm py-2">
-        <div className="container mx-auto px-4 flex items-center justify-center md:justify-end gap-6 text-sm">
-          <div className="flex items-center gap-2 text-white/90">
+    <div className="h-16 md:h-25 backdrop-blur-xl bg-foreground/80 text-white/70 overflow-hidden select-none sticky top-0 z-50">
+      <div className="md:block bg-foreground/80 backdrop-blur-sm md:py-2">
+        <div className="hidden md:flex container mx-auto px-4 md:pr-[120px] items-center justify-center md:justify-end gap-x-4 gap-y-1 md:gap-6 text-[11px] md:text-sm">
+          <div className="flex items-center gap-1.5 text-white/90">
             <Phone className="w-4 h-4" />
             <span>+852 5971 1918</span>
           </div>
-          <div className="hidden sm:flex items-center gap-2 text-white/90">
+          <div className="flex items-center gap-1.5 text-white/90">
             <Mail className="w-4 h-4" />
             <span>info@go-tech.com</span>
           </div>
-          <div className="hidden md:flex items-center gap-2 text-white/90">
+          <div className="flex items-center gap-1.5 text-white/90">
             <MapPin className="w-4 h-4" />
             <span>香港九龍觀塘道123號</span>
           </div>
@@ -76,7 +100,7 @@ const Header = () => {
             <span className="text-lg font-bold text-white">GO-TECH</span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden md:flex items-center gap-1" aria-label="主導航">
             <Link
               href="/core-advantages"
               className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-white/80 hover:text-primary hover:bg-white/5 transition-colors leading-none"
@@ -126,13 +150,13 @@ const Header = () => {
             </Link>
           </nav>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 md:gap-3">
             {isLoggedIn ? (
               <>
                 <Button
                   size="sm"
                   variant="trial"
-                  className="px-4"
+                  className="px-4 hidden md:block"
                   onClick={() => {
                     hasTenant
                       ? router.push('/select-account')
@@ -149,15 +173,18 @@ const Header = () => {
                 </Button>
                 <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                   <SheetTrigger asChild>
-                    <button className="flex items-center gap-2 text-white hover:text-primary transition-colors cursor-pointer">
+                    <button
+                      aria-label="帳戶選單"
+                      className="flex items-center gap-2 text-white hover:text-primary transition-colors cursor-pointer"
+                    >
                       <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
                         <User className="w-4 h-4 text-primary" />
                       </div>
-                      <span className="text-sm font-medium">{user?.nickname}</span>
+                      <span className="hidden md:block text-sm font-medium">{user?.nickname}</span>
                       <Crown className="w-4 h-4 text-yellow-400" />
                     </button>
                   </SheetTrigger>
-                  <SheetContent side="right" className="w-80 bg-background">
+                  <SheetContent side="right" className="w-80 bg-background" aria-describedby={undefined}>
                     <SheetHeader className="border-b pb-4">
                       <SheetTitle className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
@@ -198,16 +225,81 @@ const Header = () => {
               </>
             ) : (
               <>
-                <Link href="/account/register">
+                <Link href="/account/register" className="hidden md:block">
                   <Button variant="trial" size="sm" className="px-4">
                     {t('Nav.freeTrial')}
                   </Button>
                 </Link>
-                <Link href="/account/login">
-                  <Button size="sm">{t('Common.login')}</Button>
+                <Link href="/account/login" aria-label={t('Common.login')}>
+                  <span className="flex md:hidden h-8 w-8 items-center justify-center rounded-full bg-primary/20">
+                    <User className="w-4 h-4 text-primary" />
+                  </span>
+                  <Button size="sm" className="hidden md:inline-flex">
+                    {t('Common.login')}
+                  </Button>
                 </Link>
               </>
             )}
+            <LocaleSwitcher />
+            <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+              <SheetTrigger asChild>
+                <button className="md:hidden order-last p-2 text-white" aria-label="選單">
+                  <Menu className="w-6 h-6" />
+                </button>
+              </SheetTrigger>
+              <SheetContent
+                side="right"
+                className="w-72 max-w-full bg-background overflow-y-auto"
+                aria-describedby={undefined}
+              >
+                <SheetHeader className="border-b pb-4">
+                  <SheetTitle>選單</SheetTitle>
+                </SheetHeader>
+                <nav className="mt-4 space-y-1">
+                  {mobileMenuItems.map(([to, Icon, label]) => (
+                    <Link
+                      key={to}
+                      href={to}
+                      onClick={() => setIsMenuOpen(false)}
+                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted"
+                    >
+                      <Icon className="w-5 h-5 text-primary" />
+                      <span>{label}</span>
+                    </Link>
+                  ))}
+                </nav>
+                <Link
+                  href={isLoggedIn ? '/select-account' : '/account/register'}
+                  onClick={() => setIsMenuOpen(false)}
+                  className="block mt-6"
+                >
+                  <Button variant="trial" className="w-full">
+                    {isLoggedIn ? '立即試用' : '免費試用'}
+                  </Button>
+                </Link>
+                <Button
+                  variant="outline"
+                  className="w-full mt-3 gap-2"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    setMode('pc');
+                  }}
+                >
+                  <Monitor className="w-4 h-4" />
+                  切換至PC版
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full mt-2"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    setMode('auto');
+                  }}
+                >
+                  自動適應裝置
+                </Button>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </div>
