@@ -1,7 +1,12 @@
 'use client';
 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@go-tech-frontend/ui';
 import { useLocale } from 'next-intl';
-import { usePathname } from '@/i18n/navigation';
+import { useTransition } from 'react';
+import { withProductQuery } from '@/app/lib/product-navigation';
+import { useIframeContext } from '@/contexts/IframeContext';
+import { useOptionalProductSelection } from '@/contexts/ProductSelectionContext';
+import { usePathname, useRouter } from '@/i18n/navigation';
 import Link from './Link';
 
 const options = [
@@ -10,23 +15,52 @@ const options = [
   { code: 'en-us', label: 'EN' }
 ] as const;
 
-export default function LocaleSwitcher() {
+interface LocaleSwitcherProps {
+  type?: 'inline' | 'select';
+}
+
+export default function LocaleSwitcher({ type = 'select' }: LocaleSwitcherProps) {
   const locale = useLocale();
   const pathname = usePathname();
+  const router = useRouter();
+  const { hasIframe } = useIframeContext();
+  const productSelection = useOptionalProductSelection();
+  const [isPending, startTransition] = useTransition();
 
-  // const router = useProgressRouter();
+  const switchLocale = (value: string) => {
+    const nextLocale = options.find(option => option.code === value)?.code;
+    if (!nextLocale || nextLocale === locale || hasIframe || isPending) return;
 
-  // async function switchTo(nextLocale: string) {
-  //   if (nextLocale === locale) return;
+    startTransition(() => {
+      router.replace(withProductQuery(pathname, productSelection?.product), {
+        locale: nextLocale,
+        scroll: false
+      });
+    });
+  };
 
-  //   await fetch('/api/locale', {
-  //     method: 'POST',
-  //     headers: { 'Content-Type': 'application/json' },
-  //     body: JSON.stringify({ locale: nextLocale })
-  //   });
-
-  //   router.refresh();
-  // }
+  if (type === 'select') {
+    return (
+      <Select value={locale} onValueChange={switchLocale} disabled={hasIframe || isPending}>
+        <SelectTrigger
+          className="h-8 w-auto rounded-full border-white/30 bg-transparent text-xs text-white [&>svg]:hidden"
+          aria-label="切換語言"
+          aria-busy={isPending}
+          title={hasIframe ? '在 iframe 中不可用' : undefined}
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map(opt => (
+            <SelectItem key={opt.code} value={opt.code}>
+              {/* {localeNames[opt.code]} */}
+              {opt.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    );
+  }
 
   return (
     <div className="flex items-center gap-2 sm:gap-3">
