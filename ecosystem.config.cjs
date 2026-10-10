@@ -9,8 +9,8 @@ module.exports = {
       name: 'go-tech-next',
       author: 'hks',
       cwd: root,
-      script: 'pnpm',
-      args: ['run', 'start:h5'],
+      script: path.join(root, 'apps/web-h5/scripts/start-standalone.cjs'),
+      node_args: '--max-old-space-size=4096',
       out_file: path.join(root, 'logs/go-tech-next.log'),
       env: {
         NODE_ENV: 'production',
