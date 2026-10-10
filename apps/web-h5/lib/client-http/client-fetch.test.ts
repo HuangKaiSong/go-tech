@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { afterEach, test } from 'node:test';
 import { clientFetch } from './client-fetch';
 import { ClientHttpError, isNotifiedClientHttpError } from './client-http-error';
-import { type ClientHttpErrorEvent, subscribeClientHttpErrors } from './error-events';
+import { type ClientHttpErrorEvent, subscribeClientHttpDiagnostics, subscribeClientHttpErrors } from './error-events';
 
 const originalFetch = globalThis.fetch;
 const originalWindowDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'window');
@@ -23,6 +23,24 @@ function jsonResponse(body: unknown, init: ResponseInit = {}) {
   headers.set('Content-Type', 'application/json');
   return new Response(JSON.stringify(body), { ...init, headers });
 }
+
+test('silent failures produce diagnostics and monitoring uploads cannot recurse', async () => {
+  const events: ClientHttpErrorEvent[] = [];
+  cleanups.push(subscribeClientHttpDiagnostics(event => events.push(event)));
+  const uiEvents = captureEvents();
+  globalThis.fetch = async () => jsonResponse({ code: 503, message: 'private payload' });
+  await assert.rejects(() => clientFetch('/api/example', {}, { feedback: 'silent' }), ClientHttpError);
+  assert.equal(events.length, 1);
+  assert.equal(events[0].kind, 'business');
+  assert.equal(events[0].businessCode, 503);
+  assert.equal('userMessage' in events[0], false);
+  assert.equal(uiEvents.length, 0);
+  await assert.rejects(
+    () => clientFetch('/api/browser-monitor', {}, { feedback: 'silent', diagnostics: false }),
+    ClientHttpError
+  );
+  assert.equal(events.length, 1);
+});
 
 function captureEvents() {
   const events: ClientHttpErrorEvent[] = [];

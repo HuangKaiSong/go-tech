@@ -3,9 +3,11 @@
 import { runAuthResponseMiddleware } from './auth-response-middleware';
 import { classifyResponse } from './classify-response';
 import { ClientHttpError } from './client-http-error';
-import { publishClientHttpError } from './error-events';
+import { publishClientHttpDiagnostic, publishClientHttpError } from './error-events';
 
 export interface ClientFetchOptions {
+  /** Monitoring uploads skip diagnostics to prevent recursive reporting. */
+  diagnostics?: false;
   feedback?: 'auto' | 'silent';
   /** 复用调用点已有反馈（例如 loading toast）的 id。 */
   feedbackId?: number | string;
@@ -21,6 +23,7 @@ function isRequestAborted(input: RequestInfo | URL, init?: RequestInit) {
 }
 
 function rejectRequest(error: ClientHttpError, options: ClientFetchOptions): never {
+  if (options.diagnostics !== false) publishClientHttpDiagnostic(error);
   if (options.feedback !== 'silent') publishClientHttpError(error, options.feedbackId);
   throw error;
 }

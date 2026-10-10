@@ -1,0 +1,100 @@
+import type { ReplayEvent } from '@go-tech/monitor-contract';
+
+export function safePath(value: string, base = 'http://localhost') {
+  try {
+    return new URL(value, base).pathname.slice(0, 1000);
+  } catch {
+    return '/';
+  }
+}
+
+export function redactText(value: string, limit = 1000) {
+  return value
+    .replace(/https?:\/\/[^\s)"'<>]+/g, url => {
+      try {
+        const parsed = new URL(url);
+        return `${parsed.origin}${parsed.pathname}`;
+      } catch {
+        return '[url]';
+      }
+    })
+    .replace(/\bBearer\s+\S+/gi, 'Bearer [redacted]')
+    .replace(/\b(token|password|secret|authorization|cookie)\s*[:=]\s*[^\s,;]+/gi, '$1=[redacted]')
+    .replace(/[\w.+-]+@[\w.-]+\.[a-z]{2,}/gi, '[email]')
+    .slice(0, limit);
+}
+
+type Json = ReplayEvent['data'];
+const allowedAttributes = new Set([
+  'class',
+  'id',
+  'style',
+  '_cssText',
+  'type',
+  'width',
+  'height',
+  'checked',
+  'selected',
+  'disabled',
+  'open',
+  'hidden',
+  'role',
+  'aria-hidden',
+  'aria-expanded',
+  'aria-disabled',
+  'tabindex',
+  'rr_width',
+  'rr_height',
+  'rr_scrollLeft',
+  'rr_scrollTop',
+  'rr_open_mode'
+]);
+
+function css(value: string) {
+  return value
+    .replace(/url\(([^)]*)\)/gi, (_match, url: string) => {
+      const path = url.trim().replace(/^['"]|['"]$/g, '');
+      if (/^(data:|blob:|javascript:)/i.test(path)) return 'url("")';
+      try {
+        const parsed = new URL(path, window.location.href);
+        return `url("${parsed.origin}${parsed.pathname}")`;
+      } catch {
+        return 'url("")';
+      }
+    })
+    .replace(/\bcontent\s*:\s*(['"])[\s\S]*?\1/gi, 'content:"***"');
+}
+
+function sanitize(value: unknown, key = ''): Json {
+  if (value === null || value === undefined) return null;
+  if (typeof value === 'boolean' || typeof value === 'number') return value;
+  if (typeof value === 'string') return sanitizeString(value, key);
+  if (Array.isArray(value)) return value.map(item => sanitize(item));
+  if (typeof value !== 'object') return null;
+  const result: Record<string, Json> = {};
+  for (const [name, child] of Object.entries(value)) {
+    const safeKey = !['__proto__', 'constructor', 'prototype'].includes(name);
+    if (safeKey && (key !== 'attributes' || allowedAttributes.has(name))) result[name] = sanitize(child, name);
+  }
+  if ('property' in value && value.property === 'content' && 'value' in result) result.value = '"***"';
+  return result;
+}
+
+function sanitizeString(value: string, key: string) {
+  if (key === 'href') {
+    try {
+      const parsed = new URL(value, window.location.href);
+      return `${parsed.origin}${parsed.pathname}`;
+    } catch {
+      return '';
+    }
+  }
+  if (key === 'text') return '*'.repeat(Math.min(value.length, 1000));
+  if (['textContent', '_cssText', 'style', 'rule', 'replace', 'replaceSync', 'value'].includes(key)) return css(value);
+  return value;
+}
+
+/** No console/network payload plugins; attributes and document URLs are filtered before buffering. */
+export function sanitizeRecording(event: { data: unknown; timestamp: number; type: number }): ReplayEvent {
+  return { type: event.type, timestamp: event.timestamp, data: sanitize(event.data) };
+}

@@ -11,7 +11,33 @@ export interface ClientHttpErrorEvent {
 type ClientHttpErrorListener = (event: ClientHttpErrorEvent) => void;
 
 const listeners = new Set<ClientHttpErrorListener>();
+const diagnosticListeners = new Set<ClientHttpErrorListener>();
 let eventSequence = 0;
+
+/** Diagnostic listeners also receive silent request failures; they never control UI feedback. */
+export function subscribeClientHttpDiagnostics(listener: ClientHttpErrorListener) {
+  diagnosticListeners.add(listener);
+  return () => {
+    diagnosticListeners.delete(listener);
+  };
+}
+
+export function publishClientHttpDiagnostic(error: ClientHttpError) {
+  eventSequence += 1;
+  const event: ClientHttpErrorEvent = {
+    id: `diagnostic-${eventSequence}`,
+    kind: error.kind,
+    businessCode: error.businessCode,
+    status: error.status
+  };
+  for (const listener of diagnosticListeners) {
+    try {
+      listener(event);
+    } catch {
+      /* Diagnostics cannot replace the original request failure. */
+    }
+  }
+}
 
 export function subscribeClientHttpErrors(listener: ClientHttpErrorListener) {
   listeners.add(listener);

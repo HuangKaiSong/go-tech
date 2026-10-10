@@ -1,0 +1,28 @@
+{
+  "name": "@go-tech/browser-monitor",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@go-tech/monitor-contract": "workspace:*",
+    "@rrweb/record": "catalog:web",
+    "web-vitals": "catalog:web"
+  },
+  "devDependencies": {
+    "@go-tech/tsconfig": "workspace:*",
+    "jsdom": "catalog:dev",
+    "tsdown": "catalog:dev",
+    "typescript": "catalog:core",
+    "vitest": "catalog:dev"
+  }
+}

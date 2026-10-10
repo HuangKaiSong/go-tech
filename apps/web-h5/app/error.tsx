@@ -1,6 +1,7 @@
 'use client';
 
-import React, { Component, type ErrorInfo, type ReactNode } from 'react';
+import React, { Component, type ErrorInfo, type ReactNode, useEffect } from 'react';
+import { captureBrowserError } from '@/lib/browser-monitor/client';
 // import { sendToBetterStack } from '@/lib/betterstack-logger';
 
 interface ErrorBoundaryProps {
@@ -26,6 +27,7 @@ export class GracefullyDegradingErrorBoundary extends Component<ErrorBoundaryPro
   }
 
   override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    captureBrowserError(error, { kind: 'react', componentStack: errorInfo.componentStack ?? undefined });
     if (this.props.onError) {
       // sendToBetterStack('error', error.message, errorInfo);
       this.props.onError(error, errorInfo);
@@ -55,4 +57,17 @@ export class GracefullyDegradingErrorBoundary extends Component<ErrorBoundaryPro
   }
 }
 
-export default GracefullyDegradingErrorBoundary;
+export default function ErrorPage({ error, retry }: { error: Error & { digest?: string }; retry: () => void }) {
+  useEffect(() => {
+    captureBrowserError(error, { kind: 'react', digest: error.digest });
+  }, [error]);
+
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center gap-4 p-6">
+      <h1 className="text-xl font-semibold">Something went wrong</h1>
+      <button type="button" onClick={retry} className="rounded border px-4 py-2">
+        Try again
+      </button>
+    </main>
+  );
+}
