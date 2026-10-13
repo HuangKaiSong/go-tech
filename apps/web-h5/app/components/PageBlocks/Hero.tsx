@@ -393,7 +393,7 @@ function ProductHero({ block, hasIframe, seq }: { block: HeroBlock; hasIframe: b
           }}
         />
 
-        <div className={`relative z-10 mx-auto px-4 ${switcherBelowHero ? 'container px-4 text-center' : 'w-full'}`}>
+        <div className={`relative z-10 mx-auto px-4 container ${switcherBelowHero ? 'px-4 text-center' : 'w-full'}`}>
           {!switcherBelowHero && productSwitcher}
 
           <ProductHeroContent
