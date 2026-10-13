@@ -34,7 +34,9 @@ const MobileNav = () => {
   const t = useTranslations();
   const pathname = usePathname();
   const router = useProgressRouter();
-  const { isLoggedIn, logout, user } = useAuth();
+  // const { isLoggedIn, logout, user } = useAuth();
+  const { logout, user } = useAuth();
+  const isLoggedIn = false;
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [notifyOpen, setNotifyOpen] = useState(false);
