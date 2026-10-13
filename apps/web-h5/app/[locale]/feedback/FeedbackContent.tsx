@@ -21,6 +21,7 @@ import { OfficialAvatar, SmallOfficialAvatar, SmallUserAvatar, UserAvatar } from
 import NewPostDialog from '@/app/components/feedback/NewPostDialog';
 import Turnstile from '@/app/components/feedback/turnstile';
 import Footer from '@/app/components/Footer';
+import SwipeRow from '@/app/components/SwipeRow';
 import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -485,7 +486,7 @@ const FeedbackContent = ({ categoriesFromDB, featureCompleted, language }: Props
               <h2 style={SERIF} className="text-3xl text-stone-900 mb-8">
                 <DynamicText text="瀏覽需求主題" />
               </h2>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              <SwipeRow className="flex md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-5 overflow-x-auto md:overflow-visible snap-x snap-mandatory -mx-4 px-4 md:mx-auto md:px-0 gap-4 pb-3 md:pb-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&>*]:shrink-0 [&>*]:basis-[85%] [&>*]:snap-center md:[&>*]:basis-auto">
                 {categoryMeta.map(c => {
                   const Icon = c.icon;
                   return (
@@ -515,7 +516,7 @@ const FeedbackContent = ({ categoriesFromDB, featureCompleted, language }: Props
                     </button>
                   );
                 })}
-              </div>
+              </SwipeRow>
             </div>
 
             <div>
