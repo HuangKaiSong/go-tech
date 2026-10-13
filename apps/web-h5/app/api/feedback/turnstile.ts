@@ -1,4 +1,7 @@
 import _ from 'server-only';
+import { captureServerRouteError } from '@/lib/browser-monitor/server';
+import { serverRequestContext } from '@/lib/browser-monitor/server-report';
+import { serverFetch } from '@/lib/server-fetch';
 import { type BotVerificationAction, verifyFallbackCaptcha } from './fallback-captcha';
 import { classifyTurnstileFailure } from './turnstile-policy';
 
@@ -14,21 +17,29 @@ const testSecretKey = '1x0000000000000000000000000000000AA';
 
 const verifyTurnstileToken = async (
   token: string,
-  expectedAction: BotVerificationAction
+  expectedAction: BotVerificationAction,
+  request?: Request
 ): Promise<BotVerificationResult> => {
   if (!token || token.length > 2048) return { reason: 'invalid', success: false };
 
   const secretKey = process.env.TURNSTILE_SECRET_KEY || (process.env.NODE_ENV === 'development' ? testSecretKey : '');
-  if (!secretKey) return { reason: 'unavailable', success: false };
+  if (!secretKey) {
+    if (request) await captureServerRouteError(new Error('Turnstile verification is not configured'), request);
+    return { reason: 'unavailable', success: false };
+  }
   const isTestKey = secretKey === testSecretKey;
 
   try {
-    const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-      body: JSON.stringify({ response: token, secret: secretKey }),
-      headers: { 'Content-Type': 'application/json' },
-      method: 'POST',
-      signal: AbortSignal.timeout(5000)
-    });
+    const response = await serverFetch(
+      'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+      {
+        body: JSON.stringify({ response: token, secret: secretKey }),
+        headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+        signal: AbortSignal.timeout(5000)
+      },
+      { inspectJson: true, request: request ? serverRequestContext(request) : undefined }
+    );
     if (!response.ok) return { reason: 'unavailable', success: false };
 
     const result = (await response.json()) as SiteverifyResponse;
@@ -38,7 +49,14 @@ const verifyTurnstileToken = async (
         errorCodes,
         expectedAction
       });
-      return { reason: classifyTurnstileFailure(errorCodes), success: false };
+      const reason = classifyTurnstileFailure(errorCodes);
+      if (reason === 'unavailable' && request) {
+        await captureServerRouteError(
+          new Error('POST https://challenges.cloudflare.com/turnstile/v0/siteverify failed: verification unavailable'),
+          request
+        );
+      }
+      return { reason, success: false };
     }
     if (!isTestKey && result.action !== expectedAction) {
       console.warn('Turnstile action mismatch:', { actualAction: result.action, expectedAction });
@@ -53,9 +71,10 @@ const verifyTurnstileToken = async (
 
 export const verifyBotToken = async (
   token: string,
-  expectedAction: BotVerificationAction
+  expectedAction: BotVerificationAction,
+  request?: Request
 ): Promise<BotVerificationResult> => {
-  if (!token.startsWith('fallback:')) return verifyTurnstileToken(token, expectedAction);
+  if (!token.startsWith('fallback:')) return verifyTurnstileToken(token, expectedAction, request);
 
   const separatorIndex = token.lastIndexOf(':');
   if (separatorIndex <= 'fallback:'.length) return { reason: 'invalid', success: false };
@@ -67,6 +86,7 @@ export const verifyBotToken = async (
       ? { success: true }
       : { reason: 'invalid', success: false };
   } catch (error) {
+    if (request) await captureServerRouteError(error, request);
     console.error('Fallback captcha verification failed:', error);
     return { reason: 'unavailable', success: false };
   }

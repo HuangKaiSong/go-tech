@@ -1,4 +1,5 @@
 'use server';
+import { captureServerError } from '@/lib/browser-monitor/server';
 import { cacheKey, pendingPromises, translationCache } from './cache';
 import { hash } from './hash';
 import { addPending, addPendingBatch, loadDB, updateDB } from './loader';
@@ -62,6 +63,7 @@ export async function translate(text: string, locale: Locale): Promise<string> {
 
       return translated;
     } catch (error) {
+      await captureServerError(error);
       console.error(`[Translation Error] "${text}" -> ${locale}`, error);
       return text; // 降级返回原文
     }
@@ -121,6 +123,7 @@ export async function translateBatch(texts: string[], locale: Locale): Promise<R
   try {
     batchResult = await translateBatchByAI(uncachedTexts, locale);
   } catch (error) {
+    await captureServerError(error);
     console.error(`[Batch Translation Error] ${uncachedTexts.length} texts -> ${locale}`, error);
     return Object.fromEntries(texts.map(text => [text, result[text] ?? text]));
   }
@@ -166,6 +169,7 @@ export async function translateBatch(texts: string[], locale: Locale): Promise<R
         return db;
       });
     } catch (error) {
+      await captureServerError(error);
       console.error(`[Translation DB Write Error] ${entriesToUpdate.length} entries`, error);
     }
   }
@@ -174,6 +178,7 @@ export async function translateBatch(texts: string[], locale: Locale): Promise<R
   try {
     await addPendingBatch(uncachedTexts);
   } catch (error) {
+    await captureServerError(error);
     console.error(`[Pending Translation Write Error] ${uncachedTexts.length} entries`, error);
   }
 

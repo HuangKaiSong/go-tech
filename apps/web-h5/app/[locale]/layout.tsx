@@ -11,6 +11,7 @@ import { routing } from '@/i18n/routing';
 import { captureServerError } from '@/lib/browser-monitor/server';
 import { getBaseUrl } from '@/lib/http';
 import { getLocalizedAlternates } from '@/lib/seo';
+import { serverPlatformFetch } from '@/lib/server-fetch';
 import { VIEW_MODE_COOKIE, parseViewMode } from '@/lib/view-mode';
 import { ClientHttpErrorNotifier } from '../components/client-http-error-notifier';
 import { DynamicI18nProvider } from '../components/DynamicI18nProvider';
@@ -54,9 +55,8 @@ async function fetchLayoutData(
   init: RequestInit
 ): Promise<{ code?: unknown; data?: unknown } | undefined> {
   try {
-    const response = await fetch(url, init);
+    const response = await serverPlatformFetch(url, init);
     if (!response.ok) {
-      await captureServerError(response);
       return undefined;
     }
     const data: unknown = await response.json();

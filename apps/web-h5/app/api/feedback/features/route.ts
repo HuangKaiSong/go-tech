@@ -39,12 +39,15 @@ interface FeatureSubmission {
   turnstileToken: string;
 }
 
-const validateFeatureSubmission = async ({ categoryName, description, title, turnstileToken }: FeatureSubmission) => {
+const validateFeatureSubmission = async (
+  { categoryName, description, title, turnstileToken }: FeatureSubmission,
+  request: Request
+) => {
   if (!title || title.length > 160 || !description || description.length > 500 || !categoryName) {
     return NextResponse.json({ success: false, message: '需求內容無效' }, { status: 400 });
   }
 
-  const botVerification = await verifyBotToken(turnstileToken, 'feedback_post');
+  const botVerification = await verifyBotToken(turnstileToken, 'feedback_post', request);
   if (!botVerification.success) {
     if (botVerification.reason === 'unavailable') {
       return NextResponse.json(
@@ -58,7 +61,7 @@ const validateFeatureSubmission = async ({ categoryName, description, title, tur
     );
   }
 
-  const response = await moderateFeedbackContent([title, description]);
+  const response = await moderateFeedbackContent([title, description], request);
 
   if (!response.allowed) {
     if ('error' in response) {
@@ -138,7 +141,7 @@ export async function POST(req: NextRequest) {
   const subCategoryName = typeof body?.subCategory === 'string' ? body.subCategory.trim() : '';
   const turnstileToken = typeof body?.turnstileToken === 'string' ? body.turnstileToken : '';
 
-  const validationResponse = await validateFeatureSubmission({ categoryName, description, title, turnstileToken });
+  const validationResponse = await validateFeatureSubmission({ categoryName, description, title, turnstileToken }, req);
 
   if (validationResponse) return validationResponse;
 
@@ -188,6 +191,6 @@ export async function POST(req: NextRequest) {
     };
   });
 
-  scheduleFeedbackSync();
+  scheduleFeedbackSync(req);
   return NextResponse.json({ success: true, data: feature }, { status: 201 });
 }

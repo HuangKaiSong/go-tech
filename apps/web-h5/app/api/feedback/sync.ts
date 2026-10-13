@@ -3,6 +3,8 @@ import { after } from 'next/server';
 import { fetchFeedbackAi } from '@/app/api/feedback/ai-client';
 import { db } from '@/db';
 import { fbAideSyncJob } from '@/db/scheam';
+import { captureServerError } from '@/lib/browser-monitor/server';
+import { serverRequestContext } from '@/lib/browser-monitor/server-report';
 
 type DatabaseTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 type SyncJobExecutor = typeof db | DatabaseTransaction;
@@ -22,21 +24,27 @@ export function enqueueFeedbackSync(executor: SyncJobExecutor, featureId: number
 }
 
 /** 在响应发送后消费任务；任务失败会留在 Outbox 中按退避时间重试。 */
-export function scheduleFeedbackSync() {
+export function scheduleFeedbackSync(request: Request) {
+  const context = serverRequestContext(request);
   after(async () => {
     try {
       for (let batch = 0; batch < 5; batch += 1) {
         // oxlint-disable-next-line no-await-in-loop
-        const response = await fetchFeedbackAi('/v1/modules/feedback/sync/process', {
-          body: JSON.stringify({ limit: 10 }),
-          method: 'POST'
-        });
-        if (!response.ok) throw new Error(`Feedback AI sync returned HTTP ${response.status}`);
+        const response = await fetchFeedbackAi(
+          '/v1/modules/feedback/sync/process',
+          {
+            body: JSON.stringify({ limit: 10 }),
+            method: 'POST'
+          },
+          context
+        );
+        if (!response.ok) return;
         // oxlint-disable-next-line no-await-in-loop
         const result = (await response.json()) as { processed: number };
         if (result.processed === 0) break;
       }
     } catch (error) {
+      await captureServerError(error, context);
       console.error('Feedback vector sync could not start', error);
     }
   });

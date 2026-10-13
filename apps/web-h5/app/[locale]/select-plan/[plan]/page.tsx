@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { notFound, redirect } from 'next/navigation';
 import { buildPackageCatalog } from '@/app/lib/package-catalog';
 import { getBaseUrl } from '@/lib/http';
+import { serverPlatformFetch } from '@/lib/server-fetch';
 import PageClient from './_page';
 
 export default async function SelectPlanPage({ params }: { params: Promise<{ plan: string }> }) {
@@ -12,8 +13,8 @@ export default async function SelectPlanPage({ params }: { params: Promise<{ pla
   }
   const { plan } = await params;
   const baseUrl = getBaseUrl();
-  const packagesData = (await fetch(`${baseUrl}/go-tech/platform/platformPackage/detail/${plan}`).then(res =>
-    res.json()
+  const packagesData = (await serverPlatformFetch(`${baseUrl}/go-tech/platform/platformPackage/detail/${plan}`).then(
+    res => res.json()
   )) as HttpBaseResponse<Packages>;
   const catalog = buildPackageCatalog([packagesData?.data]);
   const packages = [...catalog.hr, ...catalog.pms][0];

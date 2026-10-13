@@ -3,7 +3,9 @@ import Footer from '@/app/components/Footer';
 import Header from '@/app/components/v2/Header';
 import { buildPackageCatalog } from '@/app/lib/package-catalog';
 import servicePlanBg from '@/assets/service-plan-bg.jpg';
+import { captureServerError } from '@/lib/browser-monitor/server';
 import { getBaseUrl } from '@/lib/http';
+import { serverPlatformFetch } from '@/lib/server-fetch';
 import { DynamicText } from '../../components/DynamicI18nText';
 import PricingCard from './_renderPackage';
 import EmptyCatalog from './EmptyCatalog';
@@ -19,8 +21,8 @@ const ServicePlan = async ({ searchParams }: { searchParams: Promise<{ product?:
   const hasProduct = requestedProduct === 'hr' || requestedProduct === 'pms';
 
   try {
-    const packagesData = (await fetch(`${baseUrl}/go-tech/platform/platformPackage/enabledList`).then(res =>
-      res.json()
+    const packagesData = (await serverPlatformFetch(`${baseUrl}/go-tech/platform/platformPackage/enabledList`).then(
+      res => res.json()
     )) as unknown;
     const productPlans = buildPackageCatalog(packagesData)[product].filter(
       currentPackage => (currentPackage.detail?.packageKind || 'plan') === 'plan'
@@ -28,6 +30,7 @@ const ServicePlan = async ({ searchParams }: { searchParams: Promise<{ product?:
 
     packages = buildServicePlans(productPlans);
   } catch (error) {
+    await captureServerError(error);
     packages = [];
     console.log(error);
   }

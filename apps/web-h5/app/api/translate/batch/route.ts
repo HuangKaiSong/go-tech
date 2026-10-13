@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import type { Locale } from '@/app/lib/translation/types';
+import { captureServerRouteError } from '@/lib/browser-monitor/server';
 import { translateBatch } from '../../../lib/translation';
 
 export const runtime = 'nodejs';
@@ -37,6 +38,7 @@ export async function POST(request: NextRequest) {
     const translations = await translateBatch(texts, locale as Locale);
     return NextResponse.json({ translations });
   } catch (error) {
+    await captureServerRouteError(error, request);
     console.error('Batch translation error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

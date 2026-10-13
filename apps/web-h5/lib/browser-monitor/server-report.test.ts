@@ -8,6 +8,19 @@ import { createServerErrorReport, sendServerErrorReport } from './server-report'
 
 const secret = 'monitor-test-signing-key';
 
+test('server request reports retain validated status and business code without copying arbitrary error fields', async () => {
+  const error = Object.assign(new Error('GET https://api.example.com/orders failed: business response code'), {
+    status: 200,
+    businessCode: 'password=private',
+    payload: { token: 'must-not-store' }
+  });
+  const report = await createServerErrorReport(error, { headers: new Headers(), path: '/orders', method: 'GET' }, {});
+  assert.equal(reportSchema.safeParse(report).success, true);
+  assert.equal(report.error.status, 200);
+  assert.equal(report.error.businessCode, 'password=[redacted]');
+  assert.equal(JSON.stringify(report).includes('must-not-store'), false);
+});
+
 test('server HTTP errors retain the request address and status without URL credentials or query parameters', async () => {
   const response = new Response('private response body', { status: 503, statusText: 'Service Unavailable' });
   Object.defineProperty(response, 'url', {

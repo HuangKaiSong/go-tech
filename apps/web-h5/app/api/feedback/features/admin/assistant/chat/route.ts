@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { fetchFeedbackAi } from '@/app/api/feedback/ai-client';
+import { serverRequestContext } from '@/lib/browser-monitor/server-report';
 import { requireFeedbackAdmin } from '../../auth';
 
 export const runtime = 'nodejs';
@@ -29,16 +30,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, message: '問題或對話上下文格式無效' }, { status: 400 });
   }
 
-  const upstream = await fetchFeedbackAi('/v1/modules/feedback/chat', {
-    body: JSON.stringify({
-      history: result.data.history ?? [],
-      conversation_id: result.data.conversationId,
-      question: result.data.question,
-      user_id: `admin:${auth.admin.id}`
-    }),
-    method: 'POST',
-    signal: req.signal
-  }).catch(error => {
+  const upstream = await fetchFeedbackAi(
+    '/v1/modules/feedback/chat',
+    {
+      body: JSON.stringify({
+        history: result.data.history ?? [],
+        conversation_id: result.data.conversationId,
+        question: result.data.question,
+        user_id: `admin:${auth.admin.id}`
+      }),
+      method: 'POST',
+      signal: req.signal
+    },
+    serverRequestContext(req)
+  ).catch(error => {
     console.error('Feedback AI service could not be reached', error);
     return undefined;
   });

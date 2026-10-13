@@ -46,6 +46,6 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ c
   });
 
   if (!result) return NextResponse.json({ success: false, message: '評論不存在' }, { status: 404 });
-  scheduleFeedbackSync();
+  scheduleFeedbackSync(req);
   return NextResponse.json({ success: true, data: { id: String(commentId), deleted: true } });
 }

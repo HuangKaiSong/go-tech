@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { fetchFeedbackAi } from '@/app/api/feedback/ai-client';
+import { serverRequestContext } from '@/lib/browser-monitor/server-report';
 import { requireFeedbackAdmin } from '../../../auth';
 
 export const runtime = 'nodejs';
@@ -20,7 +21,8 @@ async function proxyConversation(req: NextRequest, context: RouteContext, method
   const userId = encodeURIComponent(`admin:${auth.admin.id}`);
   const upstream = await fetchFeedbackAi(
     `/v1/modules/feedback/conversations/${encodeURIComponent(conversationId)}?user_id=${userId}`,
-    { method }
+    { method },
+    serverRequestContext(req)
   ).catch(error => {
     console.error(`Could not ${method.toLowerCase()} Feedback AI conversation`, error);
     return undefined;

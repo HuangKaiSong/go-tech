@@ -49,7 +49,7 @@ export class HttpClient {
 
     let response: Response;
     try {
-      response = await fetch(url, {
+      response = await (this.adapter.fetch ?? fetch)(url, {
         ...rest,
         headers,
         body: body === undefined ? null : JSON.stringify(body)

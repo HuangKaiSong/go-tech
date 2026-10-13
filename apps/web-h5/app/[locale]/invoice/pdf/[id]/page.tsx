@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { captureServerError } from '@/lib/browser-monitor/server';
 import { httpClient } from '@/lib/http';
 
 const fmt = (n: number) => n.toLocaleString('en-HK', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -19,6 +20,7 @@ export default async function Page({ params }: { params: { id: string } }) {
       });
     }
   } catch (error) {
+    await captureServerError(error);
     console.error(error);
     invoice = null;
   }

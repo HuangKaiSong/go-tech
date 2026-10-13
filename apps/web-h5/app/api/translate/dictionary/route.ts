@@ -1,32 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { loadDB, updateDB } from '@/app/lib/translation/loader';
+import z from 'zod';
 import { translationCache } from '@/app/lib/translation/cache';
 import { hash } from '@/app/lib/translation/hash';
+import { loadDB, updateDB } from '@/app/lib/translation/loader';
 import type { TranslationEntry } from '@/app/lib/translation/types';
-import z from 'zod';
+import { captureServerRouteError } from '@/lib/browser-monitor/server';
 
 // 查询参数校验（增加 value）
 const GetQuerySchema = z.object({
   key: z.string().min(1, 'Key must not be empty').optional(),
-  value: z.string().min(1, 'Value must not be empty').optional(),
+  value: z.string().min(1, 'Value must not be empty').optional()
 });
 
-/**
- * GET /api/translate/dictionary?key=xxx
- * 查询翻译词典
- * - 无参数：返回全部条目
- * - 有 key 参数：返回指定 key 的条目
- */
+/** GET /api/translate/dictionary?key=xxx 查询翻译词典 - 无参数：返回全部条目 - 有 key 参数：返回指定 key 的条目 */
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const result = GetQuerySchema.safeParse(Object.fromEntries(searchParams));
 
     if (!result.success) {
-      return NextResponse.json(
-        { error: 'Invalid query parameters', details: result.error.flatten() },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid query parameters', details: result.error.flatten() }, { status: 400 });
     }
 
     const { key, value } = result.data;
@@ -42,7 +35,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         key,
         source: entry.source,
-        translations: entry.translations,
+        translations: entry.translations
       });
     }
 
@@ -52,14 +45,14 @@ export async function GET(request: NextRequest) {
       const results: Array<{ key: string; source: string; translations: Record<string, string> }> = [];
 
       for (const [entryKey, entry] of Object.entries(db)) {
-        const matched = Object.values(entry.translations).some((translated) =>
+        const matched = Object.values(entry.translations).some(translated =>
           translated.toLowerCase().includes(searchTerm)
         );
         if (matched) {
           results.push({
             key: entryKey,
             source: entry.source,
-            translations: entry.translations,
+            translations: entry.translations
           });
         }
       }
@@ -73,14 +66,11 @@ export async function GET(request: NextRequest) {
     // 3. 无参数：返回全部
     return NextResponse.json(db);
   } catch (error) {
+    await captureServerRouteError(error, request);
     console.error('[Dictionary GET] Error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
-
 
 const PostBodySchema = z
   .object({
@@ -88,22 +78,20 @@ const PostBodySchema = z
     source: z.string().min(1, 'Source must not be empty').optional(),
     translations: z
       .record(z.string(), z.string().min(1, 'Translation value must not be empty'))
-      .refine((obj) => Object.keys(obj).length > 0, {
-        message: 'translations is required',
-      }),
+      .refine(obj => Object.keys(obj).length > 0, {
+        message: 'translations is required'
+      })
   })
-  .refine((data) => data.key || data.source, {
+  .refine(data => data.key || data.source, {
     message: 'Either key or source must be provided',
-    path: ['key'], // 错误会附加到 key 字段上
+    path: ['key'] // 错误会附加到 key 字段上
   });
 
-
 /**
- * POST /api/translate/dictionary
- * 修改翻译条目
- * Body: { key?: string, source?: string, translations: Record<string, string> }
- * - key 和 source 至少提供一个，若提供 source 则计算 hash 作为 key
- * - translations 为目标语言的翻译映射，会合并到现有条目
+ * POST /api/translate/dictionary 修改翻译条目 Body: { key?: string, source?: string, translations: Record<string, string> }
+ *
+ * - Key 和 source 至少提供一个，若提供 source 则计算 hash 作为 key
+ * - Translations 为目标语言的翻译映射，会合并到现有条目
  */
 export async function POST(request: NextRequest) {
   try {
@@ -112,10 +100,7 @@ export async function POST(request: NextRequest) {
 
     // 参数校验
     if (!result.success) {
-      return NextResponse.json(
-        { error: 'Invalid request body', details: result.error.flatten() },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid request body', details: result.error.flatten() }, { status: 400 });
     }
 
     const { key, source, translations } = result.data;
@@ -126,14 +111,11 @@ export async function POST(request: NextRequest) {
       targetKey = hash(source);
     }
     if (!targetKey) {
-      return NextResponse.json(
-        { error: 'Either key or source must be provided' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Either key or source must be provided' }, { status: 400 });
     }
 
     // 执行更新（原子操作，排队写入）
-    await updateDB((db) => {
+    await updateDB(db => {
       if (!db[targetKey]) {
         // 如果条目不存在，需要从 source 或 key 推断源文本？这里要求必须存在或提供 source
         if (!source) {
@@ -142,11 +124,11 @@ export async function POST(request: NextRequest) {
         db[targetKey] = {
           source,
           translations: {} as TranslationEntry['translations'],
-          updatedAt: Date.now(),
+          updatedAt: Date.now()
         };
       }
       // 合并 translations，覆盖已有语言
-      const translationEntries = Object.entries(translations) as [keyof TranslationEntry['translations'], string][]
+      const translationEntries = Object.entries(translations) as [keyof TranslationEntry['translations'], string][];
       for (const [locale, value] of translationEntries) {
         if (typeof value !== 'string') {
           throw new TypeError(`Translation value for ${String(locale)} must be a string`);
@@ -166,11 +148,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       key: targetKey,
       source: entry.source,
-      translations: entry.translations,
+      translations: entry.translations
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    await captureServerRouteError(error, request);
     console.error('[Dictionary POST] Error:', error);
-    const msg = error.message || 'Internal server error';
+    const msg = error instanceof Error ? error.message : 'Internal server error';
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

@@ -1,5 +1,6 @@
 import Invoice from '@/app/components/Invoice';
 import Header from '@/app/components/v2/Header';
+import { captureServerError } from '@/lib/browser-monitor/server';
 import { httpClient } from '@/lib/http';
 import BackButton from './BackButton';
 
@@ -19,6 +20,7 @@ export default async function Page({ params }: { params: { id: string } }) {
       });
     }
   } catch (error) {
+    await captureServerError(error);
     console.error(error);
     detail = null;
   }

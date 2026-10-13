@@ -21,7 +21,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     return NextResponse.json({ success: false, message: '留言內容無效' }, { status: 400 });
   }
 
-  const botVerification = await verifyBotToken(turnstileToken, 'feedback_comment');
+  const botVerification = await verifyBotToken(turnstileToken, 'feedback_comment', req);
   if (!botVerification.success) {
     if (botVerification.reason === 'unavailable') {
       return NextResponse.json(
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     );
   }
 
-  const moderation = await moderateFeedbackContent([content]);
+  const moderation = await moderateFeedbackContent([content], req);
   if (!moderation.allowed) {
     if ('error' in moderation) {
       return NextResponse.json(
@@ -81,6 +81,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     return NextResponse.json({ success: false, message: '需求不存在' }, { status: 404 });
   }
 
-  scheduleFeedbackSync();
+  scheduleFeedbackSync(req);
   return NextResponse.json({ success: true, data: comment });
 }

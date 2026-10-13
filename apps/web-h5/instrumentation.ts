@@ -3,6 +3,8 @@ import type { Instrumentation } from 'next';
 /** Unhandled Server Component, Route Handler, Server Action and proxy failures. */
 export const onRequestError: Instrumentation.onRequestError = async (error, request, context) => {
   const timestamp = Date.now();
+  const { isServerErrorReported } = await import('./lib/browser-monitor/server-error-state');
+  if (isServerErrorReported(error)) return;
   const { sendServerErrorReport } = await import('./lib/browser-monitor/server-report');
   const requestHeaders = new Headers();
   for (const [name, value] of Object.entries(request.headers)) {

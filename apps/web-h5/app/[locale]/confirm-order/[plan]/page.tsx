@@ -2,7 +2,9 @@ import { cookies } from 'next/headers';
 import { notFound, redirect } from 'next/navigation';
 import { type PromotionOption, toArray } from '@/app/constants/promotion';
 import { buildPackageCatalog } from '@/app/lib/package-catalog';
+import { captureServerError } from '@/lib/browser-monitor/server';
 import { getBaseUrl } from '@/lib/http';
+import { serverPlatformFetch } from '@/lib/server-fetch';
 import PageClient from './_page';
 
 export default async function ConfirmOrderPage({ params }: { params: { plan: string } | Promise<{ plan: string }> }) {
@@ -15,9 +17,9 @@ export default async function ConfirmOrderPage({ params }: { params: { plan: str
   const { plan } = await params;
   const baseUrl = getBaseUrl();
 
-  const packagesResponse = (await fetch(`${baseUrl}/go-tech/platform/platformPackage/detail/${plan}`).then(res =>
-    res.json()
-  )) as HttpBaseResponse<Packages>;
+  const packagesResponse = (await serverPlatformFetch(
+    `${baseUrl}/go-tech/platform/platformPackage/detail/${plan}`
+  ).then(res => res.json())) as HttpBaseResponse<Packages>;
   const catalog = buildPackageCatalog([packagesResponse.data]);
   const packagesData = [...catalog.hr, ...catalog.pms][0];
   if (!packagesData) notFound();
@@ -30,11 +32,15 @@ export default async function ConfirmOrderPage({ params }: { params: { plan: str
   // 获取当前套餐可用的优惠活动
   let promotions: PromotionOption[] = [];
   try {
-    const promotionResponse = (await fetch(`${baseUrl}/go-tech/platform/promotion/search?packageCode=${plan}`, {
-      headers: { Authorization: `Bearer ${token}`, 'User-Type': 'platform_customer' }
-    }).then(res => res.json())) as HttpBaseResponse<PromotionOption | PromotionOption[]>;
+    const promotionResponse = (await serverPlatformFetch(
+      `${baseUrl}/go-tech/platform/promotion/search?packageCode=${plan}`,
+      {
+        headers: { Authorization: `Bearer ${token}`, 'User-Type': 'platform_customer' }
+      }
+    ).then(res => res.json())) as HttpBaseResponse<PromotionOption | PromotionOption[]>;
     promotions = toArray<PromotionOption>(promotionResponse?.data);
-  } catch {
+  } catch (error) {
+    await captureServerError(error);
     // 忽略：优惠获取失败不影响下单
   }
 

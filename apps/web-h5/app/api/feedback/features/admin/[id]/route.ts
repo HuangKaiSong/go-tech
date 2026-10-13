@@ -30,6 +30,6 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     return feature;
   });
   if (!existing) return NextResponse.json({ success: false, message: '需求不存在' }, { status: 404 });
-  scheduleFeedbackSync();
+  scheduleFeedbackSync(req);
   return NextResponse.json({ success: true, data: { id: String(featureId), deleted: true } });
 }

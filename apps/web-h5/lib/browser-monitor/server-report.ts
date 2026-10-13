@@ -32,9 +32,31 @@ export interface MonitorServerRequest {
   routeType?: NonNullable<MonitorContext['request']>['routeType'];
 }
 
+export function serverRequestContext(request: Request): MonitorServerRequest {
+  return {
+    headers: new Headers(request.headers),
+    path: new URL(request.url).pathname,
+    method: request.method,
+    routeType: 'route'
+  };
+}
+
 function serverErrorCode(cause: unknown) {
   if (cause instanceof Error && 'code' in cause && typeof cause.code === 'string') return cause.code;
   return undefined;
+}
+
+function serverRequestDetails(error: Error | undefined): Pick<ErrorReport['error'], 'businessCode' | 'status'> {
+  const status = error && 'status' in error ? error.status : undefined;
+  const code = error && 'businessCode' in error ? error.businessCode : undefined;
+  let businessCode: string | number | undefined;
+  if (typeof code === 'string') businessCode = redactMonitorText(code, 100);
+  else if (typeof code === 'number' && Number.isFinite(code)) businessCode = code;
+  return {
+    status:
+      typeof status === 'number' && Number.isInteger(status) && status >= 100 && status <= 599 ? status : undefined,
+    businessCode
+  };
 }
 
 function describeServerError(error: unknown): ErrorReport['error'] {
@@ -52,6 +74,7 @@ function describeServerError(error: unknown): ErrorReport['error'] {
   const code = serverErrorCode(value?.cause);
   const digest = value && 'digest' in value && typeof value.digest === 'string' ? value.digest : undefined;
   return {
+    ...serverRequestDetails(value),
     kind: 'next-server',
     name: redactMonitorText(value?.name ?? 'Error', 100),
     message: database

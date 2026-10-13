@@ -2,6 +2,7 @@
 import { decodeJwt } from 'jose';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
+import { captureServerRouteError } from '@/lib/browser-monitor/server';
 
 export async function POST(req: NextRequest) {
   try {
@@ -56,6 +57,7 @@ export async function POST(req: NextRequest) {
       { status: 200 } // 改为 200，因为有响应体
     );
   } catch (error) {
+    await captureServerRouteError(error, req);
     console.error('Signin API error:', error);
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : 'Unknown error' },

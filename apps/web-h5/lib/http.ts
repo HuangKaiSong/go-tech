@@ -2,6 +2,7 @@
 import 'server-only';
 import { HttpClient, type HttpAdapter } from '@go-tech/core-http';
 import { cookies } from 'next/headers';
+import { serverPlatformFetch } from './server-fetch';
 
 export function getBaseUrl(): string {
   const apiUrl = process.env.API_INTERNAL_URL ?? process.env.NEXT_PUBLIC_API_URL;
@@ -18,6 +19,7 @@ export function getBaseUrl(): string {
  * tags requests as a platform customer.
  */
 const nextAdapter: HttpAdapter = {
+  fetch: serverPlatformFetch,
   getBaseUrl,
   async getToken() {
     const cookieStore = await cookies();

@@ -1,8 +1,10 @@
 // oxlint-disable-next-line import/no-unassigned-import -- Enforces the server-only dependency boundary.
 import 'server-only';
 import { headers } from 'next/headers';
+import { unstable_rethrow } from 'next/navigation';
 import { after } from 'next/server';
-import { type MonitorServerRequest, sendServerErrorReport } from './server-report';
+import { isServerErrorReported, markServerErrorReported } from './server-error-state';
+import { type MonitorServerRequest, sendServerErrorReport, serverRequestContext } from './server-report';
 
 export function serverMonitorConfig() {
   return {
@@ -15,6 +17,8 @@ export function serverMonitorConfig() {
 
 /** Call from catches which intentionally handle a server failure instead of rethrowing it. */
 export async function captureServerError(error: unknown, request?: MonitorServerRequest) {
+  unstable_rethrow(error);
+  if (isServerErrorReported(error)) return;
   const timestamp = Date.now();
   const config = serverMonitorConfig();
   if (!config.serviceUrl || !config.ingestToken) return;
@@ -28,7 +32,13 @@ export async function captureServerError(error: unknown, request?: MonitorServer
       routeType: 'render' as const
     };
     after(() => sendServerErrorReport(error, snapshot, { ...config, timestamp }));
-  } catch {
+    markServerErrorReported(error);
+  } catch (schedulingError) {
+    unstable_rethrow(schedulingError);
     console.warn('[server-monitor] Could not schedule error report.');
   }
+}
+
+export async function captureServerRouteError(error: unknown, request: Request) {
+  await captureServerError(error, serverRequestContext(request));
 }

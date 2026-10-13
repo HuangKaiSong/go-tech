@@ -6,6 +6,7 @@ import Link from '@/app/components/Link';
 import Header from '@/app/components/v2/Header';
 import type { MyOrder } from '@/app/constants/order-response';
 import { isOrderId } from '@/app/lib/order-id';
+import { captureServerError } from '@/lib/browser-monitor/server';
 import { httpClient } from '@/lib/http';
 import PageClient from './_page';
 
@@ -40,6 +41,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
         }
       }
     } catch (error) {
+      await captureServerError(error);
       console.error(error);
       detail = null;
     }

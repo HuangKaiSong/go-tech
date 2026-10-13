@@ -47,6 +47,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ com
   });
 
   if (!result) return NextResponse.json({ success: false, message: '評論不存在' }, { status: 404 });
-  scheduleFeedbackSync();
+  scheduleFeedbackSync(req);
   return NextResponse.json({ success: true, data: { id: String(commentId), deleted: false } });
 }

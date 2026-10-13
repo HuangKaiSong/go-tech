@@ -1,3 +1,5 @@
+import { captureServerError } from '@/lib/browser-monitor/server';
+import { serverPlatformFetch } from '@/lib/server-fetch';
 // oxlint-disable-next-line import/no-unassigned-import
 import 'server-only';
 
@@ -9,7 +11,7 @@ const emptyCatalog = (): PackageCatalog => ({ hr: [], pms: [] });
 
 async function getPackageCatalog(): Promise<PackageCatalog> {
   try {
-    const response = await fetch(`${getBaseUrl()}/go-tech/platform/platformPackage/enabledList`);
+    const response = await serverPlatformFetch(`${getBaseUrl()}/go-tech/platform/platformPackage/enabledList`);
 
     if (!response.ok) {
       console.error(`Package API request failed with status ${response.status}`);
@@ -25,6 +27,7 @@ async function getPackageCatalog(): Promise<PackageCatalog> {
 
     return catalog;
   } catch (error) {
+    await captureServerError(error);
     console.error('Error fetching featured packages:', error);
     return emptyCatalog();
   }

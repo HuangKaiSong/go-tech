@@ -1,6 +1,9 @@
 'use server';
 import * as deepl from 'deepl-node';
 import * as OpenCC from 'opencc-js';
+import { captureServerError } from '@/lib/browser-monitor/server';
+import { isServerErrorReported, markServerErrorReported } from '@/lib/browser-monitor/server-error-state';
+import { serverFetch } from '@/lib/server-fetch';
 
 export type TranslationProvider = 'alibaba' | 'deepl' | 'google' | 'openai';
 
@@ -111,8 +114,6 @@ async function translateWithOpenAI(texts: string[], locale: string): Promise<Rec
 export async function translateWithDeepL(texts: string[], locale: string): Promise<Record<string, string>> {
   const authKey = process.env.DEEPL_API_KEY || '';
 
-  const deeplClient = new deepl.DeepLClient(authKey);
-
   let targetLang: deepl.TargetLanguageCode;
   let instruction;
 
@@ -128,10 +129,21 @@ export async function translateWithDeepL(texts: string[], locale: string): Promi
   }
 
   // DeepL 支持批量文本（作为数组传入）
-  const response: deepl.TextResult[] = await deeplClient.translateText(texts, null, targetLang, {
-    preserveFormatting: false,
-    customInstructions: [instruction]
-  });
+  let response: deepl.TextResult[];
+  try {
+    const deeplClient = new deepl.DeepLClient(authKey);
+    response = await deeplClient.translateText(texts, null, targetLang, {
+      preserveFormatting: false,
+      customInstructions: [instruction]
+    });
+  } catch (error) {
+    const failure = new Error(
+      `POST ${authKey.endsWith(':fx') ? 'https://api-free.deepl.com' : 'https://api.deepl.com'}/v2/translate failed`
+    );
+    await captureServerError(failure);
+    if (isServerErrorReported(failure)) markServerErrorReported(error);
+    throw error;
+  }
 
   return Object.fromEntries(texts.map((text, i) => [text, response[i].text]));
 }
@@ -166,15 +178,14 @@ async function translateWithGoogle(texts: string[], locale: string): Promise<Rec
 
   const url = `https://translation.googleapis.com/language/translate/v2?key=${apiKey}`;
 
-  const response = await fetch(url, {
+  const response = await serverFetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ q: texts, target: targetLang, format: 'text' })
   });
 
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Google Translate API error: ${response.status} ${errorText}`);
+    throw new Error(`Google Translate API error: HTTP ${response.status}`, { cause: response });
   }
 
   const data = (await response.json()) as {

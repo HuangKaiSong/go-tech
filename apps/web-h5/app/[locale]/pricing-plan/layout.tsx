@@ -1,13 +1,16 @@
 import { buildPackageCatalog } from '@/app/lib/package-catalog';
+import { captureServerError } from '@/lib/browser-monitor/server';
 import { getBaseUrl } from '@/lib/http';
+import { serverPlatformFetch } from '@/lib/server-fetch';
 import PageClient from './page';
 import { buildPricingData } from './pricing-plan-data';
 
 const fetchData = async (url: string): Promise<unknown> => {
   try {
-    const response = await fetch(url);
-    return response.ok ? response.json() : undefined;
-  } catch {
+    const response = await serverPlatformFetch(url);
+    return response.ok ? await response.json() : undefined;
+  } catch (error) {
+    await captureServerError(error);
     return undefined;
   }
 };

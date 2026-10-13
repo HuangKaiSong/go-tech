@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { NextResponse } from 'next/server';
+import { captureServerRouteError } from '@/lib/browser-monitor/server';
 
 type Payload = {
   blocks: unknown[];
@@ -22,7 +23,10 @@ export const GET = async (request: Request) => {
       message: '獲取成功',
       data: JSON.parse(content)
     });
-  } catch {
+  } catch (error) {
+    if (!(error instanceof Error && 'code' in error && error.code === 'ENOENT')) {
+      await captureServerRouteError(error, request);
+    }
     return NextResponse.json(null, { status: 404 });
   }
 };
@@ -48,6 +52,7 @@ export const POST = async (request: Request) => {
 
     return NextResponse.json({ ok: true, path: `/page-blocks/${body.page}.json` });
   } catch (error) {
+    await captureServerRouteError(error, request);
     console.error(error);
     return NextResponse.json({ ok: false, error: 'Failed to save file' }, { status: 500 });
   }

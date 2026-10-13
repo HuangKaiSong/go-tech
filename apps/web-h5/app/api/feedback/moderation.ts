@@ -1,5 +1,8 @@
 import OpenAI from 'openai';
 import _ from 'server-only';
+import { captureServerError } from '@/lib/browser-monitor/server';
+import { serverRequestContext } from '@/lib/browser-monitor/server-report';
+import { serverFetch } from '@/lib/server-fetch';
 
 type ModerationCategory = 'hate_speech' | 'nsfw' | 'pii' | 'spam';
 
@@ -104,7 +107,7 @@ const parseAIResponse = (text: string): AIReviewResult | null => {
   return null;
 };
 
-export const moderateFeedbackContent = async (contents: string[]): Promise<ModerationResult> => {
+export const moderateFeedbackContent = async (contents: string[], request?: Request): Promise<ModerationResult> => {
   const normalizedContent = normalizeContent(contents.join('\n'));
 
   // 快速正则命中
@@ -115,14 +118,25 @@ export const moderateFeedbackContent = async (contents: string[]): Promise<Moder
   }
 
   // AI 深度审核
-  const openai = new OpenAI({
-    apiKey: process.env.QIANWEN_API_KEY,
-    baseURL: 'https://dashscope.aliyuncs.com/compatible-mode/v1'
-  });
-
+  const context = request ? serverRequestContext(request) : undefined;
+  let transportFailed = false;
   const prompt = buildModerationPrompt(normalizedContent);
 
   try {
+    const openai = new OpenAI({
+      apiKey: process.env.QIANWEN_API_KEY,
+      baseURL: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+      fetch: async (input, init) => {
+        try {
+          const response = await serverFetch(input, init, { inspectJson: true, request: context });
+          if (!response.ok) transportFailed = true;
+          return response;
+        } catch (error) {
+          transportFailed = true;
+          throw error;
+        }
+      }
+    });
     const response = await openai.responses.create({
       model: 'qwen3.7-plus',
       input: prompt
@@ -131,7 +145,13 @@ export const moderateFeedbackContent = async (contents: string[]): Promise<Moder
     console.info('Feedback AI moderation response:', response.output_text);
 
     const aiReview = parseAIResponse(response.output_text);
-    if (!aiReview) return { allowed: false, error: 'AI_REVIEW_FAILED' };
+    if (!aiReview) {
+      await captureServerError(
+        new Error('POST https://dashscope.aliyuncs.com/compatible-mode/v1/responses failed: invalid moderation result'),
+        context
+      );
+      return { allowed: false, error: 'AI_REVIEW_FAILED' };
+    }
 
     if (aiReview.is_sensitive && aiReview.category !== 'safe') {
       return { allowed: false, category: aiReview.category, aiReview };
@@ -139,6 +159,12 @@ export const moderateFeedbackContent = async (contents: string[]): Promise<Moder
 
     return { allowed: true, aiReview };
   } catch (error) {
+    if (!transportFailed) {
+      await captureServerError(
+        new Error('POST https://dashscope.aliyuncs.com/compatible-mode/v1/responses failed: moderation unavailable'),
+        context
+      );
+    }
     console.error('Feedback AI moderation failed:', error);
     return { allowed: false, error: 'AI_REVIEW_FAILED' };
   }

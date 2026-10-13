@@ -12,13 +12,14 @@ export class HttpError extends Error {
 }
 
 /**
- * Runtime capabilities injected into {@link HttpClient}. Each application
- * supplies its own implementation (Next.js `cookies()`, browser
- * `localStorage`, etc.), keeping the kernel free of framework imports.
+ * Runtime capabilities injected into {@link HttpClient}. Each application supplies its own implementation (Next.js
+ * `cookies()`, browser `localStorage`, etc.), keeping the kernel free of framework imports.
  */
 export interface HttpAdapter {
   /** Headers merged into every request (static or computed per-request). */
   defaultHeaders?: Record<string, string> | (() => Record<string, string> | Promise<Record<string, string>>);
+  /** Optional application transport; defaults to the runtime fetch implementation. */
+  fetch?: typeof fetch;
   /** Resolve the API base URL. A trailing slash is normalized away. */
   getBaseUrl: () => string | Promise<string>;
   /** Resolve the auth token for the current runtime. */
@@ -26,14 +27,13 @@ export interface HttpAdapter {
   /** Invoked for any network failure or non-ok response. */
   onError?: (error: HttpError) => void | Promise<void>;
   /**
-   * Invoked specifically on a 401 response. Phase 3 can wire this to reset
-   * auth state (e.g. clear Jotai atoms) and redirect to login.
+   * Invoked specifically on a 401 response. Phase 3 can wire this to reset auth state (e.g. clear Jotai atoms) and
+   * redirect to login.
    */
   onUnauthorized?: () => void | Promise<void>;
   /**
-   * When `true`, a non-ok response resolves with the parsed body instead of
-   * throwing an {@link HttpError}. Use for APIs that encode errors in the
-   * response envelope (e.g. `{ code, message }`). Defaults to `false`.
+   * When `true`, a non-ok response resolves with the parsed body instead of throwing an {@link HttpError}. Use for APIs
+   * that encode errors in the response envelope (e.g. `{ code, message }`). Defaults to `false`.
    */
   returnErrorBody?: boolean;
 }

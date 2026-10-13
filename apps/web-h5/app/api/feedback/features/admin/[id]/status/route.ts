@@ -31,6 +31,6 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (result[0].affectedRows === 0) {
     return NextResponse.json({ success: false, message: '需求不存在' }, { status: 404 });
   }
-  scheduleFeedbackSync();
+  scheduleFeedbackSync(req);
   return NextResponse.json({ success: true, data: { id: String(featureId), status } });
 }

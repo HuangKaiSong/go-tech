@@ -1,4 +1,5 @@
 import { type PromotionOption, toArray } from '@/app/constants/promotion';
+import { captureServerError } from '@/lib/browser-monitor/server';
 import { httpClient } from '@/lib/http';
 import PageClient from './_page';
 
@@ -10,6 +11,7 @@ export default async function Page({ params }: { params: { id: string } }) {
     const data = await httpClient.get(`/go-tech/platform/packageOrder/detail/${id}`);
     detail = data.data;
   } catch (error) {
+    await captureServerError(error);
     console.error(error);
     detail = null;
   }
@@ -22,6 +24,7 @@ export default async function Page({ params }: { params: { id: string } }) {
       const res = await httpClient.get(`/go-tech/platform/promotion/search?packageId=${packageId}`);
       promotions = toArray<PromotionOption>(res?.data);
     } catch (error) {
+      await captureServerError(error);
       console.error(error);
     }
   }

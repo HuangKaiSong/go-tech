@@ -98,7 +98,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const message = reply.error === 'feature' ? '需求不存在或已移除' : '被回覆的評論不存在或已移除';
     return NextResponse.json({ success: false, message }, { status: 404 });
   }
-  scheduleFeedbackSync();
+  scheduleFeedbackSync(req);
   return NextResponse.json({
     success: true,
     data: {
