@@ -123,6 +123,8 @@ curl -H "Authorization: Bearer $MONITOR_QUERY_TOKEN" \
 
 文件以 UUID 命名，写入临时文件后原子重命名；默认保留七天，最多 10000 个报告，保存时和每小时清理。JSON 文件和目录使用受限权限，数据目录已加入 Git ignore。重启会重新扫描记录并建立摘要索引。此实现只支持一个写入进程，数据目录不要由多个实例同时写入。
 
+摘要 Map 在保存和启动加载期间都受 `MONITOR_MAX_REPORTS` 限制；启动按目录流逐条加载。过期或超额摘要先从内存移除，再删除文件，文件删除失败不会让 Map 持续增长。后续清理会重新扫描并重试遗留文件，不在内存中积累待删除队列；损坏或不兼容的报告继续忽略并保留。
+
 ```bash
 pnpm --filter web-monitor type-check
 pnpm --filter web-monitor test

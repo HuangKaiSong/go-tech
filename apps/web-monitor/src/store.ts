@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { mkdir, readFile, readdir, rename, unlink, writeFile } from 'node:fs/promises';
+import { mkdir, opendir, readFile, rename, unlink, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { type MonitorReport, type ReportSummary, reportIdSchema, reportSchema } from '@go-tech/monitor-contract';
 
@@ -31,13 +31,25 @@ export class ReportStore {
     private readonly directory: string,
     private readonly retentionMs: number,
     private readonly maxReports: number
-  ) {}
+  ) {
+    if (!Number.isSafeInteger(maxReports) || maxReports < 1) throw new Error('Invalid maxReports');
+    if (!Number.isSafeInteger(retentionMs) || retentionMs < 1) throw new Error('Invalid retentionMs');
+  }
 
   async initialize() {
     await mkdir(this.directory, { recursive: true, mode: 0o700 });
-    for (const name of await readdir(this.directory)) {
-      // oxlint-disable-next-line no-await-in-loop -- Loading one potentially large recording at a time bounds startup memory.
-      await this.loadSummary(name);
+    for await (const entry of await opendir(this.directory)) {
+      if (entry.isFile()) {
+        // oxlint-disable-next-line no-await-in-loop -- Loading one potentially large recording at a time bounds startup memory.
+        const summary = await this.loadSummary(entry.name);
+        if (summary) {
+          this.summaries.set(summary.id, summary);
+          if (this.summaries.size > this.maxReports || summary.receivedAt <= Date.now() - this.retentionMs) {
+            // oxlint-disable-next-line no-await-in-loop -- Enforce the memory cap before reading the next file; avoid sorting below capacity.
+            await this.pruneFiles();
+          }
+        }
+      }
     }
     await this.prune();
   }
@@ -50,7 +62,7 @@ export class ReportStore {
       if (typeof stored !== 'object' || stored === null || !('report' in stored) || !('receivedAt' in stored)) return;
       const report = reportSchema.parse(stored.report);
       if (report.id !== id || typeof stored.receivedAt !== 'number' || !Number.isFinite(stored.receivedAt)) return;
-      this.summaries.set(id, summarize(report, stored.receivedAt));
+      return summarize(report, stored.receivedAt);
     } catch {
       /* Incomplete/corrupt files are not exposed as valid recordings. */
     }
@@ -121,7 +133,24 @@ export class ReportStore {
   }
 
   prune() {
-    return this.serialize(() => this.pruneFiles());
+    return this.serialize(async () => {
+      await this.pruneFiles();
+      // Retry orphaned files from previous failed deletions without keeping an unbounded retry queue in memory.
+      for await (const entry of await opendir(this.directory)) {
+        if (entry.isFile()) {
+          // oxlint-disable-next-line no-await-in-loop -- Keep disk cleanup serialized with writes and other deletions.
+          await this.pruneOrphan(entry.name);
+        }
+      }
+    });
+  }
+
+  private async pruneOrphan(name: string) {
+    if (!name.endsWith('.json')) return;
+    const id = name.slice(0, -5);
+    if (!reportIdSchema.safeParse(id).success || this.summaries.has(id)) return;
+    // Preserve corrupt/incompatible files, matching startup's existing ignore policy.
+    if (await this.loadSummary(name)) await this.removeReportFile(id);
   }
 
   private async pruneFiles() {
@@ -129,12 +158,17 @@ export class ReportStore {
     const expired = ordered.filter(
       (item, index) => index >= this.maxReports || item.receivedAt <= Date.now() - this.retentionMs
     );
+    // Evict every discarded summary synchronously, even if the very first disk deletion fails.
+    for (const item of expired) this.summaries.delete(item.id);
     for (const item of expired) {
       // oxlint-disable-next-line no-await-in-loop -- Serialize disk deletion with the store's mutation queue.
-      await unlink(join(this.directory, `${item.id}.json`)).catch(error => {
-        if (!(error instanceof Error && 'code' in error && error.code === 'ENOENT')) throw error;
-      });
-      this.summaries.delete(item.id);
+      await this.removeReportFile(item.id);
     }
+  }
+
+  private async removeReportFile(id: string) {
+    await unlink(join(this.directory, `${id}.json`)).catch(error => {
+      if (!(error instanceof Error && 'code' in error && error.code === 'ENOENT')) throw error;
+    });
   }
 }
