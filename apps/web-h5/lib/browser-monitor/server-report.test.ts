@@ -7,6 +7,43 @@ import { monitorAuthentication } from './authentication';
 import { createServerErrorReport, sendServerErrorReport } from './server-report';
 
 const secret = 'monitor-test-signing-key';
+
+test('server HTTP errors retain the request address and status without URL credentials or query parameters', async () => {
+  const response = new Response('private response body', { status: 503, statusText: 'Service Unavailable' });
+  Object.defineProperty(response, 'url', {
+    value: 'https://user:password@api.example.com/go-tech/platform/packageOrder/myTenants?token=private#secret'
+  });
+  const report = await createServerErrorReport(
+    response,
+    { headers: new Headers(), path: '/zh-hk', method: 'GET', routeType: 'render' },
+    {}
+  );
+  assert.equal(reportSchema.safeParse(report).success, true);
+  assert.equal(report.error.name, 'HttpError');
+  assert.equal(report.error.status, 503);
+  assert.equal(
+    report.error.message,
+    'HTTP 503 Service Unavailable: https://api.example.com/go-tech/platform/packageOrder/myTenants'
+  );
+  assert.equal(report.context.path, '/zh-hk');
+  assert.equal(JSON.stringify(report).includes('private'), false);
+});
+
+test('server request failures retain the endpoint and original failure message', async () => {
+  const report = await createServerErrorReport(
+    new Error(
+      'GET https://api.example.com/go-tech/platform/platformCustomer/getInfo?token=private failed: fetch failed'
+    ),
+    { headers: new Headers(), path: '/zh-hk', method: 'GET', routeType: 'render' },
+    {}
+  );
+  assert.equal(reportSchema.safeParse(report).success, true);
+  assert.equal(
+    report.error.message,
+    'GET https://api.example.com/go-tech/platform/platformCustomer/getInfo failed: fetch failed'
+  );
+});
+
 async function signedToken() {
   return new SignJWT({ userId: 42, username: 'test-user' })
     .setProtectedHeader({ alg: 'HS512' })

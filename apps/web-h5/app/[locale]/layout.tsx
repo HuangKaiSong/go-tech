@@ -8,6 +8,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { ProductSelectionProvider } from '@/contexts/ProductSelectionContext';
 import type { Locale } from '@/i18n/config';
 import { routing } from '@/i18n/routing';
+import { captureServerError } from '@/lib/browser-monitor/server';
 import { getBaseUrl } from '@/lib/http';
 import { getLocalizedAlternates } from '@/lib/seo';
 import { VIEW_MODE_COOKIE, parseViewMode } from '@/lib/view-mode';
@@ -48,6 +49,29 @@ function resolveLocale(value: string): Locale {
   return value;
 }
 
+async function fetchLayoutData(
+  url: string,
+  init: RequestInit
+): Promise<{ code?: unknown; data?: unknown } | undefined> {
+  try {
+    const response = await fetch(url, init);
+    if (!response.ok) {
+      await captureServerError(response);
+      return undefined;
+    }
+    const data: unknown = await response.json();
+    if (typeof data !== 'object' || data === null) return undefined;
+    return {
+      code: 'code' in data ? data.code : undefined,
+      data: 'data' in data ? data.data : undefined
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown request error';
+    await captureServerError(new Error(`GET ${url} failed: ${message}`, { cause: error }));
+    return undefined;
+  }
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const locale = resolveLocale((await params).locale);
   const requestPathname = (await headers()).get('x-go-tech-pathname');
@@ -79,35 +103,25 @@ export default async function LocaleLayout({
   if (token) {
     user = decodeJwt(token) as User;
     const baseUrl = getBaseUrl();
-    try {
-      const [res1, res2] = await Promise.all([
-        fetch(`${baseUrl}/go-tech/platform/packageOrder/myTenants`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }),
-        fetch(`${baseUrl}/go-tech/platform/platformCustomer/getInfo`, {
-          headers: new Headers({
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-            'User-Type': 'platform_customer'
-          })
+    const [tenantData, userData] = await Promise.all([
+      fetchLayoutData(`${baseUrl}/go-tech/platform/packageOrder/myTenants`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }),
+      fetchLayoutData(`${baseUrl}/go-tech/platform/platformCustomer/getInfo`, {
+        headers: new Headers({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+          'User-Type': 'platform_customer'
         })
-      ]);
-      if (res1.ok) {
-        const data = await res1.json();
-        if (Array.isArray(data?.data)) {
-          tenants = data.data;
-        }
-      }
-      if (res2.ok) {
-        const data = await res2.json();
-        if (data.code && data.code === 200) {
-          user = { ...user, ...data.data };
-        }
-      }
-    } catch {
-      // fetch 失败时 tenants 保持为空数组
+      })
+    ]);
+    if (Array.isArray(tenantData?.data)) {
+      tenants = tenantData.data;
+    }
+    if (userData?.code === 200 && typeof userData.data === 'object' && userData.data !== null) {
+      user = { ...user, ...userData.data };
     }
   }
 

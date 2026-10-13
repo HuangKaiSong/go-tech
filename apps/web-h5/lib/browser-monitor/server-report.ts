@@ -38,6 +38,14 @@ function serverErrorCode(cause: unknown) {
 }
 
 function describeServerError(error: unknown): ErrorReport['error'] {
+  if (error instanceof Response) {
+    return {
+      kind: 'next-server',
+      name: 'HttpError',
+      message: redactMonitorText(`HTTP ${error.status} ${error.statusText}: ${error.url}`),
+      status: error.status || undefined
+    };
+  }
   const value = error instanceof Error ? error : undefined;
   // Drizzle embeds SQL and parameters in its message. Retain only a stable failure code and stack frames.
   const database = value?.name === 'DrizzleQueryError' || value?.message.startsWith('Failed query:');
