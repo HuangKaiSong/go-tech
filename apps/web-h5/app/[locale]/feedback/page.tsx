@@ -5,13 +5,14 @@ import { db } from '@/db';
 import { fbCategory, fbFeature, fbSubCategory } from '@/db/scheam';
 import Header from '../../components/v2/Header';
 import FeedbackContent from './FeedbackContent';
+import { renderFeedbackPage } from './render-feedback-page';
 
 export const metadata: Metadata = {
   description: '分享並支持你對 GO-TECH 的想法',
   title: 'GO-TECH Feedback'
 };
 
-export default async function FeedbackPage() {
+async function FeedbackPageContent() {
   const language = (await cookies()).get('GO_TECH_LANGUAGE')?.value || 'hk';
   const categories = await db.query.fbCategory.findMany({
     with: {
@@ -60,4 +61,8 @@ export default async function FeedbackPage() {
       />
     </div>
   );
+}
+
+export default function FeedbackPage() {
+  return renderFeedbackPage(FeedbackPageContent);
 }

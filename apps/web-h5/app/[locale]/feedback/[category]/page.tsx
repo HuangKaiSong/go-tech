@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { db } from '@/db';
 import { fbCategory, fbComment, fbFeature, fbSubCategory } from '@/db/scheam';
+import { renderFeedbackPage } from '../render-feedback-page';
 import type { Feature } from '../useFeedbackFeatures';
 import CategoryContent from './CategoryContent';
 
@@ -121,4 +122,6 @@ const FeedbackCategoryPage = async ({ params }: { params: Promise<{ category: st
   );
 };
 
-export default FeedbackCategoryPage;
+export default function Page(props: Parameters<typeof FeedbackCategoryPage>[0]) {
+  return renderFeedbackPage(() => FeedbackCategoryPage(props));
+}

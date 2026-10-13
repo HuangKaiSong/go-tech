@@ -11,6 +11,7 @@ export default defineConfig({
     environment: 'jsdom',
     include: [
       'tests/view-mode/*.test.{ts,tsx}',
+      'app/[[]locale]/feedback/*.test.tsx',
       'app/api/feedback/turnstile-policy.test.ts',
       'app/components/feedback/submission-lock.test.ts'
     ],
