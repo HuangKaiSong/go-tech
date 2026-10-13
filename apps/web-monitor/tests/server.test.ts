@@ -70,6 +70,41 @@ async function setup(maxReports = 100) {
 }
 
 describe('monitor API', () => {
+  it('stores server credentials only in authenticated details and returns no replay', async () => {
+    const { directory, store, url } = await setup();
+    const value = report();
+    if (value.kind !== 'error') throw new Error('Expected error report');
+    value.error.kind = 'next-server';
+    value.timeSource = 'server';
+    value.replay = { events: [], unavailableReason: 'server-error' };
+    value.context.authentication = {
+      status: 'verified',
+      userId: '42',
+      username: 'test-user',
+      token: 'test-token',
+      cookie: 'session=test-cookie'
+    };
+    await store.save(value);
+    const headers = { Authorization: 'Bearer query-test' };
+    const detail: unknown = await (await fetch(`${url}/api/reports/${value.id}`, { headers })).json();
+    if (typeof detail !== 'object' || detail === null || !('data' in detail) || !('receivedAt' in detail))
+      throw new Error('Invalid detail response');
+    expect(reportSchema.parse(detail.data).context.authentication?.token).toBe('test-token');
+    expect(detail.receivedAt).toBeGreaterThanOrEqual(value.timestamp);
+    const list = reportListResponseSchema.parse(await (await fetch(`${url}/api/reports`, { headers })).json());
+    expect(list.data.items[0].context.authentication).toEqual({
+      status: 'verified',
+      userId: '42',
+      username: 'test-user'
+    });
+    expect(JSON.stringify(list)).not.toContain('test-token');
+    expect((await fetch(`${url}/api/reports/${value.id}/replay`, { headers })).status).toBe(404);
+    expect((await fetch(`${url}/api/reports/${value.id}`)).status).toBe(401);
+    const restored = new ReportStore(directory, 86400000, 100);
+    await restored.initialize();
+    expect((await restored.get(value.id))?.context.authentication?.token).toBe('test-token');
+    expect(JSON.stringify(restored.list({ limit: 20 }))).not.toContain('test-token');
+  });
   it('persists reports, lists metadata, exports rrweb JSON and survives restart', async () => {
     const { directory, url } = await setup();
     const error = report();

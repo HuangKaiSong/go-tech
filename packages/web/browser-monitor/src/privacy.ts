@@ -1,27 +1,15 @@
 import type { ReplayEvent } from '@go-tech/monitor-contract';
 
+import { redactMonitorText as redactText } from '@go-tech/monitor-contract';
+
+export { redactMonitorText as redactText } from '@go-tech/monitor-contract';
+
 export function safePath(value: string, base = 'http://localhost') {
   try {
     return new URL(value, base).pathname.slice(0, 1000);
   } catch {
     return '/';
   }
-}
-
-export function redactText(value: string, limit = 1000) {
-  return value
-    .replace(/https?:\/\/[^\s)"'<>]+/g, url => {
-      try {
-        const parsed = new URL(url);
-        return `${parsed.origin}${parsed.pathname}`;
-      } catch {
-        return '[url]';
-      }
-    })
-    .replace(/\bBearer\s+\S+/gi, 'Bearer [redacted]')
-    .replace(/\b(token|password|secret|authorization|cookie)\s*[:=]\s*[^\s,;]+/gi, '$1=[redacted]')
-    .replace(/[\w.+-]+@[\w.-]+\.[a-z]{2,}/gi, '[email]')
-    .slice(0, limit);
 }
 
 type Json = ReplayEvent['data'];

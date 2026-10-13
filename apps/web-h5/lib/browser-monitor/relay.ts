@@ -1,4 +1,5 @@
 import { MAX_REPORT_BYTES, reportSchema } from '@go-tech/monitor-contract';
+import { monitorAuthentication } from './authentication';
 
 const requests = new Map<string, { count: number; expires: number }>();
 
@@ -50,7 +51,7 @@ function limited(request: Request) {
 /** Server-only adapter by dependency direction; credentials are never returned to the browser. */
 export async function relayMonitorReport(
   request: Request,
-  config: { allowedOrigins?: readonly string[]; ingestToken?: string; serviceUrl?: string },
+  config: { allowedOrigins?: readonly string[]; ingestToken?: string; jwtSecret?: string; serviceUrl?: string },
   forward: typeof fetch = fetch
 ) {
   if (!config.serviceUrl || !config.ingestToken) return reply(503, 'Browser monitoring is not configured');
@@ -69,7 +70,11 @@ export async function relayMonitorReport(
   if (value === null) return reply(413, 'Empty or oversized report');
   const parsed = reportSchema.safeParse(value);
   if (!parsed.success) return reply(400, 'Invalid monitor report');
+  if (parsed.data.kind === 'error' && parsed.data.error.kind === 'next-server')
+    return reply(400, 'Server errors must be reported by the server');
   try {
+    parsed.data.context.authentication = await monitorAuthentication(request.headers, config.jwtSecret);
+    parsed.data.context.userAgent = (request.headers.get('user-agent') ?? parsed.data.context.userAgent).slice(0, 500);
     const response = await forward(new URL('/api/reports', config.serviceUrl), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${config.ingestToken}` },

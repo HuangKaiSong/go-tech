@@ -22,6 +22,36 @@ afterEach(() => {
 });
 
 describe('browser monitor', () => {
+  it('reports React client errors with replay and never attaches replay to server errors', async () => {
+    vi.useFakeTimers();
+    const reports: MonitorReport[] = [];
+    const monitor = startBrowserMonitor({
+      transport: async report => {
+        reports.push(report);
+      },
+      postErrorMs: 100
+    });
+    try {
+      const options = vi.mocked(record).mock.calls.at(-1)?.[0];
+      options?.emit?.({
+        type: 2,
+        timestamp: Date.now(),
+        data: { node: { type: 0, id: 1, childNodes: [] }, initialOffset: { top: 0, left: 0 } }
+      });
+      monitor.captureError(new Error('React failed'), { kind: 'react-client' });
+      monitor.captureError(new Error('Server failed'), { kind: 'next-server' });
+      await vi.advanceTimersByTimeAsync(100);
+      const server = reports.find(report => report.kind === 'error' && report.error.kind === 'next-server');
+      const client = reports.find(report => report.kind === 'error' && report.error.kind === 'react-client');
+      if (server?.kind !== 'error' || client?.kind !== 'error') throw new Error('Missing error reports');
+      expect(server.replay).toEqual({ events: [], unavailableReason: 'server-error' });
+      expect(client.replay.events.length).toBeGreaterThan(0);
+      expect(client.timeSource).toBe('client');
+      expect(client.context.device?.timezone).toBeTruthy();
+    } finally {
+      monitor.stop();
+    }
+  });
   it('uploads valid error and performance reports on LAN HTTP without randomUUID', async () => {
     vi.useFakeTimers();
     sessionStorage.clear();

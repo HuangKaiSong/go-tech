@@ -5,8 +5,8 @@ import { db } from '@/db';
 import { fbFeature, fbVote } from '@/db/scheam';
 import { getFeedbackUser } from '../../../auth';
 
-export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const user = await getFeedbackUser();
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const user = await getFeedbackUser(req);
   if (!user) {
     return NextResponse.json({ success: false, message: '請先登入後再操作' }, { status: 401 });
   }

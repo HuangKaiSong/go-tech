@@ -17,6 +17,7 @@ import { Activity, RefreshCw } from 'lucide-react';
 import { type FormEvent, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { getMonitorReports } from './monitor-api';
+import { formatMonitorTime } from './monitor-context';
 import { metricNames, metricValue, summarizeMetrics } from './monitor-metric-model';
 import { MetricCell } from './monitor-metrics';
 
@@ -74,7 +75,7 @@ export default function MonitorListPage() {
       <p className="text-sm text-muted-foreground">查看 web-h5 的錯誤現場、操作回放和頁面性能。</p>
       <Tabs value={view} onValueChange={changeView}>
         <TabsList>
-          <TabsTrigger value="error">錯誤回放</TabsTrigger>
+          <TabsTrigger value="error">錯誤記錄</TabsTrigger>
           <TabsTrigger value="performance">性能指標</TabsTrigger>
         </TabsList>
       </Tabs>
@@ -238,7 +239,7 @@ function MonitorResults({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>記錄時間</TableHead>
+            <TableHead>發生 / 接收時間（UTC+8）</TableHead>
             <TableHead>頁面</TableHead>
             {view === 'error' ? (
               <>
@@ -261,13 +262,16 @@ function MonitorResults({
         <TableBody>
           {items.map(item => (
             <TableRow key={item.id}>
-              <TableCell className="whitespace-nowrap">{new Date(item.timestamp).toLocaleString('zh-HK')}</TableCell>
+              <TableCell className="whitespace-nowrap">
+                <div>{formatMonitorTime(item.timestamp)}</div>
+                <div className="text-xs text-muted-foreground">接收：{formatMonitorTime(item.receivedAt)}</div>
+              </TableCell>
               <TableCell className="max-w-60 break-all">{item.context.path}</TableCell>
               {item.kind === 'error' ? (
                 <>
                   <TableCell className="max-w-80 break-words">{item.error.message}</TableCell>
                   <TableCell>{item.error.kind}</TableCell>
-                  <TableCell>{item.replayEventCount ? `${item.replayEventCount} 個事件` : '無回放'}</TableCell>
+                  <TableCell>{replayLabel(item)}</TableCell>
                 </>
               ) : (
                 <>
@@ -285,7 +289,7 @@ function MonitorResults({
                   to={`/monitor/${item.id}${search ? `?${search}` : ''}`}
                   className="whitespace-nowrap text-primary underline underline-offset-4"
                 >
-                  {item.kind === 'error' ? '查看回放' : '查看詳情'}
+                  {item.kind === 'error' && item.error.kind !== 'next-server' ? '查看回放' : '查看詳情'}
                 </Link>
               </TableCell>
             </TableRow>
@@ -294,4 +298,9 @@ function MonitorResults({
       </Table>
     </div>
   );
+}
+
+function replayLabel(item: ReportSummary) {
+  if (item.kind === 'error' && item.error.kind === 'next-server') return '伺服器錯誤，無回放';
+  return item.replayEventCount ? `${item.replayEventCount} 個事件` : '無回放';
 }

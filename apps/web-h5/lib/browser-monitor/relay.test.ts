@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { test } from 'node:test';
+import { SignJWT } from 'jose';
 import { relayMonitorReport } from './relay';
 
 function value() {
@@ -25,6 +26,30 @@ function value() {
 }
 const config = { serviceUrl: 'http://127.0.0.1:8200', ingestToken: 'server-only-test' };
 const successfulForward: typeof fetch = async () => Response.json({ code: 200 });
+test('relay replaces forged identity with verified request identity, retaining credentials only in context', async () => {
+  const secret = 'test-platform-secret';
+  const token = await new SignJWT({ userId: 7, username: 'actual-user' })
+    .setProtectedHeader({ alg: 'HS512' })
+    .setExpirationTime('1h')
+    .sign(new TextEncoder().encode(secret));
+  const payload = {
+    ...value(),
+    context: { ...value().context, authentication: { status: 'verified', userId: 'fake-user', token: 'fake-token' } }
+  };
+  const incoming = request(payload);
+  incoming.headers.set('cookie', `GO_TECH_AUTH_TOKEN=${token}; password=private`);
+  incoming.headers.set('user-agent', 'actual-device');
+  const response = await relayMonitorReport(incoming, { ...config, jwtSecret: secret }, async (_input, init) => {
+    const report = JSON.parse(String(init?.body));
+    assert.equal(report.context.authentication.userId, '7');
+    assert.equal(report.context.authentication.status, 'verified');
+    assert.equal(report.context.authentication.token, token);
+    assert.equal(report.context.userAgent, 'actual-device');
+    assert.equal(report.context.authentication.cookie.includes('password'), false);
+    return Response.json({ code: 200 });
+  });
+  assert.equal(response.status, 200);
+});
 function request(payload: unknown = value(), origin = 'http://localhost:3001') {
   return new Request('http://localhost:3001/api/browser-monitor', {
     method: 'POST',

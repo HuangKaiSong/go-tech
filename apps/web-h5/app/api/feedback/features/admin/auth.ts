@@ -3,6 +3,7 @@ import { jwtVerify } from 'jose';
 import { type NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { umsAdmin } from '@/db/scheam';
+import { captureServerError } from '@/lib/browser-monitor/server';
 
 export interface FeedbackAdmin {
   id: number;
@@ -20,6 +21,12 @@ export async function requireFeedbackAdmin(req: NextRequest): Promise<AdminAuthR
   const secret = process.env.PLATFORM_JWT_SECRET;
   if (!secret) {
     console.error('PLATFORM_JWT_SECRET is not configured');
+    await captureServerError(new Error('Administrator authentication is not configured'), {
+      headers: req.headers,
+      path: req.nextUrl.pathname,
+      method: req.method,
+      routeType: 'route'
+    });
     return { response: NextResponse.json({ success: false, message: '管理員驗證尚未配置' }, { status: 500 }) };
   }
 
@@ -58,6 +65,12 @@ export async function requireFeedbackAdmin(req: NextRequest): Promise<AdminAuthR
     return { admin };
   } catch (error) {
     console.error(error);
+    await captureServerError(error, {
+      headers: req.headers,
+      path: req.nextUrl.pathname,
+      method: req.method,
+      routeType: 'route'
+    });
     return {
       response: NextResponse.json(
         { success: false, message: '管理員驗證失敗，無法連接資料源或伺服器發生錯誤' },

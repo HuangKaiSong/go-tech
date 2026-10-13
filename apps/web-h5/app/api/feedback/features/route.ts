@@ -120,7 +120,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const user = await getFeedbackUser();
+  const user = await getFeedbackUser(req);
   if (!user) {
     return NextResponse.json({ success: false, message: '請先登入後再操作' }, { status: 401 });
   }

@@ -52,7 +52,9 @@ export async function getMonitorReports(params: URLSearchParams, signal: AbortSi
 
 export async function getMonitorReport(id: string, signal: AbortSignal) {
   const value = await request(`/${encodeURIComponent(id)}`, signal);
-  const parsed = z.object({ code: z.literal(200), data: reportSchema }).safeParse(value);
+  const parsed = z
+    .object({ code: z.literal(200), data: reportSchema, receivedAt: z.number().finite().nonnegative().optional() })
+    .safeParse(value);
   if (!parsed.success) throw new Error('監控記錄資料格式不正確');
-  return parsed.data.data;
+  return { ...parsed.data.data, receivedAt: parsed.data.receivedAt };
 }

@@ -5,7 +5,7 @@ import { type BotVerificationAction, createFallbackCaptcha } from '../fallback-c
 const validActions: BotVerificationAction[] = ['feedback_comment', 'feedback_post'];
 
 export async function GET(req: NextRequest) {
-  const user = await getFeedbackUser();
+  const user = await getFeedbackUser(req);
   if (!user) {
     return NextResponse.json({ success: false, message: '請先登入後再操作' }, { status: 401 });
   }

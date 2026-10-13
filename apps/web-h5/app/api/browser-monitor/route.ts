@@ -10,6 +10,7 @@ export function POST(request: Request) {
       .map(origin => origin.trim())
       .filter(Boolean),
     serviceUrl: process.env.BROWSER_MONITOR_SERVICE_URL,
-    ingestToken: process.env.BROWSER_MONITOR_INGEST_TOKEN
+    ingestToken: process.env.BROWSER_MONITOR_INGEST_TOKEN,
+    jwtSecret: process.env.PLATFORM_JWT_SECRET
   });
 }

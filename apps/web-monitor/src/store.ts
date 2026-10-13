@@ -12,8 +12,13 @@ export interface ListFilter {
 }
 
 function summarize(report: MonitorReport, receivedAt: number): ReportSummary {
-  if (report.kind === 'performance') return { ...report, receivedAt, replayEventCount: 0 };
-  const { replay, ...metadata } = report;
+  const { authentication, ...context } = report.context;
+  const publicAuth = authentication
+    ? { status: authentication.status, userId: authentication.userId, username: authentication.username }
+    : undefined;
+  const safe = { ...report, context: { ...context, authentication: publicAuth } };
+  if (safe.kind === 'performance') return { ...safe, receivedAt, replayEventCount: 0 };
+  const { replay, ...metadata } = safe;
   return { ...metadata, receivedAt, replayEventCount: replay.events.length };
 }
 
@@ -91,6 +96,10 @@ export class ReportStore {
       if (error instanceof Error && 'code' in error && error.code === 'ENOENT') return null;
       throw error;
     }
+  }
+
+  receivedAt(id: string) {
+    return this.summaries.get(id)?.receivedAt;
   }
 
   list(filter: ListFilter) {

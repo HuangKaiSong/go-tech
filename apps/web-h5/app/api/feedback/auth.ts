@@ -3,8 +3,9 @@ import { decodeJwt } from 'jose';
 import { cookies } from 'next/headers';
 import { db } from '@/db';
 import { platformCustomer } from '@/db/scheam';
+import { captureServerError } from '@/lib/browser-monitor/server';
 
-export async function getFeedbackUser() {
+export async function getFeedbackUser(request: Request) {
   const token = (await cookies()).get('GO_TECH_AUTH_TOKEN')?.value;
   if (!token) return null;
 
@@ -28,7 +29,13 @@ export async function getFeedbackUser() {
         columns: { id: true, custName: true }
       })) ?? null
     );
-  } catch {
+  } catch (error) {
+    await captureServerError(error, {
+      headers: request.headers,
+      path: new URL(request.url).pathname,
+      method: request.method,
+      routeType: 'route'
+    });
     return null;
   }
 }

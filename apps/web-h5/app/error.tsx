@@ -27,7 +27,7 @@ export class GracefullyDegradingErrorBoundary extends Component<ErrorBoundaryPro
   }
 
   override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    captureBrowserError(error, { kind: 'react', componentStack: errorInfo.componentStack ?? undefined });
+    captureBrowserError(error, { kind: 'react-client', componentStack: errorInfo.componentStack ?? undefined });
     if (this.props.onError) {
       // sendToBetterStack('error', error.message, errorInfo);
       this.props.onError(error, errorInfo);
@@ -59,7 +59,8 @@ export class GracefullyDegradingErrorBoundary extends Component<ErrorBoundaryPro
 
 export default function ErrorPage({ error, retry }: { error: Error & { digest?: string }; retry: () => void }) {
   useEffect(() => {
-    captureBrowserError(error, { kind: 'react', digest: error.digest });
+    // Server errors with a digest are reported by onRequestError before hydration.
+    if (!error.digest) captureBrowserError(error, { kind: 'react-client' });
   }, [error]);
 
   return (

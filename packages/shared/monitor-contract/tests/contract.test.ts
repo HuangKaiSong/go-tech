@@ -22,6 +22,32 @@ describe('monitor contract', () => {
   it('accepts performance without errors', () => {
     expect(reportSchema.safeParse({ ...common, kind: 'performance', hasError: false }).success).toBe(true);
   });
+  it('accepts new error kinds, authenticated context and server replay unavailability', () => {
+    for (const kind of ['react-client', 'next-server']) {
+      expect(
+        reportSchema.safeParse({
+          ...common,
+          timeSource: kind === 'next-server' ? 'server' : 'client',
+          context: {
+            ...common.context,
+            authentication: { status: 'verified', userId: '42', token: 'test-token', cookie: 'session=test-cookie' }
+          },
+          kind: 'error',
+          error: { kind, name: 'Error', message: 'test' },
+          breadcrumbs: [],
+          replay: { events: [], unavailableReason: kind === 'next-server' ? 'server-error' : 'not-ready' }
+        }).success
+      ).toBe(true);
+    }
+    expect(
+      reportSchema.safeParse({
+        ...common,
+        kind: 'performance',
+        hasError: false,
+        context: { ...common.context, authentication: { status: 'verified', password: 'must-not-store' } }
+      }).success
+    ).toBe(false);
+  });
   it('rejects URL queries and unknown context fields', () => {
     for (const context of [
       { ...common.context, path: '/en?token=secret' },

@@ -22,6 +22,7 @@ export interface BrowserMonitorOptions {
 export interface BrowserMonitor {
   captureError: (error: unknown, extra?: Partial<MonitorError>) => void;
   flush: () => void;
+  getContext: () => MonitorContext;
   navigation: (url: string) => void;
   stop: () => void;
 }
@@ -67,7 +68,12 @@ export function startBrowserMonitor(options: BrowserMonitorOptions): BrowserMoni
       release: (options.release ?? 'development').slice(0, 100),
       language: navigator.language.slice(0, 50),
       userAgent: navigator.userAgent.slice(0, 500),
-      viewport: { width: window.innerWidth, height: window.innerHeight }
+      viewport: { width: window.innerWidth, height: window.innerHeight },
+      device: {
+        platform: navigator.platform.slice(0, 100),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone.slice(0, 100),
+        mobile: /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent)
+      }
     };
   }
 
@@ -115,17 +121,19 @@ export function startBrowserMonitor(options: BrowserMonitorOptions): BrowserMoni
       errorsInWindow += 1;
       fingerprints.set(key, now);
       hasError = true;
-      const events = errorSnapshot(now);
+      const serverError = description.kind === 'next-server';
+      const events = serverError ? [] : errorSnapshot(now);
       const report: ErrorReport = {
         schemaVersion: 1,
         id: createIdentifier(),
         timestamp: now,
+        timeSource: 'client',
         context: context(),
         kind: 'error',
         error: description,
         metrics: [...metrics.values()],
         breadcrumbs: [...breadcrumbs],
-        replay: { events, unavailableReason: replayReason(events.length) }
+        replay: { events, unavailableReason: serverError ? 'server-error' : replayReason(events.length) }
       };
       if (!events.length) {
         send(report);
@@ -261,6 +269,7 @@ export function startBrowserMonitor(options: BrowserMonitorOptions): BrowserMoni
         schemaVersion: 1,
         id: createIdentifier(),
         timestamp: Date.now(),
+        timeSource: 'client',
         context: context(documentPath),
         kind: 'performance',
         metrics: [...metrics.values()],
@@ -276,6 +285,7 @@ export function startBrowserMonitor(options: BrowserMonitorOptions): BrowserMoni
   const interval = setInterval(flush, 15000);
 
   return {
+    getContext: () => context(),
     captureError,
     navigation(url) {
       breadcrumbs.push({ timestamp: Date.now(), category: 'navigation', message: safePath(url, location.href) });

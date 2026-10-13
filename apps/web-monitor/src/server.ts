@@ -1,6 +1,12 @@
 import { timingSafeEqual } from 'node:crypto';
 import { type IncomingMessage, type ServerResponse, createServer } from 'node:http';
-import { MAX_REPORT_BYTES, reportIdSchema, reportSchema } from '@go-tech/monitor-contract';
+import {
+  type ErrorReport,
+  MAX_REPORT_BYTES,
+  type MonitorReport,
+  reportIdSchema,
+  reportSchema
+} from '@go-tech/monitor-contract';
 import { type ListFilter, ReportStore } from './store';
 
 class HttpError extends Error {
@@ -63,6 +69,14 @@ function listFilter(url: URL): ListFilter {
   return { kind, limit, sessionId, cursor, path: url.searchParams.get('path') ?? undefined };
 }
 
+function hasBrowserReplay(report: MonitorReport): report is ErrorReport {
+  return report.kind === 'error' && report.error.kind !== 'next-server' && report.replay.events.length > 0;
+}
+
+function hasServerReplay(report: MonitorReport) {
+  return report.kind === 'error' && report.error.kind === 'next-server' && report.replay.events.length > 0;
+}
+
 export function createMonitorServer(store: ReportStore, tokens: { ingest: string; query: string }) {
   if (!tokens.ingest || !tokens.query || tokens.ingest === tokens.query) {
     throw new Error('Separate non-empty ingest and query tokens are required');
@@ -87,6 +101,7 @@ export function createMonitorServer(store: ReportStore, tokens: { ingest: string
       if (!authorized(request, tokens.ingest)) throw new HttpError(401, 'Unauthorized');
       const parsed = reportSchema.safeParse(await body(request));
       if (!parsed.success) throw new HttpError(400, 'Invalid monitor report');
+      if (hasServerReplay(parsed.data)) throw new HttpError(400, 'Server errors cannot contain browser replay');
       const saved = await store.save(parsed.data);
       json(response, saved.duplicate ? 200 : 201, { code: 200, data: saved });
       return;
@@ -103,12 +118,11 @@ export function createMonitorServer(store: ReportStore, tokens: { ingest: string
       const report = await store.get(id);
       if (!report) throw new HttpError(404, 'Report not found');
       if (match[2]) {
-        if (report.kind !== 'error' || report.replay.events.length === 0)
-          throw new HttpError(404, 'Replay unavailable');
+        if (!hasBrowserReplay(report)) throw new HttpError(404, 'Replay unavailable');
         // Raw event array can be passed directly to rrweb-player/Replayer.
         json(response, 200, report.replay.events);
       } else {
-        json(response, 200, { code: 200, data: report });
+        json(response, 200, { code: 200, data: report, receivedAt: store.receivedAt(id) });
       }
       return;
     }

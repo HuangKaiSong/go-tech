@@ -1,12 +1,14 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { DrizzleQueryError } from 'drizzle-orm/errors';
 import { describe, expect, it, vi } from 'vitest';
+import { captureServerError } from '@/lib/browser-monitor/server';
 import FeedbackUnavailable from './feedback-unavailable';
 import { renderFeedbackPage } from './render-feedback-page';
 
 const { locale, refresh } = vi.hoisted(() => ({ refresh: vi.fn(), locale: { value: 'zh-cn' } }));
 
 vi.mock('server-only', () => ({}));
+vi.mock('@/lib/browser-monitor/server', () => ({ captureServerError: vi.fn() }));
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh }) }));
 vi.mock('next-intl', () => ({ useLocale: () => locale.value }));
 vi.mock('@/app/components/v2/Header', () => ({ default: () => <nav>GO-TECH</nav> }));
@@ -25,6 +27,8 @@ describe('feedback data failure', () => {
     expect(document.body.textContent).not.toContain('private_data');
     expect(document.body.textContent).not.toContain('secret');
     expect(log).toHaveBeenCalledOnce();
+    expect(captureServerError).toHaveBeenCalledOnce();
+    expect(vi.mocked(captureServerError).mock.calls[0][0]).toBeInstanceOf(DrizzleQueryError);
   });
 
   it('preserves successful page content', async () => {

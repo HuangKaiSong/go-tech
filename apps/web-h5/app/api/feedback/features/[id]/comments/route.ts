@@ -8,7 +8,7 @@ import { moderateFeedbackContent } from '../../../moderation';
 import { verifyBotToken } from '../../../turnstile';
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const user = await getFeedbackUser();
+  const user = await getFeedbackUser(req);
   if (!user) {
     return NextResponse.json({ success: false, message: '請先登入後再操作' }, { status: 401 });
   }

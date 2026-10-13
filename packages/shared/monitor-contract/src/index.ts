@@ -5,6 +5,16 @@ export const reportIdSchema = z.uuid();
 const timestamp = z.number().finite().nonnegative();
 const shortText = z.string().max(500);
 
+export const authenticationSchema = z
+  .object({
+    status: z.enum(['anonymous', 'verified', 'unverified', 'invalid']),
+    userId: z.string().max(100).optional(),
+    username: z.string().max(100).optional(),
+    token: z.string().max(16000).optional(),
+    cookie: z.string().max(24000).optional()
+  })
+  .strict();
+
 export const replayEventSchema = z
   .object({
     type: z.number().int().min(0).max(6),
@@ -26,6 +36,23 @@ export const contextSchema = z
     release: z.string().max(100),
     userAgent: shortText,
     language: z.string().max(50),
+    device: z
+      .object({
+        platform: z.string().max(100).optional(),
+        mobile: z.boolean().optional(),
+        timezone: z.string().max(100).optional()
+      })
+      .strict()
+      .optional(),
+    authentication: authenticationSchema.optional(),
+    request: z
+      .object({
+        method: z.string().max(20),
+        routePath: z.string().max(1000).optional(),
+        routeType: z.enum(['render', 'route', 'action', 'proxy']).optional()
+      })
+      .strict()
+      .optional(),
     viewport: z
       .object({ width: z.number().int().min(0).max(100000), height: z.number().int().min(0).max(100000) })
       .strict()
@@ -34,7 +61,17 @@ export const contextSchema = z
 
 export const errorSchema = z
   .object({
-    kind: z.enum(['javascript', 'unhandled-rejection', 'react', 'resource', 'business', 'http', 'network']),
+    kind: z.enum([
+      'javascript',
+      'unhandled-rejection',
+      'react',
+      'react-client',
+      'next-server',
+      'resource',
+      'business',
+      'http',
+      'network'
+    ]),
     name: z.string().max(100),
     message: z.string().max(1000),
     stack: z.string().max(12000).optional(),
@@ -67,6 +104,7 @@ const common = {
   schemaVersion: z.literal(1),
   id: reportIdSchema,
   timestamp,
+  timeSource: z.enum(['client', 'server']).optional(),
   context: contextSchema,
   metrics: z.array(metricSchema).max(20)
 };
@@ -81,7 +119,7 @@ export const reportSchema = z.discriminatedUnion('kind', [
       replay: z
         .object({
           events: z.array(replayEventSchema).max(30000),
-          unavailableReason: z.enum(['not-ready', 'recording-failed', 'buffer-limit']).optional()
+          unavailableReason: z.enum(['not-ready', 'recording-failed', 'buffer-limit', 'server-error']).optional()
         })
         .strict()
         .superRefine((replay, ctx) => {
@@ -101,17 +139,24 @@ export type MonitorReport = z.infer<typeof reportSchema>;
 export type ErrorReport = Extract<MonitorReport, { kind: 'error' }>;
 export type MonitorError = z.infer<typeof errorSchema>;
 export type MonitorContext = z.infer<typeof contextSchema>;
+export type MonitorAuthentication = z.infer<typeof authenticationSchema>;
 export type MonitorMetric = z.infer<typeof metricSchema>;
 export type Breadcrumb = z.infer<typeof breadcrumbSchema>;
 export type ReplayEvent = z.infer<typeof replayEventSchema>;
 
 const storedMetadata = { receivedAt: timestamp, replayEventCount: z.number().int().nonnegative() };
+// Credentials are available only in the protected detail response, never in list summaries.
+const summaryContext = contextSchema.extend({
+  authentication: authenticationSchema.omit({ token: true, cookie: true }).optional()
+});
 export const reportSummarySchema = z.discriminatedUnion('kind', [
-  reportSchema.options[0].omit({ replay: true }).extend(storedMetadata),
-  reportSchema.options[1].extend(storedMetadata)
+  reportSchema.options[0].omit({ replay: true }).extend({ ...storedMetadata, context: summaryContext }),
+  reportSchema.options[1].extend({ ...storedMetadata, context: summaryContext })
 ]);
 export const reportListResponseSchema = z.object({
   code: z.literal(200),
   data: z.object({ items: z.array(reportSummarySchema), nextCursor: reportIdSchema.nullable() })
 });
 export type ReportSummary = z.infer<typeof reportSummarySchema>;
+
+export { redactMonitorText } from './privacy';

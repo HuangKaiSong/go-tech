@@ -40,6 +40,8 @@ export function initializeBrowserMonitor() {
   if (monitor || process.env.NEXT_PUBLIC_BROWSER_MONITOR_ENABLED !== 'true') return;
   try {
     monitor = startBrowserMonitor({ release: process.env.NEXT_PUBLIC_BROWSER_MONITOR_RELEASE, transport: upload });
+    // Non-authentication UUID cookie correlates server requests with this browser session.
+    document.cookie = `GO_TECH_MONITOR_SESSION=${monitor.getContext().sessionId}; Path=/; SameSite=Lax${location.protocol === 'https:' ? '; Secure' : ''}`;
     unsubscribe = subscribeClientHttpDiagnostics(event => {
       monitor?.captureError(`Request failed: ${event.kind}`, {
         kind: event.kind,

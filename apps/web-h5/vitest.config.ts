@@ -12,6 +12,7 @@ export default defineConfig({
     include: [
       'tests/view-mode/*.test.{ts,tsx}',
       'app/[[]locale]/feedback/*.test.tsx',
+      'lib/browser-monitor/server-lifecycle.test.ts',
       'app/api/feedback/turnstile-policy.test.ts',
       'app/components/feedback/submission-lock.test.ts'
     ],

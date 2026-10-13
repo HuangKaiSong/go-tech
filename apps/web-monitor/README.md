@@ -73,7 +73,7 @@ pnpm --filter web-monitor start
 | GET  | `/health`                 | 无           | 服务健康状态                                     |
 | POST | `/api/reports`            | ingest token | `{ code: 200, data: { id, duplicate } }`         |
 | GET  | `/api/reports`            | query token  | 分页摘要，不含回放事件                           |
-| GET  | `/api/reports/:id`        | query token  | 完整报告，包括错误的 `replay.events`             |
+| GET  | `/api/reports/:id`        | query token  | 完整报告及服务端接收时间 `receivedAt`            |
 | GET  | `/api/reports/:id/replay` | query token  | 原始 rrweb 事件 JSON 数组，可以直接传给 Replayer |
 
 认证使用 `Authorization: Bearer <token>`。上传新记录返回 HTTP 201；相同 UUID 重传返回 HTTP 200，保留原记录。最多接收 4 MiB 的未压缩 JSON，并校验共享 `@go-tech/monitor-contract` 协议；异常数据、非法 ID 和缺少完整快照的回放均拒绝。
@@ -94,6 +94,11 @@ curl -H "Authorization: Bearer $MONITOR_QUERY_TOKEN" \
 
 ## 采集行为
 
+- H5 的 `instrumentation.ts#onRequestError` 上报 Next.js 未处理的服务端请求错误，分类为 `next-server`。主动捕获并返回友好页面的异常须调用 `@/lib/browser-monitor/server` 的 `captureServerError(error)`；Route Handler 应传入 `{ headers: request.headers, path: new URL(request.url).pathname, method: request.method, routeType: 'route' }`。已接入反馈页及反馈登录校验中的数据库故障。未调用此函数的服务端 `catch` 不能由浏览器监控自动识别。
+- 服务端错误在发生时记录毫秒时间，直接使用服务端 ingest token 上报，不依赖浏览器初始化。主动处理的异常通过 Next.js `after()` 在响应结束后上传；监控故障不会破坏友好提示。`next-server` 的回放为空，管理端不提供播放器或回放下载。
+- React 客户端渲染错误分类为 `react-client`，保留 rrweb 回放。带服务端 digest 的错误边界不再次上传，避免与服务端钩子重复。旧 `react` 分类仍可读取。
+- 记录区分发生时间与监控接收时间，管理端以 UTC+8 显示到毫秒。设备信息包含请求 User-Agent、可用的客户端提示；浏览器事件还记录视窗和设备时区。服务端请求没有浏览器视窗或时区时不会伪造这些值。
+- 认证信息由 H5 服务端从实际请求补齐，验证可用的 JWT 签名及有效期，区分未登录、已验证、未验证和无效凭证。管理员详情可查看用户 ID、用户名、Token 及 `GO_TECH_AUTH_TOKEN` / `session` 认证 Cookie；密码和其他 Cookie 不采集。认证凭证不进入 rrweb 事件或列表摘要，详情沿用管理员鉴权，数据文件使用受限权限。
 - H5 的 `instrumentation-client.ts` 在 React hydration 前初始化 SDK，捕获 JavaScript、未处理 Promise rejection、资源加载和 React 错误。
 - `clientFetch` 诊断通道覆盖业务码失败、HTTP 和网络错误，包括 `feedback: 'silent'`。取消请求不报告错误。诊断不影响原 toast 行为，监控上传关闭诊断，避免递归上报。
 - 浏览器缓存约 60 秒的完整快照和增量事件，每约 10 秒产生新快照；错误后继续收集最多 5 秒，上传保留完整快照的片段。缓存限制 1.5 MB，单个错误片段限制约 2.5 MB。大页面超出限额时仍保存错误，并标记回放不可用。
@@ -104,7 +109,7 @@ curl -H "Authorization: Bearer $MONITOR_QUERY_TOKEN" \
 
 ## 回放范围与数据过滤
 
-保留普通页面文字、按钮文案和 placeholder；所有输入值与 contenteditable 内容继续遮罩。敏感文字区域可加 `data-monitor-mask`、`.monitor-mask` 或 rrweb 默认的 `.rr-mask`；包含个人资料的展示区域应显式标记。文字过滤常见 token、邮箱和 URL 参数，DOM 属性仅保留布局、样式和少量展示字段；文档 URL 移除查询串和 fragment，样式 URL 移除查询参数。不开启 console/network payload 插件，不收集 cookie、请求头、表单对象和响应 payload。业务错误只记录分类、业务码及状态。
+保留普通页面文字、按钮文案和 placeholder；所有输入值与 contenteditable 内容继续遮罩。敏感文字区域可加 `data-monitor-mask`、`.monitor-mask` 或 rrweb 默认的 `.rr-mask`；包含个人资料的展示区域应显式标记。文字过滤常见 token、邮箱和 URL 参数，DOM 属性仅保留布局、样式和少量展示字段；文档 URL 移除查询串和 fragment，样式 URL 移除查询参数。不开启 console/network payload 插件；rrweb 不收集 cookie、请求头、表单对象和响应 payload。认证凭证仅作为服务端补齐的报告上下文保存。业务错误只记录分类、业务码及状态。
 
 鼠标移动按 50 ms 采样，回放视口与鼠标使用同一缩放和坐标原点。可见页面每约 10 秒补充完整快照，错误结束时补充时间标记，因此没有 DOM 变化的等待时间也计入回放。旧记录里已被替换成星号的文字和未采集的鼠标移动无法恢复；更新后刷新 H5 页面并重新触发错误，才能验证新录制效果。
 
