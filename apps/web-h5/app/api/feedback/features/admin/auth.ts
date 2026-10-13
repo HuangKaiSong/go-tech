@@ -41,19 +41,28 @@ export async function requireFeedbackAdmin(req: NextRequest): Promise<AdminAuthR
     return { response: NextResponse.json({ success: false, message: '管理員憑證無效' }, { status: 401 }) };
   }
 
-  let admin = await db.query.umsAdmin.findFirst({
-    where: and(eq(umsAdmin.id, userId), eq(umsAdmin.status, 1)),
-    columns: { id: true }
-  });
-  if (!admin && username) {
-    admin = await db.query.umsAdmin.findFirst({
-      where: and(eq(umsAdmin.username, username), eq(umsAdmin.status, 1)),
+  try {
+    let admin = await db.query.umsAdmin.findFirst({
+      where: and(eq(umsAdmin.id, userId), eq(umsAdmin.status, 1)),
       columns: { id: true }
     });
+    if (!admin && username) {
+      admin = await db.query.umsAdmin.findFirst({
+        where: and(eq(umsAdmin.username, username), eq(umsAdmin.status, 1)),
+        columns: { id: true }
+      });
+    }
+    if (!admin) {
+      return { response: NextResponse.json({ success: false, message: '管理員不存在或已停用' }, { status: 403 }) };
+    }
+    return { admin };
+  } catch (error) {
+    console.error(error);
+    return {
+      response: NextResponse.json(
+        { success: false, message: '管理員驗證失敗，無法連接資料源或伺服器發生錯誤' },
+        { status: 500 }
+      )
+    };
   }
-  if (!admin) {
-    return { response: NextResponse.json({ success: false, message: '管理員不存在或已停用' }, { status: 403 }) };
-  }
-
-  return { admin };
 }
