@@ -38,6 +38,8 @@ pnpm --filter web-monitor build
 pnpm --filter web-monitor start
 ```
 
+服务器通过根目录 `ecosystem.config.cjs` 中的 `web-monitor` 进程交给 PM2 管理。首次上线、数据库迁移、H5 配置、验收及后续更新步骤见[上线说明](./DEPLOYMENT.md)。
+
 `NEXT_PUBLIC_*` 在 H5 构建时固化；修改开关或发布版本后需要重新构建。服务 token 只用于服务端，同源浏览器上传不会携带它。启用前需按应用的数据采集政策处理用户告知和授权。
 
 开发时也可以使用局域网 HTTP 地址，例如 `http://192.168.0.168:3001`。SDK 在没有 `crypto.randomUUID()` 时使用 `crypto.getRandomValues()` 生成 UUID；同源接口根据请求的实际 Host 校验 Origin。

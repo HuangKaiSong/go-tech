@@ -2,6 +2,7 @@ const path = require('node:path');
 
 const root = __dirname;
 const feedbackAiRoot = path.join(root, 'apps/feedback-ai');
+const webMonitorRoot = path.join(root, 'apps/web-monitor');
 
 module.exports = {
   apps: [
@@ -15,6 +16,25 @@ module.exports = {
       env: {
         NODE_ENV: 'production',
         NEXT_PUBLIC_API_URL: 'http://10.128.20.88:7171'
+      }
+    },
+    {
+      name: 'web-monitor',
+      cwd: webMonitorRoot,
+      script: path.join(webMonitorRoot, 'dist/main.mjs'),
+      interpreter: 'node',
+      node_args: '--env-file=.env',
+      exec_mode: 'fork',
+      instances: 1,
+      watch: false,
+      autorestart: true,
+      restart_delay: 3000,
+      kill_timeout: 15000,
+      max_memory_restart: '1G',
+      out_file: path.join(root, 'logs/web-monitor.log'),
+      error_file: path.join(root, 'logs/web-monitor-error.log'),
+      env: {
+        NODE_ENV: 'production'
       }
     },
     {
