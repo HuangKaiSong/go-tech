@@ -1,6 +1,6 @@
 # Web Monitor
 
-`web-h5` 的浏览器错误、rrweb JSON 和 Web Vitals 接收服务。当前使用单进程、本地 JSON 文件存储；`web-admin` 的「網頁監控」页面支持查看记录和播放 rrweb 回放。视频转码暂未接入。
+`web-h5` 的浏览器错误、rrweb JSON 和 Web Vitals 接收服务。仅使用 MySQL 存储，数据位于现有 `go-tech` 库中的 `monitor_*` 表。`web-admin` 的「網頁監控」页面支持查看记录和播放 rrweb 回放。视频转码暂未接入。
 
 ## 启动
 
@@ -31,7 +31,7 @@ pnpm --filter web-monitor dev
 pnpm dev:h5
 ```
 
-默认监听 `127.0.0.1:8200`，数据写入 `apps/web-monitor/data/`。跨容器运行时配置服务地址、监听地址和持久化数据卷。生产运行：
+默认监听 `127.0.0.1:8200`，报告在 MySQL 事务提交后确认接收。启动前必须配置数据库连接和认证加密密钥，并应用表结构迁移。生产运行：
 
 ```bash
 pnpm --filter web-monitor build
@@ -44,15 +44,12 @@ pnpm --filter web-monitor start
 
 如果反向代理改写 Host 或在 HTTPS 外部地址与 HTTP 内部地址之间转发，在 H5 服务端配置 `BROWSER_MONITOR_ALLOWED_ORIGINS=https://portal.example.com`，多个公开 origin 用逗号分隔。只允许明确配置的完整 origin，不支持通配符。
 
-## data 目录为空时
+## 接收检查
 
-1. 检查 `http://127.0.0.1:8200/health` 是否返回 HTTP 200，并确认两个服务端 ingest token 相同。
-2. 设置 `NEXT_PUBLIC_BROWSER_MONITOR_ENABLED=true` 后重启 H5 开发服务，刷新浏览器；生产模式需要重新构建。
-3. 打开 H5 页面等待约十五秒，浏览器 Network 应出现 `POST /api/browser-monitor` 并返回 HTTP 200。
-4. 返回 403 时检查浏览器 Origin、请求 Host 和反向代理配置；503 表示 H5 未配置监控服务地址或 token；502 表示监控服务不可达或拒绝转发；400 表示上传数据不符合协议。
-5. 没有上传请求时检查浏览器控制台中的 `[browser-monitor] Initialization failed`；上传失败在开发环境输出不含凭据的提示。
-
-服务启动本身不会产生 JSON 文件；错误报告和变化的性能指标上传成功后才落盘。`MONITOR_DATA_DIR` 的相对路径以监控服务工作目录为准，使用上述 pnpm 命令时为 `apps/web-monitor`。
+1. 检查 `http://127.0.0.1:8200/health` 和带 query token 的 `/api/reports`，确认服务和数据库查询正常。
+2. 启用 H5 的 `NEXT_PUBLIC_BROWSER_MONITOR_ENABLED=true`，确保两端服务端 ingest token 一致，再重新启动 H5。
+3. 页面约十五秒后应上传性能报告，错误报告还包含可用的回放。通过管理员列表确认数据入库。
+4. 返回 403 时检查 H5 Origin 校验；503 表示未配置转发或接收并发已满；502 表示接收服务不可达；400 表示协议校验失败。MySQL 故障不会切换到文件存储。
 
 ## 管理后台查看
 
@@ -119,20 +116,48 @@ curl -H "Authorization: Bearer $MONITOR_QUERY_TOKEN" \
 
 页面关闭时会尝试立即上传；浏览器对 keepalive 总请求体限制约 64 KiB，因此大回放在关闭标签页、崩溃或离线时可能丢失。当前没有离线队列与重试。上传并发达到限额时会丢弃额外报告，优先保证应用交互不受监控影响。
 
-## 存储与验证
+## MySQL 存储与配置
 
-文件以 UUID 命名，写入临时文件后原子重命名；默认保留七天，最多 10000 个报告，保存时和每小时清理。JSON 文件和目录使用受限权限，数据目录已加入 Git ignore。重启会重新扫描记录并建立摘要索引。此实现只支持一个写入进程，数据目录不要由多个实例同时写入。
+服务只使用 MySQL，不再提供文件 adapter、文件镜像、存储切换或文件导入导出命令；历史 JSON 与备份不参与运行。既有备份文件原样保留，清理应遵循备份保留策略。
 
-摘要 Map 在保存和启动加载期间都受 `MONITOR_MAX_REPORTS` 限制；启动按目录流逐条加载。过期或超额摘要先从内存移除，再删除文件，文件删除失败不会让 Map 持续增长。后续清理会重新扫描并重试遗留文件，不在内存中积累待删除队列；损坏或不兼容的报告继续忽略并保留。
+需要 MySQL 8、InnoDB、至少 16 MiB 的 `max_allowed_packet`。按用户要求复用 `go-tech` 库及连接账号，使用独立连接池和 `monitor_*` 表。迁移记录为 `monitor_schema_migrations`，与 H5 的 `__drizzle_migrations` 独立。现有业务表不参与迁移。
+
+监控服务自己的 `.env` 必须配置：
+
+- `MONITOR_DATABASE_URL`：指向 `go-tech` 库的服务端 MySQL 连接。
+- `MONITOR_AUTH_ENCRYPTION_KEY`：64 位十六进制密钥，使用 `openssl rand -hex 32` 生成；已有记录须保留原密钥。
+- `MONITOR_AUTH_KEY_VERSION`：默认 `v1`。轮换时在 `MONITOR_AUTH_PREVIOUS_KEYS` 中保留仍被报告引用的旧版本密钥。
+- `MONITOR_INGEST_TOKEN`、`MONITOR_QUERY_TOKEN`：两个独立的服务端 token。
+
+连接、密钥、版本、schema 或实例配置校验失败时启动失败。数据库不可用时上传失败，不能先确认再丢弃数据。连接池、等待队列、超时、上传并发和回放解压均有容量限制。
+
+应用迁移：
+
+```bash
+pnpm --filter web-monitor db:migrate
+```
+
+`db:migrate` 使用 `MONITOR_MIGRATION_DATABASE_URL`，未配置时使用 `MONITOR_DATABASE_URL`，需要监控表的 DDL 权限。服务启动不会自动修改表结构。也可使用 `MONITOR_PROVISION_SOURCE_ENV=/绝对路径/配置文件 pnpm --filter web-monitor db:provision` 读取该文件的 `DATABASE_URL`，确认 `go-tech` 后应用迁移并保存监控配置；该命令不创建数据库或账号，不覆盖已有加密密钥。
+
+完整中文注释建表语句见 [`sql/schema.sql`](./sql/schema.sql)，该文件仅供结构查阅，初始化和升级统一使用版本化迁移。已执行的初始迁移保持不可变。`drizzle/0001_monitor_chinese_comments.sql` 为六张表及全部 41 个字段补充中文数据库注释，不改变字段类型、可空性、自增或业务数据。`src/db/comments.ts` 维护注释规范，真实数据库测试核对所有表和字段的注释。
+
+报告索引、详情、认证密文和回放在同一事务内写入；重复 UUID 不覆盖原记录或接收时间。列表仅查询脱敏摘要，按接收时间与 UUID 降序进行游标分页。详情一次一致读取；回放独立 gzip 存储并校验大小、顺序与哈希。JSON 列保存规范化文本字符串，避免性能指标浮点精度变化。
+
+默认保留七天、最多 10000 份报告。查询直接排除过期记录，定时任务通过数据库维护锁协调分批清理；不再等待文件镜像。历史导入审计表保留用于追溯，成功审计独立保留 30 天，异常审计不会自动删除。
+
+`GET /api/storage`（query token）只返回固定的 MySQL 来源和数据库查询统计；`POST /api/storage/switch` 已移除。旧 `MONITOR_STORAGE`、`MONITOR_QUERY_STORAGE`、`MONITOR_DATA_DIR`、文件镜像和切换配置不再生效。
+
+## 验证与备份
 
 ```bash
 pnpm --filter web-monitor type-check
 pnpm --filter web-monitor test
 pnpm --filter web-monitor build
-pnpm --filter @go-tech/browser-monitor typecheck
-pnpm --filter @go-tech/browser-monitor test
-pnpm --filter @go-tech/monitor-contract test
-pnpm --filter web-h5 exec tsx --test lib/browser-monitor/relay.test.ts lib/client-http/client-fetch.test.ts
+pnpm --filter web-monitor lint
+MONITOR_TEST_DATABASE_URL='<专用测试连接>' pnpm --filter web-monitor test
+MONITOR_TEST_DATABASE_URL='<专用测试连接>' pnpm --filter web-monitor reports:benchmark
 ```
 
-浏览器冒烟验证：打开 H5 登录页，在开发者工具执行 `setTimeout(() => { throw new Error('monitor-smoke'); }, 0)`，等待约十秒，通过错误列表找到报告并查询回放。刷新一个无错误页面后等待十五秒，查询 performance 列表查看指标。
+真实 MySQL 测试和容量测试只创建、删除随机命名的隔离 schema；未提供测试连接时真实数据库测试会明确跳过。容量测试默认准备 100000 条合成性能报告。
+
+恢复使用 MySQL 备份；认证加密密钥须单独受控备份。SQL 备份包含回放二进制列时使用 `mysqldump --hex-blob` 并按原始字节保存，恢复到隔离库后核验完整报告。旧文件不能通过环境变量重新启用为运行存储。部署与核验记录见[实施记录](./DATABASE-MIGRATION-RESULTS.md)，[原迁移计划](./DATABASE-MIGRATION-PLAN.md)保留为历史过程说明。

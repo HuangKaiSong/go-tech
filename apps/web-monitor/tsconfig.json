@@ -1,5 +1,8 @@
 {
   "extends": "@go-tech/tsconfig/base.json",
-  "compilerOptions": { "lib": ["ESNext"], "types": ["node"] },
-  "include": ["src", "tests", "tsdown.config.ts"]
+  "compilerOptions": {
+    "lib": ["ESNext"],
+    "types": ["node"]
+  },
+  "include": ["src", "tests", "tsdown.config.ts", "scripts", "drizzle.config.ts"]
 }

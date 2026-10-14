@@ -7,7 +7,7 @@ import {
   reportIdSchema,
   reportSchema
 } from '@go-tech/monitor-contract';
-import { type ListFilter, ReportStore } from './store';
+import type { ListFilter, MonitorReportStore } from './storage/report-store';
 
 class HttpError extends Error {
   constructor(
@@ -77,10 +77,17 @@ function hasServerReplay(report: MonitorReport) {
   return report.kind === 'error' && report.error.kind === 'next-server' && report.replay.events.length > 0;
 }
 
-export function createMonitorServer(store: ReportStore, tokens: { ingest: string; query: string }) {
+export function createMonitorServer(
+  store: MonitorReportStore,
+  tokens: { ingest: string; query: string },
+  options: { maxInFlightUploads?: number } = {}
+) {
   if (!tokens.ingest || !tokens.query || tokens.ingest === tokens.query) {
     throw new Error('Separate non-empty ingest and query tokens are required');
   }
+  const uploadLimit = options.maxInFlightUploads ?? 16;
+  if (!Number.isSafeInteger(uploadLimit) || uploadLimit < 1) throw new Error('Invalid upload concurrency');
+  let inFlightUploads = 0;
   const server = createServer((request, response) => {
     handle(request, response).catch(error => {
       if (response.headersSent || response.destroyed) return;
@@ -91,6 +98,21 @@ export function createMonitorServer(store: ReportStore, tokens: { ingest: string
   server.requestTimeout = 15000;
   server.headersTimeout = 10000;
 
+  async function ingest(request: IncomingMessage, response: ServerResponse) {
+    if (!authorized(request, tokens.ingest)) throw new HttpError(401, 'Unauthorized');
+    if (inFlightUploads >= uploadLimit) throw new HttpError(503, 'Monitor ingestion is busy');
+    inFlightUploads += 1;
+    try {
+      const parsed = reportSchema.safeParse(await body(request));
+      if (!parsed.success) throw new HttpError(400, 'Invalid monitor report');
+      if (hasServerReplay(parsed.data)) throw new HttpError(400, 'Server errors cannot contain browser replay');
+      const saved = await store.save(parsed.data);
+      json(response, saved.duplicate ? 200 : 201, { code: 200, data: saved });
+    } finally {
+      inFlightUploads -= 1;
+    }
+  }
+
   async function handle(request: IncomingMessage, response: ServerResponse) {
     const url = new URL(request.url ?? '/', 'http://localhost');
     if (url.pathname === '/health' && request.method === 'GET') {
@@ -98,31 +120,31 @@ export function createMonitorServer(store: ReportStore, tokens: { ingest: string
       return;
     }
     if (url.pathname === '/api/reports' && request.method === 'POST') {
-      if (!authorized(request, tokens.ingest)) throw new HttpError(401, 'Unauthorized');
-      const parsed = reportSchema.safeParse(await body(request));
-      if (!parsed.success) throw new HttpError(400, 'Invalid monitor report');
-      if (hasServerReplay(parsed.data)) throw new HttpError(400, 'Server errors cannot contain browser replay');
-      const saved = await store.save(parsed.data);
-      json(response, saved.duplicate ? 200 : 201, { code: 200, data: saved });
+      await ingest(request, response);
       return;
     }
     if (!authorized(request, tokens.query)) throw new HttpError(401, 'Unauthorized');
     if (url.pathname === '/api/reports' && request.method === 'GET') {
-      json(response, 200, { code: 200, data: store.list(listFilter(url)) });
+      json(response, 200, { code: 200, data: await store.list(listFilter(url)) });
+      return;
+    }
+    if (url.pathname === '/api/storage' && request.method === 'GET') {
+      json(response, 200, { code: 200, data: { storage: 'mysql', database: store.metrics?.() } });
       return;
     }
     const match = /^\/api\/reports\/([^/]+)(\/replay)?$/.exec(url.pathname);
     if (match && request.method === 'GET') {
       const id = match[1];
       if (!reportIdSchema.safeParse(id).success) throw new HttpError(400, 'Invalid report ID');
-      const report = await store.get(id);
-      if (!report) throw new HttpError(404, 'Report not found');
+      const stored = await store.getStored(id);
+      if (!stored) throw new HttpError(404, 'Report not found');
+      const { receivedAt, report } = stored;
       if (match[2]) {
         if (!hasBrowserReplay(report)) throw new HttpError(404, 'Replay unavailable');
         // Raw event array can be passed directly to rrweb-player/Replayer.
         json(response, 200, report.replay.events);
       } else {
-        json(response, 200, { code: 200, data: report, receivedAt: store.receivedAt(id) });
+        json(response, 200, { code: 200, data: report, receivedAt });
       }
       return;
     }

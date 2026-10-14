@@ -59,6 +59,10 @@ catalog:
   vaul: ^1.1.2
 
 catalogs:
+  database:
+    drizzle-orm: ^0.45.2
+    mysql2: ^3.23.2
+    drizzle-kit: ^0.31.10
   core:
     '@tanstack/react-query': ^5.101.2
     jotai: ^2.16.0

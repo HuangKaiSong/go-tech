@@ -9,14 +9,21 @@
     "build": "tsdown",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
-    "lint": "oxlint src tests"
+    "lint": "oxlint src tests scripts drizzle.config.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "reports:benchmark": "tsx --env-file-if-exists=.env scripts/benchmark.ts",
+    "db:provision": "tsx scripts/provision-database.ts"
   },
   "dependencies": {
-    "@go-tech/monitor-contract": "workspace:*"
+    "@go-tech/monitor-contract": "workspace:*",
+    "drizzle-orm": "catalog:database",
+    "mysql2": "catalog:database"
   },
   "devDependencies": {
     "@go-tech/tsconfig": "workspace:*",
     "@types/node": "catalog:dev",
+    "drizzle-kit": "catalog:database",
     "tsdown": "catalog:dev",
     "tsx": "catalog:dev",
     "typescript": "catalog:core",
