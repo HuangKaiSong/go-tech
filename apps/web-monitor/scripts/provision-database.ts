@@ -21,7 +21,8 @@ const tables = [
   'monitor_report_payloads',
   'monitor_replays',
   'monitor_import_runs',
-  'monitor_import_items'
+  'monitor_import_items',
+  'monitor_upload_chunks'
 ];
 const journal = 'monitor_schema_migrations';
 const admin = await createConnection(sourceUrl);

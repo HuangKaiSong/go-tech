@@ -4,9 +4,12 @@ import {
   type ErrorReport,
   MAX_REPORT_BYTES,
   type MonitorReport,
+  authenticationSchema,
+  reportChunkSchema,
   reportIdSchema,
   reportSchema
 } from '@go-tech/monitor-contract';
+import { InvalidUploadChunk } from './storage/chunk-upload';
 import type { ListFilter, MonitorReportStore } from './storage/report-store';
 
 class HttpError extends Error {
@@ -91,19 +94,35 @@ export function createMonitorServer(
   const server = createServer((request, response) => {
     handle(request, response).catch(error => {
       if (response.headersSent || response.destroyed) return;
-      const status = error instanceof HttpError ? error.status : 500;
+      let status = 500;
+      if (error instanceof HttpError) status = error.status;
+      if (error instanceof InvalidUploadChunk) status = 400;
       json(response, status, { code: status, message: status === 500 ? 'Monitor service error' : error.message });
     });
   });
   server.requestTimeout = 15000;
   server.headersTimeout = 10000;
 
-  async function ingest(request: IncomingMessage, response: ServerResponse) {
+  async function ingest(request: IncomingMessage, response: ServerResponse, chunks = false) {
     if (!authorized(request, tokens.ingest)) throw new HttpError(401, 'Unauthorized');
     if (inFlightUploads >= uploadLimit) throw new HttpError(503, 'Monitor ingestion is busy');
     inFlightUploads += 1;
     try {
-      const parsed = reportSchema.safeParse(await body(request));
+      const value = await body(request);
+      if (chunks) {
+        if (!store.saveChunk) throw new HttpError(503, 'Chunk upload unavailable');
+        if (typeof value !== 'object' || value === null || !('chunk' in value))
+          throw new HttpError(400, 'Invalid chunk envelope');
+        const chunk = reportChunkSchema.safeParse(value.chunk);
+        const authentication = authenticationSchema
+          .optional()
+          .safeParse('authentication' in value ? value.authentication : undefined);
+        if (!chunk.success || !authentication.success) throw new HttpError(400, 'Invalid chunk');
+        const saved = await store.saveChunk(chunk.data, authentication.data);
+        json(response, 200, { code: 200, data: saved });
+        return;
+      }
+      const parsed = reportSchema.safeParse(value);
       if (!parsed.success) throw new HttpError(400, 'Invalid monitor report');
       if (hasServerReplay(parsed.data)) throw new HttpError(400, 'Server errors cannot contain browser replay');
       const saved = await store.save(parsed.data);
@@ -117,6 +136,10 @@ export function createMonitorServer(
     const url = new URL(request.url ?? '/', 'http://localhost');
     if (url.pathname === '/health' && request.method === 'GET') {
       json(response, 200, { code: 200, status: 'ok' });
+      return;
+    }
+    if (url.pathname === '/api/report-chunks' && request.method === 'POST') {
+      await ingest(request, response, true);
       return;
     }
     if (url.pathname === '/api/reports' && request.method === 'POST') {

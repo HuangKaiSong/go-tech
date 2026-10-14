@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { type MonitorReport, REPORT_CHUNK_BYTES, type ReportChunk } from '@go-tech/monitor-contract';
 import { drizzle } from 'drizzle-orm/mysql2';
 import { migrate } from 'drizzle-orm/mysql2/migrator';
 import { type Connection, type RowDataPacket, createConnection } from 'mysql2/promise';
@@ -9,6 +10,20 @@ import { ReportCodec } from '../src/storage/codec';
 import { MysqlReportStore } from '../src/storage/mysql-report-store';
 import { fixture } from './fixtures';
 import { storageContract } from './storage-contract';
+
+function chunks(report: MonitorReport): ReportChunk[] {
+  const bytes = Buffer.from(JSON.stringify(report));
+  const total = Math.ceil(bytes.length / REPORT_CHUNK_BYTES);
+  const uploadId = randomUUID();
+  return Array.from({ length: total }, (_, index) => ({
+    protocol: 'monitor-chunk-v1',
+    id: report.id,
+    uploadId,
+    index,
+    total,
+    data: bytes.subarray(index * REPORT_CHUNK_BYTES, (index + 1) * REPORT_CHUNK_BYTES).toString('base64')
+  }));
+}
 
 const testUrl = process.env.MONITOR_TEST_DATABASE_URL;
 describe.skipIf(!testUrl)('MySQL storage and schema migrations', () => {
@@ -44,6 +59,7 @@ describe.skipIf(!testUrl)('MySQL storage and schema migrations', () => {
   beforeEach(async () => {
     await store.connection(async connection => {
       await store.query(connection, 'DELETE FROM monitor_reports');
+      await store.query(connection, 'DELETE FROM monitor_upload_chunks');
       await store.query(connection, 'DELETE FROM monitor_import_items');
       await store.query(connection, 'DELETE FROM monitor_import_runs');
     });
@@ -65,7 +81,7 @@ describe.skipIf(!testUrl)('MySQL storage and schema migrations', () => {
     const monitor = await store.connection(connection =>
       store.query<RowDataPacket[]>(connection, 'SELECT COUNT(*) AS total FROM monitor_schema_migrations')
     );
-    expect(Number(monitor[0].total)).toBe(2);
+    expect(Number(monitor[0].total)).toBe(3);
   });
   it('applies Chinese comments to every monitor table and column', async () => {
     const databaseStore = store;
@@ -274,5 +290,54 @@ describe.skipIf(!testUrl)('MySQL storage and schema migrations', () => {
       ])
     );
     await expect(store.getStored(value.id)).rejects.toThrow('key version');
+  });
+  it('resumes chunks through another instance, commits once and clears staging', async () => {
+    const report = fixture();
+    delete report.context.authentication;
+    if (report.kind === 'error') report.replay.events[0].data = { text: '界面'.repeat(10000) };
+    const parts = chunks(report);
+    expect(parts.length).toBeGreaterThan(2);
+    expect(await store.saveChunk(parts[0])).toMatchObject({ complete: false, nextIndex: 1 });
+    expect(await second.saveChunk(parts[0])).toMatchObject({ complete: false, nextIndex: 1 });
+    for (const part of parts.slice(1)) {
+      // oxlint-disable-next-line no-await-in-loop -- Exercise sequential resumable acknowledgements.
+      await second.saveChunk(part, { status: 'unverified' });
+    }
+    const saved = await store.getStored(report.id);
+    expect(saved?.report).toEqual({
+      ...report,
+      context: { ...report.context, authentication: { status: 'unverified' } }
+    });
+    expect(await store.saveChunk(parts.at(-1) ?? parts[0])).toMatchObject({ complete: true });
+    expect((await store.list({ limit: 100 })).items).toHaveLength(1);
+    const rows = await store.connection(connection =>
+      store.query(connection, 'SELECT upload_id FROM monitor_upload_chunks')
+    );
+    expect(rows).toHaveLength(0);
+  });
+  it('rejects conflicting chunk bytes and client-supplied authentication', async () => {
+    const report = fixture();
+    const parts = chunks(report);
+    await expect(store.saveChunk(parts[0])).rejects.toThrow('Invalid assembled report');
+    delete report.context.authentication;
+    if (report.kind === 'error') report.replay.events[0].data = { text: 'x'.repeat(30000) };
+    const next = chunks(report);
+    await store.saveChunk(next[0]);
+    await expect(store.saveChunk({ ...next[0], data: Buffer.from('conflicting').toString('base64') })).rejects.toThrow(
+      'Conflicting chunk data'
+    );
+    expect(await store.getStored(report.id)).toBeNull();
+  });
+  it('cleans expired staged chunks and requests the first missing fragment after partial expiry', async () => {
+    const report = fixture();
+    delete report.context.authentication;
+    if (report.kind === 'error') report.replay.events[0].data = { text: 'x'.repeat(30000) };
+    const parts = chunks(report);
+    await store.saveChunk(parts[0]);
+    await store.connection(connection =>
+      store.query(connection, 'UPDATE monitor_upload_chunks SET expires_at_ms=?', [Date.now() - 1])
+    );
+    await store.prune();
+    expect(await store.saveChunk(parts[1])).toMatchObject({ complete: false, nextIndex: 0 });
   });
 });

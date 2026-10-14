@@ -81,3 +81,18 @@ export const importItems = mysqlTable(
   },
   table => [primaryKey({ columns: [table.sourceHash, table.fileId] })]
 );
+export const uploadChunks = mysqlTable(
+  'monitor_upload_chunks',
+  {
+    uploadId: char('upload_id', { length: 36 }).notNull(),
+    chunkIndex: int('chunk_index').notNull(),
+    reportId: char('report_id', { length: 36 }).notNull(),
+    total: int('total_chunks').notNull(),
+    data: blob('chunk_data').notNull(),
+    expiresAt: milliseconds('expires_at_ms')
+  },
+  table => [
+    primaryKey({ columns: [table.uploadId, table.chunkIndex] }),
+    index('upload_chunks_expiry').on(table.expiresAt)
+  ]
+);

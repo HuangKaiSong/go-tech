@@ -123,3 +123,33 @@ test('proxy public origins require an explicit server allowlist', async () => {
     200
   );
 });
+
+test('recovered reports never inherit credentials from a later logged-in user', async () => {
+  const incoming = request();
+  incoming.headers.set('X-Monitor-Delivery', 'recovered');
+  incoming.headers.set('Cookie', 'GO_TECH_AUTH_TOKEN=later-user');
+  const response = await relayMonitorReport(incoming, config, async (_url, init) => {
+    assert.deepEqual(JSON.parse(String(init?.body)).context.authentication, { status: 'unverified' });
+    return Response.json({ code: 200 });
+  });
+  assert.equal(response.status, 200);
+});
+
+test('relay acknowledges individual chunks without claiming a complete report commit or exposing upstream extras', async () => {
+  const id = randomUUID();
+  const incoming = request({
+    protocol: 'monitor-chunk-v1',
+    id,
+    uploadId: randomUUID(),
+    index: 0,
+    total: 2,
+    data: 'e30='
+  });
+  incoming.headers.set('X-Monitor-Delivery', 'recovered');
+  const response = await relayMonitorReport(incoming, config, async (url, init) => {
+    assert.equal(String(url), 'http://127.0.0.1:8200/api/report-chunks');
+    assert.deepEqual(JSON.parse(String(init?.body)).authentication, { status: 'unverified' });
+    return Response.json({ code: 200, data: { id, complete: false, nextIndex: 1, secret: 'must-not-return' } });
+  });
+  assert.deepEqual(await response.json(), { code: 200, data: { id, complete: false, nextIndex: 1 } });
+});

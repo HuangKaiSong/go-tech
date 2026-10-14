@@ -1,4 +1,4 @@
-import type { MonitorReport, ReportSummary } from '@go-tech/monitor-contract';
+import type { MonitorAuthentication, MonitorReport, ReportChunk, ReportSummary } from '@go-tech/monitor-contract';
 export interface ListFilter {
   cursor?: string;
   kind?: MonitorReport['kind'];
@@ -38,4 +38,8 @@ export interface MonitorReportStore {
   metrics?(): { failures: number; maxQueryMs: number; queries: number; totalQueryMs: number };
   prune(): Promise<void>;
   save(report: MonitorReport): Promise<SaveResult>;
+  saveChunk?(
+    chunk: ReportChunk,
+    authentication?: MonitorAuthentication
+  ): Promise<{ complete: boolean; id: string; nextIndex: number }>;
 }

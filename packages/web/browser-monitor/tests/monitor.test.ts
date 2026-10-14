@@ -40,7 +40,7 @@ describe('browser monitor', () => {
       });
       monitor.captureError(new Error('React failed'), { kind: 'react-client' });
       monitor.captureError(new Error('Server failed'), { kind: 'next-server' });
-      await vi.advanceTimersByTimeAsync(100);
+      await vi.advanceTimersByTimeAsync(2100);
       const server = reports.find(report => report.kind === 'error' && report.error.kind === 'next-server');
       const client = reports.find(report => report.kind === 'error' && report.error.kind === 'react-client');
       if (server?.kind !== 'error' || client?.kind !== 'error') throw new Error('Missing error reports');
@@ -332,7 +332,8 @@ describe('browser monitor', () => {
     expect(reportSchema.safeParse(reports[0]).success).toBe(true);
     monitor.captureError(new DOMException('Cancelled', 'AbortError'));
     await vi.advanceTimersByTimeAsync(15000);
-    expect(reports).toHaveLength(1);
+    expect(reports.length).toBeGreaterThan(1);
+    expect(new Set(reports.map(report => report.id)).size).toBe(1);
     monitor.stop();
   });
 });

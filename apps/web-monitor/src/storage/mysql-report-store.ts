@@ -1,7 +1,15 @@
-import { MAX_REPORT_BYTES, reportIdSchema, reportSchema, reportSummarySchema } from '@go-tech/monitor-contract';
+import {
+  MAX_REPORT_BYTES,
+  type MonitorAuthentication,
+  type ReportChunk,
+  reportIdSchema,
+  reportSchema,
+  reportSummarySchema
+} from '@go-tech/monitor-contract';
 import { getTableConfig } from 'drizzle-orm/mysql-core';
 import { type PoolConnection, type RowDataPacket, createPool } from 'mysql2/promise';
 import * as schema from '../db/schema';
+import { saveUploadChunk } from './chunk-upload';
 import { ReportCodec, sha256, storedHash, validateStored } from './codec';
 import { type ListFilter, type MonitorReportStore, type StoredReport, summarize } from './report-store';
 
@@ -132,6 +140,9 @@ export class MysqlReportStore implements MonitorReportStore {
         if (engine?.ENGINE !== 'InnoDB') throw new Error('Monitor tables must use InnoDB');
       }
     });
+  }
+  saveChunk(chunk: ReportChunk, authentication?: MonitorAuthentication) {
+    return saveUploadChunk(this, chunk, authentication);
   }
   save(report: StoredReport['report']) {
     return this.saveStored({ report, receivedAt: Date.now() });
@@ -322,6 +333,10 @@ export class MysqlReportStore implements MonitorReportStore {
             'DELETE FROM monitor_import_runs WHERE completed_at_ms < ? AND NOT EXISTS (SELECT 1 FROM monitor_import_items WHERE run_id=monitor_import_runs.id) LIMIT ?',
             [Date.now() - 30 * 86400000, this.batch]
           );
+          await this.query(connection, 'DELETE FROM monitor_upload_chunks WHERE expires_at_ms <= ? LIMIT ?', [
+            Date.now(),
+            this.batch
+          ]);
           await connection.commit();
         } catch (error) {
           await connection.rollback();

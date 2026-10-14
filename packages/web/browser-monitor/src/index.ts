@@ -11,12 +11,19 @@ import { type Metric, onCLS, onFCP, onINP, onLCP, onTTFB } from 'web-vitals';
 import { createIdentifier } from './identifier';
 import { redactText, safePath, sanitizeRecording } from './privacy';
 import { ReplayBuffer } from './replay-buffer';
+import { type ReportDeliveryContext, type ReportQueueStore, createReportQueue } from './report-queue';
+
+export { uploadReportChunks } from './chunk-upload';
+export { ReportDeliveryError } from './report-queue';
+export type { ReportDeliveryContext } from './report-queue';
 
 export interface BrowserMonitorOptions {
   /** Defaults to five seconds of post-error DOM changes. */
   postErrorMs?: number;
+  /** Optional storage adapter, primarily for isolated simulations. */
+  queueStore?: ReportQueueStore;
   release?: string;
-  transport: (report: MonitorReport) => Promise<void>;
+  transport: (report: MonitorReport, delivery: ReportDeliveryContext) => Promise<void>;
 }
 
 export interface BrowserMonitor {
@@ -51,13 +58,14 @@ export function startBrowserMonitor(options: BrowserMonitorOptions): BrowserMoni
   const breadcrumbs: Breadcrumb[] = [];
   const fingerprints = new Map<string, number>();
   const pending = new Map<string, { bytes: number; report: ErrorReport; timer: ReturnType<typeof setTimeout> }>();
-  const sends = new Set<Promise<void>>();
+  const queue = createReportQueue(options.transport, options.queueStore, pageId);
   let stopped = false;
   let hasError = false;
   let recordingFailed = false;
   let errorsInWindow = 0;
   let windowStarted = Date.now();
   let lastMetrics = '';
+  let metricReportId = createIdentifier();
 
   function context(path = safePath(location.href)): MonitorContext {
     return {
@@ -78,13 +86,7 @@ export function startBrowserMonitor(options: BrowserMonitorOptions): BrowserMoni
   }
 
   function send(report: MonitorReport) {
-    // Bounded concurrency; monitoring failures never create application errors or toasts.
-    if (sends.size >= 4) return;
-    const task = Promise.resolve()
-      .then(() => options.transport(report))
-      .catch(() => undefined);
-    sends.add(task);
-    task.finally(() => sends.delete(task));
+    queue.enqueue(report);
   }
 
   function finish(id: string) {
@@ -139,6 +141,8 @@ export function startBrowserMonitor(options: BrowserMonitorOptions): BrowserMoni
         send(report);
         return;
       }
+      // Persist the initial replay immediately; a terminated page can recover this checkpoint.
+      queue.enqueue(report, now + (options.postErrorMs ?? 5000) + 60000);
       pending.set(report.id, {
         report,
         bytes: new TextEncoder().encode(JSON.stringify(events)).length,
@@ -250,6 +254,9 @@ export function startBrowserMonitor(options: BrowserMonitorOptions): BrowserMoni
       rating: value.rating,
       navigationType: value.navigationType
     });
+    if (JSON.stringify({ metrics: [...metrics.values()], hasError }) === lastMetrics) return;
+    // Preserve measured vitals even if the process exits before the next periodic flush.
+    queue.enqueue(performanceReport(), Date.now() + 60000);
   }
   // Web Vitals observer registration is document-scoped; callbacks become no-ops after stop.
   for (const observe of [onCLS, onFCP, onINP, onLCP, onTTFB]) {
@@ -260,21 +267,26 @@ export function startBrowserMonitor(options: BrowserMonitorOptions): BrowserMoni
     }
   }
 
+  function performanceReport(): MonitorReport {
+    return {
+      schemaVersion: 1,
+      id: metricReportId,
+      timestamp: Date.now(),
+      timeSource: 'client',
+      context: context(documentPath),
+      kind: 'performance',
+      metrics: [...metrics.values()],
+      hasError
+    };
+  }
+
   function flush() {
     for (const id of pending.keys()) finish(id);
     const signature = JSON.stringify({ metrics: [...metrics.values()], hasError });
     if (metrics.size && signature !== lastMetrics) {
       lastMetrics = signature;
-      send({
-        schemaVersion: 1,
-        id: createIdentifier(),
-        timestamp: Date.now(),
-        timeSource: 'client',
-        context: context(documentPath),
-        kind: 'performance',
-        metrics: [...metrics.values()],
-        hasError
-      });
+      send(performanceReport());
+      metricReportId = createIdentifier();
     }
   }
   const onVisibility = () => {
@@ -283,6 +295,11 @@ export function startBrowserMonitor(options: BrowserMonitorOptions): BrowserMoni
   document.addEventListener('visibilitychange', onVisibility);
   window.addEventListener('pagehide', flush);
   const interval = setInterval(flush, 15000);
+  const checkpoints = setInterval(() => {
+    for (const { report } of pending.values()) {
+      queue.enqueue(report, report.timestamp + (options.postErrorMs ?? 5000) + 60000);
+    }
+  }, 1000);
 
   return {
     getContext: () => context(),
@@ -296,6 +313,8 @@ export function startBrowserMonitor(options: BrowserMonitorOptions): BrowserMoni
       if (stopped) return;
       flush();
       stopped = true;
+      queue.stop();
+      clearInterval(checkpoints);
       clearInterval(interval);
       clearInterval(snapshotInterval);
       stopRecord?.();
