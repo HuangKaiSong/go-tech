@@ -96,7 +96,7 @@ const PricingSection = ({ catalog }: { catalog: PackageCatalog }) => {
           <div className="max-w-6xl mx-auto animate-fade-in grid lg:grid-cols-[1.05fr_1.35fr] gap-6 items-stretch">
             <PackageCard
               plan={toPackageCardPlan(featuredPlan)}
-              product="hr"
+              product={featuredPlan.bizCode!}
               TextComponent={DynamicText}
               LinkComponent={Link}
             />
@@ -122,8 +122,8 @@ const PricingSection = ({ catalog }: { catalog: PackageCatalog }) => {
                   {addons.map((addon, index) => (
                     <PackageCard
                       key={addon.id ?? `${addon.itemName}-${index}`}
-                      plan={toAddonCardPlan(addon, 'hr')}
-                      product="hr"
+                      plan={toAddonCardPlan(addon, addon.bizCode!)}
+                      product={addon.bizCode!}
                       TextComponent={DynamicText}
                       LinkComponent={Link}
                     />
