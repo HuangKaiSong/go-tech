@@ -1,6 +1,6 @@
 import { Button, Card, CardContent, CardHeader } from '@go-tech-frontend/ui';
 import { formatPackagePrice, getAddonBillingLabel, getPackageFeatures } from '@go-tech/package-ui/model';
-import type { Packages } from '@go-tech/types';
+import type { PackageBizCode, Packages } from '@go-tech/types';
 import { ArrowRight, MousePointerClick, Settings, SquareCheckBig } from 'lucide-react';
 import { DynamicText } from '@/app/components/DynamicI18nText.client';
 import SwipeRow from '@/app/components/SwipeRow';
@@ -19,10 +19,21 @@ function FeatureIcon({ icon }: { icon?: string }) {
   );
 }
 
-export function HrServicePackages({ onSelect, plan }: { onSelect: (plan: Packages) => void; plan: Packages }) {
+export function ServicePackages({
+  onSelect,
+  plan,
+  product
+}: {
+  onSelect: (plan: Packages) => void;
+  plan: Packages;
+  product: PackageBizCode;
+}) {
   const detail = plan.detail ?? {};
   const addons = plan.additionalItems ?? [];
   const price = formatPackagePrice(plan.price);
+  const isHr = product === 'hr';
+  const capacityUnit = isHr ? '名員工' : '個單位';
+  const managementLabel = isHr ? '人事管理功能' : '物業管理功能';
   const features = detail.features?.length ? detail.features : (detail.menu ?? []).map(item => item.menuTitle);
 
   return (
@@ -40,7 +51,9 @@ export function HrServicePackages({ onSelect, plan }: { onSelect: (plan: Package
             <DynamicText
               text={
                 detail.capacityLabel ||
-                (detail.dataCount !== undefined ? `包含 ${detail.dataCount} 名員工` : '按套餐配置開通人事管理功能')
+                (detail.dataCount !== undefined
+                  ? `包含 ${detail.dataCount} ${capacityUnit}`
+                  : `按套餐配置開通${managementLabel}`)
               }
             />
           </p>
@@ -69,7 +82,7 @@ export function HrServicePackages({ onSelect, plan }: { onSelect: (plan: Package
             </p>
           </div>
           <div className="rounded-md bg-primary/15 px-3 py-3 text-center text-sm font-medium text-foreground">
-            <DynamicText text={detail.summary || '包含人事管理功能'} />
+            <DynamicText text={detail.summary || `包含${managementLabel}`} />
           </div>
           <ul className="space-y-1">
             {features.map((feature, index) => (
@@ -96,16 +109,18 @@ export function HrServicePackages({ onSelect, plan }: { onSelect: (plan: Package
             ADD-ON MODULES
           </span>
           <h3 className="mt-2 text-xl font-bold text-foreground">
-            <DynamicText text="可加購的附加模塊（按每名員工計費）" />
+            <DynamicText text={`可加購的附加模塊（按每${capacityUnit}計費）`} />
           </h3>
           <p className="mt-1 text-sm leading-6 text-muted-foreground">
-            <DynamicText text="在基礎版之上按需加購，模塊費用 = 單價 × 員工人數 × 開通月份，下一步可即時計算。" />
+            <DynamicText
+              text={`在基礎版之上按需加購，模塊費用 = 單價 × ${isHr ? '員工人數' : '單位數量'} × 開通月份，下一步可即時計算。`}
+            />
           </p>
         </div>
         {addons.length > 0 ? (
           <SwipeRow className="flex md:grid md:grid-cols-3 md:gap-5 overflow-x-auto md:overflow-visible snap-x snap-mandatory -mx-4 px-4 md:mx-auto md:px-0 gap-4 pb-3 md:pb-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&>*]:shrink-0 [&>*]:basis-[85%] [&>*]:snap-center md:[&>*]:basis-auto">
             {addons.map((addon, index) => {
-              const card = toAddonCardPlan(addon, 'hr');
+              const card = toAddonCardPlan(addon, product);
               const addonPrice = formatPackagePrice(card.price);
               const addonFeatures = getPackageFeatures(card);
               return (
