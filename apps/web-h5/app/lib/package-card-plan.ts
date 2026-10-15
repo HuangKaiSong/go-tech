@@ -4,7 +4,7 @@ import type { PackageAddon, PackageBizCode, Packages } from '@go-tech/types';
 const firstText = (...values: Array<string | undefined>) => values.find(Boolean);
 const firstDefined = <Value>(...values: Array<Value | undefined>) => values.find(value => value !== undefined);
 
-export const getFeaturedHrPlan = (packages: Packages[]) => {
+export const getFeaturedPlan = (packages: Packages[]) => {
   const plans = packages.filter(plan => (plan.detail?.packageKind ?? 'plan') === 'plan');
   return plans.find(plan => plan.detail?.isFeatured ?? plan.isFeatured ?? plan.displayConfig?.isFeatured) ?? plans[0];
 };

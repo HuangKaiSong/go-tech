@@ -5,7 +5,7 @@ import { PackageCard } from '@go-tech/package-ui';
 import type { PackageBizCode } from '@go-tech/types';
 import { Building2, ChevronRight, Users } from 'lucide-react';
 import Link from '@/app/components/Link';
-import { getFeaturedHrPlan, toAddonCardPlan, toPackageCardPlan } from '@/app/lib/package-card-plan';
+import { getFeaturedPlan, toAddonCardPlan, toPackageCardPlan } from '@/app/lib/package-card-plan';
 import type { PackageCatalog } from '@/app/lib/package-catalog';
 import { useProductSelection } from '@/contexts/ProductSelectionContext';
 import { DynamicText } from './DynamicI18nText.client';
@@ -48,8 +48,8 @@ const PricingSection = ({ catalog }: { catalog: PackageCatalog }) => {
   const packages = catalog[product];
 
   const plans = packages.filter(plan => (plan.detail?.packageKind || 'plan') === 'plan');
-  const featuredHrPlan = getFeaturedHrPlan(packages);
-  const addons = featuredHrPlan?.additionalItems ?? [];
+  const featuredPlan = getFeaturedPlan(packages);
+  const addons = featuredPlan?.additionalItems ?? [];
 
   const renderHeader = () => {
     if (!content) return null;
@@ -77,7 +77,7 @@ const PricingSection = ({ catalog }: { catalog: PackageCatalog }) => {
         {renderHeader()}
 
         {plans.length === 0 ? <EmptyCatalog product={product} /> : null}
-
+        {/*
         {product === 'pms' && plans.length > 0 ? (
           <SwipeRow className="flex md:grid overflow-x-auto md:overflow-visible snap-x snap-mandatory -mx-4 px-4 md:mx-auto pb-3 md:pb-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&>*]:shrink-0 [&>*]:basis-[85%] [&>*]:snap-center md:[&>*]:basis-auto md:grid-cols-3 gap-5 max-w-5xl animate-fade-in items-stretch">
             {plans.map((plan, i) => (
@@ -90,12 +90,12 @@ const PricingSection = ({ catalog }: { catalog: PackageCatalog }) => {
               />
             ))}
           </SwipeRow>
-        ) : null}
+        ) : null} */}
 
-        {product === 'hr' && featuredHrPlan ? (
+        {featuredPlan ? (
           <div className="max-w-6xl mx-auto animate-fade-in grid lg:grid-cols-[1.05fr_1.35fr] gap-6 items-stretch">
             <PackageCard
-              plan={toPackageCardPlan(featuredHrPlan)}
+              plan={toPackageCardPlan(featuredPlan)}
               product="hr"
               TextComponent={DynamicText}
               LinkComponent={Link}

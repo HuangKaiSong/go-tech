@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { Packages } from '@go-tech/types';
-import { getFeaturedHrPlan, toAddonCardPlan, toPackageCardPlan } from './package-card-plan';
+import { getFeaturedPlan, toAddonCardPlan, toPackageCardPlan } from './package-card-plan';
 import { buildPackageCatalog } from './package-catalog';
 
 const plan: Packages = {
@@ -122,7 +122,7 @@ test('HR modules use the featured parent and retain nested names and serialized 
       }
     ]
   });
-  const featured = getFeaturedHrPlan(catalog.hr);
+  const featured = getFeaturedPlan(catalog.hr);
   assert.equal(featured?.id, 2);
   const addons = featured?.additionalItems ?? [];
   assert.equal(addons.length, 2);
@@ -137,5 +137,5 @@ test('HR modules use the featured parent and retain nested names and serialized 
   const quantity = toAddonCardPlan(addons[1], 'hr');
   assert.equal(quantity.count, 8);
   assert.equal(quantity.price, 100);
-  assert.equal(getFeaturedHrPlan([]), undefined);
+  assert.equal(getFeaturedPlan([]), undefined);
 });

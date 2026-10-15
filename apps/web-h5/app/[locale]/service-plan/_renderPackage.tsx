@@ -5,7 +5,7 @@ import type { PackageBizCode, Packages } from '@go-tech/types';
 import { ArrowLeft, Building2, Settings, Users } from 'lucide-react';
 import SwipeRow from '@/app/components/SwipeRow';
 import { useProgressRouter } from '@/app/hooks/use-progress-router';
-import { getFeaturedHrPlan } from '@/app/lib/package-card-plan';
+import { getFeaturedPlan } from '@/app/lib/package-card-plan';
 import { DynamicText } from '../../components/DynamicI18nText.client';
 import { HrServicePackages } from './hr-service-packages';
 
@@ -22,7 +22,7 @@ const getIconHref = (value: string) => {
 
 export default function Page({ packages, product }: { packages: ExtendedPackages[]; product: PackageBizCode }) {
   const router = useProgressRouter();
-  const hrPlan = product === 'hr' ? getFeaturedHrPlan(packages) : undefined;
+  const hrPlan = product === 'hr' ? getFeaturedPlan(packages) : undefined;
   const hrAddonNames = hrPlan?.additionalItems?.map(addon => addon.itemName).join('、');
 
   const handleSelectPlan = (plan: Packages) => {
