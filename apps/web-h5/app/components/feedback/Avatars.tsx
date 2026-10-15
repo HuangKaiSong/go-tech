@@ -10,7 +10,7 @@ export const UserAvatar = ({ name }: { name: string }) => (
 export const OfficialAvatar = () => (
   <div className="w-16 h-16 shrink-0 rounded-md bg-stone-900 text-white flex flex-col items-center justify-center leading-none">
     <Settings className="w-4 h-4 text-primary mb-1" strokeWidth={2.5} />
-    <span className="text-[10px] font-bold tracking-wider">GO-TECH</span>
+    <span className="text-[10px] font-bold tracking-wider">GO-TECHS</span>
     <span className="text-[8px] tracking-widest text-stone-400 mt-0.5">MANAGER</span>
   </div>
 );

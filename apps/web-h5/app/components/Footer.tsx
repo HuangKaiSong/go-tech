@@ -100,7 +100,7 @@ const Footer = () => {
               <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
                 <Settings className="w-6 h-6 text-primary-foreground" />
               </div>
-              <span className="text-lg font-bold">GO-TECH</span>
+              <span className="text-lg font-bold">GO-TECHS</span>
             </div>
             <p className="text-background/70 text-sm mb-4">
               <DynamicText text="專業租務管理系統" />
@@ -112,7 +112,7 @@ const Footer = () => {
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-primary" />
-                <span>info@go-tech.com</span>
+                <span>info@go-techs.com</span>
               </li>
               <li className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-primary" />

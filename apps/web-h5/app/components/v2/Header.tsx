@@ -87,7 +87,7 @@ const Header = () => {
           </div>
           <div className="flex items-center gap-1.5 text-white/90">
             <Mail className="w-4 h-4" />
-            <span>info@go-tech.com</span>
+            <span>info@go-techs.com</span>
           </div>
           <div className="flex items-center gap-1.5 text-white/90">
             <MapPin className="w-4 h-4" />
@@ -99,7 +99,7 @@ const Header = () => {
             <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
               <Settings className="w-6 h-6 text-primary-foreground" />
             </div>
-            <span className="text-lg font-bold text-white">GO-TECH</span>
+            <span className="text-lg font-bold text-white">GO-TECHS</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-1" aria-label="主導航">

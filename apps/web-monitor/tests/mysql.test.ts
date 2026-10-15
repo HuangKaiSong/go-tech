@@ -11,9 +11,9 @@ import { MysqlReportStore } from '../src/storage/mysql-report-store';
 import { fixture } from './fixtures';
 import { storageContract } from './storage-contract';
 
-function chunks(report: MonitorReport): ReportChunk[] {
+function chunks(report: MonitorReport, chunkBytes = REPORT_CHUNK_BYTES): ReportChunk[] {
   const bytes = Buffer.from(JSON.stringify(report));
-  const total = Math.ceil(bytes.length / REPORT_CHUNK_BYTES);
+  const total = Math.ceil(bytes.length / chunkBytes);
   const uploadId = randomUUID();
   return Array.from({ length: total }, (_, index) => ({
     protocol: 'monitor-chunk-v1',
@@ -21,7 +21,8 @@ function chunks(report: MonitorReport): ReportChunk[] {
     uploadId,
     index,
     total,
-    data: bytes.subarray(index * REPORT_CHUNK_BYTES, (index + 1) * REPORT_CHUNK_BYTES).toString('base64')
+    ...(chunkBytes !== REPORT_CHUNK_BYTES ? { chunkBytes } : {}),
+    data: bytes.subarray(index * chunkBytes, (index + 1) * chunkBytes).toString('base64')
   }));
 }
 
@@ -81,7 +82,7 @@ describe.skipIf(!testUrl)('MySQL storage and schema migrations', () => {
     const monitor = await store.connection(connection =>
       store.query<RowDataPacket[]>(connection, 'SELECT COUNT(*) AS total FROM monitor_schema_migrations')
     );
-    expect(Number(monitor[0].total)).toBe(3);
+    expect(Number(monitor[0].total)).toBe(4);
   });
   it('applies Chinese comments to every monitor table and column', async () => {
     const databaseStore = store;
@@ -339,5 +340,17 @@ describe.skipIf(!testUrl)('MySQL storage and schema migrations', () => {
     );
     await store.prune();
     expect(await store.saveChunk(parts[1])).toMatchObject({ complete: false, nextIndex: 0 });
+  });
+  it('assembles adaptive 256 KiB chunks losslessly', async () => {
+    const report = fixture();
+    delete report.context.authentication;
+    if (report.kind === 'error') report.replay.events[0].data = { text: '界面'.repeat(100000) };
+    const parts = chunks(report, 262144);
+    expect(parts).toHaveLength(3);
+    for (const part of parts) {
+      // oxlint-disable-next-line no-await-in-loop -- Assemble actual adaptive chunks in order.
+      await store.saveChunk(part);
+    }
+    expect((await store.getStored(report.id))?.report).toEqual(report);
   });
 });

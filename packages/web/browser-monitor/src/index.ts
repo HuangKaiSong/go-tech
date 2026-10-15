@@ -13,6 +13,7 @@ import { redactText, safePath, sanitizeRecording } from './privacy';
 import { ReplayBuffer } from './replay-buffer';
 import { type ReportDeliveryContext, type ReportQueueStore, createReportQueue } from './report-queue';
 
+export { createAdaptiveReportTransport } from './adaptive-upload';
 export { uploadReportChunks } from './chunk-upload';
 export { ReportDeliveryError } from './report-queue';
 export type { ReportDeliveryContext } from './report-queue';

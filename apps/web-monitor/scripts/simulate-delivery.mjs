@@ -39,8 +39,14 @@ async function captured(page, message) {
   await page.evaluate(text => {
     window.simulation.capture(text);
   }, message);
-  await page.waitForFunction(async () => (await window.simulation.rows()).length > 0);
-  return (await rows(page)).find(row => 'replay' in row.report)?.id;
+  await page.waitForFunction(
+    async expected =>
+      (await window.simulation.rows()).some(
+        row => row.report.kind === 'error' && row.report.error.message === expected
+      ),
+    message
+  );
+  return (await rows(page)).find(row => row.report.kind === 'error' && row.report.error.message === message)?.id;
 }
 async function committed(id) {
   for (let count = 0; count < 300; count += 1) {
@@ -110,9 +116,11 @@ window.simulation = { capture: message => captureBrowserError(new Error(message)
   assert(bundleName);
   const bundle = await readFile(resolve(directory, 'bundle', bundleName));
   const chunksSeen = [];
+  const requestsSeen = [];
   let loseAcknowledgement;
   let lostAcknowledgements = 0;
   let failChunkOnce = false;
+  let failWholeId;
   gateway = createServer(async (incoming, outgoing) => {
     try {
       if (incoming.url === '/bundle.js') {
@@ -131,6 +139,13 @@ window.simulation = { capture: message => captureBrowserError(new Error(message)
       for await (const piece of incoming) pieces.push(Buffer.from(piece));
       const body = Buffer.concat(pieces).toString();
       const value = JSON.parse(body);
+      requestsSeen.push({ id: value.id, chunk: value.protocol === 'monitor-chunk-v1', chunkBytes: value.chunkBytes });
+      if (value.id === failWholeId && value.protocol !== 'monitor-chunk-v1') {
+        failWholeId = undefined;
+        outgoing.writeHead(413);
+        outgoing.end('{}');
+        return;
+      }
       if (value.protocol === 'monitor-chunk-v1') {
         chunksSeen.push({ id: value.id, index: value.index });
         if (value.index === 2 && failChunkOnce) {
@@ -191,7 +206,42 @@ window.simulation = { capture: message => captureBrowserError(new Error(message)
   assert.equal((await committed(offlineId)).report.id, offlineId);
   await page.waitForFunction(async () => (await window.simulation.rows()).length === 0);
   console.log('PASS: offline → tab close → reopen → MySQL commit → local queue empty');
-  // A large sanitized DOM forces multiple small chunks rather than one large request.
+  // The same large replay should use one request on a fast connection.
+  await page.evaluate(() =>
+    Object.defineProperty(navigator, 'connection', {
+      configurable: true,
+      value: { effectiveType: '4g', downlink: 10, rtt: 50 }
+    })
+  );
+  await page.evaluate(() => {
+    for (let index = 0; index < 600; index += 1) {
+      const element = document.createElement('div');
+      element.textContent = `模拟界面 ${index} ${'回放测试'.repeat(30)}`;
+      document.body.append(element);
+    }
+  });
+
+  await page.waitForTimeout(200);
+  const fastId = await captured(page, 'simulation-fast-single');
+  assert(fastId);
+  await page.evaluate(() => window.dispatchEvent(new Event('pagehide')));
+  await committed(fastId);
+  await page.waitForFunction(async () => (await window.simulation.rows()).length === 0);
+  const fastRequests = requestsSeen.filter(request => request.id === fastId);
+  assert(Buffer.byteLength(JSON.stringify((await store.getStored(fastId)).report)) > 100000);
+  assert.equal(fastRequests.length, 1);
+  assert.equal(fastRequests[0].chunk, false);
+  console.log('PASS: fast network + large replay → exactly one whole-report request');
+  const fallbackId = await captured(page, 'simulation-whole-size-limit');
+  assert(fallbackId);
+  failWholeId = fallbackId;
+  await page.evaluate(() => window.dispatchEvent(new Event('pagehide')));
+  await committed(fallbackId);
+  await page.waitForFunction(async () => (await window.simulation.rows()).length === 0);
+  const fallbackRequests = requestsSeen.filter(request => request.id === fallbackId);
+  assert.equal(fallbackRequests[0].chunk, false);
+  assert(fallbackRequests.slice(1).length > 0 && fallbackRequests.slice(1).every(request => request.chunk));
+  console.log('PASS: whole-report HTTP 413 → adaptive chunks → MySQL commit');
   const cdp = await context.newCDPSession(page);
   await cdp.send('Network.enable');
   await cdp.send('Network.emulateNetworkConditions', {
@@ -200,13 +250,12 @@ window.simulation = { capture: message => captureBrowserError(new Error(message)
     downloadThroughput: 65536,
     uploadThroughput: 16384
   });
-  await page.evaluate(() => {
-    for (let index = 0; index < 600; index += 1) {
-      const element = document.createElement('div');
-      element.textContent = `模拟界面 ${index} ${'回放测试'.repeat(30)}`;
-      document.body.append(element);
-    }
-  });
+  await page.evaluate(() =>
+    Object.defineProperty(navigator, 'connection', {
+      configurable: true,
+      value: { effectiveType: '3g', downlink: 0.5, rtt: 300 }
+    })
+  );
   await page.waitForTimeout(200);
   failChunkOnce = true;
   const replayId = await captured(page, 'simulation-slow-replay');
@@ -222,6 +271,18 @@ window.simulation = { capture: message => captureBrowserError(new Error(message)
   if (stored.report.kind === 'error') assert.deepEqual(stored.report.replay.events, expectedReplay);
   assert.equal(chunksSeen.filter(chunk => chunk.id === replayId && chunk.index === 0).length, 1);
   assert.equal(stored.report.context.authentication?.status, 'unverified');
+  const fragmentSizes = new Set(
+    requestsSeen.filter(request => request.id === replayId && request.chunk).map(request => request.chunkBytes)
+  );
+  assert.equal(fragmentSizes.size, 1);
+  const [fragmentSize] = fragmentSizes;
+  assert(fragmentSize > 12288 && fragmentSize <= 262144);
+  const uniqueFragments = new Set(chunksSeen.filter(chunk => chunk.id === replayId).map(chunk => chunk.index)).size;
+  const legacyFragments = Math.ceil(Buffer.byteLength(JSON.stringify(stored.report)) / 12288);
+  assert(uniqueFragments < legacyFragments);
+  console.log(
+    JSON.stringify({ adaptiveFragmentBytes: fragmentSize, adaptiveFragments: uniqueFragments, legacyFragments })
+  );
   console.log(
     'PASS: 16 KiB/s upload + interrupted chunk + tab close → resume without resending chunk 0 → complete replay'
   );

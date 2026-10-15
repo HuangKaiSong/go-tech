@@ -161,23 +161,29 @@ export const reportListResponseSchema = z.object({
 
 export type ReportSummary = z.infer<typeof reportSummarySchema>;
 
-/** Each base64 chunk carries at most 12 KiB; no authentication may come from the browser. */
+/** Legacy uploads use 12 KiB; adaptive uploads declare a fixed size for resumable boundaries. */
 export const REPORT_CHUNK_BYTES = 12 * 1024;
+export const MAX_REPORT_CHUNK_BYTES = 256 * 1024;
+export const MAX_REPORT_CHUNK_BODY_BYTES = Math.ceil(MAX_REPORT_CHUNK_BYTES / 3) * 4 + 2048;
 export const reportChunkSchema = z
   .object({
     protocol: z.literal('monitor-chunk-v1'),
     id: reportIdSchema,
     uploadId: reportIdSchema,
+    chunkBytes: z.number().int().min(REPORT_CHUNK_BYTES).max(MAX_REPORT_CHUNK_BYTES).optional(),
     index: z.number().int().min(0).max(341),
     total: z.number().int().min(1).max(342),
     data: z
       .string()
       .min(4)
-      .max(16384)
+      .max(Math.ceil(MAX_REPORT_CHUNK_BYTES / 3) * 4)
       .regex(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/)
   })
   .strict()
-  .refine(value => value.index < value.total);
+  .refine(
+    value =>
+      value.index < value.total && value.total <= Math.ceil(MAX_REPORT_BYTES / (value.chunkBytes ?? REPORT_CHUNK_BYTES))
+  );
 export type ReportChunk = z.infer<typeof reportChunkSchema>;
 export const reportChunkAckSchema = z.object({
   code: z.literal(200),

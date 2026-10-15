@@ -4,13 +4,20 @@ const MAX_AGE = 24 * 60 * 60 * 1000;
 const MAX_BYTES = 20 * 1024 * 1024;
 const MAX_ITEMS = 50;
 
+export interface UploadProgress {
+  chunkBytes?: number;
+  forceChunks?: boolean;
+  index: number;
+  uploadId: string;
+}
+
 export interface QueuedReport {
   attempts: number;
   bytes: number;
   createdAt: number;
   id: string;
   nextAttemptAt: number;
-  progress?: { index: number; uploadId: string };
+  progress?: UploadProgress;
   readyAt: number;
   report: MonitorReport;
 }
@@ -25,7 +32,8 @@ export interface ReportQueueStore {
 export class ReportDeliveryError extends Error {
   constructor(
     readonly retryable: boolean,
-    readonly retryAfterMs = 0
+    readonly retryAfterMs = 0,
+    readonly adaptSize = false
   ) {
     super('Monitor delivery failed');
   }
@@ -114,7 +122,7 @@ export function createIndexedDBReportStore(): ReportQueueStore {
 
 export interface ReportDeliveryContext {
   checkpoint: () => Promise<void>;
-  progress: { index: number; uploadId: string };
+  progress: UploadProgress;
   recovered: boolean;
 }
 

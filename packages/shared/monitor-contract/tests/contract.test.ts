@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { reportSchema } from '../src/index';
+import { reportChunkSchema, reportSchema } from '../src/index';
 
 const common = {
   schemaVersion: 1,
@@ -79,5 +79,19 @@ describe('monitor contract', () => {
         replay: { events: [{ type: 3, timestamp: 1, data: {} }] }
       }).success
     ).toBe(false);
+  });
+  it('accepts legacy and adaptive chunks but rejects invalid sizes and unbounded totals', () => {
+    const chunk = {
+      protocol: 'monitor-chunk-v1',
+      id: common.id,
+      uploadId: common.id,
+      index: 0,
+      total: 2,
+      data: 'e30='
+    };
+    expect(reportChunkSchema.safeParse(chunk).success).toBe(true);
+    expect(reportChunkSchema.safeParse({ ...chunk, chunkBytes: 262144, data: 'YQ=='.repeat(1) }).success).toBe(true);
+    expect(reportChunkSchema.safeParse({ ...chunk, chunkBytes: 262145 }).success).toBe(false);
+    expect(reportChunkSchema.safeParse({ ...chunk, chunkBytes: 65536, total: 342 }).success).toBe(false);
   });
 });

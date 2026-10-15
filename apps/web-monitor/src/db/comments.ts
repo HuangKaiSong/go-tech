@@ -70,7 +70,7 @@ export const monitorComments = {
       chunk_index: '从零开始的分片序号，与任务标识组成主键',
       report_id: '待组装报告唯一标识（UUID，最终报告幂等入库）',
       total_chunks: '本次上传分片总数，最多三百四十二片',
-      chunk_data: '脱敏报告的 UTF-8 字节分片，不含认证凭证，单片最多十二 KiB',
+      chunk_data: '脱敏报告的 UTF-8 字节分片，不含认证凭证，兼容十二 KiB 固定分片，智能分片最大二百五十六 KiB',
       expires_at_ms: '未完成上传的过期时间（Unix 毫秒，首次分片接收后二十四小时）'
     }
   },

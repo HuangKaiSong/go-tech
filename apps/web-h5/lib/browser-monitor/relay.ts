@@ -1,5 +1,6 @@
 import {
   MAX_REPORT_BYTES,
+  MAX_REPORT_CHUNK_BODY_BYTES,
   type ReportChunk,
   reportChunkAckSchema,
   reportChunkSchema,
@@ -97,7 +98,7 @@ export async function relayMonitorReport(request: Request, config: RelayConfig, 
   if (!hasAllowedOrigin(request, config.allowedOrigins)) return reply(403, 'Invalid origin');
   const chunks = request.headers.get('x-monitor-chunk') === '1';
   if (limited(request, chunks)) return throttled();
-  const maxBytes = chunks ? 24000 : MAX_REPORT_BYTES;
+  const maxBytes = chunks ? MAX_REPORT_CHUNK_BODY_BYTES : MAX_REPORT_BYTES;
   if (!request.headers.get('content-type')?.toLowerCase().startsWith('application/json'))
     return reply(415, 'Expected JSON');
   if (request.headers.has('content-encoding')) return reply(415, 'Compressed reports are not supported');

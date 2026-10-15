@@ -18,7 +18,14 @@ export async function saveUploadChunk(
 ) {
   if (await store.hash(chunk.id)) return { id: chunk.id, complete: true, nextIndex: chunk.total };
   const bytes = Buffer.from(chunk.data, 'base64');
-  if (bytes.length > REPORT_CHUNK_BYTES || bytes.toString('base64') !== chunk.data)
+  if (
+    bytes.length >
+      Math.min(
+        chunk.chunkBytes ?? REPORT_CHUNK_BYTES,
+        MAX_REPORT_BYTES - chunk.index * (chunk.chunkBytes ?? REPORT_CHUNK_BYTES)
+      ) ||
+    bytes.toString('base64') !== chunk.data
+  )
     throw new InvalidUploadChunk('Invalid chunk bytes');
   const result = await store.connection(async connection => {
     const [size] = await store.query<RowDataPacket[]>(
