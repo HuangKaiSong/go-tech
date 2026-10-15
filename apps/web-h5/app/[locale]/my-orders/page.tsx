@@ -28,7 +28,6 @@ import { DynamicText } from '../../components/DynamicI18nText.client';
 import { OrderItemTypeEnum, OrderStatusEnum } from '../../constants/order';
 import type { MyOrder, MyOrdersResponse } from '../../constants/order-response';
 import { AddService } from './AddService';
-import { Upgrade } from './Upgrade';
 
 // REJECT 订单重新上传支付凭证：直接复用 FPS 凭证上传界面
 const Fps = dynamic(() => import('../../components/payment/Fps'), {
@@ -71,7 +70,6 @@ const MyOrders = () => {
     return orderList.find(order => order.id === selectedOrderId);
   }, [orderList, selectedOrderId]);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
-  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const openAddonsDialog = (orderId: number) => {
     setSelectedOrderId(orderId);
     setShowAddonsDialog(true);
@@ -121,7 +119,6 @@ const MyOrders = () => {
 
   const openUpgradeDialog = (orderId: number) => {
     setSelectedOrderId(orderId);
-    setShowUpgradeDialog(true);
   };
 
   useEffect(() => {
@@ -394,11 +391,6 @@ const MyOrders = () => {
       {/* 購買增值服務對話框 */}
       {showAddonsDialog && selectOrder && (
         <AddService data={selectOrder} open={showAddonsDialog} onOpenChangeAction={setShowAddonsDialog} />
-      )}
-
-      {/* 套餐升級對話框 */}
-      {showUpgradeDialog && selectOrder && (
-        <Upgrade data={selectOrder} open={showUpgradeDialog} onOpenChangeAction={setShowUpgradeDialog} />
       )}
 
       {/* 重新上傳支付憑證對話框（REJECT 订单，直接进入凭证上传） */}
