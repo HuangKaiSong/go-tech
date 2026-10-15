@@ -13,7 +13,7 @@ import {
   type UploadedFile,
   toast
 } from '@go-tech-frontend/ui';
-import { ArrowUpCircle, Eye, Package, RefreshCw, Settings, ShoppingCart } from 'lucide-react';
+import { Eye, Package, RefreshCw, Settings, ShoppingCart } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import { useEffect, useMemo, useState } from 'react';
@@ -115,10 +115,6 @@ const MyOrders = () => {
     } catch (error) {
       if (!isNotifiedClientHttpError(error)) toast.error(t('toast.submitFailed'), { id: toastId });
     }
-  };
-
-  const openUpgradeDialog = (orderId: number) => {
-    setSelectedOrderId(orderId);
   };
 
   useEffect(() => {
@@ -344,15 +340,6 @@ const MyOrders = () => {
                                 <ShoppingCart className="w-4 h-4" />
                                 {t('buyAddon')}
                               </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="gap-2 border-primary text-primary hover:bg-primary hover:text-white"
-                                onClick={() => openUpgradeDialog(order.id)}
-                              >
-                                <ArrowUpCircle className="w-4 h-4" />
-                                {t('upgrade')}
-                              </Button>
                               <Link href={`/renew-order/${order.id}`}>
                                 <Button size="sm">{t('renew')}</Button>
                               </Link>
@@ -360,11 +347,6 @@ const MyOrders = () => {
                           )}
                         </>
                       )}
-                      {/* {order.status === "expired" && (
-                        <Link href="/service-plan">
-                          <Button size="sm">重新訂購</Button>
-                        </Link>
-                      )} */}
                     </div>
                   </CardContent>
                 </Card>
