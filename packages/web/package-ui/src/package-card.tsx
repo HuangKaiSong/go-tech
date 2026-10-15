@@ -293,11 +293,15 @@ function AddonCard(props: PackageCardProps) {
   );
 }
 
-/** Both applications render these cards; only text translation and navigation are supplied by the host. */
-export function PackageCard(props: PackageCardProps) {
+function BasePlan(props: PackageCardProps) {
   if (props.plan.packageKind === 'addon') return <AddonCard {...props} />;
+
   if (props.product === 'hr') {
     return <HrBasePlan {...props} />;
   }
   return <PmsPlanCard {...props} />;
+}
+
+export function PackageCard(props: PackageCardProps) {
+  return <BasePlan {...props} />;
 }

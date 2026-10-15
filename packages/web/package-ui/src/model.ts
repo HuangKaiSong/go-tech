@@ -48,7 +48,7 @@ export function getAddonBillingLabel(
   plan: Pick<PackageCardPlan, 'billingLabel' | 'billingMode' | 'count' | 'itemType'>
 ) {
   const quantityType = plan.itemType === 2 || plan.itemType === 3;
-  if (!quantityType || !Number.isSafeInteger(plan.count) || Number(plan.count) < 0) return getBillingLabel(plan);
+  if (!quantityType || !Number.isSafeInteger(plan.count) || Number(plan.count) <= 0) return getBillingLabel(plan);
   if (plan.billingMode === 'employee_month') return `${plan.count}名員工 / 月`;
   if (plan.billingMode === 'unit_month') return `${plan.count}個單位 / 月`;
   return getBillingLabel(plan);
