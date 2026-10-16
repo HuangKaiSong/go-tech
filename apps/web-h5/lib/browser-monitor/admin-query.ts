@@ -22,7 +22,7 @@ export async function queryMonitorAdmin(request: Request, path: string[], config
   }
   const url = new URL(`/api/reports${path.length ? `/${path.join('/')}` : ''}`, config.serviceUrl);
   const incoming = new URL(request.url);
-  for (const key of ['kind', 'limit', 'cursor', 'path', 'sessionId']) {
+  for (const key of ['kind', 'limit', 'cursor', 'path', 'sessionId', 'from', 'to']) {
     const value = incoming.searchParams.get(key);
     if (value !== null && !path.length) url.searchParams.set(key, value);
   }

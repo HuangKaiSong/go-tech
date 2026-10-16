@@ -279,6 +279,14 @@ export class MysqlReportStore implements MonitorReportStore {
         conditions.push('(received_at_ms < ? OR (received_at_ms = ? AND id < ?))');
         values.push(cursor.received_at_ms, cursor.received_at_ms, cursor.id);
       }
+      if (filter.from !== undefined) {
+        conditions.push('occurred_at_ms >= ?');
+        values.push(filter.from);
+      }
+      if (filter.to !== undefined) {
+        conditions.push('occurred_at_ms <= ?');
+        values.push(filter.to);
+      }
       if (filter.kind) {
         conditions.push('report_kind = ?');
         values.push(filter.kind);

@@ -59,6 +59,16 @@ async function body(request: IncomingMessage) {
   }
 }
 
+function timeBound(url: URL, name: string) {
+  const value = url.searchParams.get(name);
+  if (value === null) return undefined;
+  if (!/^\d+$/.test(value)) throw new HttpError(400, 'Invalid time range');
+  const timestamp = Number(value);
+  if (!Number.isSafeInteger(timestamp) || timestamp < 0 || timestamp > 8640000000000000)
+    throw new HttpError(400, 'Invalid time range');
+  return timestamp;
+}
+
 function listFilter(url: URL): ListFilter {
   const kind = url.searchParams.get('kind') ?? undefined;
   if (kind !== undefined && kind !== 'error' && kind !== 'performance') throw new HttpError(400, 'Invalid kind');
@@ -69,7 +79,10 @@ function listFilter(url: URL): ListFilter {
   for (const id of [sessionId, cursor]) {
     if (id !== undefined && !reportIdSchema.safeParse(id).success) throw new HttpError(400, 'Invalid UUID');
   }
-  return { kind, limit, sessionId, cursor, path: url.searchParams.get('path') ?? undefined };
+  const from = timeBound(url, 'from');
+  const to = timeBound(url, 'to');
+  if (from !== undefined && to !== undefined && from > to) throw new HttpError(400, 'Invalid time range');
+  return { kind, limit, sessionId, cursor, from, to, path: url.searchParams.get('path') ?? undefined };
 }
 
 function hasBrowserReplay(report: MonitorReport): report is ErrorReport {

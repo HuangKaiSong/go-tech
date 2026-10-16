@@ -1,10 +1,12 @@
 import type { MonitorAuthentication, MonitorReport, ReportChunk, ReportSummary } from '@go-tech/monitor-contract';
 export interface ListFilter {
   cursor?: string;
+  from?: number;
   kind?: MonitorReport['kind'];
   limit: number;
   path?: string;
   sessionId?: string;
+  to?: number;
 }
 
 export function summarize(report: MonitorReport, receivedAt: number): ReportSummary {

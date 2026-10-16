@@ -77,7 +77,7 @@ pnpm --filter web-monitor start
 
 认证使用 `Authorization: Bearer <token>`。上传新记录返回 HTTP 201；相同 UUID 重传返回 HTTP 200，保留原记录。最多接收 4 MiB 的未压缩 JSON，并校验共享 `@go-tech/monitor-contract` 协议；异常数据、非法 ID 和缺少完整快照的回放均拒绝。
 
-列表查询支持 `kind=error|performance`、`sessionId`、`path`、`limit=1..100`（默认 20）和 `cursor`。使用返回的 `nextCursor` 查询下一页，并保留原过滤条件。记录过期后游标可能失效，重新查询第一页即可。
+列表查询支持 `kind=error|performance`、`sessionId`、`path`、`limit=1..100`（默认 20）、`cursor`，以及按发生时间筛选的 `from` / `to`（Unix 毫秒，可单独传入，包含边界，开始不得晚于结束）。管理后台时间输入统一使用 UTC+8，结束时间包含所选分钟。使用返回的 `nextCursor` 查询下一页，并保留原过滤条件。记录过期后游标可能失效，重新查询第一页即可。
 
 ```bash
 curl http://127.0.0.1:8200/health

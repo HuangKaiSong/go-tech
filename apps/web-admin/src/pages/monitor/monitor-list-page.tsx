@@ -20,19 +20,31 @@ import { getMonitorReports } from './monitor-api';
 import { formatMonitorTime } from './monitor-context';
 import { metricNames, metricValue, summarizeMetrics } from './monitor-metric-model';
 import { MetricCell } from './monitor-metrics';
+import { monitorTimeBound, monitorTimeInput } from './monitor-time-range';
+
+interface MonitorFilters {
+  from: string;
+  path: string;
+  sessionId: string;
+  to: string;
+}
 
 export default function MonitorListPage() {
   const [params, setParams] = useSearchParams();
   const view = params.get('view') === 'performance' ? 'performance' : 'error';
   const path = params.get('path') ?? '';
   const sessionId = params.get('sessionId') ?? '';
+  const from = params.get('from') ?? '';
+  const to = params.get('to') ?? '';
   const reports = useInfiniteQuery({
-    queryKey: ['browser-monitor', 'reports', view, path, sessionId],
+    queryKey: ['browser-monitor', 'reports', view, path, sessionId, from, to],
     initialPageParam: '',
     queryFn: ({ pageParam, signal }) => {
       const search = new URLSearchParams({ kind: view, limit: '50' });
       if (path) search.set('path', path);
       if (sessionId) search.set('sessionId', sessionId);
+      if (from) search.set('from', from);
+      if (to) search.set('to', to);
       if (pageParam) search.set('cursor', pageParam);
       return getMonitorReports(search, signal);
     },
@@ -42,10 +54,10 @@ export default function MonitorListPage() {
   const items = reports.data?.pages.flatMap(page => page.items) ?? [];
 
   useEffect(() => {
-    if (!params.has('view') && !path && !sessionId && reports.data?.pages[0].items.length === 0) {
+    if (!params.has('view') && !path && !sessionId && !from && !to && reports.data?.pages[0].items.length === 0) {
       setParams({ view: 'performance' }, { replace: true });
     }
-  }, [params, path, sessionId, reports.data, setParams]);
+  }, [params, path, sessionId, from, to, reports.data, setParams]);
 
   const changeView = (next: string) => {
     if (next !== 'error' && next !== 'performance') return;
@@ -80,13 +92,14 @@ export default function MonitorListPage() {
         </TabsList>
       </Tabs>
       <FilterForm
-        key={`${path}:${sessionId}`}
+        key={`${path}:${sessionId}:${from}:${to}`}
         path={path}
         sessionId={sessionId}
-        onApply={(nextPath, nextSession) => {
+        from={from}
+        to={to}
+        onApply={filters => {
           const updated = new URLSearchParams({ view });
-          if (nextPath) updated.set('path', nextPath);
-          if (nextSession) updated.set('sessionId', nextSession);
+          for (const [key, value] of Object.entries(filters)) if (value) updated.set(key, value);
           setParams(updated);
         }}
       />
@@ -148,14 +161,12 @@ export default function MonitorListPage() {
 }
 
 function FilterForm({
+  from,
   onApply,
   path,
-  sessionId
-}: {
-  onApply: (path: string, session: string) => void;
-  path: string;
-  sessionId: string;
-}) {
+  sessionId,
+  to
+}: MonitorFilters & { onApply: (filters: MonitorFilters) => void }) {
   const [error, setError] = useState('');
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -171,7 +182,17 @@ function FilterForm({
       return;
     }
     setError('');
-    onApply(nextPath, nextSession);
+    try {
+      const nextFrom = monitorTimeBound(String(data.get('from') ?? ''));
+      const nextTo = monitorTimeBound(String(data.get('to') ?? ''), true);
+      if (nextFrom && nextTo && Number(nextFrom) > Number(nextTo)) {
+        setError('開始時間不能晚於結束時間');
+        return;
+      }
+      onApply({ path: nextPath, sessionId: nextSession, from: nextFrom, to: nextTo });
+    } catch {
+      setError('請輸入有效的時間');
+    }
   };
   return (
     <form onSubmit={submit} className="space-y-2">
@@ -184,13 +205,30 @@ function FilterForm({
           會話 ID
           <Input name="sessionId" defaultValue={sessionId} placeholder="按會話篩選" />
         </label>
+        <label className="min-w-52 flex-1 space-y-1 text-sm">
+          開始時間（UTC+8）
+          <Input name="from" type="datetime-local" defaultValue={monitorTimeInput(from)} />
+        </label>
+        <label className="min-w-52 flex-1 space-y-1 text-sm">
+          結束時間（UTC+8）
+          <Input name="to" type="datetime-local" defaultValue={monitorTimeInput(to)} />
+        </label>
         <Button type="submit" variant="outline">
           篩選
         </Button>
-        <Button type="button" variant="ghost" onClick={() => onApply('', '')}>
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={event => {
+            event.currentTarget.form?.reset();
+            setError('');
+            onApply({ path: '', sessionId: '', from: '', to: '' });
+          }}
+        >
           重設
         </Button>
       </div>
+      <p className="text-xs text-muted-foreground">按發生時間篩選，結束時間包含所選分鐘。</p>
       {error && (
         <p role="alert" className="text-sm text-destructive">
           {error}

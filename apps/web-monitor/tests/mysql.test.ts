@@ -353,4 +353,20 @@ describe.skipIf(!testUrl)('MySQL storage and schema migrations', () => {
     }
     expect((await store.getStored(report.id))?.report).toEqual(report);
   });
+  it('filters occurrence time inclusively before pagination independently of receive time', async () => {
+    const base = Date.now() - 10000;
+    const reports = Array.from({ length: 4 }, (_, index) => ({ ...fixture(), timestamp: base + index * 1000 }));
+    await Promise.all(
+      reports.map((report, index) => store.saveStored({ report, receivedAt: Date.now() - index * 10 }))
+    );
+    const range = { from: base + 1000, to: base + 2000, kind: 'error' as const, limit: 1 };
+    const first = await store.list(range);
+    expect(first.items.map(item => item.id)).toEqual([reports[1].id]);
+    expect(first.nextCursor).toBe(reports[1].id);
+    const secondPage = await store.list({ ...range, cursor: first.nextCursor ?? undefined });
+    expect(secondPage.items.map(item => item.id)).toEqual([reports[2].id]);
+    expect(secondPage.nextCursor).toBeNull();
+    expect((await store.list({ from: base + 2000, limit: 100 })).items).toHaveLength(2);
+    expect((await store.list({ to: base, limit: 100 })).items).toHaveLength(1);
+  });
 });

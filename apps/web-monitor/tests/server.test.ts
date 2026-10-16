@@ -110,4 +110,17 @@ describe('monitor HTTP protocol', () => {
     }
     expect((await first).status).toBe(201);
   });
+  it('validates inclusive occurrence-time bounds before querying storage', async () => {
+    const { store, url } = await setup();
+    const response = await fetch(`${url}/api/reports?from=1000&to=2000`, { headers: queryHeaders });
+    expect(response.status).toBe(200);
+    expect(store.list).toHaveBeenLastCalledWith(expect.objectContaining({ from: 1000, to: 2000 }));
+    for (const range of ['from=2000&to=1000', 'from=bad', 'from=-1', 'to=1.5', 'from=', 'to=99999999999999999999']) {
+      // oxlint-disable-next-line no-await-in-loop -- Verify each invalid HTTP boundary is rejected before storage.
+      expect((await fetch(`${url}/api/reports?${range}`, { headers: queryHeaders })).status).toBe(400);
+    }
+    expect(store.list).toHaveBeenCalledTimes(1);
+    expect((await fetch(`${url}/api/reports?from=0`, { headers: queryHeaders })).status).toBe(200);
+    expect((await fetch(`${url}/api/reports?to=2000`, { headers: queryHeaders })).status).toBe(200);
+  });
 });

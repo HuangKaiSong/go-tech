@@ -23,12 +23,12 @@ test('unauthenticated admin requests never contact monitor storage', async () =>
 test('admin list query forwards only supported filters using a server-only token', async () => {
   const result = { code: 200, data: { items: [], nextCursor: null } };
   const response = await queryMonitorAdmin(
-    new Request('http://h5/api/browser-monitor/admin?kind=error&limit=20&secret=private'),
+    new Request('http://h5/api/browser-monitor/admin?kind=error&limit=20&from=1000&to=2000&secret=private'),
     [],
     {
       ...config,
       forward: async (input, init) => {
-        assert.equal(String(input), 'http://localhost:8200/api/reports?kind=error&limit=20');
+        assert.equal(String(input), 'http://localhost:8200/api/reports?kind=error&limit=20&from=1000&to=2000');
         assert.equal(new Headers(init?.headers).get('authorization'), 'Bearer private-query-test');
         return Response.json(result);
       }
