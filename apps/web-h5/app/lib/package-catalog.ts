@@ -96,7 +96,7 @@ export function buildPackageCatalog(response: unknown): PackageCatalog {
     });
   }
 
-  catalog.pms = sortPackages(catalog.pms);
-  catalog.hr = sortPackages(catalog.hr);
+  catalog.pms = sortPackages(catalog.pms).slice(0, 1);
+  catalog.hr = sortPackages(catalog.hr).slice(0, 1);
   return catalog;
 }

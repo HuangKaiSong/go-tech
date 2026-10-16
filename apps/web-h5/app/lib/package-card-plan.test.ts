@@ -103,11 +103,17 @@ test('explicit values retain precedence, including zero prices and false recomme
 test('HR modules use the featured parent and retain nested names and serialized detail', () => {
   const catalog = buildPackageCatalog({
     data: [
-      { ...plan, bizCode: 'hr', additionalItems: [{ itemName: '其他套餐模塊', itemType: 1, price: 10 }] },
+      {
+        ...plan,
+        bizCode: 'hr',
+        sortOrder: 2,
+        additionalItems: [{ itemName: '其他套餐模塊', itemType: 1, price: 10 }]
+      },
       {
         ...plan,
         id: 2,
         bizCode: 'hr',
+        sortOrder: 1,
         detail: { packageKind: 'plan', isFeatured: true },
         additionalItems: [
           {
@@ -122,6 +128,7 @@ test('HR modules use the featured parent and retain nested names and serialized 
       }
     ]
   });
+  assert.equal(catalog.hr.length, 1);
   const featured = getFeaturedPlan(catalog.hr);
   assert.equal(featured?.id, 2);
   const addons = featured?.additionalItems ?? [];
@@ -138,4 +145,32 @@ test('HR modules use the featured parent and retain nested names and serialized 
   assert.equal(quantity.count, 8);
   assert.equal(quantity.price, 100);
   assert.equal(getFeaturedPlan([]), undefined);
+});
+
+for (const grouped of [false, true]) {
+  test(`catalog retains only the first sorted package per product (${grouped ? 'grouped' : 'mixed'})`, () => {
+    const pms = [
+      { ...plan, id: 3, bizCode: 'pms', sortOrder: 2 },
+      { ...plan, id: 2, bizCode: 'pms', sortOrder: 1 },
+      { ...plan, id: 1, bizCode: 'pms', sortOrder: 1 }
+    ];
+    const hr = [
+      { ...plan, id: 5, bizCode: 'hr', sortOrder: 2 },
+      { ...plan, id: 4, bizCode: 'hr', sortOrder: 1 }
+    ];
+    const catalog = buildPackageCatalog({ data: grouped ? { pms, hr } : [...pms, ...hr] });
+    assert.deepEqual(
+      catalog.pms.map(item => item.id),
+      [1]
+    );
+    assert.deepEqual(
+      catalog.hr.map(item => item.id),
+      [4]
+    );
+  });
+}
+
+test('catalog preserves empty product arrays when no valid packages exist', () => {
+  assert.deepEqual(buildPackageCatalog({ data: [] }), { pms: [], hr: [] });
+  assert.deepEqual(buildPackageCatalog({ data: { pms: [null], hr: [] } }), { pms: [], hr: [] });
 });
