@@ -95,7 +95,7 @@ const FeedbackCategoryPage = async ({ params }: { params: Promise<{ category: st
       .filter((c: any) => !c.parentId || (row.comments || []).some((parent: any) => parent.id === c.parentId))
       .map((c: any) => ({
         id: String(c.id),
-        author: c.isOfficial ? 'GO-TECH Manager' : c.author?.custName || 'Anonymous',
+        author: c.isOfficial ? 'GO-TECHS Manager' : c.author?.custName || 'Anonymous',
         content: c.content,
         createdAt: new Date(c.createdAt).toISOString(),
         isOfficial: c.isOfficial,

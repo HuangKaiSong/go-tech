@@ -1,1 +1,1 @@
-"""GO-TECH product-feedback AI service."""
+"""GO-TECHS product-feedback AI service."""

@@ -393,7 +393,7 @@ const FeedbackContent = ({ categoriesFromDB, featureCompleted, language }: Props
         <div className="container mx-auto pt-10 pb-14 px-6 md:px-12 max-w-5xl">
           <div className="flex items-baseline gap-3 flex-wrap mb-4">
             <h1 style={SERIF} className="text-4xl md:text-6xl text-stone-900 tracking-tight">
-              <DynamicText text="分享並支持你對" /> <span className="text-primary">GO-TECH</span>{' '}
+              <DynamicText text="分享並支持你對" /> <span className="text-primary">GO-TECHS</span>{' '}
               <DynamicText text="的想法" />
             </h1>
           </div>
@@ -402,7 +402,7 @@ const FeedbackContent = ({ categoriesFromDB, featureCompleted, language }: Props
           </p>
           <div
             className="inline-flex items-center gap-1 rounded-full bg-white border border-stone-200 p-1 mb-6"
-            aria-label="GO-TECH 系統"
+            aria-label="GO-TECHS 系統"
           >
             {systemTabs.map(system => {
               const active = system.id === activeSystem;
@@ -567,7 +567,7 @@ const FeedbackContent = ({ categoriesFromDB, featureCompleted, language }: Props
                     <div className="flex-1 min-w-0">
                       <div className="bg-white border border-stone-200 rounded-md rounded-tl-none px-6 py-5 shadow-sm">
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-3 pb-3 border-b border-stone-200/80">
-                          <span className="text-primary font-semibold text-sm">GO-TECH Manager</span>
+                          <span className="text-primary font-semibold text-sm">GO-TECHS Manager</span>
                           <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest bg-primary/10 text-primary border border-primary/20">
                             <DynamicText text="官方公告" />
                           </span>

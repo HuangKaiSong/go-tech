@@ -476,7 +476,7 @@ const CategoryContent = ({ activeCat, categoriesForPage, featuresFromDB, languag
                         <DynamicText text={f.title} />
                       </h3>
                       <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 mt-1.5 mb-3 text-xs text-stone-500">
-                        <span className="text-primary font-medium">GO-TECH Manager</span>
+                        <span className="text-primary font-medium">GO-TECHS Manager</span>
                         <span className="text-stone-300">·</span>
                         <span>{formatDate(f.shippedAt!, language)}</span>
                         <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest rounded-full border border-emerald-100 bg-emerald-50 text-emerald-700">

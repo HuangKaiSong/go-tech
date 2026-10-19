@@ -8,8 +8,8 @@ import FeedbackContent from './FeedbackContent';
 import { renderFeedbackPage } from './render-feedback-page';
 
 export const metadata: Metadata = {
-  description: '分享並支持你對 GO-TECH 的想法',
-  title: 'GO-TECH Feedback'
+  description: '分享並支持你對 GO-TECHS 的想法',
+  title: 'GO-TECHS Feedback'
 };
 
 async function FeedbackPageContent() {

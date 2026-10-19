@@ -70,7 +70,7 @@ const StaticLoginBackground = () => (
         <img src={Logo} alt="" className="h-10 w-10 object-contain" />
       </div>
       <div>
-        <p className="text-sm font-semibold tracking-[0.28em] text-white/90">GO-TECH</p>
+        <p className="text-sm font-semibold tracking-[0.28em] text-white/90">GO-TECHS</p>
         <p className="mt-1 text-[11px] tracking-[0.2em] text-slate-400">ADMIN CONSOLE</p>
       </div>
     </div>
