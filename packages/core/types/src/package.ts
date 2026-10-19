@@ -4,6 +4,7 @@ export interface PackageItem {
   menuIcon: string;
   menuId: number;
   menuTitle: string;
+  parentId?: number | null;
   sortOrder?: number;
 }
 

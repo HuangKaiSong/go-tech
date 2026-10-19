@@ -1,7 +1,13 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { Packages } from '@go-tech/types';
-import { getFeaturedPlan, toAddonCardPlan, toPackageCardPlan } from './package-card-plan';
+import {
+  getFeaturedPlan,
+  getHrFeatureGroups,
+  getPmsFeatureGroups,
+  toAddonCardPlan,
+  toPackageCardPlan
+} from './package-card-plan';
 import { buildPackageCatalog } from './package-catalog';
 
 const plan: Packages = {
@@ -13,6 +19,67 @@ const plan: Packages = {
   packageName: '基礎套餐',
   price: 100
 };
+
+test('PMS groups level 1 features by parent even when modules follow their children, hiding level 2 actions', () => {
+  assert.deepEqual(
+    getPmsFeatureGroups([
+      { menuId: 960, parentId: 937, menuTitle: '合同列表', menuIcon: '', level: 1 },
+      { menuId: 961, parentId: 960, menuTitle: '新增', menuIcon: '', level: 2 },
+      { menuId: 937, parentId: null, menuTitle: '租務部', menuIcon: '', level: 0 },
+      { menuId: 938, parentId: 937, menuTitle: '代理列表', menuIcon: '', level: 1 },
+      { menuId: 1, parentId: null, menuTitle: '管理層', menuIcon: '', level: 0 },
+      { menuId: 2, parentId: 1, menuTitle: '目錄管理', menuIcon: '', level: 1 },
+      { menuId: 3, menuTitle: '儀表板', menuIcon: '', level: 1 },
+      { menuId: 4, parentId: 999, menuTitle: '獨立功能', menuIcon: '', level: 1 }
+    ]),
+    [
+      { id: '937', title: '租務部', features: ['合同列表', '代理列表'] },
+      { id: '1', title: '管理層', features: ['目錄管理'] }
+    ]
+  );
+});
+
+test('PMS retains module headings without visible children and supports an empty menu', () => {
+  assert.deepEqual(getPmsFeatureGroups(), []);
+  assert.deepEqual(
+    getPmsFeatureGroups([
+      { menuId: 1, menuTitle: '管理層', menuIcon: '', level: 0 },
+      { menuId: 2, parentId: 1, menuTitle: '刪除', menuIcon: '', level: 2 }
+    ]),
+    [{ id: '1', title: '管理層', features: [] }]
+  );
+});
+
+test('HR groups level 2 and 3 descendants under level 1 modules and hides level 4 actions', () => {
+  assert.deepEqual(
+    getHrFeatureGroups([
+      { menuId: 1211, parentId: 1210, menuTitle: '打卡管理', menuIcon: '', level: 3 },
+      { menuId: 1442, parentId: 1211, menuTitle: '新增班次', menuIcon: '', level: 4 },
+      { menuId: 1210, parentId: 1200, menuTitle: '行政管理', menuIcon: '', level: 2 },
+      { menuId: 1200, parentId: null, menuTitle: '日常管理', menuIcon: '', level: 1 },
+      { menuId: 1100, parentId: null, menuTitle: '人事管理', menuIcon: '', level: 1 },
+      { menuId: 1110, parentId: 1100, menuTitle: '員工管理', menuIcon: '', level: 2 },
+      { menuId: 1111, parentId: 1110, menuTitle: '員工資料', menuIcon: '', level: 3 }
+    ]),
+    [
+      { id: '1200', title: '日常管理', features: ['打卡管理', '行政管理'] },
+      { id: '1100', title: '人事管理', features: ['員工管理', '員工資料'] }
+    ]
+  );
+});
+
+test('HR supports empty modules and ignores broken or cyclic parent relationships', () => {
+  assert.deepEqual(getHrFeatureGroups(), []);
+  assert.deepEqual(
+    getHrFeatureGroups([
+      { menuId: 1, menuTitle: '總覽', menuIcon: '', level: 1 },
+      { menuId: 2, parentId: 99, menuTitle: '缺失父級', menuIcon: '', level: 2 },
+      { menuId: 3, parentId: 4, menuTitle: '循環一', menuIcon: '', level: 2 },
+      { menuId: 4, parentId: 3, menuTitle: '循環二', menuIcon: '', level: 3 }
+    ]),
+    [{ id: '1', title: '總覽', features: [] }]
+  );
+});
 
 test('retains H5 display configuration fallbacks without changing the API model', () => {
   const adapted = toPackageCardPlan({

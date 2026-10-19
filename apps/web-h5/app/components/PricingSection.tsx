@@ -11,7 +11,13 @@ import type { PackageBizCode, Packages } from '@go-tech/types';
 import { cn } from '@go-tech/web-ui';
 import { ArrowRight, Check, Gift, MousePointerClick, Settings } from 'lucide-react';
 import Link from '@/app/components/Link';
-import { getFeaturedPlan, toAddonCardPlan, toPackageCardPlan } from '@/app/lib/package-card-plan';
+import {
+  getFeaturedPlan,
+  getHrFeatureGroups,
+  getPmsFeatureGroups,
+  toAddonCardPlan,
+  toPackageCardPlan
+} from '@/app/lib/package-card-plan';
 import type { PackageCatalog } from '@/app/lib/package-catalog';
 import { useProductSelection } from '@/contexts/ProductSelectionContext';
 import { DynamicText } from './DynamicI18nText.client';
@@ -36,6 +42,11 @@ function FeatureList({ features, singleColumn = false }: { features: readonly st
 function BasePackage({ plan, product }: { plan: Packages; product: PackageBizCode }) {
   const card = toPackageCardPlan(plan);
   const features = card.features?.length ? card.features : (card.menu?.map(item => item.menuTitle) ?? []);
+  const getFeatureGroups = product === 'hr' ? getHrFeatureGroups : getPmsFeatureGroups;
+  const featureGroups =
+    !card.features?.length && plan.detail?.menu?.length
+      ? getFeatureGroups(plan.detail.menu)
+      : [{ id: 'core', title: '核心模組', features }];
   const href = plan.price ? `/select-plan/${encodeURIComponent(plan.packageCode!)}?product=${product}` : '';
   const summary = card.summary || (product === 'hr' ? '包含人事管理核心功能' : '包含租務管理核心功能');
 
@@ -73,11 +84,15 @@ function BasePackage({ plan, product }: { plan: Packages; product: PackageBizCod
       <p className="mt-2 text-center text-[11px] leading-5 text-primary">
         <DynamicText text="第一步：點此開始 · 下一頁可自由加購模組" />
       </p>
-      <div className="mt-3">
-        <h4 className="mb-2 border-b border-primary/20 pb-1 text-xs font-semibold text-primary">
-          <DynamicText text="核心模組" />
-        </h4>
-        <FeatureList features={features} />
+      <div className="mt-3 space-y-3">
+        {featureGroups.map(group => (
+          <div key={group.id}>
+            <h4 className="mb-2 border-b border-primary/20 pb-1 text-xs font-semibold text-primary">
+              <DynamicText text={group.title} />
+            </h4>
+            {group.features.length > 0 && <FeatureList features={group.features} />}
+          </div>
+        ))}
       </div>
       {card.note && (
         <p className="mt-4 text-xs leading-5 text-muted-foreground">
