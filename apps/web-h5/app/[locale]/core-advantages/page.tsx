@@ -60,7 +60,7 @@ const content = {
     advIntroHeading: '優勢介紹',
     advIntroImage: advantageIntro,
     advIntroTitle: '租務管理系統的優勢',
-    advIntroLead: '租務管理系統在現代租賃市場中具有顯著的優勢，相比傳統的人手書面管理：',
+    advIntroLead: '租務管理系統，相比傳統的人手書面管理，在現代租賃市場中具有顯著的優勢：',
     advIntroPoints: [
       {
         title: '精準出租定價',

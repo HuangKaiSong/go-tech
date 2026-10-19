@@ -65,7 +65,7 @@ const previews = [
   {
     id: 'customer-list-preview',
     title: '客戶列表管理，客戶關係盡在掌握',
-    description: '從臨時客戶到租客，全生命週期客戶檔案管理，讓每一位客戶都被妥善追蹤與服務',
+    description: '從新客戶轉化為長期「舊客」（回頭客），全生命週期客戶檔案管理，讓每一位客戶都被妥善追蹤與服務',
     image: customerListPreview,
     imageAlt: 'GO-PMS 客戶列表頁面預覽',
     muted: true,
@@ -74,7 +74,7 @@ const previews = [
         icon: Users,
         title: '分類管理清晰',
         tag: 'Segmented',
-        description: '租客、客戶、臨時客戶一鍵分類切換，客戶關係狀態一目瞭然'
+        description: '租客、客戶、舊客一鍵分類切換，客戶關係狀態一目瞭然'
       },
       {
         icon: RefreshCw,
