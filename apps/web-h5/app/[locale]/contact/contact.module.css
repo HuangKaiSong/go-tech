@@ -1,0 +1,33 @@
+.content {
+  --foreground: 220 20% 20%;
+  --primary: 24 95% 53%;
+  --primary-foreground: 0 0% 100%;
+  --background: 0 0% 100%;
+  --card: 0 0% 100%;
+  --muted-foreground: 220 10% 50%;
+  --border: 220 13% 91%;
+  --input: 220 13% 91%;
+  color: hsl(var(--foreground));
+}
+
+@container view (width < 48rem) {
+  .content h1 {
+    font-size: 1.625rem;
+    line-height: 1.3;
+  }
+
+  .content h2 {
+    font-size: 1.375rem;
+    line-height: 1.35;
+  }
+
+  .content h3 {
+    font-size: 1.0625rem;
+    line-height: 1.4;
+  }
+
+  .content p {
+    font-size: 0.875rem;
+    line-height: 1.65;
+  }
+}
