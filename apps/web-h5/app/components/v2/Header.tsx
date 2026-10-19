@@ -40,7 +40,7 @@ const mobileMenuItems = [
   ['/core-advantages', Sparkles, '核心優勢'],
   ['/system-features', LayoutGrid, '查看系統功能'],
   ['/service-plan', Briefcase, '服務計劃'],
-  ['/target-audience', Users, '適合人群'],
+  ['/target-audience', Users, '理想客戶'],
   ['/contact', MessageCircle, '聯繫我們'],
   ['/feedback', Lightbulb, '需求反饋']
 ] as const;

@@ -20,7 +20,7 @@ const pages = [
   ['/core-advantages', '核心優勢'],
   ['/system-features', '查看系統功能'],
   ['/service-plan', '服務計劃'],
-  ['/target-audience', '適合人群'],
+  ['/target-audience', '理想客戶'],
   ['/contact', '聯繫我們'],
   ['/feedback', '需求反饋']
 ] as const;

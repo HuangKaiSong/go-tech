@@ -27,7 +27,7 @@ const SiteSettingPage = () => {
               查看系統功能
             </TabsTrigger>
             <TabsTrigger value="target-audience" className="flex items-center gap-2">
-              適合人群
+              理想客戶
             </TabsTrigger>
           </TabsList>
         </div>

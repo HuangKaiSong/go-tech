@@ -321,21 +321,20 @@ export const audienceProducts: AudienceProduct[] = [
     key: 'pms',
     audiences: [
       {
-        title: '擁有出租物業的個人業主',
-        description: '管理一至數個出租單位，需要處理租戶溝通、租金收取和維修訴求。',
+        title: '持有1至3個物業的個人業主',
+        description: '管理一次兩到三個, 並打通程序實現同步, 簡化管理, 讓一切井然有序。',
         image: '/images/audience-individual.jpg',
         sort: 9
       },
       {
-        title: '擁有多元物業組合的投資型業主',
-        description: '管理多個物業（住宅、商業或混合用途），需要追蹤不同物業的收入、支出和租賃狀況。',
+        title: '持有多只物業或結合物業投資業主',
+        description: '投資一兩棟物業? 所有物業資料在雲端集中處理, 讓投資更輕鬆。',
         image: '/images/audience-investor.jpg',
         sort: 8
       },
       {
-        title: '地產物管集團',
-        description:
-          '專為物業集團設計的智能管理平臺，打通從決策到服務的全鏈條，讓數據驅動運營、系統賦能團隊，實現降本增效與品質提升的一體化管理。',
+        title: '長期租賃不在本地的海外業主',
+        description: '遙距管理物業? 隨時隨地透過系統查看物業狀況, 讓管理無距離。',
         image: '/images/audience-overseas.jpg',
         sort: 7
       }
