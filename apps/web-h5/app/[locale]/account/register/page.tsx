@@ -3,7 +3,7 @@
 import { useCountDown } from '@go-tech/hooks';
 import { Button, Checkbox, Input, toast } from '@go-tech/web-ui';
 import { CircleAlert, X } from 'lucide-react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { useState } from 'react';
 import z from 'zod';
@@ -12,11 +12,11 @@ import Link from '@/app/components/Link';
 import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { useBatchTranslation } from '@/app/hooks/useBatchTranslation';
 import { reportClientHttpError } from '@/app/lib/report-client-http-error';
-import { translateError } from '@/app/lib/translate-error';
 // import Logo from "@/assets/Gotech_Logo.webp";
 import authBgImg from '@/assets/background.webp';
 import { clientFetch } from '@/lib/client-http/client-fetch';
 import { ClientHttpError, isNotifiedClientHttpError } from '@/lib/client-http/client-http-error';
+import { formatValidationError } from '@/lib/format-validation-error';
 
 const parseEmailExists = (result: any) => {
   if (typeof result?.data === 'boolean') return !result.data;
@@ -116,7 +116,6 @@ const EmailStatusIcon = ({ emailExists, isEmailAvailable }: EmailStatusIconProps
 const Register = () => {
   const router = useProgressRouter();
   const t = useTranslations('Account');
-  const locale = useLocale();
   const existingEmailMessage = t('emailExists');
   const passwordPlaceholder = useBatchTranslation('請輸入密碼');
   const pwdConfirmPlaceholder = useBatchTranslation('請再次輸入密碼');
@@ -154,8 +153,8 @@ const Register = () => {
   const signupSchema = verificationCodeSchema.extend({
     name: z
       .string({ message: t('vNameRequired') })
-      .min(2, t('vNameRequired'))
-      .max(50)
+      .min(2, t('vNameLength'))
+      .max(50, t('vNameLength'))
       .trim(),
     phone: z
       .string({ message: t('vPhoneRequired') })
@@ -164,13 +163,13 @@ const Register = () => {
       .trim(),
     company: z
       .string({ message: t('vCompanyRequired') })
-      .min(2)
-      .max(50)
+      .min(2, t('vCompanyLength'))
+      .max(50, t('vCompanyLength'))
       .trim(),
     verificationCode: z
       .string({ message: t('vCodeRequired') })
       .min(1, t('vCodeRequired'))
-      .length(6)
+      .length(6, t('vCodeLength'))
       .trim()
   });
   const signupSchema2 = signupSchema
@@ -291,7 +290,7 @@ const Register = () => {
     const result = verificationCodeSchema.safeParse(formData);
 
     if (!result.success) {
-      const message = result.error.message || '';
+      const message = formatValidationError(result.error);
       toast.error(message);
       return;
     }
@@ -330,7 +329,7 @@ const Register = () => {
     const result = signupSchema.safeParse(formData);
 
     if (!result.success) {
-      const message = result.error.message || '';
+      const message = formatValidationError(result.error);
       toast.error(message);
       return;
     }
@@ -379,8 +378,8 @@ const Register = () => {
     const result = signupSchema2.safeParse(formData);
 
     if (!result.success) {
-      const message = result.error.message || '';
-      toast.error((await translateError(message, locale)) || message);
+      const message = formatValidationError(result.error);
+      toast.error(message);
       return;
     }
     try {

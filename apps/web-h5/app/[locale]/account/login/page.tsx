@@ -17,11 +17,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getSafePostLoginPath } from '@/lib/auth/auth-redirect';
 import { clientFetch } from '@/lib/client-http/client-fetch';
 import { isNotifiedClientHttpError } from '@/lib/client-http/client-http-error';
-
-const signinSchema = z.object({
-  username: z.string(),
-  password: z.string().min(6)
-});
+import { formatValidationError } from '@/lib/format-validation-error';
 
 const Login = () => {
   const searchParams = useSearchParams();
@@ -30,6 +26,10 @@ const Login = () => {
   const redirect = getSafePostLoginPath(searchParams.get('redirect'));
 
   const t = useTranslations('Account');
+  const signinSchema = z.object({
+    username: z.string(),
+    password: z.string().min(6, t('vPasswordMin'))
+  });
   const router = useProgressRouter();
   const { refetchTenants, setToken, setUser } = useAuth();
   const [account, setAccount] = useState(email || '');
@@ -44,7 +44,7 @@ const Login = () => {
     });
 
     if (!result.success) {
-      toast.error(result.error.message);
+      toast.error(formatValidationError(result.error));
       return;
     }
 

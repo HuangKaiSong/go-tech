@@ -75,9 +75,7 @@
       },
       {
         "title": "2. Use of Information",
-        "paragraphs": [
-          "We use the collected information for the following purposes:"
-        ],
+        "paragraphs": ["We use the collected information for the following purposes:"],
         "items": [
           "To provide, maintain, and improve PMS functionality (e.g., generating invoices, sending rent reminders).",
           "To process your subscription orders and provide technical support.",
@@ -309,6 +307,9 @@
     "hrTrialHostMissing": "The HR system URL is not configured. Please contact an administrator.",
     "vEmailRequired": "Please enter your email",
     "vEmailInvalid": "Please enter a valid email",
+    "vNameLength": "Username must be 2–50 characters",
+    "vCompanyLength": "Company name must be 2–50 characters",
+    "vCodeLength": "Verification code must be 6 characters",
     "vNameRequired": "Please enter a username",
     "vPhoneRequired": "Please enter a phone number",
     "vPhoneMin": "Phone number needs at least 7 characters",

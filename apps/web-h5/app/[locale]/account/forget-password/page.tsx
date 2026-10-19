@@ -14,6 +14,7 @@ import { reportClientHttpError } from '@/app/lib/report-client-http-error';
 import authBgImg from '@/assets/background.webp';
 import { clientFetch } from '@/lib/client-http/client-fetch';
 import { isNotifiedClientHttpError } from '@/lib/client-http/client-http-error';
+import { formatValidationError } from '@/lib/format-validation-error';
 
 const inputClassNames = {
   root: 'min-w-0 flex-1 h-14 px-3 pr-12 border-border',
@@ -101,7 +102,7 @@ const ForgetPassword = () => {
     const result = sendCodeSchema.safeParse(formData);
 
     if (!result.success) {
-      const message = result.error.message || '';
+      const message = formatValidationError(result.error);
       toast.error(message);
       return;
     }
@@ -134,7 +135,7 @@ const ForgetPassword = () => {
     const result = verificationCodeSchema.safeParse(formData);
 
     if (!result.success) {
-      toast.error(result.error.message || '');
+      toast.error(formatValidationError(result.error));
       return;
     }
 
@@ -171,7 +172,7 @@ const ForgetPassword = () => {
     const result = forgetPwdVerifySchema.safeParse(formData);
 
     if (!result.success) {
-      toast.error(result.error.message || '');
+      toast.error(formatValidationError(result.error));
       return;
     }
     try {
