@@ -20,7 +20,7 @@ export const defaultHomeBlocks: PageBlock[] = [
         label: 'PMS 租務系統',
         backgroundImage: '/images/hero-house.jpg',
         backgroundImageAlt: '夕陽下的物業',
-        title: '越多物業，\n越易管理！',
+        title: '租務數碼，一 Go 到位',
         titleSecondary: 'GO-TECHS租務系統',
         subtitle: '繳費·分配差餉·查帳·維修確認·租期通知',
         detailButtonText: '了解 PMS 系統',
@@ -76,8 +76,8 @@ export const defaultHomeBlocks: PageBlock[] = [
     products: [
       {
         key: 'pms',
-        title: '租務管理系統，一站式解決方案！',
-        intro: '簡化繳費、帳單及收款，通過分類輕鬆管理查詢、自動提醒及批量通知到期，省心管理、協心合作。'
+        title: 'Techs 租務系統｜一站式物業租務數碼平台',
+        intro: '由問盤、租契管理、自動收租、按金紀錄到差餉帳務，一套系統管理全流程。'
       },
       {
         key: 'hr',
@@ -85,8 +85,8 @@ export const defaultHomeBlocks: PageBlock[] = [
         intro: '覆蓋人事、考勤、薪資、審批、績效、培訓與報表分析，助企業建立標準化、數碼化的人力資源管理流程。'
       }
     ],
-    title: '租務管理系統，一站式解決方案！',
-    intro: '簡化繳費、帳單及收款，通過分類輕鬆管理查詢、自動提醒及批量通知到期，省心管理、協心合作。'
+    title: 'Techs 租務系統｜一站式物業租務數碼平台',
+    intro: '由問盤、租契管理、自動收租、按金紀錄到差餉帳務，一套系統管理全流程。'
   },
   {
     id: 'home-testimonial',

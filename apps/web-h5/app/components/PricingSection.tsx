@@ -115,7 +115,7 @@ function AddonModule({ plan }: { plan: PackageCardPlan }) {
 export default function PricingSection({ catalog }: { catalog: PackageCatalog }) {
   const { product } = useProductSelection();
   const featuredPlan = getFeaturedPlan(catalog[product]);
-  const title = product === 'hr' ? '基礎套餐 + 附加模塊' : '選擇適合你的租務方案';
+  const title = product === 'hr' ? '基礎套餐 + 附加模塊' : '基礎套餐 + 附加模組';
   const description =
     product === 'hr'
       ? '以基礎版為核心，按需加購模塊，靈活組合你的 HR 系統'

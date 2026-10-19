@@ -8,8 +8,8 @@ import { type PageBlock, type SectionBlock } from './PageBlocks';
 
 const defaultContent = {
   pms: {
-    title: '租務管理系統，一站式解決方案！',
-    intro: '簡化繳費、帳單及收款，通過分類輕鬆管理查詢、自動提醒及批量通知到期，省心管理、協心合作。'
+    title: 'Go Techs 租務系統｜一站式物業租務數碼平台',
+    intro: '由問盤、租契管理、自動收租、按金紀錄到差餉帳務，一套系統管理全流程。'
   },
   hr: {
     title: '人力資源管理系統，一站式 SaaS 解決方案！',
