@@ -1,5 +1,6 @@
 const { cpSync, existsSync } = require('node:fs');
 const path = require('node:path');
+const { checkBuildCss } = require('./check-build-css.cjs');
 
 const appRoot = path.resolve(__dirname, '..');
 const standaloneRoot = path.join(appRoot, '.next/standalone/apps/web-h5');
@@ -10,6 +11,7 @@ if (!existsSync(serverPath)) {
 }
 
 // Next.js does not include these assets in standalone output by default.
+checkBuildCss();
 const publicRoot = path.join(appRoot, 'public');
 if (existsSync(publicRoot)) {
   cpSync(publicRoot, path.join(standaloneRoot, 'public'), { recursive: true });

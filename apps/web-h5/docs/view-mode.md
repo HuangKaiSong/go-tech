@@ -20,6 +20,15 @@
 
 ## 验证
 
+生产 CSS 必须同时包含 `view-mode` 布局规则、命名容器变体和 `--whatsapp` 品牌色定义。缺少这些规则时，
+WhatsApp 按钮会变透明，模式切换器会失去固定定位并落到页面底部。
+
+应用 `build`、根目录 `build:h5` 和 PM2 使用的 standalone 启动入口都会运行
+`scripts/check-build-css.cjs`，缺少关键规则时直接报错。根目录校验在 Turbo 之后执行，缓存命中时也不会跳过。
+线上发布从仓库根目录执行 `pnpm build:h5`，成功后再执行
+`pm2 restart ecosystem.config.cjs --only go-tech-next --update-env`。
+发布后需确认 HTML 与 `/_next/static/` 来自同一次构建；若仍引用旧 CSS，应检查部署目录及反向代理/CDN 缓存。
+
 ```bash
 pnpm --filter web-h5 test:view-mode
 pnpm --filter web-h5 test
