@@ -30,6 +30,7 @@ import homeOffice from '@/assets/home-office.jpg';
 import { defaultCoreAdvantages } from '../../components/blockDefaults';
 import { DynamicText } from '../../components/DynamicI18nText';
 import HeroSection from '../../components/HeroSection';
+import WhyChooseUs from '../../components/WhyChooseUs';
 import { loadPageBlocks } from '../../lib/pageBlocks';
 
 const content = {
@@ -390,6 +391,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ p
           )}
         </div>
       </section>
+
+      <WhyChooseUs />
 
       <Footer />
     </div>
