@@ -1,30 +1,29 @@
 import { Mail, MapPin, Phone, Settings } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { DynamicText } from './DynamicI18nText';
-// import Image from 'next/image';
 import Link from './Link';
-// import { TrialAction } from './trial-action';
 
 const groups = [
   {
-    title: '方案/費用',
+    title: '產品/方案',
     links: [
-      ['方案介紹', '/service-plan'],
-      ['了解費用', '/service-plan']
+      ['核心優勢', '/core-advantages'],
+      ['查看系統功能', '/system-features'],
+      ['服務計劃', '/service-plan']
     ]
   },
   {
-    title: '服務/支援',
+    title: '客戶/支援',
     links: [
-      ['使用說明/教學', '/system-features'],
-      ['聯絡我們', '/contact']
+      ['理想客戶', '/target-audience'],
+      ['需求反饋', '/feedback']
     ]
   },
   {
     title: '關於我們',
     links: [
-      ['公司簡介', '/core-advantages'],
-      ['查看品牌', '/']
+      ['公司簡介', '/contact'],
+      ['合作夥伴加盟', '/contact?tab=partner']
     ]
   }
 ];
@@ -33,72 +32,13 @@ const Footer = () => {
   const t = useTranslations('Footer');
 
   return (
-    <footer className="bg-foreground text-background pt-10 pb-6 md:py-12">
-      <div className="container mx-auto px-5 md:px-4">
-        <div className="grid md:grid-cols-5 gap-8 mb-8">
-          {/* <Image
-            src="/images/Gotech_Logo.webp"
-            loading="eager"
-            alt="logo"
-            width={120}
-            height={120}
-            className="w-full max-w-30"
-          />
-          <div>
-            <h4 className="font-semibold mb-4">{t('business')}</h4>
-            <ul className="space-y-2 text-sm text-white/70">
-              <li>
-                <Link href="/system-features" className="hover:text-primary transition-colors">
-                  {t('rentalManagement')}
-                </Link>
-              </li>
-              <li>
-                <Link href="/system-features" className="hover:text-primary transition-colors">
-                  {t('rentCollection')}
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-semibold mb-4">{t('audience')}</h4>
-            <ul className="space-y-2 text-sm text-white/70">
-              <li>
-                <Link href="/target-audience" className="hover:text-primary transition-colors">
-                  {t('pmsSubscribers')}
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-semibold mb-4">{t('aboutUs')}</h4>
-            <ul className="space-y-2 text-sm text-white/70">
-              <li>
-                <Link href="/service-plan" className="hover:text-primary transition-colors">
-                  {t('servicePlan')}
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className="hover:text-primary transition-colors">
-                  {t('contact')}
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <ul className="space-y-2 text-sm text-white/80">
-              <li>
-                <TrialAction className="hover:text-primary transition-colors">{t('tryNow')}</TrialAction>
-              </li>
-            </ul>
-          </div> */}
-
+    <footer className="bg-[hsl(220_20%_20%)] text-background pt-10 pb-6 md:py-12">
+      <div className="w-full max-w-350 mx-auto px-5 md:px-4">
+        <div className="grid md:grid-cols-4 gap-8 mb-8">
           <div className="text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start gap-2 mb-3">
               <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
-                <Settings className="w-6 h-6 text-primary-foreground" />
+                <Settings className="w-6 h-6 text-primary-foreground" aria-hidden="true" />
               </div>
               <span className="text-lg font-bold">GO-TECHS</span>
             </div>
@@ -130,7 +70,10 @@ const Footer = () => {
                 <ul className="space-y-2 text-sm text-background/70">
                   {g.links.map(([label, to]) => (
                     <li key={label}>
-                      <Link href={to} className="hover:text-primary transition-colors">
+                      <Link
+                        href={to}
+                        className="hover:text-primary transition-colors focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-4"
+                      >
                         <DynamicText text={label} />
                       </Link>
                     </li>
@@ -142,15 +85,29 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-background/20 pt-5 md:pt-8 flex flex-col-reverse md:flex-row justify-between items-center gap-3 text-xs md:text-sm text-background/50">
-          <p>{t('copyright')}</p>
-          <div className="flex gap-5 md:gap-6">
-            <Link href="/legal-agreement/terms/refund" className="hover:text-primary transition-colors">
+          <p>
+            <DynamicText text="© 2024 GO-TECHS 版權所有" />
+          </p>
+          <p className="font-semibold text-primary text-center">
+            <DynamicText text="Go Techs — 租務數碼，一 Go 到位。" />
+          </p>
+          <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 md:gap-x-6">
+            <Link
+              href="/legal-agreement/terms/refund"
+              className="hover:text-primary transition-colors focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-4"
+            >
               {t('refundPolicy')}
             </Link>
-            <Link href="/legal-agreement/terms/terms-of-use" className="hover:text-primary transition-colors">
+            <Link
+              href="/legal-agreement/terms/terms-of-use"
+              className="hover:text-primary transition-colors focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-4"
+            >
               {t('termsOfUse')}
             </Link>
-            <Link href="/legal-agreement/terms/privacy" className="hover:text-primary transition-colors">
+            <Link
+              href="/legal-agreement/terms/privacy"
+              className="hover:text-primary transition-colors focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-4"
+            >
               {t('privacyPolicy')}
             </Link>
           </div>
