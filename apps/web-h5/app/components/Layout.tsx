@@ -24,10 +24,10 @@ export default function Layout({
   const hasIframe = useSyncExternalStore(subscribeToIframeState, getIframeSnapshot, getServerIframeSnapshot);
 
   return (
-    <TrialWindowProvider>
+    <ViewModeProvider initialMode={initialViewMode}>
       <JotaiProvider>
         <IframeProvider hasIframe={hasIframe}>
-          <ViewModeProvider initialMode={initialViewMode}>
+          <TrialWindowProvider>
             <ViewModeShell
               controls={
                 <>
@@ -40,9 +40,9 @@ export default function Layout({
                 {children}
               </div>
             </ViewModeShell>
-          </ViewModeProvider>
+          </TrialWindowProvider>
         </IframeProvider>
       </JotaiProvider>
-    </TrialWindowProvider>
+    </ViewModeProvider>
   );
 }

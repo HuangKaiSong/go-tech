@@ -5,6 +5,7 @@ import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { startFreeTrial } from '@/app/lib/go-now';
 import { clientFetch } from '@/lib/client-http/client-fetch';
 import { useAuth } from './AuthContext';
+import { useViewMode } from './view-mode-context';
 
 type PmsWindowAction = 'order' | 'renew' | 'service-plan' | 'trial-env';
 
@@ -34,6 +35,7 @@ function resolveOrderId(value: unknown): string | null {
 export function TrialWindowProvider({ children }: { children: ReactNode }) {
   const router = useProgressRouter();
   const { token } = useAuth();
+  const { isMobile } = useViewMode();
   const pm2Window = useRef<Window | null>(null);
 
   const requestHeaders = useCallback(
@@ -46,10 +48,15 @@ export function TrialWindowProvider({ children }: { children: ReactNode }) {
     [token]
   );
 
-  const openPmsCallback = useCallback((uri: string) => {
-    const trialHost = process.env.NEXT_PUBLIC_PMS_TRIAL_HOST;
-    pm2Window.current = window.open(`${trialHost}/oauth/${uri}`, '_blank');
-  }, []);
+  const openPmsCallback = useCallback(
+    (uri: string) => {
+      const trialHost = isMobile
+        ? process.env.NEXT_PUBLIC_PMS_TRIAL_MOBILE_HOST
+        : process.env.NEXT_PUBLIC_PMS_TRIAL_HOST;
+      pm2Window.current = window.open(`${trialHost}/oauth/${uri}`, '_blank');
+    },
+    [isMobile]
+  );
 
   const applyAction = useCallback(
     async (action: PmsWindowAction, data?: unknown) => {

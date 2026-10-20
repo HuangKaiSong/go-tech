@@ -287,15 +287,23 @@ const Header = () => {
                     </Link>
                   ))}
                 </nav>
-                <Link
-                  href={isLoggedIn ? '/select-account' : '/account/register'}
-                  onClick={() => setIsMenuOpen(false)}
-                  className="block mt-6"
+                <Button
+                  variant="trial"
+                  className="w-full mt-6 gap-2"
+                  onClick={() => {
+                    hasTenant
+                      ? router.push('/select-account')
+                      : startFreeTrial({
+                          generateCallback,
+                          bizCode: product,
+                          onHrTrialHostMissing: () => toast.error(t('Account.hrTrialHostMissing')),
+                          onTrialExpired: () => router.push('/service-plan'),
+                          token
+                        });
+                  }}
                 >
-                  <Button variant="trial" className="w-full">
-                    {isLoggedIn ? '立即試用' : '免費試用'}
-                  </Button>
-                </Link>
+                  {hasTenant ? <DynamicText text="選擇系統" /> : <DynamicText text="立即試用" />}
+                </Button>
                 <Button
                   variant="outline"
                   className="w-full mt-3 gap-2"
