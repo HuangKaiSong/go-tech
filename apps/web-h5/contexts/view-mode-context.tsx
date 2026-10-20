@@ -27,8 +27,15 @@ export function ViewModeProvider({ children, initialMode = 'auto' }: { children:
       }
     }
 
-    const measure = () =>
-      setViewport({ width: window.innerWidth, height: window.visualViewport?.height ?? window.innerHeight });
+    let previousWidth = window.innerWidth;
+    const measure = () => {
+      const width = window.innerWidth;
+      // A real width change resumes responsive layout after a manual preview.
+      // Height-only changes (for example the mobile keyboard) keep the chosen mode.
+      if (width !== previousWidth) setMode('auto');
+      previousWidth = width;
+      setViewport({ width, height: window.visualViewport?.height ?? window.innerHeight });
+    };
     measure();
     window.addEventListener('resize', measure);
     window.visualViewport?.addEventListener('resize', measure);

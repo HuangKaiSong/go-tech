@@ -7,10 +7,13 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { type CSSProperties, type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { getNavigationProgressSnapshot } from '@/app/lib/navigation-progress';
 import { useViewMode } from '@/contexts/view-mode-context';
+import { MOBILE_BREAKPOINT } from '@/lib/view-mode';
 import { NavigationProgress } from './navigation-progress';
 
 export default function ViewModeShell({ children, controls }: { children: ReactNode; controls?: ReactNode }) {
   const { frame, mode, setMode } = useViewMode();
+  const automaticMode = (frame?.width ?? 1280) <= MOBILE_BREAKPOINT ? 'mobile' : 'pc';
+  const activeMode = mode === 'auto' ? automaticMode : mode;
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const routeKey = `${pathname}?${searchParams.toString()}`;
@@ -143,8 +146,8 @@ export default function ViewModeShell({ children, controls }: { children: ReactN
             key={value}
             type="button"
             onClick={() => setMode(value)}
-            aria-pressed={mode === value || (mode === 'auto' && value === 'pc')}
-            className={`flex items-center gap-1 px-2.5 py-1 rounded-full transition-colors ${mode === value || (mode === 'auto' && value === 'pc') ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+            aria-pressed={activeMode === value}
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-full transition-colors ${activeMode === value ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
           >
             <Icon className="w-3.5 h-3.5" aria-hidden="true" />
             {label}

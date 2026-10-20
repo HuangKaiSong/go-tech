@@ -14,6 +14,8 @@
 
 `useViewMode()` 提供 `mode / setMode / frame / isMobile`。模式存入 `GO_TECH_VIEW_MODE` Cookie，服务端读取初始值；localStorage仅用于兼容旧偏好。无需修改meta viewport或创建iframe。
 
+手动切换即时生效；浏览器窗口宽度改变后恢复自动模式，布局和切换器高亮一起跟随窗口宽度。自动模式在宽度小于等于 `MOBILE_BREAKPOINT` 时高亮手机版，超过时高亮 PC 版。仅高度变化（例如软键盘弹出）不会重置手动模式；自动恢复不改写已保存的偏好。
+
 独立滚动区由Shell管理路径切换、hash与浏览器历史恢复。通用Link和useProgressRouter默认 `scroll:false`，避免Next的自动滚动覆盖Shell位置；同路径产品参数切换保留滚动。历史恢复等待异步内容撑开页面，并在用户操作时取消待恢复行为。
 
 公共UI使用可选 `PortalContainerProvider`，Dialog/Sheet/Drawer/DropdownMenu/Select跟随宿主；没有Provider的消费方保留原行为。DropdownMenu和Select将frame作为碰撞边界。Sonner及导航进度也位于框内。
