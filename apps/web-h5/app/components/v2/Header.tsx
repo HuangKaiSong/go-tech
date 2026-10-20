@@ -313,7 +313,7 @@ const Header = () => {
                   }}
                 >
                   <Monitor className="w-4 h-4" />
-                  切換至PC版
+                  <DynamicText text="切換至PC版" />
                 </Button>
                 <Button
                   variant="ghost"
@@ -323,7 +323,7 @@ const Header = () => {
                     setMode('auto');
                   }}
                 >
-                  自動適應裝置
+                  <DynamicText text="自動適應裝置" />
                 </Button>
               </SheetContent>
             </Sheet>
