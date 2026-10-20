@@ -53,6 +53,8 @@ COPY --from=builder --chown=node:node /workspace/apps/web-h5/.next/standalone ./
 COPY --from=builder --chown=node:node /workspace/apps/web-h5/public ./apps/web-h5/public
 COPY --from=builder --chown=node:node /workspace/apps/web-h5/.next/static ./apps/web-h5/.next/static
 
+RUN mkdir -p /app/data/page-blocks && chown -R node:node /app/data
+
 USER node
 
 EXPOSE 3200

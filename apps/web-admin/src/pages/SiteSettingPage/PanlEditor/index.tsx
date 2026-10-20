@@ -1,7 +1,9 @@
 import { Button, Tabs, TabsList, TabsTrigger } from '@go-tech-frontend/ui';
 import { type RefObject, useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import Common from './Common';
 import LegacyHero from './Hero';
+import { savePageBlocks } from './page-block-api';
 import Home from './page/Home';
 import ProductHero from './ProductHero';
 import {
@@ -36,6 +38,8 @@ export default function PanlEditor({ iframeRef }: { iframeRef: RefObject<HTMLIFr
   const [showCommon, setShowCommon] = useState<boolean>(false);
   const [showHome, setShowHome] = useState<boolean>(false);
   const [activeProduct, setActiveProduct] = useState<HeroProductKey>('pms');
+  const [isSaving, setIsSaving] = useState(false);
+  const savingRef = useRef(false);
 
   useEffect(() => {
     blocksRef.current = blocks;
@@ -241,23 +245,20 @@ export default function PanlEditor({ iframeRef }: { iframeRef: RefObject<HTMLIFr
   };
 
   const applyBlocksToPreview = async () => {
-    postToIframe({
-      type: 'SET_PAGE_BLOCKS',
-      page: pageKey,
-      blocks: blocksRef.current
-    });
-
+    if (savingRef.current) return;
+    savingRef.current = true;
+    setIsSaving(true);
+    const savedPage = pageKey;
+    const savedBlocks = blocksRef.current;
     try {
-      await fetch(`/h5-hook/api/page-blocks`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          page: pageKey,
-          blocks: blocksRef.current
-        })
-      });
+      await savePageBlocks(savedPage, savedBlocks);
+      postToIframe({ type: 'SET_PAGE_BLOCKS', page: savedPage, blocks: savedBlocks });
+      toast.success('保存成功，页面配置已同步');
     } catch {
-      // ignore save errors for now
+      toast.error('保存失败，请检查网络或稍后重试');
+    } finally {
+      savingRef.current = false;
+      setIsSaving(false);
     }
   };
 
@@ -326,8 +327,8 @@ export default function PanlEditor({ iframeRef }: { iframeRef: RefObject<HTMLIFr
           <div className="rounded-full bg-primary/10 text-primary px-2 py-1 text-xs">预览中</div>
         </div>
         <div className="mt-3 flex gap-2">
-          <Button size="sm" onClick={applyBlocksToPreview}>
-            保存并同步
+          <Button size="sm" onClick={applyBlocksToPreview} disabled={isSaving}>
+            {isSaving ? '保存中…' : '保存并同步'}
           </Button>
           <Button size="sm" variant="outline" onClick={handleExportJson}>
             导出 JSON

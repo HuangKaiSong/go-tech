@@ -105,3 +105,4 @@ dist
 .open-next
 .wrangler
 MIGRATION_PLAN.md
+/apps/web-h5/data/page-blocks/

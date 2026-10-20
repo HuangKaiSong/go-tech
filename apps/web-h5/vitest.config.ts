@@ -15,6 +15,7 @@ export default defineConfig({
       'lib/browser-monitor/server-lifecycle.test.ts',
       'lib/server-fetch.test.ts',
       'app/api/feedback/turnstile-policy.test.ts',
+      'app/api/page-blocks/route.test.ts',
       'app/components/feedback/submission-lock.test.ts'
     ],
     setupFiles: ['tests/view-mode/setup.ts']

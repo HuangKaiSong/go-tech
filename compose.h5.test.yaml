@@ -20,12 +20,14 @@ services:
       NODE_ENV: production
       NODE_OPTIONS: --max-old-space-size=4096
       PORT: '3200'
+      H5_PAGE_BLOCKS_DIR: /app/data/page-blocks
     ports:
       - '0.0.0.0:3200:3200'
     extra_hosts:
       - 'host.docker.internal:host-gateway'
     volumes:
       - './apps/web-h5/public/page-blocks:/app/apps/web-h5/public/page-blocks:Z'
+      - 'h5_page_blocks:/app/data/page-blocks'
       - './apps/web-h5/locales:/app/apps/web-h5/locales:Z'
       - './apps/web-h5/translations:/app/apps/web-h5/translations:Z'
     restart: unless-stopped
