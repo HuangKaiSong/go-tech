@@ -60,6 +60,7 @@ catalog:
 
 catalogs:
   database:
+    ioredis: 5.11.1
     drizzle-orm: ^0.45.2
     mysql2: ^3.23.2
     drizzle-kit: ^0.31.10
