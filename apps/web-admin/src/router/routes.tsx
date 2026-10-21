@@ -24,6 +24,7 @@ const SettingsUsersPage = lazyPage(() => import('@/pages/SettingsUsersPage'));
 const ContentPage = lazyPage(() => import('@/pages/ContentPage'));
 const ContentAddPage = lazyPage(() => import('@/pages/ContentAddPage'));
 const ContentEditPage = lazyPage(() => import('@/pages/ContentEditPage'));
+const ManualManagement = lazyPage(() => import('@/pages/manual'));
 const SiteSettingPage = lazyPage(() => import('@/pages/SiteSettingPage'));
 const RuntimeConfigPage = lazyPage(() => import('@/pages/runtime-config'));
 const MessageBoard = lazyPage(() => import('@/pages/MessageBoard'));
@@ -42,6 +43,7 @@ export const createRoutes = (authLoader: LoaderFunction): RouteObject[] => [
     loader: authLoader,
     element: <AdminLayout />,
     children: [
+      { path: '/manual', element: <ManualManagement /> },
       { path: '/monitor', element: <MonitorListPage /> },
       { path: '/monitor/:id', element: <MonitorDetailPage /> },
       {

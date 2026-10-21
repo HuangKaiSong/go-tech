@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import './view-mode.css';
+@import '@go-tech/manual-content/styles.css';
 
 @plugin '@go-tech/tailwind-plugin' {
   color: 'orange';

@@ -15,7 +15,8 @@
     "test:view-mode": "vitest run tests/view-mode",
     "test:pms-mobile-redis": "node --import tsx scripts/check-mobile-handoff-redis.mts",
     "config": "tsx scripts/runtime-config.mts",
-    "test:runtime-config:integration": "tsx scripts/check-runtime-config.mts"
+    "test:runtime-config:integration": "tsx scripts/check-runtime-config.mts",
+    "db:seed:manual": "tsx scripts/seed-manual.ts"
   },
   "dependencies": {
     "@file-viewer/preset-office": "^2.2.9",
@@ -27,6 +28,7 @@
     "@go-tech/core-http": "workspace:*",
     "@go-tech/core-state": "workspace:*",
     "@go-tech/hooks": "workspace:*",
+    "@go-tech/manual-content": "workspace:*",
     "@go-tech/monitor-contract": "workspace:*",
     "@go-tech/package-ui": "workspace:*",
     "@go-tech/types": "workspace:*",

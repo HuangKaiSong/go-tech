@@ -1,4 +1,5 @@
 @import '@go-tech-frontend/styles/src/index.css';
+@import '@go-tech/manual-content/styles.css';
 
 @source "../../../packages/web/package-ui/src/**/*.{ts,tsx}";
 

@@ -1,5 +1,6 @@
 'use client';
 
+import type { ManualPublicData } from '@go-tech/manual-content/model';
 import {
   Building2,
   ChevronRight,
@@ -14,15 +15,16 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import Link from '@/app/components/Link';
-import { manualArticles, manualCategories } from './manual-data';
 
 const icons = { Rocket, Building2, Wallet, Wrench, Users, CreditCard };
 
-const Manual = () => {
+/** 只对服务端传入的发布内容做本地筛选，不在浏览器请求管理接口或加载草稿。 */
+const Manual = ({ data }: { data: ManualPublicData }) => {
+  const { articles: manualArticles, categories: manualCategories, settings } = data;
   const [q, setQ] = useState('');
-  const [cat, setCat] = useState<string | null>(null);
+  const [cat, setCat] = useState<number | null>(null);
   const term = q.trim();
-  const list = manualArticles.filter(a => (!cat || a.category === cat) && (a.title + a.summary).includes(term));
+  const list = manualArticles.filter(a => (!cat || a.categoryId === cat) && (a.title + a.summary).includes(term));
   const categoryName = manualCategories.find(c => c.id === cat)?.name;
   const listTitle = term ? `「${term}」的搜尋結果` : (categoryName ?? '熱門指南');
 
@@ -30,8 +32,8 @@ const Manual = () => {
     <div className="flex-1 flex flex-col bg-background">
       <section className="pt-12 md:pt-11 pb-14 bg-primary text-primary-foreground">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-3xl md:text-5xl font-bold mb-3">Go Techs 操作手冊</h1>
-          <p className="opacity-90 mb-6">一步一步教您使用租務系統及 GO-HRM</p>
+          <h1 className="text-3xl md:text-5xl font-bold mb-3">{settings.title}</h1>
+          <p className="opacity-90 mb-6">{settings.subtitle}</p>
           <div className="relative max-w-xl mx-auto">
             <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input
@@ -39,7 +41,7 @@ const Manual = () => {
               value={q}
               onChange={e => setQ(e.target.value)}
               maxLength={50}
-              placeholder="搜尋操作指南，例如：自動收租"
+              placeholder={settings.searchPlaceholder}
               className="w-full h-12 rounded-full bg-background text-foreground pl-12 pr-4 shadow-lg"
             />
           </div>
@@ -53,7 +55,7 @@ const Manual = () => {
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
               {manualCategories.map(c => {
                 const Icon = icons[c.icon];
-                const count = manualArticles.filter(a => a.category === c.id).length;
+                const count = manualArticles.filter(a => a.categoryId === c.id).length;
                 return (
                   <button
                     key={c.id}
@@ -102,12 +104,12 @@ const Manual = () => {
           <div className="flex items-center gap-3">
             <LifeBuoy className="w-8 h-8 text-primary" />
             <div>
-              <p className="font-bold text-foreground">找不到答案？</p>
-              <p className="text-sm text-muted-foreground">歡迎向我們提出問題或需求</p>
+              <p className="font-bold text-foreground">{settings.supportTitle}</p>
+              <p className="text-sm text-muted-foreground">{settings.supportDescription}</p>
             </div>
           </div>
           <Link href="/feedback" className="px-5 py-2.5 rounded-full bg-primary text-primary-foreground font-semibold">
-            聯絡支援
+            {settings.supportButton}
           </Link>
         </div>
       </main>

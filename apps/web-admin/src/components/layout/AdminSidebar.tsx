@@ -1,6 +1,7 @@
 import { cn } from '@go-tech/utils';
 import {
   Activity,
+  BookOpen,
   ChevronDown,
   ChevronRight,
   FileText,
@@ -28,6 +29,7 @@ const menuItems: MenuItem[] = [
   // { title: "系統用戶列表", path: "/system-users", icon: UserCog },
   { title: '留言管理', path: '/messages', icon: MessageSquare },
   { title: '需求反饋', path: '/feedback', icon: Lightbulb },
+  { title: '操作手冊', path: '/manual', icon: BookOpen },
   { title: '網頁監控', path: '/monitor', icon: Activity },
   {
     title: '優惠管理',

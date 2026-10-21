@@ -6,4 +6,5 @@ export * from './fb_feature';
 export * from './fb_relations';
 export * from './fb_vote';
 
+export * from './manual';
 export * from './runtime_config';

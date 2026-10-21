@@ -1,0 +1,36 @@
+{
+  "name": "@go-tech/manual-content",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": [
+    "./src/styles.css"
+  ],
+  "exports": {
+    ".": "./src/index.tsx",
+    "./model": "./src/model.ts",
+    "./styles.css": "./src/styles.css"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "build": "tsdown"
+  },
+  "dependencies": {
+    "zod": "catalog:utils"
+  },
+  "devDependencies": {
+    "@go-tech/tsconfig": "workspace:*",
+    "@types/react": "catalog:react19",
+    "@types/react-dom": "catalog:react19",
+    "react": "catalog:react19",
+    "react-dom": "catalog:react19",
+    "tsdown": "catalog:dev",
+    "typescript": "catalog:core",
+    "vitest": "catalog:dev"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
+}

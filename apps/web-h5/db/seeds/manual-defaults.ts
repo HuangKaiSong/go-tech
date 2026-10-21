@@ -1,3 +1,4 @@
+/** 迁移前的静态指南格式，仅供初始化转换使用，前台运行时不再依赖此文件。 */
 export type ManualArticle = {
   category: string;
   slug: string;
@@ -6,6 +7,7 @@ export type ManualArticle = {
   title: string;
 };
 
+/** 首批主题及其原始业务标识，初始化时映射为真实数据库主键。 */
 export const manualCategories = [
   { id: 'start', name: '開始使用', desc: '註冊、登入、選擇公司及系統基本設定', icon: 'Rocket' },
   { id: 'property', name: '物業與租約', desc: '新增物業、租戶檔案、電子租約管理', icon: 'Building2' },
@@ -15,6 +17,7 @@ export const manualCategories = [
   { id: 'account', name: '帳戶與訂閱', desc: '套餐、續費、用戶權限與發票', icon: 'CreditCard' }
 ] as const;
 
+/** 首批指南保留既有 slug，避免迁移为动态内容后破坏历史链接。 */
 export const manualArticles: ManualArticle[] = [
   {
     slug: 'getting-started',

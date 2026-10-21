@@ -1,0 +1,117 @@
+/* 前台正文和后台预览共用样式；依赖消费方主题 token，编号与目录锚点互不耦合。 */
+.manual-rich-text {
+  color: inherit;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+  counter-reset: manual-step;
+}
+.manual-rich-text h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 2rem 0 0.75rem;
+  scroll-margin-top: 8rem;
+  counter-increment: manual-step;
+}
+.manual-rich-text h2::before {
+  content: counter(manual-step);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  margin-right: 1rem;
+  border-radius: 100%;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+.manual-rich-text h3 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 1.5rem 0 0.5rem;
+  scroll-margin-top: 8rem;
+}
+.manual-rich-text p {
+  margin: 0.75rem 0;
+}
+.manual-rich-text a,
+.manual-contents a {
+  color: hsl(var(--primary));
+  text-decoration: underline;
+}
+.manual-rich-text ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+}
+.manual-rich-text ol {
+  list-style: decimal;
+  padding-left: 1.5rem;
+}
+.manual-rich-text blockquote {
+  border-left: 3px solid hsl(var(--primary));
+  padding-left: 1rem;
+  margin: 1rem 0;
+}
+.manual-rich-text .manual-tip {
+  border: 1px solid hsl(var(--primary) / 0.3);
+  background: hsl(var(--primary) / 0.1);
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+.manual-rich-text img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+.manual-rich-text .manual-table {
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+.manual-rich-text table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.manual-rich-text td,
+.manual-rich-text th {
+  border: 1px solid hsl(var(--border));
+  padding: 0.5rem;
+  min-width: 5rem;
+  text-align: left;
+}
+.manual-rich-text th {
+  background: hsl(var(--muted));
+  font-weight: 700;
+}
+.manual-rich-text hr {
+  margin: 1.5rem 0;
+  border-color: hsl(var(--border));
+}
+.manual-contents {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: hsl(var(--muted) / 0.5);
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+}
+.manual-contents > p {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+.manual-contents ol {
+  padding-left: 1.25rem;
+  list-style: decimal;
+  font-size: 0.875rem;
+}
+.manual-contents .manual-subheading {
+  margin-left: 1rem;
+}
+.manual-editor .tiptap {
+  min-height: 20rem;
+  padding: 1rem;
+  outline: none;
+}
+.manual-editor .tiptap:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: -2px;
+}
