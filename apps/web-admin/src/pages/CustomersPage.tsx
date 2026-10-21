@@ -14,10 +14,12 @@ import {
   TableHeader,
   TableRow
 } from '@go-tech-frontend/ui';
-import { useQuery } from '@tanstack/react-query';
-import { RotateCcw, Search, Users } from 'lucide-react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { Download, RotateCcw, Search, Users } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import { getStoredToken } from '@/hooks/use-auth';
 
 interface Customer {
   companyName: string;
@@ -36,6 +38,17 @@ interface Reponse {
 
 const defaultSize = 10;
 
+function downloadCustomerWorkbook(blob: Blob) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = '客戶資料.xlsx';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 30_000);
+}
+
 const CustomersPage = () => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
@@ -44,7 +57,9 @@ const CustomersPage = () => {
     custName: '',
     phone: '',
     email: '',
-    vipLevel: ''
+    vipLevel: '',
+    registerDateStart: '',
+    registerDateEnd: ''
   });
 
   const { data, refetch: _refetch } = useQuery<Reponse>({
@@ -87,12 +102,39 @@ const CustomersPage = () => {
     }
   });
 
+  const exportExcel = useMutation({
+    mutationFn: async () => {
+      const token = getStoredToken()?.replace(/^Bearer\s+/i, '');
+
+      const response = await fetch(`/h5-hook/api/admin/customers/export`, {
+        method: 'POST',
+        cache: 'no-store',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token ?? ''}` },
+        body: JSON.stringify(searchParams)
+      });
+      if (!response.ok) {
+        const error: unknown = await response.json().catch(() => null);
+        const message =
+          error && typeof error === 'object' && 'message' in error && typeof error.message === 'string'
+            ? error.message
+            : '客戶資料匯出失敗，請稍後重試';
+        throw new Error(message);
+      }
+
+      return response.blob();
+    },
+    onSuccess: downloadCustomerWorkbook,
+    onError: error => toast.error(error.message || '客戶資料匯出失敗，請稍後重試')
+  });
+
   const handleReset = () => {
     setSearchParams({
       custName: '',
       phone: '',
       email: '',
-      vipLevel: ''
+      vipLevel: '',
+      registerDateStart: '',
+      registerDateEnd: ''
     });
   };
 
@@ -103,9 +145,20 @@ const CustomersPage = () => {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex items-center gap-3">
-        <Users className="w-6 h-6 text-primary" />
-        <h1 className="text-2xl font-bold text-foreground">客戶列表</h1>
+      <div className="flex flex-row justify-between">
+        <div className="flex items-center gap-3">
+          <Users className="w-6 h-6 text-primary" />
+          <h1 className="text-2xl font-bold text-foreground">客戶列表</h1>
+        </div>
+        <Button
+          variant="outline"
+          className="ml-auto gap-2"
+          loading={exportExcel.isPending}
+          onClick={() => exportExcel.mutate()}
+        >
+          <Download className="w-4 h-4" />
+          導出全部客戶 Excel
+        </Button>
       </div>
 
       {/* Search Filters */}
@@ -174,6 +227,36 @@ const CustomersPage = () => {
                 <SelectItem value="4">鑽石會員</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <span className="text-sm text-muted-foreground">註冊時間</span>
+            <Input
+              type="date"
+              aria-label="註冊開始日期"
+              value={searchParams.registerDateStart}
+              max={searchParams.registerDateEnd || undefined}
+              onChange={event =>
+                setSearchParams({
+                  ...searchParams,
+                  registerDateStart: event.target.value
+                })
+              }
+              className="w-44"
+            />
+            <span className="text-sm text-muted-foreground">至</span>
+            <Input
+              type="date"
+              aria-label="註冊結束日期"
+              value={searchParams.registerDateEnd}
+              min={searchParams.registerDateStart || undefined}
+              onChange={event =>
+                setSearchParams({
+                  ...searchParams,
+                  registerDateEnd: event.target.value
+                })
+              }
+              className="w-44"
+            />
           </div>
           <div className="flex gap-3 ml-auto">
             <Button className="gap-2">

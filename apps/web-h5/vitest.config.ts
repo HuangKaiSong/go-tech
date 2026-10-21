@@ -17,6 +17,7 @@ export default defineConfig({
       'lib/server-fetch.test.ts',
       'app/api/feedback/turnstile-policy.test.ts',
       'app/api/page-blocks/route.test.ts',
+      'app/api/admin/customers/export/route.test.ts',
       'app/components/feedback/submission-lock.test.ts'
     ],
     setupFiles: ['tests/view-mode/setup.ts']

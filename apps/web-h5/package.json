@@ -39,6 +39,7 @@
     "dayjs": "^1.11.19",
     "deepl-node": "^1.27.0",
     "drizzle-orm": "^0.45.2",
+    "exceljs": "^4.4.0",
     "fast-glob": "^3.3.3",
     "ioredis": "catalog:database",
     "jose": "^6.1.3",
