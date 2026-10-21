@@ -1,8 +1,7 @@
 import { and, eq, isNull, sql } from 'drizzle-orm';
 import { type NextRequest, NextResponse } from 'next/server';
 import { enqueueFeedbackSync, scheduleFeedbackSync } from '@/app/api/feedback/sync';
-import { withRuntimeScope } from '@/db';
-import { getDb } from '@/db';
+import { getDb, withRuntimeScope } from '@/db';
 import { fbFeature, fbVote } from '@/db/scheam';
 import { getFeedbackUser } from '../../../auth';
 

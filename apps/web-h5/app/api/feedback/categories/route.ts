@@ -1,7 +1,6 @@
 import { asc } from 'drizzle-orm';
 import { type NextRequest, NextResponse } from 'next/server';
-import { withRuntimeScope } from '@/db';
-import { getDb } from '@/db';
+import { getDb, withRuntimeScope } from '@/db';
 import { fbCategory, fbSubCategory } from '@/db/scheam';
 
 async function handleGET(_req: NextRequest) {

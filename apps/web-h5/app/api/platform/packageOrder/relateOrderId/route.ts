@@ -1,7 +1,6 @@
 import { and, eq, isNotNull } from 'drizzle-orm';
 import { type NextRequest, NextResponse } from 'next/server';
-import { withRuntimeScope } from '@/db';
-import { getDb } from '@/db';
+import { getDb, withRuntimeScope } from '@/db';
 import { packageOrder, platformTenant } from '@/db/scheam';
 
 async function handleGET(request: NextRequest) {

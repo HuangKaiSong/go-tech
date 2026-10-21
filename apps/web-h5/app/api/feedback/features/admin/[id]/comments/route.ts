@@ -1,7 +1,6 @@
 import { asc, eq } from 'drizzle-orm';
 import { type NextRequest, NextResponse } from 'next/server';
-import { withRuntimeScope } from '@/db';
-import { getDb } from '@/db';
+import { getDb, withRuntimeScope } from '@/db';
 import { fbComment, fbFeature } from '@/db/scheam';
 import { requireFeedbackAdmin } from '../../auth';
 import { toIso } from '../../shared';

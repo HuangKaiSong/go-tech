@@ -1,8 +1,7 @@
 import { and, asc, desc, eq, inArray, isNull, like, or } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 import { enqueueFeedbackSync, scheduleFeedbackSync } from '@/app/api/feedback/sync';
-import { withRuntimeScope } from '@/db';
-import { getDb } from '@/db';
+import { getDb, withRuntimeScope } from '@/db';
 import { fbCategory, fbComment, fbFeature, fbSubCategory, fbVote } from '@/db/scheam';
 import { getFeedbackUser } from '../auth';
 import { moderateFeedbackContent } from '../moderation';
