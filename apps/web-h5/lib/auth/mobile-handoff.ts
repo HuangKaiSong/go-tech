@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { configValue } from '@/lib/runtime-config/service';
 
 export interface MobileHandoffStore {
   consume: (code: string, audience: string) => Promise<string | null>;
@@ -7,8 +8,8 @@ export interface MobileHandoffStore {
 
 const privateHeaders = { 'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer' };
 
-function mobileTarget() {
-  const target = new URL(process.env.NEXT_PUBLIC_PMS_TRIAL_MOBILE_HOST ?? '');
+async function mobileTarget(getHost: () => Promise<string>) {
+  const target = new URL(await getHost());
   if (!['https:', 'http:'].includes(target.protocol) || target.username || target.password) {
     throw new Error('Invalid mobile host');
   }
@@ -19,7 +20,10 @@ function json(code: number, message: string, headers: HeadersInit = privateHeade
   return NextResponse.json({ code, message }, { status: code, headers });
 }
 
-export function createMobileHandoffHandlers(store: MobileHandoffStore) {
+export function createMobileHandoffHandlers(
+  store: MobileHandoffStore,
+  getHost: () => Promise<string> = () => configValue('NEXT_PUBLIC_PMS_TRIAL_MOBILE_HOST')
+) {
   return {
     async redirect(request: Request, mode: 'json' | 'redirect' = 'redirect') {
       const authorization = request.headers.get('authorization')?.trim();
@@ -28,7 +32,7 @@ export function createMobileHandoffHandlers(store: MobileHandoffStore) {
       }
       let target: URL;
       try {
-        target = mobileTarget();
+        target = await mobileTarget(getHost);
       } catch {
         return json(503, 'PMS mobile host is not configured correctly');
       }
@@ -61,7 +65,7 @@ export function createMobileHandoffHandlers(store: MobileHandoffStore) {
     async exchange(request: Request) {
       let origin: string;
       try {
-        origin = mobileTarget().origin;
+        origin = (await mobileTarget(getHost)).origin;
       } catch {
         return json(503, 'PMS mobile host is not configured correctly');
       }

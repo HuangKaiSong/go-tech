@@ -1,6 +1,7 @@
 import { hasLocale } from 'next-intl';
 import { getRequestConfig } from 'next-intl/server';
 import { notFound } from 'next/navigation';
+import { configValue } from '@/lib/runtime-config/server';
 import { loadLocale } from '../locales';
 import { routing } from './routing';
 
@@ -11,6 +12,7 @@ export default getRequestConfig(async ({ locale, requestLocale }) => {
   const messages = loadLocale(resolvedLocale);
 
   return {
+    timeZone: await configValue('GO_TECH_TIMEZONE'),
     locale: resolvedLocale,
     messages
   };

@@ -1,12 +1,13 @@
 import { and, desc, eq, isNull, sql } from 'drizzle-orm';
 import { type NextRequest, NextResponse } from 'next/server';
 import { enqueueFeedbackSync, scheduleFeedbackSync } from '@/app/api/feedback/sync';
-import { db } from '@/db';
+import { withRuntimeScope } from '@/db';
+import { getDb } from '@/db';
 import { fbComment, fbFeature } from '@/db/scheam';
 import { requireFeedbackAdmin } from '../../auth';
 import { toIso } from '../../shared';
 
-export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+async function handlePUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireFeedbackAdmin(req);
   if (auth.response) return auth.response;
 
@@ -25,7 +26,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     return NextResponse.json({ success: false, message: '回覆內容或目標無效' }, { status: 400 });
   }
 
-  const reply = await db.transaction(async tx => {
+  const reply = await (
+    await getDb()
+  ).transaction(async tx => {
     const feature = await tx.query.fbFeature.findFirst({
       where: and(eq(fbFeature.id, featureId), isNull(fbFeature.deletedAt)),
       columns: { id: true }
@@ -111,3 +114,5 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     }
   });
 }
+
+export const PUT = withRuntimeScope(handlePUT);

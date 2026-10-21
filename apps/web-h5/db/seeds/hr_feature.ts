@@ -1,4 +1,4 @@
-import { db } from '../index';
+import { getDb } from '../index';
 import { type NewFbFeature, fbCategory, fbComment, fbFeature, fbSubCategory } from '../scheam';
 import { platformCustomer } from '../scheam/external/platform_customer';
 
@@ -327,6 +327,7 @@ const randomPick = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length
 /* ========== 导入逻辑 ========== */
 
 export async function seedHRFeatures() {
+  const db = await getDb();
   // 查詢所有用戶
   const allUsers = await db.select().from(platformCustomer);
   const userByName = new Map(allUsers.map(u => [u.custName, u.id]));

@@ -15,7 +15,7 @@ export default async function ConfirmOrderPage({ params }: { params: { plan: str
   }
 
   const { plan } = await params;
-  const baseUrl = getBaseUrl();
+  const baseUrl = await getBaseUrl();
 
   const packagesResponse = (await serverPlatformFetch(
     `${baseUrl}/go-tech/platform/platformPackage/detail/${plan}`

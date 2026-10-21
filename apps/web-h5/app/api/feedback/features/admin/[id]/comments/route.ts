@@ -1,6 +1,7 @@
 import { asc, eq } from 'drizzle-orm';
 import { type NextRequest, NextResponse } from 'next/server';
-import { db } from '@/db';
+import { withRuntimeScope } from '@/db';
+import { getDb } from '@/db';
 import { fbComment, fbFeature } from '@/db/scheam';
 import { requireFeedbackAdmin } from '../../auth';
 import { toIso } from '../../shared';
@@ -24,7 +25,7 @@ const mapOfficialReply = (row: DetailComment | undefined) =>
       }
     : null;
 
-export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+async function handleGET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireFeedbackAdmin(req);
   if (auth.response) return auth.response;
 
@@ -33,13 +34,17 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     return NextResponse.json({ success: false, message: '無效的需求 ID' }, { status: 400 });
   }
 
-  const feature = await db.query.fbFeature.findFirst({
+  const feature = await (
+    await getDb()
+  ).query.fbFeature.findFirst({
     where: eq(fbFeature.id, featureId),
     columns: { id: true }
   });
   if (!feature) return NextResponse.json({ success: false, message: '需求不存在' }, { status: 404 });
 
-  const rows = await db.query.fbComment.findMany({
+  const rows = await (
+    await getDb()
+  ).query.fbComment.findMany({
     where: eq(fbComment.featureId, featureId),
     with: { author: { columns: { custName: true } } },
     orderBy: [asc(fbComment.createdAt), asc(fbComment.id)]
@@ -72,3 +77,5 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     }
   });
 }
+
+export const GET = withRuntimeScope(handleGET);

@@ -1,11 +1,12 @@
 import { type SQL, and, count, desc, eq, isNotNull, like, or } from 'drizzle-orm';
 import { type NextRequest, NextResponse } from 'next/server';
-import { db } from '@/db';
+import { withRuntimeScope } from '@/db';
+import { getDb } from '@/db';
 import { fbComment, fbFeature, platformCustomer } from '@/db/scheam';
 import { requireFeedbackAdmin } from '../auth';
 import { getPagination, isFeatureStatus, toIso } from '../shared';
 
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   const auth = await requireFeedbackAdmin(req);
   if (auth.response) return auth.response;
 
@@ -50,7 +51,7 @@ export async function GET(req: NextRequest) {
     deletedAt: fbComment.deletedAt
   };
   const [rows, totalRows] = await Promise.all([
-    db
+    (await getDb())
       .select(baseSelection)
       .from(fbComment)
       .innerJoin(fbFeature, eq(fbComment.featureId, fbFeature.id))
@@ -59,7 +60,7 @@ export async function GET(req: NextRequest) {
       .orderBy(desc(fbComment.deletedAt), desc(fbComment.createdAt), desc(fbComment.id))
       .limit(pageSize)
       .offset(offset),
-    db
+    (await getDb())
       .select({ total: count() })
       .from(fbComment)
       .innerJoin(fbFeature, eq(fbComment.featureId, fbFeature.id))
@@ -87,3 +88,5 @@ export async function GET(req: NextRequest) {
     }
   });
 }
+
+export const GET = withRuntimeScope(handleGET);

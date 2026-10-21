@@ -1,9 +1,10 @@
 import { and, eq } from 'drizzle-orm';
 import { jwtVerify } from 'jose';
 import { type NextRequest, NextResponse } from 'next/server';
-import { db } from '@/db';
+import { getDb } from '@/db';
 import { umsAdmin } from '@/db/scheam';
 import { captureServerError } from '@/lib/browser-monitor/server';
+import { infrastructureValue } from '@/lib/runtime-config/service';
 
 export interface FeedbackAdmin {
   id: number;
@@ -18,7 +19,8 @@ export async function requireFeedbackAdmin(req: NextRequest): Promise<AdminAuthR
     return { response: NextResponse.json({ success: false, message: '缺少管理員憑證' }, { status: 401 }) };
   }
 
-  const secret = process.env.PLATFORM_JWT_SECRET;
+  const secret = infrastructureValue('PLATFORM_JWT_SECRET');
+
   if (!secret) {
     console.error('PLATFORM_JWT_SECRET is not configured');
     await captureServerError(new Error('Administrator authentication is not configured'), {
@@ -49,12 +51,16 @@ export async function requireFeedbackAdmin(req: NextRequest): Promise<AdminAuthR
   }
 
   try {
-    let admin = await db.query.umsAdmin.findFirst({
+    let admin = await (
+      await getDb()
+    ).query.umsAdmin.findFirst({
       where: and(eq(umsAdmin.id, userId), eq(umsAdmin.status, 1)),
       columns: { id: true }
     });
     if (!admin && username) {
-      admin = await db.query.umsAdmin.findFirst({
+      admin = await (
+        await getDb()
+      ).query.umsAdmin.findFirst({
         where: and(eq(umsAdmin.username, username), eq(umsAdmin.status, 1)),
         columns: { id: true }
       });

@@ -1,16 +1,21 @@
+import { withRuntimeScope } from '@/db';
+import { relayMonitorReport } from '@/lib/browser-monitor/relay';
 // oxlint-disable-next-line import/no-unassigned-import -- Enforces the server-only dependency boundary.
 import 'server-only';
-import { relayMonitorReport } from '@/lib/browser-monitor/relay';
+import { getRuntimeConfig } from '@/lib/runtime-config/server';
 
 export const runtime = 'nodejs';
 
-export function POST(request: Request) {
+async function handlePOST(request: Request) {
+  const { values } = await getRuntimeConfig();
   return relayMonitorReport(request, {
-    allowedOrigins: process.env.BROWSER_MONITOR_ALLOWED_ORIGINS?.split(',')
+    allowedOrigins: values.BROWSER_MONITOR_ALLOWED_ORIGINS?.split(',')
       .map(origin => origin.trim())
       .filter(Boolean),
-    serviceUrl: process.env.BROWSER_MONITOR_SERVICE_URL,
-    ingestToken: process.env.BROWSER_MONITOR_INGEST_TOKEN,
-    jwtSecret: process.env.PLATFORM_JWT_SECRET
+    serviceUrl: values.BROWSER_MONITOR_SERVICE_URL,
+    ingestToken: values.BROWSER_MONITOR_INGEST_TOKEN,
+    jwtSecret: values.PLATFORM_JWT_SECRET
   });
 }
+
+export const POST = withRuntimeScope(handlePOST);

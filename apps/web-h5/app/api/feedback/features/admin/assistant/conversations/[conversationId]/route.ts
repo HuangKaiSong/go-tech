@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { fetchFeedbackAi } from '@/app/api/feedback/ai-client';
+import { withRuntimeScope } from '@/db';
 import { serverRequestContext } from '@/lib/browser-monitor/server-report';
 import { requireFeedbackAdmin } from '../../../auth';
 
@@ -38,10 +39,13 @@ async function proxyConversation(req: NextRequest, context: RouteContext, method
   return NextResponse.json({ success: true, data: await upstream.json() });
 }
 
-export async function GET(req: NextRequest, context: RouteContext) {
+async function handleGET(req: NextRequest, context: RouteContext) {
   return proxyConversation(req, context, 'GET');
 }
 
-export async function DELETE(req: NextRequest, context: RouteContext) {
+async function handleDELETE(req: NextRequest, context: RouteContext) {
   return proxyConversation(req, context, 'DELETE');
 }
+
+export const GET = withRuntimeScope(handleGET);
+export const DELETE = withRuntimeScope(handleDELETE);

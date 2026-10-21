@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
+import { withRuntimeScope } from '@/db';
 import { captureServerRouteError } from '@/lib/browser-monitor/server';
 import { isValidPageBlockKey, readPageBlockFile, writePageBlockFile } from '@/lib/page-block-storage';
 
-export const GET = async (request: Request) => {
+const handleGET = async (request: Request) => {
   const { searchParams } = new URL(request.url);
   const page = searchParams.get('page');
   if (!isValidPageBlockKey(page)) {
@@ -27,7 +28,7 @@ export const GET = async (request: Request) => {
   }
 };
 
-export const POST = async (request: Request) => {
+const handlePOST = async (request: Request) => {
   try {
     const body: unknown = await request.json();
     if (
@@ -50,3 +51,6 @@ export const POST = async (request: Request) => {
     return NextResponse.json({ ok: false, error: 'Failed to save file' }, { status: 500 });
   }
 };
+
+export const GET = withRuntimeScope(handleGET);
+export const POST = withRuntimeScope(handlePOST);

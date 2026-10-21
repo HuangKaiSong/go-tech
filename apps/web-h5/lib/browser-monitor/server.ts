@@ -1,17 +1,19 @@
+import { headers } from 'next/headers';
 // oxlint-disable-next-line import/no-unassigned-import -- Enforces the server-only dependency boundary.
 import 'server-only';
-import { headers } from 'next/headers';
 import { unstable_rethrow } from 'next/navigation';
 import { after } from 'next/server';
+import { getRuntimeConfig } from '@/lib/runtime-config/server';
 import { isServerErrorReported, markServerErrorReported } from './server-error-state';
 import { type MonitorServerRequest, sendServerErrorReport, serverRequestContext } from './server-report';
 
-export function serverMonitorConfig() {
+export async function serverMonitorConfig() {
+  const { values } = await getRuntimeConfig();
   return {
-    serviceUrl: process.env.BROWSER_MONITOR_SERVICE_URL,
-    ingestToken: process.env.BROWSER_MONITOR_INGEST_TOKEN,
-    jwtSecret: process.env.PLATFORM_JWT_SECRET,
-    release: process.env.NEXT_PUBLIC_BROWSER_MONITOR_RELEASE
+    serviceUrl: values.BROWSER_MONITOR_SERVICE_URL,
+    ingestToken: values.BROWSER_MONITOR_INGEST_TOKEN,
+    jwtSecret: values.PLATFORM_JWT_SECRET,
+    release: values.NEXT_PUBLIC_BROWSER_MONITOR_RELEASE
   };
 }
 
@@ -20,9 +22,9 @@ export async function captureServerError(error: unknown, request?: MonitorServer
   unstable_rethrow(error);
   if (isServerErrorReported(error)) return;
   const timestamp = Date.now();
-  const config = serverMonitorConfig();
-  if (!config.serviceUrl || !config.ingestToken) return;
   try {
+    const config = await serverMonitorConfig();
+    if (!config.serviceUrl || !config.ingestToken) return;
     // Server Components cannot read request APIs inside after(). Snapshot them first.
     const incoming = request?.headers ?? new Headers(await headers());
     const snapshot = request ?? {

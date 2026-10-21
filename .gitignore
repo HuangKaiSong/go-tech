@@ -106,3 +106,5 @@ dist
 .wrangler
 MIGRATION_PLAN.md
 /apps/web-h5/data/page-blocks/
+
+/apps/web-h5/data/runtime-config/

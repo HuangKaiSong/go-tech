@@ -1,4 +1,5 @@
 'use client';
+import { useRuntimeConfig } from '@/lib/runtime-config/provider';
 
 import { type ReactNode, createContext, useCallback, useContext, useEffect, useRef } from 'react';
 import { useProgressRouter } from '@/app/hooks/use-progress-router';
@@ -33,6 +34,7 @@ function resolveOrderId(value: unknown): string | null {
 }
 
 export function TrialWindowProvider({ children }: { children: ReactNode }) {
+  const config = useRuntimeConfig().values;
   const router = useProgressRouter();
   const { token } = useAuth();
   const { isMobile } = useViewMode();
@@ -50,12 +52,10 @@ export function TrialWindowProvider({ children }: { children: ReactNode }) {
 
   const openPmsCallback = useCallback(
     (uri: string) => {
-      const trialHost = isMobile
-        ? process.env.NEXT_PUBLIC_PMS_TRIAL_MOBILE_HOST
-        : process.env.NEXT_PUBLIC_PMS_TRIAL_HOST;
+      const trialHost = isMobile ? config.NEXT_PUBLIC_PMS_TRIAL_MOBILE_HOST : config.NEXT_PUBLIC_PMS_TRIAL_HOST;
       pm2Window.current = window.open(`${trialHost}/oauth/${uri}`, '_blank');
     },
-    [isMobile]
+    [isMobile, config]
   );
 
   const applyAction = useCallback(

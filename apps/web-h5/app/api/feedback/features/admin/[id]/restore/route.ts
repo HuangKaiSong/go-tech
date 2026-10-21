@@ -1,11 +1,12 @@
 import { eq } from 'drizzle-orm';
 import { type NextRequest, NextResponse } from 'next/server';
 import { enqueueFeedbackSync, scheduleFeedbackSync } from '@/app/api/feedback/sync';
-import { db } from '@/db';
+import { withRuntimeScope } from '@/db';
+import { getDb } from '@/db';
 import { fbFeature } from '@/db/scheam';
 import { requireFeedbackAdmin } from '../../auth';
 
-export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+async function handlePOST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireFeedbackAdmin(req);
   if (auth.response) return auth.response;
 
@@ -13,7 +14,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (!Number.isSafeInteger(featureId) || featureId <= 0) {
     return NextResponse.json({ success: false, message: '無效的需求 ID' }, { status: 400 });
   }
-  const result = await db.transaction(async tx => {
+  const result = await (
+    await getDb()
+  ).transaction(async tx => {
     const updateResult = await tx.update(fbFeature).set({ deletedAt: null }).where(eq(fbFeature.id, featureId));
     if (updateResult[0].affectedRows > 0) await enqueueFeedbackSync(tx, featureId);
     return updateResult;
@@ -24,3 +27,5 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   scheduleFeedbackSync(req);
   return NextResponse.json({ success: true, data: { id: String(featureId), deleted: false } });
 }
+
+export const POST = withRuntimeScope(handlePOST);

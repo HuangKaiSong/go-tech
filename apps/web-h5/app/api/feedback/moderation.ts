@@ -2,6 +2,7 @@ import OpenAI from 'openai';
 import _ from 'server-only';
 import { captureServerError } from '@/lib/browser-monitor/server';
 import { serverRequestContext } from '@/lib/browser-monitor/server-report';
+import { configValue } from '@/lib/runtime-config/server';
 import { serverFetch } from '@/lib/server-fetch';
 
 type ModerationCategory = 'hate_speech' | 'nsfw' | 'pii' | 'spam';
@@ -124,7 +125,7 @@ export const moderateFeedbackContent = async (contents: string[], request?: Requ
 
   try {
     const openai = new OpenAI({
-      apiKey: process.env.QIANWEN_API_KEY,
+      apiKey: await configValue('QIANWEN_API_KEY'),
       baseURL: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
       fetch: async (input, init) => {
         try {
@@ -138,7 +139,7 @@ export const moderateFeedbackContent = async (contents: string[], request?: Requ
       }
     });
     const response = await openai.responses.create({
-      model: 'qwen3.7-plus',
+      model: await configValue('QIANWEN_MODEL_NAME'),
       input: prompt
     });
 

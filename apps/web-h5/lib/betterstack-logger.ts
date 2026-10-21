@@ -1,8 +1,10 @@
-export async function sendToBetterStack(level: string, message: any, extra = {}) {
-  if (process.env.NODE_ENV === 'development') return
+import 'server-only';
+import { configValue } from '@/lib/runtime-config/server';
+export async function sendToBetterStack(level: string, message: unknown, extra = {}) {
+  if (process.env.NODE_ENV === 'development') return;
   // 从环境变量读取配置
-  const LOG_SOURCE_TOKEN = process.env.NEXT_PUBLIC_BETTERSTACK_SOURCE_TOKEN;
-  const LOG_INGEST_URL = process.env.NEXT_PUBLIC_BETTERSTACK_INGEST_URL as string;
+  const LOG_SOURCE_TOKEN = await configValue('NEXT_PUBLIC_BETTERSTACK_SOURCE_TOKEN');
+  const LOG_INGEST_URL = await configValue('NEXT_PUBLIC_BETTERSTACK_INGEST_URL');
 
   const logEntry = {
     message: `[${level.toUpperCase()}] ${message}`,

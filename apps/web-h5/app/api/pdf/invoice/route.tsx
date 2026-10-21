@@ -1,4 +1,5 @@
 import { renderToBuffer } from '@react-pdf/renderer';
+import { withRuntimeScope } from '@/db';
 import { httpClient } from '@/lib/http';
 import { InvoicePDF } from './InvoicePDF';
 import { LOGO_DATA_URI } from './logo';
@@ -140,7 +141,7 @@ async function generatePdf(id: string): Promise<GenerateResult | null> {
   };
 }
 
-export async function GET(req: Request) {
+async function handleGET(req: Request) {
   const startedAt = performance.now();
   const { searchParams } = new URL(req.url);
   const id = searchParams.get('id');
@@ -193,3 +194,5 @@ export async function GET(req: Request) {
     inFlight.delete(id);
   }
 }
+
+export const GET = withRuntimeScope(handleGET);

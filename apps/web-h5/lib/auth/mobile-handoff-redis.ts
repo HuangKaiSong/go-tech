@@ -1,14 +1,19 @@
 import Redis from 'ioredis';
+import { infrastructureValue } from '@/lib/runtime-config/service';
 
 const globalForRedis = globalThis as typeof globalThis & {
-  pmsHandoffRedis?: { client: Redis; connecting?: Promise<Redis> };
+  pmsHandoffRedis?: { client: Redis; url: string; connecting?: Promise<Redis> };
 };
 
 /** 每个 Node worker 复用一个连接；Redis 不可用时快速失败，不缓存凭证写命令。 */
 export async function getMobileHandoffRedis() {
+  const url = infrastructureValue('REDIS_URL');
   let state = globalForRedis.pmsHandoffRedis;
+  if (state && state.url !== url) {
+    state.client.disconnect();
+    state = undefined;
+  }
   if (!state || state.client.status === 'end') {
-    const url = process.env.REDIS_URL;
     if (!url) throw new Error('REDIS_URL is required');
     const client = new Redis(url, {
       lazyConnect: true,
@@ -20,7 +25,7 @@ export async function getMobileHandoffRedis() {
     });
     // ioredis 要求处理 error 事件；接口统一返回通用错误，不记录连接凭证。
     client.on('error', () => {});
-    state = { client };
+    state = { client, url };
     globalForRedis.pmsHandoffRedis = state;
   }
   if (state.client.status === 'ready') return state.client;

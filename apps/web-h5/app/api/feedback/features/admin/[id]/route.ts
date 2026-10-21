@@ -1,11 +1,12 @@
 import { and, eq, isNull } from 'drizzle-orm';
 import { type NextRequest, NextResponse } from 'next/server';
 import { enqueueFeedbackSync, scheduleFeedbackSync } from '@/app/api/feedback/sync';
-import { db } from '@/db';
+import { withRuntimeScope } from '@/db';
+import { getDb } from '@/db';
 import { fbFeature } from '@/db/scheam';
 import { requireFeedbackAdmin } from '../auth';
 
-export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+async function handleDELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireFeedbackAdmin(req);
   if (auth.response) return auth.response;
 
@@ -14,7 +15,9 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     return NextResponse.json({ success: false, message: '無效的需求 ID' }, { status: 400 });
   }
 
-  const existing = await db.transaction(async tx => {
+  const existing = await (
+    await getDb()
+  ).transaction(async tx => {
     const feature = await tx.query.fbFeature.findFirst({
       where: eq(fbFeature.id, featureId),
       columns: { id: true, deletedAt: true }
@@ -33,3 +36,5 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   scheduleFeedbackSync(req);
   return NextResponse.json({ success: true, data: { id: String(featureId), deleted: true } });
 }
+
+export const DELETE = withRuntimeScope(handleDELETE);

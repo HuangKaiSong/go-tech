@@ -4,7 +4,8 @@ import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, type Uploaded
 import { CreditCard } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { type FC, useEffect, useState } from 'react';
-import { KPAY_ENABLE, PayTypeEnum } from '@/app/constants/payment';
+import { PayTypeEnum } from '@/app/constants/payment';
+import { useRuntimeConfig } from '@/lib/runtime-config/provider';
 import { DynamicText } from '../DynamicI18nText.client';
 const Fps = dynamic(() => import('./Fps'), { ssr: false });
 
@@ -26,6 +27,7 @@ export const Panel: FC<PanelProps> = ({
   open,
   price
 }) => {
+  const kpayEnabled = useRuntimeConfig().values.NEXT_PUBLIC_KPAY_ENABLE === 'true';
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PayTypeEnum | null>(null);
   const [onlineLoading, setOnlineLoading] = useState(false);
 
@@ -36,7 +38,12 @@ export const Panel: FC<PanelProps> = ({
     }
   }, [open]);
 
+  useEffect(() => {
+    setSelectedPaymentMethod(null);
+  }, [kpayEnabled]);
+
   const handleOnlinePayment = async () => {
+    if (!kpayEnabled) return;
     if (onlineLoading) return;
     setOnlineLoading(true);
     try {
@@ -83,7 +90,7 @@ export const Panel: FC<PanelProps> = ({
           />
         ) : (
           <div className="grid gap-4 py-4">
-            {KPAY_ENABLE ? (
+            {kpayEnabled ? (
               <Button
                 variant="outline"
                 loading={onlineLoading}

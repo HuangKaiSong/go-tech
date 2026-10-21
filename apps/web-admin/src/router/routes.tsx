@@ -25,6 +25,7 @@ const ContentPage = lazyPage(() => import('@/pages/ContentPage'));
 const ContentAddPage = lazyPage(() => import('@/pages/ContentAddPage'));
 const ContentEditPage = lazyPage(() => import('@/pages/ContentEditPage'));
 const SiteSettingPage = lazyPage(() => import('@/pages/SiteSettingPage'));
+const RuntimeConfigPage = lazyPage(() => import('@/pages/runtime-config'));
 const MessageBoard = lazyPage(() => import('@/pages/MessageBoard'));
 const MessagePage = lazyPage(() => import('@/pages/MessagePage'));
 const FeedbackPage = lazyPage(() => import('@/pages/FeedbackPage'));
@@ -122,6 +123,10 @@ export const createRoutes = (authLoader: LoaderFunction): RouteObject[] => [
       {
         path: '/settings/content/:id/edit',
         element: <ContentEditPage />
+      },
+      {
+        path: '/settings/runtime-config',
+        element: <RuntimeConfigPage />
       },
       {
         path: '/settings/site/h5',

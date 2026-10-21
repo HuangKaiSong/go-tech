@@ -4,6 +4,7 @@ import { translationCache } from '@/app/lib/translation/cache';
 import { hash } from '@/app/lib/translation/hash';
 import { loadDB, updateDB } from '@/app/lib/translation/loader';
 import type { TranslationEntry } from '@/app/lib/translation/types';
+import { withRuntimeScope } from '@/db';
 import { captureServerRouteError } from '@/lib/browser-monitor/server';
 
 // 查询参数校验（增加 value）
@@ -13,7 +14,7 @@ const GetQuerySchema = z.object({
 });
 
 /** GET /api/translate/dictionary?key=xxx 查询翻译词典 - 无参数：返回全部条目 - 有 key 参数：返回指定 key 的条目 */
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const result = GetQuerySchema.safeParse(Object.fromEntries(searchParams));
@@ -93,7 +94,7 @@ const PostBodySchema = z
  * - Key 和 source 至少提供一个，若提供 source 则计算 hash 作为 key
  * - Translations 为目标语言的翻译映射，会合并到现有条目
  */
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
     const body = await request.json();
     const result = PostBodySchema.safeParse(body);
@@ -157,3 +158,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
+
+export const GET = withRuntimeScope(handleGET);
+export const POST = withRuntimeScope(handlePOST);

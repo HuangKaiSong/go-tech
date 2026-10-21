@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import type { Locale } from '@/app/lib/translation/types';
+import { withRuntimeScope } from '@/db';
 import { captureServerRouteError } from '@/lib/browser-monitor/server';
 import { translateBatch } from '../../../lib/translation';
 
@@ -11,7 +12,7 @@ function isLocale(value: unknown): value is Locale {
   return typeof value === 'string' && SUPPORTED_LOCALES.has(value as Locale);
 }
 
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   let body: unknown;
 
   try {
@@ -43,3 +44,5 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+
+export const POST = withRuntimeScope(handlePOST);

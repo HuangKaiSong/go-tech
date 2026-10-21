@@ -43,6 +43,13 @@
       "when": 1788490881985,
       "tag": "0005_add_feedback_table_comments",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1792491766855,
+      "tag": "0006_runtime_config",
+      "breakpoints": true
     }
   ]
 }

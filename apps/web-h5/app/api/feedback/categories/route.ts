@@ -1,10 +1,13 @@
 import { asc } from 'drizzle-orm';
 import { type NextRequest, NextResponse } from 'next/server';
-import { db } from '@/db';
+import { withRuntimeScope } from '@/db';
+import { getDb } from '@/db';
 import { fbCategory, fbSubCategory } from '@/db/scheam';
 
-export async function GET(_req: NextRequest) {
-  const allCats = await db.query.fbCategory.findMany({
+async function handleGET(_req: NextRequest) {
+  const allCats = await (
+    await getDb()
+  ).query.fbCategory.findMany({
     with: {
       subCategories: {
         columns: {
@@ -27,3 +30,5 @@ export async function GET(_req: NextRequest) {
 
   return NextResponse.json({ success: true, data: allCats });
 }
+
+export const GET = withRuntimeScope(handleGET);

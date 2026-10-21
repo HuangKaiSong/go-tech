@@ -1,4 +1,5 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto';
+import { infrastructureValue } from '@/lib/runtime-config/service';
 import type { MobileHandoffStore } from './mobile-handoff';
 import { getMobileHandoffRedis } from './mobile-handoff-redis';
 
@@ -6,7 +7,7 @@ const lifetime = 60_000;
 const hash = (value: string) => createHash('sha256').update(value).digest('hex');
 
 function encryptionKey() {
-  const secret = process.env.SESSION_SECRET;
+  const secret = infrastructureValue('SESSION_SECRET');
   if (!secret) throw new Error('SESSION_SECRET is required');
   return createHash('sha256').update(`pms-mobile-handoff:${secret}`).digest();
 }

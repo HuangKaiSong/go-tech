@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { afterEach, test } from 'node:test';
 import { type ClientHttpErrorEvent, subscribeClientHttpErrors } from '@/lib/client-http/error-events';
+import { publishClientSnapshot } from '@/lib/runtime-config/client-store';
+import { effectiveValues, publicValues } from '@/lib/runtime-config/definitions';
 import { enterOrStartTrial, enterTenant, filterTenantsByBizCode, goNow, startFreeTrial } from './go-now';
 
 const originalFetch = globalThis.fetch;
@@ -41,14 +43,18 @@ afterEach(() => {
 
   if (originalHrTrialHost === undefined) {
     delete process.env.NEXT_PUBLIC_HR_TRIAL_HOST;
+    publishClientSnapshot({ version: String(Math.random()), values: publicValues(effectiveValues({})) });
   } else {
     process.env.NEXT_PUBLIC_HR_TRIAL_HOST = originalHrTrialHost;
+    publishClientSnapshot({ version: String(Math.random()), values: publicValues(effectiveValues({})) });
   }
 
   if (originalPmsTrialHost === undefined) {
     delete process.env.NEXT_PUBLIC_PMS_TRIAL_HOST;
+    publishClientSnapshot({ version: String(Math.random()), values: publicValues(effectiveValues({})) });
   } else {
     process.env.NEXT_PUBLIC_PMS_TRIAL_HOST = originalPmsTrialHost;
+    publishClientSnapshot({ version: String(Math.random()), values: publicValues(effectiveValues({})) });
   }
 });
 
@@ -107,6 +113,7 @@ test('goNow 的 HR 租户使用公共试用地址打开新窗口', async () => {
   let openedUrl: string | URL | undefined;
 
   process.env.NEXT_PUBLIC_HR_TRIAL_HOST = 'https://hr.example.com/trial?source=web';
+  publishClientSnapshot({ version: String(Math.random()), values: publicValues(effectiveValues({})) });
   installWindow(url => {
     openedUrl = url;
   });
@@ -124,6 +131,7 @@ test('goNow 在 HR 试用地址缺失时通知调用方', async () => {
   let missingHostCalls = 0;
 
   delete process.env.NEXT_PUBLIC_HR_TRIAL_HOST;
+  publishClientSnapshot({ version: String(Math.random()), values: publicValues(effectiveValues({})) });
   globalThis.fetch = async () => jsonResponse({ code: 200, data: 'hr-code' });
 
   await goNow({
@@ -141,6 +149,7 @@ test('enterTenant 在 HR 试用地址缺失时通知调用方', async () => {
   let missingHostCalls = 0;
 
   delete process.env.NEXT_PUBLIC_HR_TRIAL_HOST;
+  publishClientSnapshot({ version: String(Math.random()), values: publicValues(effectiveValues({})) });
   globalThis.fetch = async () => jsonResponse({ code: 200, data: 'hr-code' });
 
   await enterTenant({
@@ -177,6 +186,7 @@ test('goNow 未提供 PMS 回调时沿用公共 PMS 试用地址', async () => {
   let openedUrl: string | URL | undefined;
 
   process.env.NEXT_PUBLIC_PMS_TRIAL_HOST = 'https://pms.example.com';
+  publishClientSnapshot({ version: String(Math.random()), values: publicValues(effectiveValues({})) });
   installWindow(url => {
     openedUrl = url;
   });
@@ -279,6 +289,7 @@ test('startFreeTrial 在 HR 试用地址缺失时通知调用方', async () => {
   let missingHostCalls = 0;
 
   delete process.env.NEXT_PUBLIC_HR_TRIAL_HOST;
+  publishClientSnapshot({ version: String(Math.random()), values: publicValues(effectiveValues({})) });
   globalThis.fetch = async () => jsonResponse({ code: 200, data: 'hr-code' });
 
   await startFreeTrial({
@@ -312,6 +323,7 @@ test('enterOrStartTrial 没有租户时按指定业务类型开始试用', async
   let openedUrl: string | URL | undefined;
 
   process.env.NEXT_PUBLIC_HR_TRIAL_HOST = 'https://hr.example.com/trial';
+  publishClientSnapshot({ version: String(Math.random()), values: publicValues(effectiveValues({})) });
   installWindow(url => {
     openedUrl = url;
   });

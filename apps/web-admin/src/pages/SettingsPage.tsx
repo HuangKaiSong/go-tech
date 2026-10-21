@@ -1,7 +1,13 @@
-import { ChevronRight, FileImage, Settings, Shield, Users } from 'lucide-react';
+import { ChevronRight, FileImage, Settings, Settings2, Shield, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const menuItems = [
+  {
+    title: '运行配置',
+    description: '管理門戶的運行參數與服務設定',
+    icon: Settings2,
+    path: '/settings/runtime-config'
+  },
   {
     title: '角色管理',
     description: '管理系統角色與權限設定',

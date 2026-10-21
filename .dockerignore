@@ -26,3 +26,5 @@
 .vscode
 plans
 apps/web-h5/data/page-blocks
+
+apps/web-h5/data/runtime-config

@@ -80,7 +80,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     title: metadata[locale].title,
     keywords: metadata[locale].keywords,
     description: metadata[locale].description,
-    alternates: getLocalizedAlternates(locale, requestPathname),
+    alternates: await getLocalizedAlternates(locale, requestPathname),
     icons: [{ rel: 'icon', url: '/favicon.svg' }]
   };
 }
@@ -102,7 +102,7 @@ export default async function LocaleLayout({
 
   if (token) {
     user = decodeJwt(token) as User;
-    const baseUrl = getBaseUrl();
+    const baseUrl = await getBaseUrl();
     const [tenantData, userData] = await Promise.all([
       fetchLayoutData(`${baseUrl}/go-tech/platform/packageOrder/myTenants`, {
         headers: {

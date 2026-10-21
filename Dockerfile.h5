@@ -24,12 +24,15 @@ FROM dependencies AS builder
 ENV CI=true
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Bump to invalidate persisted Next.js output without clearing dependency caches.
+ARG H5_NEXT_CACHE_VERSION=2
+
 COPY . .
 
 RUN --mount=type=cache,id=go-tech-frontend-pnpm-10.17-store,target=/pnpm/store,sharing=locked \
     pnpm install --frozen-lockfile --offline
 RUN --mount=type=cache,id=go-tech-frontend-turbo,target=/workspace/.turbo,sharing=locked \
-    --mount=type=cache,id=go-tech-frontend-next-h5,target=/workspace/apps/web-h5/.next/cache,sharing=locked \
+    --mount=type=cache,id=go-tech-frontend-next-h5-v${H5_NEXT_CACHE_VERSION},target=/workspace/apps/web-h5/.next/cache,sharing=locked \
     --mount=type=secret,id=h5_env,target=/workspace/apps/web-h5/.env,required=true \
     --mount=type=secret,id=h5_env_local,target=/workspace/apps/web-h5/.env.local,required=true \
     pnpm exec turbo run build --filter=web-h5 \
@@ -46,6 +49,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 ENV NODE_OPTIONS=--max-old-space-size=4096
 ENV PORT=3200
+ENV H5_RUNTIME_CONFIG_SQLITE_PATH=/app/data/runtime-config/config.sqlite
 
 WORKDIR /app
 
@@ -53,7 +57,7 @@ COPY --from=builder --chown=node:node /workspace/apps/web-h5/.next/standalone ./
 COPY --from=builder --chown=node:node /workspace/apps/web-h5/public ./apps/web-h5/public
 COPY --from=builder --chown=node:node /workspace/apps/web-h5/.next/static ./apps/web-h5/.next/static
 
-RUN mkdir -p /app/data/page-blocks && chown -R node:node /app/data
+RUN mkdir -p /app/data/page-blocks /app/data/runtime-config && chown -R node:node /app/data
 
 USER node
 

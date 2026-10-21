@@ -11,7 +11,7 @@ const emptyCatalog = (): PackageCatalog => ({ hr: [], pms: [] });
 
 async function getPackageCatalog(): Promise<PackageCatalog> {
   try {
-    const response = await serverPlatformFetch(`${getBaseUrl()}/go-tech/platform/platformPackage/enabledList`);
+    const response = await serverPlatformFetch(`${await getBaseUrl()}/go-tech/platform/platformPackage/enabledList`);
 
     if (!response.ok) {
       console.error(`Package API request failed with status ${response.status}`);

@@ -1,9 +1,10 @@
 import { and, eq, isNotNull } from 'drizzle-orm';
 import { type NextRequest, NextResponse } from 'next/server';
-import { db } from '@/db';
+import { withRuntimeScope } from '@/db';
+import { getDb } from '@/db';
 import { packageOrder, platformTenant } from '@/db/scheam';
 
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const tenantId = searchParams.get('tenantId');
 
@@ -16,7 +17,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ success: false, message: 'Missing authorization credentials' }, { status: 401 });
   }
 
-  const result = await db
+  const result = await (
+    await getDb()
+  )
     .select({
       order_id: packageOrder.id,
       tenant_id: platformTenant.tenantId,
@@ -34,3 +37,5 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json({ success: true, data: tenant.order_id });
 }
+
+export const GET = withRuntimeScope(handleGET);

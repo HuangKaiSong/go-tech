@@ -3,12 +3,12 @@ import * as deepl from 'deepl-node';
 import * as OpenCC from 'opencc-js';
 import { captureServerError } from '@/lib/browser-monitor/server';
 import { isServerErrorReported, markServerErrorReported } from '@/lib/browser-monitor/server-error-state';
+import { configValue } from '@/lib/runtime-config/server';
 import { serverFetch } from '@/lib/server-fetch';
 
 export type TranslationProvider = 'alibaba' | 'deepl' | 'google' | 'openai';
 
 // 默认 Provider（可通过环境变量覆盖）
-const DEFAULT_PROVIDER: TranslationProvider = (process.env.TRANSLATION_PROVIDER as TranslationProvider) || 'deepl';
 
 function detectScript(text: string) {
   // 1. 创建转换器：尝试将文本当作繁体转换为简体
@@ -56,7 +56,7 @@ export async function translateWithOpenCC(text: string, locale: string): Promise
 async function callAITranslation(
   texts: string[],
   locale: string,
-  provider: TranslationProvider = DEFAULT_PROVIDER
+  provider?: TranslationProvider
 ): Promise<Record<string, string>> {
   if (texts.length === 0) return {};
 
@@ -72,7 +72,7 @@ async function callAITranslation(
     return result;
   }
 
-  switch (provider) {
+  switch (provider ?? (await configValue('TRANSLATION_PROVIDER'))) {
     case 'openai':
       return translateWithOpenAI(texts, locale);
     case 'deepl':
@@ -112,7 +112,7 @@ async function translateWithOpenAI(texts: string[], locale: string): Promise<Rec
 }
 
 export async function translateWithDeepL(texts: string[], locale: string): Promise<Record<string, string>> {
-  const authKey = process.env.DEEPL_API_KEY || '';
+  const authKey = (await configValue('DEEPL_API_KEY')) || '';
 
   let targetLang: deepl.TargetLanguageCode;
   let instruction;
@@ -165,7 +165,7 @@ async function translateWithAlibaba(texts: string[], locale: string): Promise<Re
 }
 
 async function translateWithGoogle(texts: string[], locale: string): Promise<Record<string, string>> {
-  const apiKey = process.env.GOOGLE_TRANSLATE_API_KEY || '';
+  const apiKey = (await configValue('GOOGLE_TRANSLATE_API_KEY')) || '';
 
   let targetLang: string;
   if (locale === 'zh-cn') {

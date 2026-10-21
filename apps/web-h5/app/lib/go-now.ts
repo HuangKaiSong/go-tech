@@ -1,6 +1,7 @@
 import type { PackageBizCode } from '@go-tech/types';
 import { clientFetch } from '@/lib/client-http/client-fetch';
 import { ClientHttpError } from '@/lib/client-http/client-http-error';
+import { clientConfigValue } from '@/lib/runtime-config/client-store';
 
 interface CallbackOptions {
   generateCallback?: (uri: string) => void;
@@ -47,7 +48,7 @@ function completeCallback(uri: string, generateCallback?: (uri: string) => void)
     return;
   }
 
-  const trialHost = process.env.NEXT_PUBLIC_PMS_TRIAL_HOST;
+  const trialHost = clientConfigValue('NEXT_PUBLIC_PMS_TRIAL_HOST');
   window.open(`${trialHost}/oauth/${uri}`, '_blank');
 }
 
@@ -75,7 +76,7 @@ async function requestPlatformCode(
 }
 
 function openHrTrial(code: unknown, onHrTrialHostMissing?: () => void) {
-  const hrTrialHost = process.env.NEXT_PUBLIC_HR_TRIAL_HOST;
+  const hrTrialHost = clientConfigValue('NEXT_PUBLIC_HR_TRIAL_HOST');
   if (!hrTrialHost) {
     onHrTrialHostMissing?.();
     return;

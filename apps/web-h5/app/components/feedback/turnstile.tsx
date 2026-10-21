@@ -1,4 +1,5 @@
 'use client';
+import { useRuntimeConfig } from '@/lib/runtime-config/provider';
 
 import { Button, Input } from '@go-tech-frontend/ui';
 import { useLocale } from 'next-intl';
@@ -143,7 +144,8 @@ const TurnstileWidget = ({ action, language, onVerify, resetKey }: Props & { lan
   const [fallbackMode, setFallbackMode] = useState(false);
   const [turnstileVerified, setTurnstileVerified] = useState(false);
   const siteKey =
-    process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || (process.env.NODE_ENV === 'development' ? testSiteKey : '');
+    useRuntimeConfig().values.NEXT_PUBLIC_TURNSTILE_SITE_KEY ||
+    (process.env.NODE_ENV === 'development' ? testSiteKey : '');
 
   const renderWidget = () => {
     if (!siteKey || !containerRef.current || !window.turnstile || widgetIdRef.current) return;
@@ -238,9 +240,10 @@ const TurnstileWidget = ({ action, language, onVerify, resetKey }: Props & { lan
 
 const Turnstile = (props: Props) => {
   const locale = useLocale();
+  const siteKey = useRuntimeConfig().values.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
   const language = turnstileLanguages[locale as keyof typeof turnstileLanguages] || 'en';
 
-  return <TurnstileWidget key={language} {...props} language={language} />;
+  return <TurnstileWidget key={`${language}:${siteKey}`} {...props} language={language} />;
 };
 
 export default Turnstile;

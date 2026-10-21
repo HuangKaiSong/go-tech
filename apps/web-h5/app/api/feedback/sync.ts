@@ -1,13 +1,13 @@
 import { sql } from 'drizzle-orm';
 import { after } from 'next/server';
 import { fetchFeedbackAi } from '@/app/api/feedback/ai-client';
-import { db } from '@/db';
+import { getDb } from '@/db';
 import { fbAideSyncJob } from '@/db/scheam';
 import { captureServerError } from '@/lib/browser-monitor/server';
 import { serverRequestContext } from '@/lib/browser-monitor/server-report';
 
-type DatabaseTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
-type SyncJobExecutor = typeof db | DatabaseTransaction;
+type DatabaseTransaction = Parameters<Parameters<Awaited<ReturnType<typeof getDb>>['transaction']>[0]>[0];
+type SyncJobExecutor = Awaited<ReturnType<typeof getDb>> | DatabaseTransaction;
 
 export function enqueueFeedbackSync(executor: SyncJobExecutor, featureId: number) {
   return executor

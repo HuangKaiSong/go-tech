@@ -1,4 +1,4 @@
-import { db } from '../index';
+import { getDb } from '../index';
 import { type NewFbCategory, type NewFbSubCategory, fbCategory, fbSubCategory } from '../scheam';
 
 const categories: Omit<NewFbCategory, 'id'>[] = [
@@ -68,6 +68,7 @@ const subCategoryNames: Record<string, string[]> = {
 };
 
 export async function seedCategories() {
+  const db = await getDb();
   // 插入分類並記錄實際 ID（自增 ID 不一定是 1-6）
   const catResults = await Promise.all(categories.map(c => db.insert(fbCategory).values(c)));
   const catIds = catResults.map(r => Number(r[0].insertId));

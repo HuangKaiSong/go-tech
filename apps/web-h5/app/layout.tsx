@@ -4,17 +4,22 @@ import type { Metadata } from 'next';
 import { hasLocale } from 'next-intl';
 import { ThemeProvider } from 'next-themes';
 import { headers } from 'next/headers';
+import { connection } from 'next/server';
 import { routing } from '@/i18n/routing';
-import { siteUrl } from '@/lib/seo';
+import { RuntimeConfigProvider } from '@/lib/runtime-config/provider';
+import { configValue, publicSnapshot } from '@/lib/runtime-config/server';
 import { createSvgSpriteHtml } from '@/plugins/createSvgIcons';
 // oxlint-disable import/no-unassigned-import
 import './globals.css';
 
-export const metadata: Metadata = {
-  metadataBase: siteUrl
-};
+export async function generateMetadata(): Promise<Metadata> {
+  await connection();
+  return { metadataBase: new URL(await configValue('NEXT_PUBLIC_SITE_URL')) };
+}
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  await connection();
+  const initialConfig = await publicSnapshot();
   const locale = (await headers()).get('x-next-intl-locale');
   const language = hasLocale(routing.locales, locale) ? locale : routing.defaultLocale;
 
@@ -30,9 +35,11 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     <html lang={language} suppressHydrationWarning>
       <body className="w-full">
         <div aria-hidden="true" dangerouslySetInnerHTML={{ __html: svgSpriteHtml }} />
-        <ThemeProvider attribute="class" enableSystem={false}>
-          {children}
-        </ThemeProvider>
+        <RuntimeConfigProvider initial={initialConfig}>
+          <ThemeProvider attribute="class" enableSystem={false}>
+            {children}
+          </ThemeProvider>
+        </RuntimeConfigProvider>
       </body>
     </html>
   );

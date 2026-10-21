@@ -1,6 +1,8 @@
 import path from 'node:path';
 import dotenv from 'dotenv';
 import { defineConfig } from 'drizzle-kit';
+import { effectiveValues } from './lib/runtime-config/definitions';
+import { readInfrastructure } from './lib/runtime-config/sqlite';
 
 // 按 Next.js 优先级顺序加载 .env 文件
 const env = process.env.NODE_ENV || 'development';
@@ -13,7 +15,7 @@ export default defineConfig({
   schema: './db/scheam/managed',
   dialect: 'mysql',
   dbCredentials: {
-    url: process.env.DATABASE_URL!
+    url: effectiveValues(readInfrastructure().overrides).DATABASE_URL!
   },
   casing: 'snake_case'
 });

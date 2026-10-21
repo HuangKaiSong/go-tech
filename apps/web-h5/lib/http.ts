@@ -1,11 +1,12 @@
+import { HttpClient, type HttpAdapter } from '@go-tech/core-http';
 // oxlint-disable
 import 'server-only';
-import { HttpClient, type HttpAdapter } from '@go-tech/core-http';
 import { cookies } from 'next/headers';
+import { configValue } from '@/lib/runtime-config/server';
 import { serverPlatformFetch } from './server-fetch';
 
-export function getBaseUrl(): string {
-  const apiUrl = process.env.API_INTERNAL_URL ?? process.env.NEXT_PUBLIC_API_URL;
+export async function getBaseUrl(): Promise<string> {
+  const apiUrl = (await configValue('API_INTERNAL_URL')) || (await configValue('NEXT_PUBLIC_API_URL'));
 
   if (!apiUrl) {
     throw new Error('NEXT_PUBLIC_API_URL is not defined');

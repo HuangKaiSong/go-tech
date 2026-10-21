@@ -1,7 +1,7 @@
 import { and, asc, count, desc, eq, inArray, isNotNull, isNull, ne } from 'drizzle-orm';
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
-import { db } from '@/db';
+import { getDb } from '@/db';
 import { fbCategory, fbFeature, fbSubCategory } from '@/db/scheam';
 import Header from '../../components/v2/Header';
 import FeedbackContent from './FeedbackContent';
@@ -14,7 +14,9 @@ export const metadata: Metadata = {
 
 async function FeedbackPageContent() {
   const language = (await cookies()).get('GO_TECH_LANGUAGE')?.value || 'hk';
-  const categories = await db.query.fbCategory.findMany({
+  const categories = await (
+    await getDb()
+  ).query.fbCategory.findMany({
     with: {
       subCategories: {
         columns: { id: true, name: true, sortOrder: true },
@@ -29,7 +31,9 @@ async function FeedbackPageContent() {
   const catIds = categories.map(c => c.id);
   const featureCounts: Record<number, number> = {};
   if (catIds.length > 0) {
-    const rows = await db
+    const rows = await (
+      await getDb()
+    )
       .select({ categoryId: fbFeature.categoryId, cnt: count() })
       .from(fbFeature)
       .where(and(inArray(fbFeature.categoryId, catIds), ne(fbFeature.status, 'shipped'), isNull(fbFeature.deletedAt)))
@@ -45,7 +49,9 @@ async function FeedbackPageContent() {
   }));
 
   // 获取已经完成的历史记录
-  const featureCompleted = await db
+  const featureCompleted = await (
+    await getDb()
+  )
     .select()
     .from(fbFeature)
     .where(and(eq(fbFeature.status, 'shipped'), isNotNull(fbFeature.shippedAt), isNull(fbFeature.deletedAt)))

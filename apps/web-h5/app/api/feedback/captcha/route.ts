@@ -1,10 +1,11 @@
 import { type NextRequest, NextResponse } from 'next/server';
+import { withRuntimeScope } from '@/db';
 import { getFeedbackUser } from '../auth';
 import { type BotVerificationAction, createFallbackCaptcha } from '../fallback-captcha';
 
 const validActions: BotVerificationAction[] = ['feedback_comment', 'feedback_post'];
 
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   const user = await getFeedbackUser(req);
   if (!user) {
     return NextResponse.json({ success: false, message: '請先登入後再操作' }, { status: 401 });
@@ -22,3 +23,5 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({ success: true, data: captcha }, { headers: { 'Cache-Control': 'no-store' } });
 }
+
+export const GET = withRuntimeScope(handleGET);

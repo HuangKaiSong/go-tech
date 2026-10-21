@@ -1,20 +1,21 @@
 import { and, count, eq, isNotNull, isNull } from 'drizzle-orm';
 import { type NextRequest, NextResponse } from 'next/server';
-import { db } from '@/db';
+import { withRuntimeScope } from '@/db';
+import { getDb } from '@/db';
 import { fbComment, fbFeature } from '@/db/scheam';
 import { requireFeedbackAdmin } from '../auth';
 
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   const auth = await requireFeedbackAdmin(req);
   if (auth.response) return auth.response;
 
   const [completedRows, deletedFeatureRows, deletedCommentRows] = await Promise.all([
-    db
+    (await getDb())
       .select({ value: count() })
       .from(fbFeature)
       .where(and(eq(fbFeature.status, 'shipped'), isNull(fbFeature.deletedAt))),
-    db.select({ value: count() }).from(fbFeature).where(isNotNull(fbFeature.deletedAt)),
-    db.select({ value: count() }).from(fbComment).where(isNotNull(fbComment.deletedAt))
+    (await getDb()).select({ value: count() }).from(fbFeature).where(isNotNull(fbFeature.deletedAt)),
+    (await getDb()).select({ value: count() }).from(fbComment).where(isNotNull(fbComment.deletedAt))
   ]);
 
   const deletedFeatures = deletedFeatureRows[0]?.value ?? 0;
@@ -29,3 +30,5 @@ export async function GET(req: NextRequest) {
     }
   });
 }
+
+export const GET = withRuntimeScope(handleGET);

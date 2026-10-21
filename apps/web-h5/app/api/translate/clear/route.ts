@@ -1,7 +1,10 @@
-import { clearCache } from "@/app/lib/translation/cache";
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
+import { clearCache } from '@/app/lib/translation/cache';
+import { withRuntimeScope } from '@/db';
 
-export async function POST() {
-  clearCache()
+async function handlePOST() {
+  clearCache();
   return NextResponse.json({ ok: true });
 }
+
+export const POST = withRuntimeScope(handlePOST);

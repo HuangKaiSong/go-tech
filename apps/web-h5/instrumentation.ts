@@ -2,6 +2,7 @@ import type { Instrumentation } from 'next';
 
 /** Unhandled Server Component, Route Handler, Server Action and proxy failures. */
 export const onRequestError: Instrumentation.onRequestError = async (error, request, context) => {
+  if (process.env.NEXT_RUNTIME === 'edge') return;
   const timestamp = Date.now();
   const { isServerErrorReported } = await import('./lib/browser-monitor/server-error-state');
   if (isServerErrorReported(error)) return;
@@ -10,6 +11,12 @@ export const onRequestError: Instrumentation.onRequestError = async (error, requ
   for (const [name, value] of Object.entries(request.headers)) {
     if (typeof value === 'string') requestHeaders.set(name, value);
     else if (Array.isArray(value)) requestHeaders.set(name, value.join(name.toLowerCase() === 'cookie' ? '; ' : ', '));
+  }
+  let values;
+  try {
+    values = (await (await import('./lib/runtime-config/service')).getRuntimeConfig()).values;
+  } catch {
+    return;
   }
   await sendServerErrorReport(
     error,
@@ -21,10 +28,10 @@ export const onRequestError: Instrumentation.onRequestError = async (error, requ
       routeType: context.routeType
     },
     {
-      serviceUrl: process.env.BROWSER_MONITOR_SERVICE_URL,
-      ingestToken: process.env.BROWSER_MONITOR_INGEST_TOKEN,
-      jwtSecret: process.env.PLATFORM_JWT_SECRET,
-      release: process.env.NEXT_PUBLIC_BROWSER_MONITOR_RELEASE,
+      serviceUrl: values.BROWSER_MONITOR_SERVICE_URL,
+      ingestToken: values.BROWSER_MONITOR_INGEST_TOKEN,
+      jwtSecret: values.PLATFORM_JWT_SECRET,
+      release: values.NEXT_PUBLIC_BROWSER_MONITOR_RELEASE,
       timestamp
     }
   );

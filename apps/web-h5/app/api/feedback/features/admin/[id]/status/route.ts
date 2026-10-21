@@ -1,12 +1,13 @@
 import { eq } from 'drizzle-orm';
 import { type NextRequest, NextResponse } from 'next/server';
 import { enqueueFeedbackSync, scheduleFeedbackSync } from '@/app/api/feedback/sync';
-import { db } from '@/db';
+import { withRuntimeScope } from '@/db';
+import { getDb } from '@/db';
 import { fbFeature } from '@/db/scheam';
 import { requireFeedbackAdmin } from '../../auth';
 import { isFeatureStatus } from '../../shared';
 
-export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+async function handlePATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireFeedbackAdmin(req);
   if (auth.response) return auth.response;
 
@@ -17,7 +18,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   }
   const status = body.status;
 
-  const result = await db.transaction(async tx => {
+  const result = await (
+    await getDb()
+  ).transaction(async tx => {
     const updateResult = await tx
       .update(fbFeature)
       .set({
@@ -34,3 +37,5 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   scheduleFeedbackSync(req);
   return NextResponse.json({ success: true, data: { id: String(featureId), status } });
 }
+
+export const PATCH = withRuntimeScope(handlePATCH);

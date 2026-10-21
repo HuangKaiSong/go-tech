@@ -1,5 +1,6 @@
 'use server';
 import { captureServerError } from '@/lib/browser-monitor/server';
+import { getRuntimeConfig } from '@/lib/runtime-config/server';
 import { cacheKey, pendingPromises, translationCache } from './cache';
 import { hash } from './hash';
 import { addPending, addPendingBatch, loadDB, updateDB } from './loader';
@@ -9,8 +10,9 @@ import type { Locale, TranslationEntry } from './types';
 export async function translate(text: string, locale: Locale): Promise<string> {
   if (!text) return text;
 
+  const version = (await getRuntimeConfig()).version;
   const key = hash(text);
-  const memoryKey = cacheKey(locale, text);
+  const memoryKey = `${version}:${cacheKey(locale, text)}`;
 
   // 1. 内存强缓存
   if (translationCache.has(memoryKey)) {
@@ -83,6 +85,7 @@ export async function translate(text: string, locale: Locale): Promise<string> {
 export async function translateBatch(texts: string[], locale: Locale): Promise<Record<string, string>> {
   if (texts.length === 0) return {};
 
+  const version = (await getRuntimeConfig()).version;
   const result: Record<string, string> = {};
   const uncachedTexts: string[] = [];
   const entriesToUpdate: { entry: TranslationEntry; key: string }[] = [];
@@ -90,7 +93,7 @@ export async function translateBatch(texts: string[], locale: Locale): Promise<R
   // 1. 逐个检查缓存（内存 + 文件）
   for (const text of texts) {
     const key = hash(text);
-    const memoryKey = cacheKey(locale, text);
+    const memoryKey = `${version}:${cacheKey(locale, text)}`;
 
     // 内存缓存
     if (translationCache.has(memoryKey)) {
@@ -133,7 +136,7 @@ export async function translateBatch(texts: string[], locale: Locale): Promise<R
     const translated = batchResult[text];
     if (translated) {
       const key = hash(text);
-      const memoryKey = cacheKey(locale, text);
+      const memoryKey = `${version}:${cacheKey(locale, text)}`;
       result[text] = translated;
       translationCache.set(memoryKey, translated);
       // 收集要写入文件的条目

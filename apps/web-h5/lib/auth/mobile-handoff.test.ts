@@ -14,18 +14,21 @@ afterEach(() => {
 function setup() {
   process.env.NEXT_PUBLIC_PMS_TRIAL_MOBILE_HOST = 'https://mobile.example/#/property?tab=rent';
   let stored: { audience: string; value: string } | undefined;
-  return createMobileHandoffHandlers({
-    async issue(value, audience) {
-      stored = { value, audience };
-      return code;
+  return createMobileHandoffHandlers(
+    {
+      async issue(value, audience) {
+        stored = { value, audience };
+        return code;
+      },
+      async consume(value, audience) {
+        if (value !== code || stored?.audience !== audience) return null;
+        const result = stored.value;
+        stored = undefined;
+        return result;
+      }
     },
-    async consume(value, audience) {
-      if (value !== code || stored?.audience !== audience) return null;
-      const result = stored.value;
-      stored = undefined;
-      return result;
-    }
-  });
+    async () => process.env.NEXT_PUBLIC_PMS_TRIAL_MOBILE_HOST ?? ''
+  );
 }
 
 function redirectRequest(value = authorization) {
@@ -115,14 +118,17 @@ test('拒绝未知/过期的 code、错误 JSON 和超长请求体', async () =>
 
 test('存储失败时返回通用错误，不泄露底层消息', async () => {
   setup();
-  const handlers = createMobileHandoffHandlers({
-    async issue() {
-      throw new Error('secret');
+  const handlers = createMobileHandoffHandlers(
+    {
+      async issue() {
+        throw new Error('secret');
+      },
+      async consume() {
+        throw new Error('secret');
+      }
     },
-    async consume() {
-      throw new Error('secret');
-    }
-  });
+    async () => process.env.NEXT_PUBLIC_PMS_TRIAL_MOBILE_HOST ?? ''
+  );
   const responses = await Promise.all([handlers.redirect(redirectRequest()), handlers.exchange(exchangeRequest())]);
   responses.forEach(response => assert.equal(response.status, 503));
   const bodies = await Promise.all(responses.map(response => response.text()));

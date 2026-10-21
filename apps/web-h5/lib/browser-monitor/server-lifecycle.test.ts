@@ -7,6 +7,14 @@ const { after, incomingHeaders } = vi.hoisted(() => ({
   after: vi.fn(),
   incomingHeaders: new Headers({ 'x-go-tech-pathname': '/feedback', 'user-agent': 'test-device' })
 }));
+vi.mock('@/lib/runtime-config/service', async () => ({
+  getRuntimeConfig: vi.fn(async () => ({
+    values: {
+      BROWSER_MONITOR_SERVICE_URL: process.env.BROWSER_MONITOR_SERVICE_URL,
+      BROWSER_MONITOR_INGEST_TOKEN: process.env.BROWSER_MONITOR_INGEST_TOKEN
+    }
+  }))
+}));
 vi.mock('server-only', () => ({}));
 vi.mock('next/headers', () => ({ headers: async () => incomingHeaders }));
 vi.mock('next/server', () => ({ after }));

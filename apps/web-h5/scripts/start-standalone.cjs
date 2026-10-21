@@ -15,6 +15,7 @@ if (!existsSync(serverPath)) {
 checkBuildCss();
 // Resolve before server.js changes cwd. Preserve editor saves from the previous deployment.
 preparePageBlockDirectory(appRoot);
+process.env.H5_RUNTIME_CONFIG_SQLITE_PATH ||= path.join(appRoot, 'data/runtime-config/config.sqlite');
 const publicRoot = path.join(appRoot, 'public');
 if (existsSync(publicRoot)) {
   cpSync(publicRoot, path.join(standaloneRoot, 'public'), {

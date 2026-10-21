@@ -31,8 +31,13 @@ const AdminLayout = () => {
       // 添加认证token到请求头
       if (token) {
         if (config.headers instanceof Headers) {
-          config.headers.append('Authorization', `Bearer ${token}`);
-          config.headers.append('Language', 'zh-TW');
+          // Request-specific credentials take precedence; append would produce an invalid comma-separated JWT.
+          if (!config.headers.has('Authorization')) {
+            config.headers.set('Authorization', `Bearer ${token.replace(/^Bearer\s+/i, '')}`);
+          }
+          if (!config.headers.has('Language')) {
+            config.headers.set('Language', 'zh-TW');
+          }
         }
       }
 

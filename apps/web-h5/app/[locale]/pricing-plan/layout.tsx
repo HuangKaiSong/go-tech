@@ -16,7 +16,7 @@ const fetchData = async (url: string): Promise<unknown> => {
 };
 
 export default async function Layout() {
-  const baseUrl = getBaseUrl();
+  const baseUrl = await getBaseUrl();
   const [packageResponse, pmsMenuResponse, hrMenuResponse] = await Promise.all([
     fetchData(`${baseUrl}/go-tech/platform/platformPackage/enabledList`),
     fetchData(`${baseUrl}/go-tech/platform/platformPackage/menuTree?bizCode=pms`),

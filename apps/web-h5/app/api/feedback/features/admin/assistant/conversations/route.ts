@@ -1,12 +1,13 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { fetchFeedbackAi } from '@/app/api/feedback/ai-client';
+import { withRuntimeScope } from '@/db';
 import { serverRequestContext } from '@/lib/browser-monitor/server-report';
 import { requireFeedbackAdmin } from '../../auth';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   const auth = await requireFeedbackAdmin(req);
   if (auth.response) return auth.response;
 
@@ -25,3 +26,5 @@ export async function GET(req: NextRequest) {
   }
   return NextResponse.json({ success: true, data: await upstream.json() });
 }
+
+export const GET = withRuntimeScope(handleGET);

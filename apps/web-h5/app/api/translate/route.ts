@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type { Locale } from '@/app/lib/translation/types';
+import { withRuntimeScope } from '@/db';
 import { captureServerRouteError } from '@/lib/browser-monitor/server';
 import { translate } from '../../lib/translation';
 
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const text = searchParams.get('text');
   const locale = searchParams.get('locale') as Locale;
@@ -21,3 +22,5 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Translation failed' }, { status: 500 });
   }
 }
+
+export const GET = withRuntimeScope(handleGET);

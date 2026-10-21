@@ -10,6 +10,7 @@ import { type MonitorError, reportChunkAckSchema } from '@go-tech/monitor-contra
 import { clientFetch } from '@/lib/client-http/client-fetch';
 import { ClientHttpError } from '@/lib/client-http/client-http-error';
 import { subscribeClientHttpDiagnostics } from '@/lib/client-http/error-events';
+import { clientConfigValue, subscribeRuntimeConfig } from '@/lib/runtime-config/client-store';
 
 let monitor: BrowserMonitor | undefined;
 let unsubscribe: (() => void) | undefined;
@@ -68,9 +69,12 @@ const upload = createAdaptiveReportTransport(async (value, options) => {
 });
 
 export function initializeBrowserMonitor() {
-  if (monitor || process.env.NEXT_PUBLIC_BROWSER_MONITOR_ENABLED !== 'true') return;
+  if (monitor || clientConfigValue('NEXT_PUBLIC_BROWSER_MONITOR_ENABLED') !== 'true') return;
   try {
-    monitor = startBrowserMonitor({ release: process.env.NEXT_PUBLIC_BROWSER_MONITOR_RELEASE, transport: upload });
+    monitor = startBrowserMonitor({
+      release: clientConfigValue('NEXT_PUBLIC_BROWSER_MONITOR_RELEASE'),
+      transport: upload
+    });
     // Non-authentication UUID cookie correlates server requests with this browser session.
     document.cookie = `GO_TECH_MONITOR_SESSION=${monitor.getContext().sessionId}; Path=/; SameSite=Lax${location.protocol === 'https:' ? '; Secure' : ''}`;
     unsubscribe = subscribeClientHttpDiagnostics(event => {
@@ -101,3 +105,13 @@ export function stopBrowserMonitor() {
   monitor?.stop();
   monitor = undefined;
 }
+
+let monitorConfiguration = '';
+subscribeRuntimeConfig(() => {
+  const next = `${clientConfigValue('NEXT_PUBLIC_BROWSER_MONITOR_ENABLED')}:${clientConfigValue('NEXT_PUBLIC_BROWSER_MONITOR_RELEASE')}`;
+  if (next !== monitorConfiguration) {
+    monitorConfiguration = next;
+    stopBrowserMonitor();
+    initializeBrowserMonitor();
+  }
+});

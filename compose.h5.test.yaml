@@ -21,6 +21,7 @@ services:
       NODE_OPTIONS: --max-old-space-size=4096
       PORT: '3200'
       H5_PAGE_BLOCKS_DIR: /app/data/page-blocks
+      H5_RUNTIME_CONFIG_SQLITE_PATH: /app/data/runtime-config/config.sqlite
     ports:
       - '0.0.0.0:3200:3200'
     extra_hosts:
@@ -28,6 +29,7 @@ services:
     volumes:
       - './apps/web-h5/public/page-blocks:/app/apps/web-h5/public/page-blocks:Z'
       - 'h5_page_blocks:/app/data/page-blocks'
+      - 'h5_runtime_config:/app/data/runtime-config'
       - './apps/web-h5/locales:/app/apps/web-h5/locales:Z'
       - './apps/web-h5/translations:/app/apps/web-h5/translations:Z'
     restart: unless-stopped
@@ -71,6 +73,7 @@ secrets:
     file: ./apps/web-h5/.env.local
 
 volumes:
+  h5_runtime_config:
   h5_page_blocks:
   h5_locales:
   h5_translations:

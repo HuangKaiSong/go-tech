@@ -2,8 +2,9 @@ import { createHmac, randomBytes, randomInt, timingSafeEqual } from 'node:crypto
 import { and, eq, gt, lt } from 'drizzle-orm';
 import { cookies } from 'next/headers';
 import _ from 'server-only';
-import { db } from '@/db';
+import { getDb } from '@/db';
 import { fbCaptchaChallenge } from '@/db/scheam';
+import { infrastructureValue } from '@/lib/runtime-config/service';
 
 export type BotVerificationAction = 'feedback_comment' | 'feedback_post';
 
@@ -25,7 +26,7 @@ const captchaCookie = 'GO_TECH_FEEDBACK_CAPTCHA';
 const captchaLifetime = 5 * 60 * 1000;
 const characters = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
 
-const getSecret = () => process.env.SESSION_SECRET || '';
+const getSecret = () => infrastructureValue('SESSION_SECRET') || '';
 
 const signCaptcha = ({ action, answer, expiresAt, nonce }: CaptchaSignatureInput) =>
   createHmac('sha256', getSecret()).update(`${nonce}:${answer}:${expiresAt}:${action}`).digest('hex');
@@ -64,7 +65,9 @@ export const createFallbackCaptcha = async (action: BotVerificationAction) => {
   const token = Buffer.from(JSON.stringify(payload)).toString('base64url');
   const image = `data:image/svg+xml;base64,${Buffer.from(createSvg(answer)).toString('base64')}`;
 
-  await db.transaction(async tx => {
+  await (
+    await getDb()
+  ).transaction(async tx => {
     await tx.delete(fbCaptchaChallenge).where(lt(fbCaptchaChallenge.expiresAt, new Date()));
     await tx.insert(fbCaptchaChallenge).values({ nonce, expiresAt: new Date(expiresAt) });
   });
@@ -105,7 +108,9 @@ export const verifyFallbackCaptcha = async (token: string, answer: string, expec
     return false;
   }
 
-  const result = await db
+  const result = await (
+    await getDb()
+  )
     .delete(fbCaptchaChallenge)
     .where(and(eq(fbCaptchaChallenge.nonce, payload.nonce), gt(fbCaptchaChallenge.expiresAt, new Date())));
   if (result[0].affectedRows !== 1) return false;

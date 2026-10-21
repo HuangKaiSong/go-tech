@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { decodeJwt } from 'jose';
 import { cookies } from 'next/headers';
-import { db } from '@/db';
+import { getDb } from '@/db';
 import { platformCustomer } from '@/db/scheam';
 import { captureServerError } from '@/lib/browser-monitor/server';
 
@@ -24,7 +24,9 @@ export async function getFeedbackUser(request: Request) {
     if (!Number.isSafeInteger(userId) || userId <= 0) return null;
 
     return (
-      (await db.query.platformCustomer.findFirst({
+      (await (
+        await getDb()
+      ).query.platformCustomer.findFirst({
         where: eq(platformCustomer.id, userId),
         columns: { id: true, custName: true }
       })) ?? null

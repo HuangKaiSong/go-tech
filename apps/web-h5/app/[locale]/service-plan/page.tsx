@@ -14,7 +14,7 @@ import { type ExtendedPackages, buildServicePlans } from './service-plan-data';
 
 const ServicePlan = async ({ searchParams }: { searchParams: Promise<{ product?: string | string[] }> }) => {
   let packages: ExtendedPackages[] = [];
-  const baseUrl = getBaseUrl();
+  const baseUrl = await getBaseUrl();
   const productParam = (await searchParams).product;
   const requestedProduct = Array.isArray(productParam) ? productParam[0] : productParam;
   const product: PackageBizCode = requestedProduct === 'hr' ? 'hr' : 'pms';

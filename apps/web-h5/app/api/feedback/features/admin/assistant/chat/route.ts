@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { fetchFeedbackAi } from '@/app/api/feedback/ai-client';
+import { withRuntimeScope } from '@/db';
 import { serverRequestContext } from '@/lib/browser-monitor/server-report';
 import { requireFeedbackAdmin } from '../../auth';
 
@@ -21,7 +22,7 @@ const chatRequestSchema = z.object({
   question: z.string().trim().min(1).max(4_000)
 });
 
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const auth = await requireFeedbackAdmin(req);
   if (auth.response) return auth.response;
 
@@ -61,3 +62,5 @@ export async function POST(req: NextRequest) {
     }
   });
 }
+
+export const POST = withRuntimeScope(handlePOST);

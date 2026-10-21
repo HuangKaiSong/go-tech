@@ -2,9 +2,10 @@
 import { decodeJwt } from 'jose';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
+import { withRuntimeScope } from '@/db';
 import { captureServerRouteError } from '@/lib/browser-monitor/server';
 
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   try {
     const body = await req.json();
 
@@ -65,3 +66,5 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export const POST = withRuntimeScope(handlePOST);

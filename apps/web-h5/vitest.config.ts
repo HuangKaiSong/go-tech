@@ -11,6 +11,7 @@ export default defineConfig({
     environment: 'jsdom',
     include: [
       'tests/view-mode/*.test.{ts,tsx}',
+      'lib/runtime-config/*.vitest.test.{ts,tsx}',
       'app/[[]locale]/feedback/*.test.tsx',
       'lib/browser-monitor/server-lifecycle.test.ts',
       'lib/server-fetch.test.ts',

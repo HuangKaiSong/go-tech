@@ -1,7 +1,8 @@
 import { and, asc, desc, eq, inArray, isNull, like, or } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 import { enqueueFeedbackSync, scheduleFeedbackSync } from '@/app/api/feedback/sync';
-import { db } from '@/db';
+import { withRuntimeScope } from '@/db';
+import { getDb } from '@/db';
 import { fbCategory, fbComment, fbFeature, fbSubCategory, fbVote } from '@/db/scheam';
 import { getFeedbackUser } from '../auth';
 import { moderateFeedbackContent } from '../moderation';
@@ -79,7 +80,7 @@ const validateFeatureSubmission = async (
   return null;
 };
 
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get('q')?.trim();
   if (!q) {
     return NextResponse.json({ success: true, data: [] });
@@ -87,7 +88,7 @@ export async function GET(req: NextRequest) {
   const requestedSystem = req.nextUrl.searchParams.get('system');
   const system = requestedSystem === 'pms' || requestedSystem === 'hr' ? requestedSystem : null;
   const systemCategoryIds = system
-    ? (await db.select({ id: fbCategory.id }).from(fbCategory).where(eq(fbCategory.system, system))).map(
+    ? (await (await getDb()).select({ id: fbCategory.id }).from(fbCategory).where(eq(fbCategory.system, system))).map(
         category => category.id
       )
     : null;
@@ -98,7 +99,9 @@ export async function GET(req: NextRequest) {
 
   const textSearch = or(like(fbFeature.title, `%${q}%`), like(fbFeature.description, `%${q}%`));
 
-  const rows = await db.query.fbFeature.findMany({
+  const rows = await (
+    await getDb()
+  ).query.fbFeature.findMany({
     where: systemCategoryIds
       ? and(isNull(fbFeature.deletedAt), inArray(fbFeature.categoryId, systemCategoryIds), textSearch)
       : and(isNull(fbFeature.deletedAt), textSearch),
@@ -122,7 +125,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ success: true, data: rows.map(mapFeature) });
 }
 
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const user = await getFeedbackUser(req);
   if (!user) {
     return NextResponse.json({ success: false, message: '請先登入後再操作' }, { status: 401 });
@@ -145,7 +148,9 @@ export async function POST(req: NextRequest) {
 
   if (validationResponse) return validationResponse;
 
-  const category = await db.query.fbCategory.findFirst({
+  const category = await (
+    await getDb()
+  ).query.fbCategory.findFirst({
     where: eq(fbCategory.name, categoryName),
     columns: { id: true, name: true }
   });
@@ -154,7 +159,9 @@ export async function POST(req: NextRequest) {
   }
 
   const subCategory = subCategoryName
-    ? await db.query.fbSubCategory.findFirst({
+    ? await (
+        await getDb()
+      ).query.fbSubCategory.findFirst({
         where: and(eq(fbSubCategory.categoryId, category.id), eq(fbSubCategory.name, subCategoryName)),
         columns: { id: true, name: true }
       })
@@ -163,7 +170,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, message: '建議分類不存在' }, { status: 400 });
   }
 
-  const feature = await db.transaction(async tx => {
+  const feature = await (
+    await getDb()
+  ).transaction(async tx => {
     const [insertResult] = await tx.insert(fbFeature).values({
       authorId: user.id,
       categoryId: category.id,
@@ -194,3 +203,6 @@ export async function POST(req: NextRequest) {
   scheduleFeedbackSync(req);
   return NextResponse.json({ success: true, data: feature }, { status: 201 });
 }
+
+export const GET = withRuntimeScope(handleGET);
+export const POST = withRuntimeScope(handlePOST);

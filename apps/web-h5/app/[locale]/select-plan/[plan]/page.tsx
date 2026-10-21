@@ -12,7 +12,7 @@ export default async function SelectPlanPage({ params }: { params: Promise<{ pla
     return redirect('/account/login');
   }
   const { plan } = await params;
-  const baseUrl = getBaseUrl();
+  const baseUrl = await getBaseUrl();
   const packagesData = (await serverPlatformFetch(`${baseUrl}/go-tech/platform/platformPackage/detail/${plan}`).then(
     res => res.json()
   )) as HttpBaseResponse<Packages>;

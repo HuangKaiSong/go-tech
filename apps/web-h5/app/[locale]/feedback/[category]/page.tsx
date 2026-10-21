@@ -1,7 +1,7 @@
 import { and, asc, count, desc, eq, inArray, isNull, ne } from 'drizzle-orm';
 import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
-import { db } from '@/db';
+import { getDb } from '@/db';
 import { fbCategory, fbComment, fbFeature, fbSubCategory } from '@/db/scheam';
 import { renderFeedbackPage } from '../render-feedback-page';
 import type { Feature } from '../useFeedbackFeatures';
@@ -23,7 +23,9 @@ const FeedbackCategoryPage = async ({ params }: { params: Promise<{ category: st
   const language = (await cookies()).get('GO_TECH_LANGUAGE')?.value || 'hk';
 
   // 1. 查询所有分类（含子分类，按排序）
-  const allCats = await db.query.fbCategory.findMany({
+  const allCats = await (
+    await getDb()
+  ).query.fbCategory.findMany({
     with: { subCategories: { orderBy: [asc(fbSubCategory.sortOrder)] } },
     orderBy: [asc(fbCategory.sortOrder)]
   });
@@ -38,7 +40,9 @@ const FeedbackCategoryPage = async ({ params }: { params: Promise<{ category: st
   let countByCatId: Map<number, number> = new Map();
 
   if (catIds.length > 0) {
-    const countRows = await db
+    const countRows = await (
+      await getDb()
+    )
       .select({ categoryId: fbFeature.categoryId, cnt: count() })
       .from(fbFeature)
       .where(and(inArray(fbFeature.categoryId, catIds), ne(fbFeature.status, 'shipped'), isNull(fbFeature.deletedAt)))
@@ -57,7 +61,9 @@ const FeedbackCategoryPage = async ({ params }: { params: Promise<{ category: st
   }));
 
   // 4. 查询当前分类下的所有需求（含 author、subCategory、comments(含author)、votes(含user)）
-  const dbFeatures = await db.query.fbFeature.findMany({
+  const dbFeatures = await (
+    await getDb()
+  ).query.fbFeature.findMany({
     where: and(eq(fbFeature.categoryId, currentCat.id), isNull(fbFeature.deletedAt)),
     with: {
       author: { columns: { custName: true } },

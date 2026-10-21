@@ -1,6 +1,7 @@
 import _ from 'server-only';
 import { captureServerRouteError } from '@/lib/browser-monitor/server';
 import { serverRequestContext } from '@/lib/browser-monitor/server-report';
+import { configValue } from '@/lib/runtime-config/server';
 import { serverFetch } from '@/lib/server-fetch';
 import { type BotVerificationAction, verifyFallbackCaptcha } from './fallback-captcha';
 import { classifyTurnstileFailure } from './turnstile-policy';
@@ -22,7 +23,8 @@ const verifyTurnstileToken = async (
 ): Promise<BotVerificationResult> => {
   if (!token || token.length > 2048) return { reason: 'invalid', success: false };
 
-  const secretKey = process.env.TURNSTILE_SECRET_KEY || (process.env.NODE_ENV === 'development' ? testSecretKey : '');
+  const secretKey =
+    (await configValue('TURNSTILE_SECRET_KEY')) || (process.env.NODE_ENV === 'development' ? testSecretKey : '');
   if (!secretKey) {
     if (request) await captureServerRouteError(new Error('Turnstile verification is not configured'), request);
     return { reason: 'unavailable', success: false };

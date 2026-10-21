@@ -2,8 +2,13 @@ import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import _ from 'server-only';
+import { infrastructureValue } from '@/lib/runtime-config/service';
 
-const encodedKey = new TextEncoder().encode(process.env.SESSION_SECRET);
+const encodedKey = () => {
+  const key = infrastructureValue('SESSION_SECRET');
+  if (!key) throw new Error('SESSION_SECRET is required');
+  return new TextEncoder().encode(key);
+};
 
 type SessionData = {
   expiresAt: Date;
@@ -15,12 +20,12 @@ export async function encrypt(payload: SessionData) {
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('7d')
-    .sign(encodedKey);
+    .sign(encodedKey());
 }
 
 export async function decrypt(session: string | undefined = '') {
   try {
-    const { payload } = await jwtVerify(session, encodedKey, {
+    const { payload } = await jwtVerify(session, encodedKey(), {
       algorithms: ['HS256']
     });
     return payload;
