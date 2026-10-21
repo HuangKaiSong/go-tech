@@ -17,7 +17,8 @@ const groups = [
     links: [
       ['理想客戶', '/target-audience'],
       ['需求反饋', '/feedback'],
-      ['操作手冊', '/manual']
+      ['操作手冊', '/manual'],
+      ['博客 BLOG', '/blog']
     ]
   },
   {

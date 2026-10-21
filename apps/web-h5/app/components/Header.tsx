@@ -272,6 +272,10 @@ const Header = ({ heroBg, initialBlocks }: { heroBg?: string | StaticImageData; 
               <Link href="/feedback" className="text-lg hover:text-primary transition-colors col-span-1">
                 <DynamicText text="需求反饋" />
               </Link>
+              <div className="h-10 border border-white/70" />
+              <Link href="/blog" className="text-lg hover:text-primary transition-colors col-span-1">
+                <DynamicText text="博客" />
+              </Link>
             </nav>
             <div className="grid grid-cols-2 text-sm text-white/80">
               <div

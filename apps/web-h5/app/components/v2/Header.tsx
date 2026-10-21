@@ -13,6 +13,7 @@ import {
   Menu,
   MessageCircle,
   Monitor,
+  Newspaper,
   Package,
   Phone,
   Settings,
@@ -42,7 +43,8 @@ const mobileMenuItems = [
   ['/service-plan', Briefcase, '服務計劃'],
   ['/target-audience', Users, '理想客戶'],
   ['/contact', MessageCircle, '聯繫我們'],
-  ['/feedback', Lightbulb, '需求反饋']
+  ['/feedback', Lightbulb, '需求反饋'],
+  ['/blog', Newspaper, '博客']
 ] as const;
 
 const Header = () => {
@@ -149,6 +151,14 @@ const Header = () => {
             >
               <Lightbulb className="w-4 h-4 shrink-0" strokeWidth={2} />
               <DynamicText text="需求反饋" />
+            </Link>
+            <span className="text-white/30 select-none">|</span>
+            <Link
+              href="/blog"
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-white/80 hover:text-primary hover:bg-white/5 transition-colors leading-none"
+            >
+              <Newspaper className="w-4 h-4 shrink-0" strokeWidth={2} />
+              <DynamicText text="博客" />
             </Link>
           </nav>
 

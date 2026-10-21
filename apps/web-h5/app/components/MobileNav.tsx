@@ -22,7 +22,8 @@ const pages = [
   ['/service-plan', '服務計劃'],
   ['/target-audience', '理想客戶'],
   ['/contact', '聯繫我們'],
-  ['/feedback', '需求反饋']
+  ['/feedback', '需求反饋'],
+  ['/blog', '博客']
 ] as const;
 const notices = [
   ['14 天免費試用', '立即體驗 GO-TECHS 租務及 HR 系統'],
