@@ -16,7 +16,8 @@ const groups = [
     title: '客戶/支援',
     links: [
       ['理想客戶', '/target-audience'],
-      ['需求反饋', '/feedback']
+      ['需求反饋', '/feedback'],
+      ['操作手冊', '/manual']
     ]
   },
   {
