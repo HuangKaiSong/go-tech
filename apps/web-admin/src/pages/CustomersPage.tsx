@@ -14,6 +14,7 @@ import {
   TableHeader,
   TableRow
 } from '@go-tech-frontend/ui';
+import { getFileNameFromHeaders } from '@go-tech/utils/web';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Download, RotateCcw, Search, Users } from 'lucide-react';
 import { useState } from 'react';
@@ -38,11 +39,11 @@ interface Reponse {
 
 const defaultSize = 10;
 
-function downloadCustomerWorkbook(blob: Blob) {
+function downloadCustomerWorkbook(blob: Blob, name?: string) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = '客戶資料.xlsx';
+  link.download = name ?? '客戶資料.xlsx';
   document.body.appendChild(link);
   link.click();
   link.remove();
@@ -106,11 +107,20 @@ const CustomersPage = () => {
     mutationFn: async () => {
       const token = getStoredToken()?.replace(/^Bearer\s+/i, '');
 
-      const response = await fetch(`/h5-hook/api/admin/customers/export`, {
-        method: 'POST',
+      const url = new URL(
+        `${import.meta.env.VITE_PROXY_PREFIX}/go-tech/platform/platformCustomer/export`,
+        location.origin
+      );
+      Object.entries(searchParams).map(([key, value]) => {
+        if (value) {
+          url.searchParams.append(key, value);
+        }
+        return null;
+      });
+
+      const response = await fetch(url.toString(), {
         cache: 'no-store',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token ?? ''}` },
-        body: JSON.stringify(searchParams)
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token ?? ''}` }
       });
       if (!response.ok) {
         const error: unknown = await response.json().catch(() => null);
@@ -121,9 +131,14 @@ const CustomersPage = () => {
         throw new Error(message);
       }
 
-      return response.blob();
+      return {
+        blob: await response.blob(),
+        name: getFileNameFromHeaders(response.headers) ?? undefined
+      };
     },
-    onSuccess: downloadCustomerWorkbook,
+    onSuccess: ({ blob, name }) => {
+      downloadCustomerWorkbook(blob, name);
+    },
     onError: error => toast.error(error.message || '客戶資料匯出失敗，請稍後重試')
   });
 
@@ -154,7 +169,7 @@ const CustomersPage = () => {
           variant="outline"
           className="ml-auto gap-2"
           loading={exportExcel.isPending}
-          onClick={() => exportExcel.mutate()}
+          onClick={() => exportExcel.mutateAsync()}
         >
           <Download className="w-4 h-4" />
           導出全部客戶 Excel
