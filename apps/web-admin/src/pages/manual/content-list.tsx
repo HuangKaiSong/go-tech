@@ -33,59 +33,71 @@ export function ContentList({ controller }: { controller: ManualController }) {
   );
   return (
     <>
-      {tab === 'article' && (
-        <>
-          <Input
-            aria-label="搜尋指南"
-            placeholder="搜尋標題、摘要或 URL"
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-          />
-          <select
-            aria-label="篩選主題"
-            className="w-full border rounded-md p-2 bg-background"
-            value={category}
-            onChange={e => setCategory(e.target.value)}
+      <div className="shrink-0 space-y-3 border-b border-border p-3">
+        {tab === 'article' && (
+          <>
+            <Input
+              aria-label="搜尋指南"
+              placeholder="搜尋標題、摘要或 URL"
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+            />
+            <div className="grid grid-cols-2 gap-3">
+              <select
+                aria-label="篩選主題"
+                className="w-full border rounded-md p-2 bg-background"
+                value={category}
+                onChange={e => setCategory(e.target.value)}
+              >
+                <option value="">全部主題</option>
+                {data.categories.map(row => (
+                  <option key={row.id} value={row.id}>
+                    {row.draft.name}
+                  </option>
+                ))}
+              </select>
+              <select
+                aria-label="篩選狀態"
+                className="w-full border rounded-md p-2 bg-background"
+                value={status}
+                onChange={e => setStatus(e.target.value)}
+              >
+                <option value="">全部狀態</option>
+                <option value="published">已發佈</option>
+                <option value="draft">未發佈</option>
+                <option value="changed">有未發佈修改</option>
+              </select>
+            </div>
+          </>
+        )}
+        {tab !== 'settings' && (
+          <Button disabled={busy || (tab === 'article' && !data.categories.length)} onClick={() => choose(tab)}>
+            新增{tab === 'article' ? '指南' : '主題'}
+          </Button>
+        )}
+      </div>
+      {/* 筛选条件不随列表滚动，长列表只占用工作区剩余高度。 */}
+      <div
+        className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain p-3"
+        aria-label="內容項目"
+        role="region"
+        tabIndex={0}
+      >
+        {rows.map(row => (
+          <button
+            type="button"
+            key={row.id}
+            disabled={busy}
+            aria-pressed={selection?.record?.id === row.id && selection.kind === tab}
+            onClick={() => choose(tab, row)}
+            className={`block w-full p-4 text-left border rounded-lg ${selection?.record?.id === row.id && selection.kind === tab ? 'border-primary' : 'border-border'}`}
           >
-            <option value="">全部主題</option>
-            {data.categories.map(row => (
-              <option key={row.id} value={row.id}>
-                {row.draft.name}
-              </option>
-            ))}
-          </select>
-          <select
-            aria-label="篩選狀態"
-            className="w-full border rounded-md p-2 bg-background"
-            value={status}
-            onChange={e => setStatus(e.target.value)}
-          >
-            <option value="">全部狀態</option>
-            <option value="published">已發佈</option>
-            <option value="draft">未發佈</option>
-            <option value="changed">有未發佈修改</option>
-          </select>
-        </>
-      )}
-      {tab !== 'settings' && (
-        <Button disabled={busy || (tab === 'article' && !data.categories.length)} onClick={() => choose(tab)}>
-          新增{tab === 'article' ? '指南' : '主題'}
-        </Button>
-      )}
-      {rows.map(row => (
-        <button
-          type="button"
-          key={row.id}
-          disabled={busy}
-          aria-pressed={selection?.record?.id === row.id && selection.kind === tab}
-          onClick={() => choose(tab, row)}
-          className={`block w-full p-4 text-left border rounded-lg ${selection?.record?.id === row.id && selection.kind === tab ? 'border-primary' : 'border-border'}`}
-        >
-          <span className="font-semibold block">{'name' in row.draft ? row.draft.name : row.draft.title}</span>
-          <span className="text-xs text-muted-foreground">{stateLabel(row)}</span>
-        </button>
-      ))}
-      {!rows.length && <p className="text-muted-foreground">沒有符合條件的內容；新增指南前請先建立主題。</p>}
+            <span className="font-semibold block">{'name' in row.draft ? row.draft.name : row.draft.title}</span>
+            <span className="text-xs text-muted-foreground">{stateLabel(row)}</span>
+          </button>
+        ))}
+        {!rows.length && <p className="text-muted-foreground">沒有符合條件的內容；新增指南前請先建立主題。</p>}
+      </div>
     </>
   );
 }

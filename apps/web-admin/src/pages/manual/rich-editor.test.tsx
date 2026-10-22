@@ -40,6 +40,19 @@ describe('manual visual editor', () => {
     expect(richDocumentSchema.safeParse(latest).success).toBe(true);
     expect(JSON.stringify(latest)).toContain('登入畫面');
   });
+  it('keeps icon actions accessible and reflects the selected text format', () => {
+    render(<RichEditor value={document('正文內容')} disabled={false} onChange={() => {}} />);
+    const bold = screen.getByRole('button', { name: '粗體' });
+    expect(bold.textContent).toBe('');
+    expect(bold.querySelector('svg')).not.toBeNull();
+    expect(bold.getAttribute('aria-pressed')).toBe('false');
+    fireEvent.click(bold);
+    expect(bold.getAttribute('aria-pressed')).toBe('true');
+    fireEvent.click(bold);
+    expect(bold.getAttribute('aria-pressed')).toBe('false');
+    expect(screen.getByRole('button', { name: '新增表格行' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: '刪除表格列' })).toBeTruthy();
+  });
   it('replaces the editor document when selecting a different guide', () => {
     const guide = {
       categoryId: 1,

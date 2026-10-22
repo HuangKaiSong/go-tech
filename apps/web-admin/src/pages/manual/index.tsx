@@ -1,5 +1,6 @@
 import { Button } from '@go-tech-frontend/ui';
 import { BookOpen } from 'lucide-react';
+import { useEffect, useRef } from 'react';
 import { ContentList } from './content-list';
 import { EditPanel } from './edit-panel';
 import { useManual } from './use-manual';
@@ -8,6 +9,17 @@ import { useManual } from './use-manual';
 export default function ManualManagement() {
   const controller = useManual();
   const { busy, changeTab, confirmation, data, error, reload, tab } = controller;
+  const editPanelRef = useRef<HTMLElement>(null);
+  const selectedKey = controller.selection
+    ? `${controller.selection.kind}:${controller.selection.record?.id ?? 'new'}`
+    : null;
+  useEffect(() => {
+    const panel = editPanelRef.current;
+    if (!selectedKey || !panel) return;
+    // 换篇时重置编辑区；窄屏自动定位到表单，避免选完列表后还需手动寻找正文。
+    panel.scrollTop = 0;
+    if (window.matchMedia('(max-width: 1023px)').matches) panel.scrollIntoView?.({ block: 'start' });
+  }, [selectedKey]);
   if (!data)
     return (
       <div className="space-y-4">
@@ -25,9 +37,9 @@ export default function ManualManagement() {
       </div>
     );
   return (
-    <div className="space-y-6">
+    <div className="flex h-full min-h-0 flex-col gap-4">
       {confirmation}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-bold flex items-center gap-3">
           <BookOpen />
           操作手冊
@@ -41,7 +53,7 @@ export default function ManualManagement() {
           {error}
         </p>
       )}
-      <div className="flex flex-wrap gap-2" aria-label="管理內容">
+      <div className="flex shrink-0 flex-wrap gap-2" aria-label="管理內容">
         {(
           [
             ['article', '指南'],
@@ -59,11 +71,24 @@ export default function ManualManagement() {
           </Button>
         ))}
       </div>
-      <div className="grid xl:grid-cols-[minmax(260px,1fr)_minmax(0,3fr)] gap-6">
-        <section className="space-y-3" aria-label="內容列表">
+      {/* 窄屏在工作区内纵向滚动；宽屏让列表和编辑面板独立滚动，标题与导航始终保留。 */}
+      <div
+        role="region"
+        aria-label="手冊內容"
+        tabIndex={0}
+        className="grid min-h-0 flex-1 grid-rows-[20rem_auto] content-start gap-4 overflow-y-auto overscroll-contain focus-visible:outline-primary lg:grid-cols-[minmax(240px,1fr)_minmax(0,3fr)] lg:grid-rows-1 lg:content-stretch lg:overflow-hidden"
+      >
+        <section
+          className="flex max-h-80 min-h-0 flex-col overflow-hidden rounded-xl border border-border bg-card lg:max-h-none"
+          aria-label="內容列表"
+        >
           <ContentList controller={controller} />
         </section>
-        <section className="border border-border bg-card rounded-xl p-5 min-w-0 space-y-5" aria-label="內容編輯">
+        <section
+          className="min-w-0 rounded-xl border border-border bg-card lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain"
+          ref={editPanelRef}
+          aria-label="內容編輯"
+        >
           <EditPanel controller={controller} />
         </section>
       </div>

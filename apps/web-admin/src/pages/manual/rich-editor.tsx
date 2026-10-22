@@ -7,6 +7,7 @@ import { TableKit } from '@tiptap/extension-table';
 import { EditorContent, useEditor } from '@tiptap/react';
 import { StarterKit } from '@tiptap/starter-kit';
 import { useState } from 'react';
+import { EditorToolbar } from './editor-toolbar';
 
 /** 提示块只包含段落，节点名称与共享 JSON 契约及前台渲染保持一致。 */
 const Tip = Node.create({
@@ -55,151 +56,20 @@ export function RichEditor({
     }
   });
   if (!editor) return <p>載入編輯器…</p>;
-  const tools: [string, () => void][] = [
-    [
-      '正文',
-      () => {
-        editor.chain().focus().setParagraph().run();
-      }
-    ],
-    [
-      '二級標題',
-      () => {
-        editor.chain().focus().toggleHeading({ level: 2 }).run();
-      }
-    ],
-    [
-      '三級標題',
-      () => {
-        editor.chain().focus().toggleHeading({ level: 3 }).run();
-      }
-    ],
-    [
-      '粗體',
-      () => {
-        editor.chain().focus().toggleBold().run();
-      }
-    ],
-    [
-      '斜體',
-      () => {
-        editor.chain().focus().toggleItalic().run();
-      }
-    ],
-    [
-      '項目列表',
-      () => {
-        editor.chain().focus().toggleBulletList().run();
-      }
-    ],
-    [
-      '編號列表',
-      () => {
-        editor.chain().focus().toggleOrderedList().run();
-      }
-    ],
-    [
-      '引用',
-      () => {
-        editor.chain().focus().toggleBlockquote().run();
-      }
-    ],
-    [
-      '提示塊',
-      () => {
-        editor.chain().focus().toggleWrap('tip').run();
-      }
-    ],
-    [
-      '插入表格',
-      () => {
-        editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
-      }
-    ],
-    [
-      '新增表格行',
-      () => {
-        editor.chain().focus().addRowAfter().run();
-      }
-    ],
-    [
-      '刪除表格行',
-      () => {
-        editor.chain().focus().deleteRow().run();
-      }
-    ],
-    [
-      '新增表格列',
-      () => {
-        editor.chain().focus().addColumnAfter().run();
-      }
-    ],
-    [
-      '刪除表格列',
-      () => {
-        editor.chain().focus().deleteColumn().run();
-      }
-    ],
-    [
-      '刪除表格',
-      () => {
-        editor.chain().focus().deleteTable().run();
-      }
-    ],
-    [
-      '取消連結',
-      () => {
-        editor.chain().focus().unsetLink().run();
-      }
-    ],
-    [
-      '撤銷',
-      () => {
-        editor.chain().focus().undo().run();
-      }
-    ],
-    [
-      '重做',
-      () => {
-        editor.chain().focus().redo().run();
-      }
-    ]
-  ];
   return (
     <div className="manual-editor rounded-lg border border-border overflow-hidden">
-      <div className="flex flex-wrap gap-1 p-2 border-b border-border bg-muted" role="toolbar" aria-label="正文格式">
-        {tools.map(([name, action]) => (
-          <Button key={name} type="button" variant="ghost" size="sm" disabled={disabled} onClick={action}>
-            {name}
-          </Button>
-        ))}
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          disabled={disabled}
-          onClick={() => {
-            setPanel('link');
-            setUrl('');
-          }}
-        >
-          插入連結
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          disabled={disabled}
-          onClick={() => {
-            setPanel('image');
-            setUrl('');
+      <EditorToolbar
+        editor={editor}
+        disabled={disabled}
+        onInsert={kind => {
+          setPanel(kind);
+          setUrl('');
+          if (kind === 'image') {
             setAlt('');
             setFiles([]);
-          }}
-        >
-          插入圖片
-        </Button>
-      </div>
+          }
+        }}
+      />
       {panel && (
         <div className="p-4 space-y-3 border-b border-border">
           <Label htmlFor="manual-resource-url">{panel === 'image' ? '圖片網址' : '連結網址'}</Label>

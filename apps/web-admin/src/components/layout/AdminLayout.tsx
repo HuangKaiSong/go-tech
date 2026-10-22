@@ -1,11 +1,13 @@
 import { useLayoutEffect } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useMatch } from 'react-router-dom';
 import { useAuth } from '@/hooks/use-auth';
 import AdminHeader from './AdminHeader';
 import AdminSidebar from './AdminSidebar';
 
 const AdminLayout = () => {
   const { token } = useAuth();
+  // 仅手册工作区锁定视口高度，其他后台页面继续沿用原来的整页滚动。
+  const isManualWorkspace = useMatch('/manual') !== null;
 
   useLayoutEffect(() => {
     const originFetch = window.fetch;
@@ -50,11 +52,19 @@ const AdminLayout = () => {
   }, [token]);
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div
+      className={
+        isManualWorkspace
+          ? 'flex h-dvh overflow-hidden bg-background [&>aside]:h-full [&>aside]:min-h-0 [&>aside]:shrink-0 [&>aside]:overflow-y-auto [&>aside]:overscroll-contain'
+          : 'flex min-h-screen bg-background'
+      }
+    >
       <AdminSidebar />
-      <div className="flex-1 flex flex-col">
+      <div
+        className={`flex-1 flex flex-col ${isManualWorkspace ? 'min-h-0 min-w-0 overflow-hidden [&>header]:shrink-0' : ''}`}
+      >
         <AdminHeader />
-        <main className="flex-1 p-6">
+        <main className={isManualWorkspace ? 'flex-1 min-h-0 overflow-hidden p-4 lg:p-6' : 'flex-1 p-6'}>
           <Outlet />
         </main>
       </div>
