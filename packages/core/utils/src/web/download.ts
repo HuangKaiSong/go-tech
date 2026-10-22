@@ -209,7 +209,7 @@ function resolveFileName(url: string, override?: string): string {
 }
 
 /** 解析 Content-Disposition 里的文件名（如果服务端提供） */
-function getFileNameFromHeaders(headers: Headers): string | null {
+export function getFileNameFromHeaders(headers: Headers): string | null {
   const cd = headers.get('content-disposition') || headers.get('Content-Disposition');
   if (!cd) return null;
 
