@@ -30,11 +30,21 @@ interface Customer {
   id: number;
   phone: string;
   registerTime: string;
+  type: string;
 }
 
 interface Reponse {
   records: Customer[];
   total: number;
+}
+
+interface SearchParams {
+  custName: string;
+  email: string;
+  phone: string;
+  registerDateEnd: string;
+  registerDateStart: string;
+  type?: string;
 }
 
 const defaultSize = 10;
@@ -54,16 +64,15 @@ const CustomersPage = () => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(defaultSize);
-  const [searchParams, setSearchParams] = useState({
+  const [searchParams, setSearchParams] = useState<SearchParams>({
     custName: '',
     phone: '',
     email: '',
-    vipLevel: '',
     registerDateStart: '',
     registerDateEnd: ''
   });
 
-  const { data, refetch: _refetch } = useQuery<Reponse>({
+  const { data, refetch } = useQuery<Reponse>({
     queryKey: ['platform/platformPackage/page', currentPage.toString(), pageSize.toString(), searchParams],
     queryFn: async () => {
       try {
@@ -147,7 +156,7 @@ const CustomersPage = () => {
       custName: '',
       phone: '',
       email: '',
-      vipLevel: '',
+      type: '',
       registerDateStart: '',
       registerDateEnd: ''
     });
@@ -224,11 +233,11 @@ const CustomersPage = () => {
           <div className="flex items-center gap-2">
             <label className="text-sm text-muted-foreground whitespace-nowrap">客戶類型</label>
             <Select
-              value={searchParams.vipLevel}
+              value={searchParams.type}
               onValueChange={e => {
                 setSearchParams({
                   ...searchParams,
-                  vipLevel: e
+                  type: e
                 });
               }}
             >
@@ -236,10 +245,9 @@ const CustomersPage = () => {
                 <SelectValue placeholder="請選擇" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="1">註冊會員</SelectItem>
-                <SelectItem value="2">黃金會員</SelectItem>
-                <SelectItem value="3">白金會員</SelectItem>
-                <SelectItem value="4">鑽石會員</SelectItem>
+                <SelectItem value="客戶">客戶</SelectItem>
+                <SelectItem value="用戶">用戶</SelectItem>
+                <SelectItem value="舊客">舊客</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -274,7 +282,7 @@ const CustomersPage = () => {
             />
           </div>
           <div className="flex gap-3 ml-auto">
-            <Button className="gap-2">
+            <Button className="gap-2" onClick={() => refetch()}>
               <Search className="w-4 h-4" />
               搜索
             </Button>
@@ -310,7 +318,7 @@ const CustomersPage = () => {
                 <TableCell className="text-center">{customer.phone}</TableCell>
                 <TableCell className="text-center">{customer.email}</TableCell>
                 <TableCell className="text-center">{customer.companyName}</TableCell>
-                <TableCell className="text-center">註冊會員</TableCell>
+                <TableCell className="text-center">{customer.type}</TableCell>
                 <TableCell className="text-center">
                   <Button variant="link" className="text-primary p-0 h-auto" onClick={() => handleView(customer.id)}>
                     查看
