@@ -27,7 +27,7 @@ const menuItems: MenuItem[] = [
   { title: '客戶列表', path: '/customers', icon: Users },
   { title: '訂單列表', path: '/orders', icon: FileText },
   // { title: "系統用戶列表", path: "/system-users", icon: UserCog },
-  { title: '留言管理', path: '/messages', icon: MessageSquare },
+  { title: '留言管理', path: '/message-board', icon: MessageSquare },
   { title: '需求反饋', path: '/feedback', icon: Lightbulb },
   { title: '操作手冊', path: '/manual', icon: BookOpen },
   { title: '網頁監控', path: '/monitor', icon: Activity },
