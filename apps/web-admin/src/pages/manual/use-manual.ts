@@ -43,11 +43,13 @@ export function useManual() {
   const [data, setData] = useState<ManualAdminData | null>(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [imageUploads, setImageUploads] = useState(0);
   const [selection, setSelection] = useState<Selection | null>(null);
   const [preview, setPreview] = useState(false);
   const [tab, setTab] = useState<ManualKind>('article');
   const { ask, confirmation } = useManualConfirmation();
-  const dirty = selection !== null && JSON.stringify(selection.draft) !== selection.baseline;
+  // 未完成的图片还没有进入正文，也必须参与离开确认和保存限制。
+  const dirty = imageUploads > 0 || (selection !== null && JSON.stringify(selection.draft) !== selection.baseline);
   useUnsavedGuard(dirty, ask);
   useEffect(() => {
     const controller = new AbortController();
@@ -75,6 +77,10 @@ export function useManual() {
   /** 提交当前记录版本；成功后按服务端返回 ID 恢复编辑会话，冲突时保留本地修改。 */
   async function perform(action: ManualCommand['action']) {
     if (!selection) return;
+    if (imageUploads > 0 && action !== 'delete') {
+      toast.error('請先完成或取消圖片上傳');
+      return;
+    }
     const notice = mutationNotice(action);
     if (notice && !(await ask(notice))) return;
     const saves = action === 'save' || action === 'create';
@@ -141,6 +147,8 @@ export function useManual() {
     data,
     error,
     busy,
+    imageUploads,
+    setImageUploads,
     selection,
     setSelection,
     preview,

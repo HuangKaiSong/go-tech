@@ -1,5 +1,5 @@
 import { type ReactNode, createElement } from 'react';
-import { type RichDocument, type RichNode, headingEntries, safeManualUrl } from './model';
+import { type RichDocument, type RichNode, headingEntries, imageDimension, safeManualUrl } from './model';
 export * from './model';
 
 /** 前台及后台预览共用的 React 渲染器；仅映射受控节点，不插入原始 HTML。 */
@@ -40,11 +40,7 @@ function renderText(node: RichNode, index: number): ReactNode {
 /** 将白名单块节点映射为语义化元素；未知节点不渲染，表格使用独立横向滚动容器。 */
 function renderBlock(node: RichNode, children: ReactNode, index: number): ReactNode {
   const props = { key: index };
-  if (node.type === 'image') {
-    const src = node.attrs?.src;
-    if (typeof src !== 'string' || !safeManualUrl(src, true)) return null;
-    return <img key={index} src={src} alt={String(node.attrs?.alt ?? '')} loading="lazy" />;
-  }
+  if (node.type === 'image') return renderImage(node, index);
   if (node.type === 'hardBreak') return <br key={index} />;
   if (node.type === 'horizontalRule') return <hr key={index} />;
   if (node.type === 'orderedList')
@@ -104,5 +100,21 @@ function renderCell(node: RichNode, children: ReactNode, index: number): ReactNo
     node.type === 'tableCell' ? 'td' : 'th',
     { key: index, colSpan: Number(node.attrs?.colspan ?? 1), rowSpan: Number(node.attrs?.rowspan ?? 1) },
     children
+  );
+}
+
+/** 只输出经过校验的像素尺寸；共享响应式样式确保窄屏仍按比例缩小。 */
+function renderImage(node: RichNode, index: number): ReactNode {
+  const src = node.attrs?.src;
+  if (typeof src !== 'string' || !safeManualUrl(src, true)) return null;
+  return (
+    <img
+      key={index}
+      src={src}
+      alt={String(node.attrs?.alt ?? '')}
+      width={imageDimension(node.attrs?.width)}
+      height={imageDimension(node.attrs?.height)}
+      loading="lazy"
+    />
   );
 }

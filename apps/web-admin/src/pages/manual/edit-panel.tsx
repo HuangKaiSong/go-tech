@@ -6,7 +6,7 @@ import type { ManualController } from './use-manual';
 
 /** 根据内容种类选择表单；指南身份或版本变化时重建编辑器，防止串用上一篇正文。 */
 function EditorForm({ controller }: { controller: ManualController }) {
-  const { busy, data, selection, setSelection } = controller;
+  const { busy, data, selection, setImageUploads, setSelection } = controller;
   if (!selection || !data) return null;
   switch (selection.kind) {
     case 'article':
@@ -14,6 +14,7 @@ function EditorForm({ controller }: { controller: ManualController }) {
         <ArticleForm
           key={`${selection.record?.id ?? 'new'}-${selection.record?.version ?? 0}`}
           value={selection.draft}
+          onPendingChange={setImageUploads}
           categories={data.categories}
           locked={Boolean(selection.record?.lockedSlug)}
           disabled={busy}
@@ -40,7 +41,7 @@ function EditorForm({ controller }: { controller: ManualController }) {
 }
 /** 管理保存、预览、发布等操作按钮；未保存的内容必须先保存才能发布或预览。 */
 export function EditPanel({ controller }: { controller: ManualController }) {
-  const { busy, dirty, perform, preview, selection, setPreview, showPreview } = controller;
+  const { busy, dirty, imageUploads, perform, preview, selection, setPreview, showPreview } = controller;
   if (!selection) return <p className="text-muted-foreground py-12 text-center">請選擇內容或新增項目</p>;
   let title = '新增內容';
   if (selection.record) title = '編輯內容';
@@ -48,7 +49,10 @@ export function EditPanel({ controller }: { controller: ManualController }) {
   return (
     <>
       {/* 操作栏位于内容滚动容器内，滚动长指南时仍可直接保存、预览和发布。 */}
-      <div className="sticky top-0 z-10 space-y-3 rounded-t-xl border-b border-border bg-card p-4 lg:p-5">
+      <div
+        data-manual-actions
+        className="sticky top-0 z-10 space-y-3 rounded-t-xl border-b border-border bg-card p-4 lg:p-5"
+      >
         <div className="flex flex-wrap gap-2 items-center">
           <h2 className="font-bold text-xl mr-auto">{title}</h2>
           {dirty && <span className="text-sm text-primary">有未儲存修改</span>}
@@ -61,7 +65,10 @@ export function EditPanel({ controller }: { controller: ManualController }) {
           </p>
         )}
         <div className="flex flex-wrap gap-2">
-          <Button disabled={busy || preview} onClick={() => perform(selection.record ? 'save' : 'create')}>
+          <Button
+            disabled={[busy, preview, imageUploads > 0].includes(true)}
+            onClick={() => perform(selection.record ? 'save' : 'create')}
+          >
             儲存草稿
           </Button>
           <Button

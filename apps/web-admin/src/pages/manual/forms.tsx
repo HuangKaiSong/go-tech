@@ -14,12 +14,14 @@ export function ArticleForm({
   disabled,
   locked,
   onChange,
+  onPendingChange,
   value
 }: {
   categories: ManualAdminData['categories'];
   disabled: boolean;
   locked: boolean;
   onChange: (next: ManualArticle) => void;
+  onPendingChange?: (count: number) => void;
   value: ManualArticle;
 }) {
   return (
@@ -71,7 +73,12 @@ export function ArticleForm({
         onChange={e => onChange({ ...value, sortOrder: Number(e.target.value) })}
       />
       <Label>指南正文</Label>
-      <RichEditor value={value.body} onChange={body => onChange({ ...value, body })} disabled={disabled} />
+      <RichEditor
+        onPendingChange={onPendingChange}
+        value={value.body}
+        onChange={body => onChange({ ...value, body })}
+        disabled={disabled}
+      />
     </fieldset>
   );
 }

@@ -83,6 +83,28 @@ export function textOf(node: RichNode): string {
   return node.text ?? node.content?.map(textOf).join('') ?? '';
 }
 
+/** 图片尺寸统一采用正整数像素，限制超大或非数值属性，供保存与渲染共同使用。 */
+export const manualImageSizeLimit = 10_000;
+export function imageDimension(value: unknown): number | undefined {
+  return typeof value === 'number' && Number.isInteger(value) && value > 0 && value <= manualImageSizeLimit
+    ? value
+    : undefined;
+}
+
+function validImage(attrs: Record<string, unknown>): boolean {
+  const dimensions = ['width', 'height'].every(
+    key => attrs[key] === undefined || attrs[key] === null || imageDimension(attrs[key]) !== undefined
+  );
+  return (
+    dimensions &&
+    typeof attrs.src === 'string' &&
+    safeManualUrl(attrs.src, true) &&
+    typeof attrs.alt === 'string' &&
+    Boolean(attrs.alt.trim()) &&
+    attrs.alt.length <= 500
+  );
+}
+
 /** 按节点类型限制可持久化属性，并强制图片替代文字及受支持的标题层级。 */
 function validAttributes(node: RichNode): boolean {
   const attrs = node.attrs ?? {};
@@ -98,13 +120,7 @@ function validAttributes(node: RichNode): boolean {
     case 'heading':
       return attrs.level === 2 || attrs.level === 3;
     case 'image':
-      return (
-        typeof attrs.src === 'string' &&
-        safeManualUrl(attrs.src, true) &&
-        typeof attrs.alt === 'string' &&
-        Boolean(attrs.alt.trim()) &&
-        attrs.alt.length <= 500
-      );
+      return validImage(attrs);
     case 'orderedList':
       return attrs.start === undefined || (Number.isSafeInteger(attrs.start) && Number(attrs.start) >= 1);
     case 'tableCell':

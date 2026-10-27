@@ -5,7 +5,14 @@ import { RouterProvider, createMemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import ManualManagement from './index';
 vi.mock('@/hooks/use-auth', () => ({ getStoredToken: () => 'admin-token' }));
-vi.mock('./rich-editor', () => ({ RichEditor: () => <div>可視化正文編輯器</div> }));
+vi.mock('./rich-editor', () => ({
+  RichEditor: ({ onPendingChange }: { onPendingChange?: (count: number) => void }) => (
+    <div>
+      可視化正文編輯器<button onClick={() => onPendingChange?.(1)}>模擬圖片上傳</button>
+      <button onClick={() => onPendingChange?.(0)}>完成圖片上傳</button>
+    </div>
+  )
+}));
 const meta = {
   version: 1,
   publishedVersion: 1,
@@ -87,6 +94,16 @@ describe('manual management workflow', () => {
     await waitFor(() => expect(commands).toHaveLength(2));
     expect(commands[1]).toMatchObject({ action: 'publish', version: 2 });
     expect(data.articles[0]?.published?.title).toBe('更新後的指南');
+  });
+  it('blocks save, preview and publish until pending images are completed', async () => {
+    setup();
+    fireEvent.click(await screen.findByRole('button', { name: /首次登入/ }));
+    fireEvent.click(await screen.findByRole('button', { name: '模擬圖片上傳' }));
+    expect((screen.getByRole('button', { name: '儲存草稿' }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('button', { name: '預覽已儲存草稿' }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('button', { name: '發佈' }) as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.click(screen.getByRole('button', { name: '完成圖片上傳' }));
+    expect((screen.getByRole('button', { name: '儲存草稿' }) as HTMLButtonElement).disabled).toBe(false);
   });
   it('warns before discarding edits and allows cancelling', async () => {
     setup();

@@ -115,3 +115,43 @@
   outline: 2px solid hsl(var(--primary));
   outline-offset: -2px;
 }
+
+/* 拖拽框只用于后台编辑；图片本身的尺寸仍由共享文档属性决定。 */
+.manual-editor [data-resize-container][data-node='image'] {
+  margin: 1rem 0;
+  max-width: 100%;
+}
+.manual-editor [data-resize-wrapper] {
+  max-width: 100%;
+}
+.manual-editor [data-resize-wrapper] img {
+  display: block;
+  margin: 0;
+}
+.manual-editor [data-resize-container].ProseMirror-selectednode [data-resize-wrapper] {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+.manual-editor [data-resize-handle] {
+  width: 12px;
+  height: 12px;
+  border: 2px solid hsl(var(--background));
+  border-radius: 3px;
+  background: hsl(var(--primary));
+  opacity: 0;
+  z-index: 1;
+}
+.manual-editor [data-resize-container]:hover [data-resize-handle],
+.manual-editor [data-resize-container].ProseMirror-selectednode [data-resize-handle],
+.manual-editor [data-resize-state='true'] [data-resize-handle] {
+  opacity: 1;
+}
+.manual-image-upload-placeholder {
+  display: inline-flex;
+  padding: 0.5rem 0.75rem;
+  border: 1px dashed hsl(var(--primary) / 0.5);
+  border-radius: 0.5rem;
+  background: hsl(var(--primary) / 0.08);
+  color: hsl(var(--muted-foreground));
+  font-size: 0.875rem;
+}

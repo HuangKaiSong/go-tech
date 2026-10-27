@@ -17,7 +17,7 @@ const document = (text: string): RichDocument => ({
 });
 afterEach(cleanup);
 describe('manual visual editor', () => {
-  it('inserts an image only with a safe URL and alt text, in the shared document format', () => {
+  it('inserts a URL image with a safe source and an optional description', () => {
     let latest: RichDocument = emptyDocument;
     render(
       <RichEditor
@@ -28,11 +28,11 @@ describe('manual visual editor', () => {
         }}
       />
     );
-    fireEvent.click(screen.getByRole('button', { name: '插入圖片' }));
+    fireEvent.click(screen.getByRole('button', { name: '使用圖片網址' }));
     const insert = screen.getByRole('button', { name: '插入' }) as HTMLButtonElement;
     // oxlint-disable-next-line eslint/no-script-url -- Deliberately unsafe regression input.
     fireEvent.change(screen.getByLabelText('圖片網址'), { target: { value: 'javascript:alert(1)' } });
-    fireEvent.change(screen.getByLabelText('圖片說明（必填）'), { target: { value: '登入畫面' } });
+    fireEvent.change(screen.getByLabelText('圖片說明（選填）'), { target: { value: '登入畫面' } });
     expect(insert.disabled).toBe(true);
     fireEvent.change(screen.getByLabelText('圖片網址'), { target: { value: 'https://example.com/manual.png' } });
     expect(insert.disabled).toBe(false);
@@ -81,6 +81,8 @@ describe('manual visual editor', () => {
     const controller: ManualController = {
       data,
       busy: false,
+      imageUploads: 0,
+      setImageUploads: vi.fn(),
       dirty: false,
       error: '',
       preview: false,
