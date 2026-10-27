@@ -31,11 +31,17 @@ function uploadMessage(task: { error?: string; status: string }): string {
 /** 选图、粘贴、拖拽共用异步上传队列；占位与插入位置都不依赖上传完成时的光标。 */
 export function RichEditor({
   disabled,
+  imageBaseUrl = '',
+  label = '指南正文',
+  numberedHeadings = true,
   onChange,
   onPendingChange,
   value
 }: {
   disabled: boolean;
+  imageBaseUrl?: string;
+  label?: string;
+  numberedHeadings?: boolean;
   onChange: (value: RichDocument) => void;
   onPendingChange?: (count: number) => void;
   value: RichDocument;
@@ -56,7 +62,7 @@ export function RichEditor({
         trailingNode: false
       }),
       Link.configure({ openOnClick: false, isAllowedUri: href => safeManualUrl(href) }),
-      ManualImage,
+      ManualImage.configure({ imageBaseUrl }),
       TableKit.configure({ table: { resizable: false } }),
       Tip,
       ImageUploadPlaceholders
@@ -64,7 +70,7 @@ export function RichEditor({
     content: value.doc,
     editable: !disabled,
     editorProps: {
-      attributes: { 'aria-label': '指南正文', role: 'textbox', 'aria-multiline': 'true' },
+      attributes: { 'aria-label': label, role: 'textbox', 'aria-multiline': 'true' },
       handlePaste(view, event) {
         const images = clipboardImages(event.clipboardData);
         if (!view.editable || !images.length) return false;
@@ -229,7 +235,7 @@ export function RichEditor({
           </div>
         </div>
       )}
-      <div className="manual-rich-text">
+      <div className="manual-rich-text" data-numbered-headings={numberedHeadings}>
         <EditorContent editor={editor} />
       </div>
     </div>

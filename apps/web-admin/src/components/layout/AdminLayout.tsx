@@ -6,8 +6,10 @@ import AdminSidebar from './AdminSidebar';
 
 const AdminLayout = () => {
   const { token } = useAuth();
-  // 仅手册工作区锁定视口高度，其他后台页面继续沿用原来的整页滚动。
-  const isManualWorkspace = useMatch('/manual') !== null;
+  // 手册和博客工作区锁定视口高度，其他后台页面继续沿用原来的整页滚动。
+  const isManual = useMatch('/manual') !== null;
+  const isBlog = useMatch('/blog') !== null;
+  const isManualWorkspace = isManual || isBlog;
 
   useLayoutEffect(() => {
     const originFetch = window.fetch;

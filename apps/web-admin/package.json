@@ -15,6 +15,7 @@
     "@go-tech-frontend/styles": "workspace:*",
     "@go-tech-frontend/three": "workspace:*",
     "@go-tech-frontend/ui": "workspace:*",
+    "@go-tech/blog-content": "workspace:*",
     "@go-tech/manual-content": "workspace:*",
     "@go-tech/monitor-contract": "workspace:*",
     "@go-tech/package-ui": "workspace:*",

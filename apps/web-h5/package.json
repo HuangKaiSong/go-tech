@@ -16,13 +16,15 @@
     "test:pms-mobile-redis": "node --import tsx scripts/check-mobile-handoff-redis.mts",
     "config": "tsx scripts/runtime-config.mts",
     "test:runtime-config:integration": "tsx scripts/check-runtime-config.mts",
-    "db:seed:manual": "tsx scripts/seed-manual.ts"
+    "db:seed:manual": "tsx scripts/seed-manual.ts",
+    "db:seed:blog": "tsx scripts/seed-blog.ts"
   },
   "dependencies": {
     "@file-viewer/preset-office": "^2.2.9",
     "@file-viewer/react": "^2.2.9",
     "@go-tech-frontend/styles": "workspace:*",
     "@go-tech-frontend/ui": "workspace:*",
+    "@go-tech/blog-content": "workspace:*",
     "@go-tech/browser-monitor": "workspace:*",
     "@go-tech/color": "workspace:*",
     "@go-tech/core-http": "workspace:*",

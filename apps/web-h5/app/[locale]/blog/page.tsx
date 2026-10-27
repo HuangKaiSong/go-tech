@@ -1,11 +1,21 @@
 import type { Metadata } from 'next';
+import { connection } from 'next/server';
+import { readBlogList } from '@/lib/blog/public';
 import BlogContent from './blog-content';
-
-export const metadata: Metadata = {
-  title: '博客 Blog | GO-TECHS',
-  description: '最新香港租務及人事條例、實務指南與 Go Techs 產品動態，助您管理更合規、更輕鬆。'
-};
-
-export default function BlogPage() {
-  return <BlogContent />;
+type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> };
+async function load(props: Props) {
+  const params = await props.searchParams;
+  return readBlogList({ categoryId: params.categoryId, q: params.q, page: params.page });
+}
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  try {
+    const data = await load(props);
+    return { title: `${data.settings.title} | GO-TECHS`, description: data.settings.description };
+  } catch {
+    return { title: '博客 | GO-TECHS' };
+  }
+}
+export default async function BlogPage(props: Props) {
+  await connection();
+  return <BlogContent initial={await load(props)} />;
 }

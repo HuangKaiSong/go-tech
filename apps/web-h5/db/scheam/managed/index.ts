@@ -8,3 +8,4 @@ export * from './fb_vote';
 
 export * from './manual';
 export * from './runtime_config';
+export * from './blog';

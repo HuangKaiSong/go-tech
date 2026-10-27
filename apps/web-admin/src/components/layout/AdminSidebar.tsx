@@ -30,6 +30,7 @@ const menuItems: MenuItem[] = [
   { title: '留言管理', path: '/message-board', icon: MessageSquare },
   { title: '需求反饋', path: '/feedback', icon: Lightbulb },
   { title: '操作手冊', path: '/manual', icon: BookOpen },
+  { title: '博客管理', path: '/blog', icon: BookOpen },
   { title: '網頁監控', path: '/monitor', icon: Activity },
   {
     title: '優惠管理',

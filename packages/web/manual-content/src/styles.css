@@ -24,6 +24,14 @@
   background: hsl(var(--primary));
   color: hsl(var(--primary-foreground));
 }
+/* 博客保留作者自己的章节标题，不叠加手册步骤编号。 */
+.manual-rich-text[data-numbered-headings='false'] h2 {
+  counter-increment: none;
+}
+.manual-rich-text[data-numbered-headings='false'] h2::before {
+  content: none;
+  display: none;
+}
 .manual-rich-text h3 {
   font-size: 1.125rem;
   font-weight: 700;

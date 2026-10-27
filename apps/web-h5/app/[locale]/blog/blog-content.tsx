@@ -1,9 +1,9 @@
 'use client';
 
+import type { BlogList } from '@go-tech/blog-content/model';
 import { ArrowRight, BookOpen, Calendar, Clock, Search } from 'lucide-react';
-import { useState } from 'react';
 import Link from '@/app/components/Link';
-import { blogCategories, blogPosts } from '@/lib/blog/posts';
+import { useBlogList } from './use-blog-list';
 
 const Meta = ({ date, readMin }: { date: string; readMin: number }) => (
   <div className="flex items-center gap-4 text-xs text-muted-foreground">
@@ -18,13 +18,11 @@ const Meta = ({ date, readMin }: { date: string; readMin: number }) => (
   </div>
 );
 
-const Blog = () => {
-  const [cat, setCat] = useState<string>('全部');
-  const [q, setQ] = useState('');
-  const list = blogPosts.filter(
-    p => (cat === '全部' || p.category === cat) && (p.title + p.excerpt + p.tags.join('')).includes(q.trim())
-  );
-  const [featured, ...rest] = list;
+const Blog = ({ initial }: { initial: BlogList }) => {
+  const { data, error, input, loading, query, retry, search, selectCategory, selectPage } = useBlogList(initial);
+  const [featured, ...rest] = data.articles;
+  const categories = [{ id: undefined, name: '全部' }, ...data.categories];
+  const pages = Math.max(1, Math.ceil(data.total / data.pageSize));
 
   return (
     <div className="flex-1 flex flex-col bg-background">
@@ -34,38 +32,49 @@ const Blog = () => {
           <span className="inline-flex items-center gap-2 rounded-full bg-primary/20 text-primary border border-primary/40 px-3 py-1 text-xs font-semibold mb-4">
             <BookOpen className="w-4 h-4" /> BLOG
           </span>
-          <h1 className="text-4xl md:text-5xl font-bold mb-3">博客 Blog</h1>
-          <p className="text-lg text-background/75 max-w-2xl">
-            最新香港租務及人事條例、實務指南與 Go Techs 產品動態，助您管理更合規、更輕鬆。
-          </p>
+          <h1 className="text-4xl md:text-5xl font-bold mb-3">{data.settings.title}</h1>
+          <p className="text-lg text-background/75 max-w-2xl">{data.settings.description}</p>
           <div className="mt-6 relative max-w-md">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input
               aria-label="搜尋博客文章"
-              value={q}
-              onChange={e => setQ(e.target.value)}
+              value={input}
+              onChange={e => search(e.target.value)}
               maxLength={50}
-              placeholder="搜尋文章，例如：外勞宿舍"
+              placeholder={data.settings.searchPlaceholder}
               className="w-full h-11 rounded-full bg-background text-foreground pl-9 pr-4 text-sm"
             />
           </div>
         </div>
       </section>
 
-      <main className="flex-1 container mx-auto px-4 py-10">
+      <main aria-busy={loading} className="flex-1 container mx-auto px-4 py-10">
         <div className="flex gap-2 overflow-x-auto pb-2 mb-8 [scrollbar-width:none]">
-          {blogCategories.map(c => (
+          {categories.map(c => (
             <button
-              aria-pressed={cat === c}
-              key={c}
-              onClick={() => setCat(c)}
-              className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium border transition-colors ${cat === c ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:text-foreground'}`}
+              aria-pressed={query.categoryId === c.id}
+              key={c.id ?? 'all'}
+              onClick={() => selectCategory(c.id)}
+              className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium border transition-colors ${query.categoryId === c.id ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:text-foreground'}`}
             >
-              {c}
+              {c.name}
             </button>
           ))}
         </div>
 
+        {loading && (
+          <p role="status" className="mb-4 text-sm text-muted-foreground">
+            載入中…
+          </p>
+        )}
+        {error && (
+          <div role="alert" className="mb-4 rounded-lg border border-destructive p-4">
+            <p>{error}</p>
+            <button onClick={retry} className="text-primary underline mt-2">
+              重新載入
+            </button>
+          </div>
+        )}
         {!featured ? (
           <p role="status" className="text-center text-muted-foreground py-20">
             沒有符合的文章
@@ -79,12 +88,13 @@ const Blog = () => {
             >
               <div className="md:col-span-2 min-h-48 bg-gradient-to-br from-primary to-primary/60 p-8 flex flex-col justify-between text-primary-foreground">
                 <span className="text-xs font-semibold bg-background/20 rounded-full px-3 py-1 w-fit">
-                  精選 · {featured.category}
+                  {featured.isFeatured ? '精選 · ' : ''}
+                  {featured.category}
                 </span>
                 <BookOpen className="w-16 h-16 opacity-80" />
               </div>
               <div className="md:col-span-3 p-6 md:p-8 bg-card">
-                <Meta date={featured.date} readMin={featured.readMin} />
+                <Meta date={featured.displayDate} readMin={featured.readMin} />
                 <h2 className="mt-3 text-2xl font-bold text-foreground group-hover:text-primary transition-colors">
                   {featured.title}
                 </h2>
@@ -111,12 +121,38 @@ const Blog = () => {
                   </h3>
                   <p className="mt-2 text-sm text-muted-foreground leading-relaxed flex-1">{p.excerpt}</p>
                   <div className="mt-4 pt-4 border-t border-border">
-                    <Meta date={p.date} readMin={p.readMin} />
+                    <Meta date={p.displayDate} readMin={p.readMin} />
                   </div>
                 </Link>
               ))}
             </div>
           </>
+        )}
+        {pages > 1 && (
+          <nav aria-label="博客分頁" className="mt-10 flex items-center justify-center gap-4">
+            <button
+              className="rounded-lg border px-4 py-2 disabled:opacity-40"
+              disabled={query.page <= 1 || loading}
+              onClick={() => selectPage(query.page - 1)}
+            >
+              上一頁
+            </button>
+            <span aria-live="polite">
+              第 {query.page} 頁 / 共 {pages} 頁
+            </span>
+            <button
+              className="rounded-lg border px-4 py-2 disabled:opacity-40"
+              disabled={query.page >= pages || loading}
+              onClick={() => selectPage(query.page + 1)}
+            >
+              下一頁
+            </button>
+          </nav>
+        )}
+        {!loading && !error && query.page > pages && (
+          <button onClick={() => selectPage(1)} className="block mx-auto text-primary underline">
+            返回第一頁
+          </button>
         )}
       </main>
     </div>

@@ -1,9 +1,24 @@
 import { type ReactNode, createElement } from 'react';
-import { type RichDocument, type RichNode, headingEntries, imageDimension, safeManualUrl } from './model';
+import {
+  type RichDocument,
+  type RichNode,
+  contentImageUrl,
+  headingEntries,
+  imageDimension,
+  safeManualUrl
+} from './model';
 export * from './model';
 
 /** 前台及后台预览共用的 React 渲染器；仅映射受控节点，不插入原始 HTML。 */
-export function ManualBody({ body }: { body: RichDocument }) {
+export function ManualBody({
+  body,
+  imageBaseUrl = '',
+  numberedHeadings = true
+}: {
+  body: RichDocument;
+  imageBaseUrl?: string;
+  numberedHeadings?: boolean;
+}) {
   let heading = 0;
   const render = (node: RichNode, index: number): ReactNode => {
     const children = node.content?.map(render);
@@ -14,9 +29,13 @@ export function ManualBody({ body }: { body: RichDocument }) {
       heading += 1;
       return createElement(node.attrs?.level === 3 ? 'h3' : 'h2', { ...props, id }, children);
     }
-    return renderBlock(node, children, index);
+    return renderBlock(node, children, { index, imageBaseUrl });
   };
-  return <div className="manual-rich-text">{render(body.doc, 0)}</div>;
+  return (
+    <div className="manual-rich-text" data-numbered-headings={numberedHeadings}>
+      {render(body.doc, 0)}
+    </div>
+  );
 }
 /** 通过 React 自动转义文本，格式标记只能生成固定标签，链接再次检查目标地址。 */
 function renderText(node: RichNode, index: number): ReactNode {
@@ -38,9 +57,13 @@ function renderText(node: RichNode, index: number): ReactNode {
   return <span key={index}>{text}</span>;
 }
 /** 将白名单块节点映射为语义化元素；未知节点不渲染，表格使用独立横向滚动容器。 */
-function renderBlock(node: RichNode, children: ReactNode, index: number): ReactNode {
+function renderBlock(
+  node: RichNode,
+  children: ReactNode,
+  { imageBaseUrl, index }: { imageBaseUrl: string; index: number }
+): ReactNode {
   const props = { key: index };
-  if (node.type === 'image') return renderImage(node, index);
+  if (node.type === 'image') return renderImage(node, index, imageBaseUrl);
   if (node.type === 'hardBreak') return <br key={index} />;
   if (node.type === 'horizontalRule') return <hr key={index} />;
   if (node.type === 'orderedList')
@@ -104,13 +127,13 @@ function renderCell(node: RichNode, children: ReactNode, index: number): ReactNo
 }
 
 /** 只输出经过校验的像素尺寸；共享响应式样式确保窄屏仍按比例缩小。 */
-function renderImage(node: RichNode, index: number): ReactNode {
+function renderImage(node: RichNode, index: number, imageBaseUrl = ''): ReactNode {
   const src = node.attrs?.src;
   if (typeof src !== 'string' || !safeManualUrl(src, true)) return null;
   return (
     <img
       key={index}
-      src={src}
+      src={contentImageUrl(src, imageBaseUrl)}
       alt={String(node.attrs?.alt ?? '')}
       width={imageDimension(node.attrs?.width)}
       height={imageDimension(node.attrs?.height)}

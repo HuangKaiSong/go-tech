@@ -12,6 +12,9 @@ export default defineConfig({
     include: [
       'tests/view-mode/*.test.{ts,tsx}',
       'lib/manual/*.test.ts',
+      'lib/blog/*.test.ts',
+      'app/api/admin/blog/route.test.ts',
+      'app/[[]locale]/blog/*.test.tsx',
       'app/api/admin/manual/route.test.ts',
       'lib/runtime-config/*.vitest.test.{ts,tsx}',
       'app/[[]locale]/feedback/*.test.tsx',

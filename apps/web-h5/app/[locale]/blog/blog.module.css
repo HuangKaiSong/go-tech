@@ -20,3 +20,22 @@
   --color-primary-foreground: hsl(var(--primary-foreground));
   color: var(--color-foreground);
 }
+
+/* Keep the original blog typography while reusing the safe rich-text renderer. */
+.theme :global(.blog-body .manual-rich-text) {
+  margin-top: 0;
+}
+.theme :global(.blog-body .manual-rich-text h2) {
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+.theme :global(.blog-body .manual-rich-text p),
+.theme :global(.blog-body .manual-rich-text li) {
+  color: hsl(var(--foreground) / 0.8);
+  line-height: 1.625;
+}
+.theme :global(.blog-body .manual-rich-text li::marker) {
+  color: hsl(var(--primary));
+}

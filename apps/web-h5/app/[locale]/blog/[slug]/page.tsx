@@ -1,24 +1,33 @@
+import { ManualBody } from '@go-tech/manual-content';
 import { AlertCircle, ArrowLeft, Calendar, Clock, Tag } from 'lucide-react';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import Link from '@/app/components/Link';
-import { blogPosts } from '@/lib/blog/posts';
+import { BlogError } from '@/lib/blog/error';
+import { readBlogDetail } from '@/lib/blog/public';
 import BlogTrialAction from '../blog-trial-action';
 
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const article = blogPosts.find(p => p.slug === slug);
-  return { title: `${article?.title ?? '找不到此文章'} | GO-TECHS 博客`, description: article?.excerpt };
+  try {
+    const { article } = await readBlogDetail(slug);
+    return { title: `${article.title} | GO-TECHS 博客`, description: article.excerpt };
+  } catch (error) {
+    if (error instanceof BlogError && error.status === 404) return { title: '找不到此文章 | GO-TECHS 博客' };
+    throw error;
+  }
 }
 
 const BlogPost = async ({ params }: Props) => {
   const { slug } = await params;
-  const post = blogPosts.find(p => p.slug === slug);
-  if (!post) notFound();
-  const related = blogPosts.filter(p => p.slug !== slug).slice(0, 3);
+  const detail = await readBlogDetail(slug).catch(error => {
+    if (error instanceof BlogError && error.status === 404) notFound();
+    throw error;
+  });
+  const { article: post, related, settings } = detail;
 
   return (
     <div className="flex-1 flex flex-col bg-background">
@@ -39,7 +48,7 @@ const BlogPost = async ({ params }: Props) => {
             <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
               <span className="flex items-center gap-1">
                 <Calendar className="w-4 h-4" />
-                {post.date}
+                {post.displayDate}
               </span>
               <span className="flex items-center gap-1">
                 <Clock className="w-4 h-4" />
@@ -51,45 +60,15 @@ const BlogPost = async ({ params }: Props) => {
                 width={896}
                 height={771}
                 src={post.cover}
-                alt={post.title}
+                alt={post.coverAlt}
                 className="mt-8 w-full rounded-xl border border-border shadow-sm"
               />
             )}
             <p className="mt-8 text-lg text-foreground/80 leading-relaxed border-l-4 border-primary pl-4">
               {post.excerpt}
             </p>
-            <div className="mt-10 space-y-8">
-              {post.sections.map(s => (
-                <section key={s.heading}>
-                  <h2 className="text-xl md:text-2xl font-bold text-foreground mb-3">{s.heading}</h2>
-                  {s.image && (
-                    <Image
-                      width={881}
-                      height={391}
-                      src={s.image}
-                      alt={s.heading}
-                      loading="lazy"
-                      className="w-full rounded-xl border border-border shadow-sm mb-4"
-                    />
-                  )}
-                  {s.body.length > 1 ? (
-                    <ul className="space-y-2">
-                      {s.body.map((b, i) => (
-                        <li key={i} className="flex gap-2 text-foreground/80 leading-relaxed">
-                          <span className="mt-2 w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
-                          {b}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    s.body.map((b, i) => (
-                      <p key={i} className="text-foreground/80 leading-relaxed mb-3">
-                        {b}
-                      </p>
-                    ))
-                  )}
-                </section>
-              ))}
+            <div className="blog-body mt-10">
+              <ManualBody numberedHeadings={false} body={post.body} />
             </div>
             <div className="mt-8 flex flex-wrap gap-2">
               {post.tags.map(t => (
@@ -107,8 +86,8 @@ const BlogPost = async ({ params }: Props) => {
               本文內容僅供一般參考，不構成法律意見。具體要求請以政府最新公布及專業意見為準。
             </div>
             <div className="mt-10 rounded-2xl bg-primary/10 border border-primary/30 p-6 md:p-8 text-center">
-              <h3 className="text-xl font-bold text-foreground mb-2">用 Go Techs 讓合規管理更輕鬆</h3>
-              <p className="text-muted-foreground mb-5">租約、單據、到期提醒一站管理</p>
+              <h3 className="text-xl font-bold text-foreground mb-2">{settings.promotionTitle}</h3>
+              <p className="text-muted-foreground mb-5">{settings.promotionDescription}</p>
               <BlogTrialAction />
             </div>
           </article>

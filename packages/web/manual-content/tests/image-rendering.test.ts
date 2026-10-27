@@ -27,3 +27,13 @@ describe('manual image dimensions', () => {
     expect(richDocumentSchema.safeParse(image(null, null)).success).toBe(true);
   });
 });
+
+it('resolves cross-application preview images without changing persisted document URLs', () => {
+  const body = richDocumentSchema.parse(image(320));
+  const html = renderToStaticMarkup(
+    createElement(ManualBody, { body, imageBaseUrl: '/h5-hook', numberedHeadings: false })
+  );
+  expect(html).toContain('src="/h5-hook/manual.png"');
+  expect(html).toContain('data-numbered-headings="false"');
+  expect(body.doc.content?.[0]?.attrs?.src).toBe('/manual.png');
+});

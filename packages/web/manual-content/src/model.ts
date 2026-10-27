@@ -57,6 +57,14 @@ export function safeManualUrl(value: string, image = false): boolean {
   }
 }
 
+/** 跨应用预览时仅解析图片展示地址，保持持久化文档中的站内地址不变。 */
+export function contentImageUrl(source: string, baseUrl = ''): string {
+  if (!safeManualUrl(source, true)) return '';
+  if (!source.startsWith('/') || !baseUrl) return source;
+  const resolved = `${baseUrl.replace(/\/$/, '')}${source}`;
+  return safeManualUrl(resolved, true) ? resolved : '';
+}
+
 const record = z.record(z.string(), z.unknown());
 /** 递归解析字段形状；解析前先执行非递归上限检查，避免恶意嵌套耗尽调用栈。 */
 const nodeSchema: z.ZodType<RichNode> = z.lazy(() =>

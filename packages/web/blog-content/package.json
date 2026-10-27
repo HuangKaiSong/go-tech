@@ -1,0 +1,24 @@
+{
+  "name": "@go-tech/blog-content",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./model": "./src/model.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "build": "tsdown"
+  },
+  "dependencies": {
+    "@go-tech/manual-content": "workspace:*",
+    "zod": "catalog:utils"
+  },
+  "devDependencies": {
+    "@go-tech/tsconfig": "workspace:*",
+    "tsdown": "catalog:dev",
+    "typescript": "catalog:core",
+    "vitest": "catalog:dev"
+  }
+}

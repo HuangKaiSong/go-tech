@@ -7,36 +7,10 @@ import {
   draftSchemas
 } from '@go-tech/manual-content/model';
 import { useEffect, useState } from 'react';
-import { useBlocker } from 'react-router-dom';
+import { useUnsavedGuard } from '../content/use-unsaved-guard';
 import { manualRequest } from './api';
 import { useManualConfirmation } from './confirmation';
 import { type Selection, makeSelection, manualRows, mutationNotice, mutationSuccess } from './selection';
-
-/** 同时拦截应用内路由切换与关闭页面；组件清理后不再处理异步确认结果。 */
-function useUnsavedGuard(dirty: boolean, ask: (message: string) => Promise<boolean>) {
-  const blocker = useBlocker(dirty);
-  useEffect(() => {
-    if (blocker.state !== 'blocked') return;
-    let active = true;
-    ask('尚有未儲存的修改，確定離開？').then(result => {
-      if (!active) return;
-      if (result) blocker.proceed();
-      else blocker.reset();
-    });
-    return () => {
-      active = false;
-    };
-  }, [blocker, ask]);
-  useEffect(() => {
-    if (!dirty) return;
-    const guard = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      event.returnValue = '';
-    };
-    window.addEventListener('beforeunload', guard);
-    return () => window.removeEventListener('beforeunload', guard);
-  }, [dirty]);
-}
 
 /** 统筹后台草稿会话、保存/发布状态及错误反馈，不通过公开接口加载草稿。 */
 export function useManual() {

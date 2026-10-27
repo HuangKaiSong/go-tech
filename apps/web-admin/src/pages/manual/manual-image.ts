@@ -1,6 +1,6 @@
-import { imageDimension, manualImageSizeLimit, safeManualUrl } from '@go-tech/manual-content/model';
+import { contentImageUrl, imageDimension, manualImageSizeLimit, safeManualUrl } from '@go-tech/manual-content/model';
 import { ResizableNodeView } from '@tiptap/core';
-import { Image } from '@tiptap/extension-image';
+import { Image, type ImageOptions } from '@tiptap/extension-image';
 import { setImageAttributes } from './image-attributes';
 
 /** HTML 图片属性不直接信任字符串尺寸；不合法的数值回退为图片自然尺寸。 */
@@ -11,7 +11,17 @@ function htmlDimension(element: HTMLElement, name: 'height' | 'width') {
 }
 
 /** 复用 Tiptap 自带等比例拖拽，粘贴网页图片时补齐说明并过滤不安全的 src。 */
-export const ManualImage = Image.extend({
+export const ManualImage = Image.extend<ImageOptions & { imageBaseUrl: string }>({
+  addOptions() {
+    return {
+      inline: false,
+      allowBase64: false,
+      HTMLAttributes: {},
+      resize: false,
+      ...this.parent?.(),
+      imageBaseUrl: ''
+    };
+  },
   addAttributes() {
     return {
       ...this.parent?.(),
@@ -27,6 +37,10 @@ export const ManualImage = Image.extend({
       const view = parent(props);
       if (!(view instanceof ResizableNodeView)) return view;
       const element = view.element;
+      const syncSource = (source: unknown) => {
+        if (typeof source === 'string') element.setAttribute('src', contentImageUrl(source, this.options.imageBaseUrl));
+      };
+      syncSource(props.node.attrs.src);
       const contentWidth = props.view.dom.clientWidth;
       view.maxSize = {
         width: Math.min(contentWidth || manualImageSizeLimit, manualImageSizeLimit),
@@ -37,6 +51,7 @@ export const ManualImage = Image.extend({
       view.update = (node, decorations, inner) => {
         const result = update(node, decorations, inner);
         if (result) {
+          syncSource(node.attrs.src);
           const width = imageDimension(node.attrs.width);
           element.style.width = width ? `${width}px` : '';
           element.style.height = 'auto';
