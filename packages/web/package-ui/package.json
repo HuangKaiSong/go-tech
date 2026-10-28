@@ -18,6 +18,7 @@
   "dependencies": {
     "@go-tech-frontend/ui": "workspace:*",
     "@go-tech/types": "workspace:*",
+    "@go-tech/utils": "workspace:*",
     "lucide-react": "catalog:"
   },
   "devDependencies": {
