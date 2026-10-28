@@ -8,6 +8,23 @@ packages:
   - packages/primitives/*
   - internal/*
 
+allowBuilds:
+  '@parcel/watcher': true
+  '@swc/core': true
+  core-js: true
+  es5-ext: true
+  esbuild: true
+  msw: true
+  sharp: true
+  typeit: true
+  unrs-resolver: true
+  workerd: true
+
+autoInstallPeers: true
+dedupePeerDependents: true
+linkWorkspacePackages: true
+shamefullyHoist: true
+
 catalog:
   '@hookform/resolvers': ^3.10.0
   '@radix-ui/react-accordion': ^1.2.11
@@ -203,18 +220,6 @@ catalogs:
     web-vitals: 6.2.3
 
 ignoreWorkspaceRootCheck: true
-
-onlyBuiltDependencies:
-  - '@parcel/watcher'
-  - '@swc/core'
-  - core-js
-  - es5-ext
-  - esbuild
-  - msw
-  - sharp
-  - typeit
-  - unrs-resolver
-  - workerd
 
 overrides:
   react: 19.2.7
