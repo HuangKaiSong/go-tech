@@ -1,13 +1,13 @@
 # syntax=docker.1ms.run/docker/dockerfile:1.7
 
-ARG NODE_IMAGE=node:22.23.2-bookworm-slim
+ARG NODE_IMAGE=node:24.22.1-bookworm-slim
 
 FROM ${NODE_IMAGE} AS pnpm-base
 
 ENV PNPM_HOME=/pnpm
 ENV PATH=$PNPM_HOME:$PATH
 
-RUN corepack enable && corepack prepare pnpm@10.17.0 --activate
+RUN corepack enable && corepack prepare pnpm@12.15.0 --activate
 
 WORKDIR /workspace
 
@@ -15,7 +15,7 @@ FROM pnpm-base AS dependencies
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 
-RUN --mount=type=cache,id=go-tech-frontend-pnpm-10.17-store,target=/pnpm/store,sharing=locked \
+RUN --mount=type=cache,id=go-tech-frontend-pnpm-12.15-store,target=/pnpm/store,sharing=locked \
     pnpm fetch --frozen-lockfile \
     && rm -rf /workspace/node_modules
 
@@ -29,7 +29,7 @@ ARG H5_NEXT_CACHE_VERSION=2
 
 COPY . .
 
-RUN --mount=type=cache,id=go-tech-frontend-pnpm-10.17-store,target=/pnpm/store,sharing=locked \
+RUN --mount=type=cache,id=go-tech-frontend-pnpm-12.15-store,target=/pnpm/store,sharing=locked \
     pnpm install --frozen-lockfile --offline
 RUN --mount=type=cache,id=go-tech-frontend-turbo,target=/workspace/.turbo,sharing=locked \
     --mount=type=cache,id=go-tech-frontend-next-h5-v${H5_NEXT_CACHE_VERSION},target=/workspace/apps/web-h5/.next/cache,sharing=locked \

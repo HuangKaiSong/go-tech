@@ -7,7 +7,7 @@ services:
       context: .
       dockerfile: Dockerfile.h5
       args:
-        NODE_IMAGE: ${H5_NODE_IMAGE:-docker.1ms.run/node:22.23.2-bookworm-slim}
+        NODE_IMAGE: ${H5_NODE_IMAGE:-docker.1ms.run/node:24.22.1-bookworm-slim}
       secrets:
         - h5_env
         - h5_env_local
