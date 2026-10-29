@@ -24,14 +24,12 @@ import {
 import Link from '@/app/components/Link';
 
 import { Button, Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@go-tech-frontend/ui';
-import { toast } from '@go-tech/web-ui';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { useProgressRouter } from '@/app/hooks/use-progress-router';
-import { filterTenantsByBizCode, startFreeTrial } from '@/app/lib/go-now';
+import { filterTenantsByBizCode } from '@/app/lib/go-now';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProductSelection } from '@/contexts/ProductSelectionContext';
-import { useTrialWindow } from '@/contexts/TrialWindowContext';
 import { useViewMode } from '@/contexts/view-mode-context';
 import { DynamicText } from '../DynamicI18nText';
 import LocaleSwitcher from '../LocaleSwitcher';
@@ -51,7 +49,6 @@ const Header = () => {
   const t = useTranslations();
   const router = useProgressRouter();
   const { product } = useProductSelection();
-  const { openPmsCallback: generateCallback } = useTrialWindow();
   const { isLoggedIn, logout, refetchTenants, tenants, tenantsStatus, token, user } = useAuth();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -170,18 +167,10 @@ const Header = () => {
                   variant="trial"
                   className="px-4 hidden md:block"
                   onClick={() => {
-                    hasTenant
-                      ? router.push('/select-account')
-                      : startFreeTrial({
-                          generateCallback,
-                          bizCode: product,
-                          onHrTrialHostMissing: () => toast.error(t('Account.hrTrialHostMissing')),
-                          onTrialExpired: () => router.push('/service-plan'),
-                          token
-                        });
+                    hasTenant ? router.push('/select-account') : router.push('/select-system');
                   }}
                 >
-                  {hasTenant ? <DynamicText text="選擇系統" /> : <DynamicText text="立即試用" />}
+                  {hasTenant ? <DynamicText text="選擇系統" /> : <DynamicText text="立即開始14天免費試用" />}
                 </Button>
                 <span className="flex md:hidden items-center gap-2 text-white">
                   <span className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
@@ -301,18 +290,10 @@ const Header = () => {
                   variant="trial"
                   className="w-full mt-6 gap-2"
                   onClick={() => {
-                    hasTenant
-                      ? router.push('/select-account')
-                      : startFreeTrial({
-                          generateCallback,
-                          bizCode: product,
-                          onHrTrialHostMissing: () => toast.error(t('Account.hrTrialHostMissing')),
-                          onTrialExpired: () => router.push('/service-plan'),
-                          token
-                        });
+                    hasTenant ? router.push('/select-account') : router.push('/select-system');
                   }}
                 >
-                  {hasTenant ? <DynamicText text="選擇系統" /> : <DynamicText text="立即試用" />}
+                  {hasTenant ? <DynamicText text="選擇系統" /> : <DynamicText text="立即開始14天免費試用" />}
                 </Button>
                 <Button
                   variant="outline"
