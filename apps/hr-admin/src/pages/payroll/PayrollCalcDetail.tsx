@@ -399,9 +399,9 @@ export default function PayrollCalcDetail() {
         </div>
 
         {/* Employee Detail Sidebar */}
-        <div className="space-y-4">
+        <div className="space-y-4 lg:sticky lg:top-0 lg:self-start lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto">
           {selected ? (
-            <Card className="sticky top-6">
+            <Card>
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">

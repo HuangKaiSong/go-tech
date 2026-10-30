@@ -55,9 +55,9 @@ export function AppLayout() {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full">
+      <div className="h-screen flex w-full overflow-hidden">
         <AppSidebar />
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 min-h-0">
           <ServiceExpiryBanner />
           <header className="h-14 border-b bg-card flex items-center justify-between px-4 shrink-0">
             <div className="flex items-center gap-3">
