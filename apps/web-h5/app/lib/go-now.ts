@@ -87,7 +87,7 @@ function openHrTrial(code: unknown, onHrTrialHostMissing?: () => void) {
   window.open(targetUrl.toString(), '_blank');
 }
 
-function openTrialEnvironment({
+export function openTrialEnvironment({
   bizCode,
   code,
   generateCallback,

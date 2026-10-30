@@ -1,9 +1,14 @@
 'use client';
 
-import { Button, Dialog } from '@go-tech/web-ui';
+import { Button, toast } from '@go-tech/web-ui';
 import { ArrowLeft, ArrowRight, Building2, Check, Users } from 'lucide-react';
 import { useState } from 'react';
 import { useProgressRouter } from '@/app/hooks/use-progress-router';
+import { openTrialEnvironment } from '@/app/lib/go-now';
+import { useAuth } from '@/contexts/AuthContext';
+import { useTrialWindow } from '@/contexts/TrialWindowContext';
+import { clientFetch } from '@/lib/client-http/client-fetch';
+import { isNotifiedClientHttpError } from '@/lib/client-http/client-http-error';
 
 const systems = [
   {
@@ -26,9 +31,46 @@ const systems = [
 
 const SelectSystem = () => {
   const router = useProgressRouter();
+  const { token } = useAuth();
+  const { openPmsCallback } = useTrialWindow();
+
   const [selected, setSelected] = useState<string | null>(null);
-  const [isComingSoonOpen, setIsComingSoonOpen] = useState(false);
   const current = systems.find(system => system.key === selected);
+
+  const requestHeaders = () =>
+    new Headers({
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+      'User-Type': 'platform_customer'
+    });
+
+  const handleExclusiveTrial = async (product?: string) => {
+    const bizcode = product || current?.key;
+    const headers = requestHeaders();
+    const toastId = toast.loading('正在進入专属试用系統');
+
+    try {
+      // 创建订单
+      const response = await clientFetch(
+        `/go-tech/platform/packageOrder/exclusiveTrail?bizCode=${bizcode}`,
+        {
+          method: 'GET',
+          headers
+        },
+        { feedbackId: toastId }
+      );
+      const responseData = await response.json();
+      openTrialEnvironment({
+        bizCode: 'hr',
+        code: responseData.data,
+        generateCallback: openPmsCallback,
+        pmsCallbackPath: 'tenantCallback'
+      });
+      toast.success('专属试用系統已成功打开', { id: toastId });
+    } catch (error) {
+      if (!isNotifiedClientHttpError(error)) toast.error('', { id: toastId });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-foreground text-background relative overflow-hidden">
@@ -61,7 +103,7 @@ const SelectSystem = () => {
                 onClick={() => setSelected(s.key)}
                 type="button"
                 aria-pressed={isSelected}
-                onDoubleClick={() => setIsComingSoonOpen(true)}
+                onDoubleClick={() => handleExclusiveTrial(s.key)}
                 className={`group relative text-left rounded-2xl border p-6 md:p-8 transition-all duration-300 ${
                   isSelected
                     ? 'border-primary bg-primary/10 shadow-[0_0_50px_-12px_hsl(var(--primary))] scale-[1.02]'
@@ -97,21 +139,13 @@ const SelectSystem = () => {
         </div>
 
         <div className="mt-10 flex flex-col items-center gap-3">
-          <Button size="lg" disabled={!current} onClick={() => setIsComingSoonOpen(true)} className="min-w-64">
+          <Button size="lg" disabled={!current} onClick={() => handleExclusiveTrial()} className="min-w-64">
             {current ? `進入${current.name}` : '請先選擇系統'}
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
           <p className="text-xs text-background/50">提示：雙擊卡片可直接進入該系統</p>
         </div>
       </div>
-      <Dialog
-        open={isComingSoonOpen}
-        onOpenChange={setIsComingSoonOpen}
-        title="敬请期待"
-        description="系統正在開發中，敬請期待。"
-        okText="知道了"
-        onOk={() => setIsComingSoonOpen(false)}
-      />
     </div>
   );
 };
