@@ -58,6 +58,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { hasPerm } from '@/lib/auth';
 import { PAYROLL_PERM } from '@/lib/perms';
+import { salaryTypeLabel } from '@/lib/salaryType';
 
 const statusColors: Record<DistStatus, string> = {
   1: 'bg-muted text-muted-foreground border-border',
@@ -375,7 +376,7 @@ export default function PayrollDistDetail() {
               </Card>
             </div>
 
-            <div>
+            <div className="lg:sticky lg:top-0 lg:self-start lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto">
               {selected ? (
                 <Card>
                   <CardHeader className="pb-3">
@@ -401,6 +402,30 @@ export default function PayrollDistDetail() {
                         </span>
                         <span className="font-medium">{selected.departmentName}</span>
                       </div>
+                      {selected.baseSalary != null && (
+                        <>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">{t('適用方案')}</span>
+                            <span className="font-medium text-primary">{selected.planName || t('未指定')}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">{t('薪資類型 / 退休計劃')}</span>
+                            <span className="flex items-center gap-1.5">
+                              <Badge variant="outline" className="text-xs bg-primary/10 text-primary border-primary/20">
+                                {t(salaryTypeLabel(selected.salaryType ?? undefined))}
+                              </Badge>
+                              {selected.retireScheme && (
+                                <Badge
+                                  variant="outline"
+                                  className="text-xs bg-accent/10 text-accent-foreground border-accent/20"
+                                >
+                                  {selected.retireScheme}
+                                </Badge>
+                              )}
+                            </span>
+                          </div>
+                        </>
+                      )}
                       <div className="flex justify-between">
                         <span className="text-muted-foreground flex items-center gap-1">
                           <CreditCard className="h-3.5 w-3.5" /> {t('支付方式')}
@@ -444,6 +469,120 @@ export default function PayrollDistDetail() {
                       )}
                     </div>
                     <Separator />
+
+                    {/* 收入/扣款逐項（取自來源核算明細，與薪資計算詳情一致） */}
+                    {selected.baseSalary != null && (
+                      <>
+                        <div>
+                          <p className="text-sm font-semibold text-success mb-2">{t('收入項目')}</p>
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                              <span>{t('基本薪資')}</span>
+                              <span className="font-medium">{num(selected.baseSalary)}</span>
+                            </div>
+                            {selected.allowances
+                              .filter(a => !a.name.includes('（獎懲）'))
+                              .map((a, i) => (
+                                <div key={i} className="flex justify-between text-sm">
+                                  <span>{a.name}</span>
+                                  <span className="font-medium">{num(a.amount)}</span>
+                                </div>
+                              ))}
+                            {(selected.overtimeAmount ?? 0) > 0 && (
+                              <div className="flex justify-between text-sm">
+                                <span>
+                                  {t('加班費')}
+                                  {(selected.overtimeHours ?? 0) > 0 && (
+                                    <span className="text-muted-foreground ml-1">
+                                      ({t('{{h}} 小時', { h: selected.overtimeHours })})
+                                    </span>
+                                  )}
+                                </span>
+                                <span className="font-medium">{num(selected.overtimeAmount)}</span>
+                              </div>
+                            )}
+                            {selected.allowances.filter(a => a.name.includes('（獎懲）')).length > 0 && (
+                              <>
+                                <Separator className="my-1" />
+                                <p className="text-xs font-medium text-primary">{t('獎金（來自獎懲管理）')}</p>
+                                {selected.allowances
+                                  .filter(a => a.name.includes('（獎懲）'))
+                                  .map((a, i) => (
+                                    <div key={`bp-${i}`} className="flex justify-between text-sm">
+                                      <span className="flex items-center gap-1">
+                                        <Badge
+                                          variant="outline"
+                                          className="text-[10px] px-1 py-0 bg-success/10 text-success border-success/20"
+                                        >
+                                          {t('獎')}
+                                        </Badge>
+                                        {a.name.replace('（獎懲）', '')}
+                                      </span>
+                                      <span className="font-medium text-success">+{num(a.amount)}</span>
+                                    </div>
+                                  ))}
+                              </>
+                            )}
+                            <Separator />
+                            <div className="flex justify-between text-sm font-semibold">
+                              <span>{t('收入小計')}</span>
+                              <span className="text-success">{num(selected.totalEarnings ?? selected.grossSalary)}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <Separator />
+
+                        <div>
+                          <p className="text-sm font-semibold text-destructive mb-2">{t('扣款項目')}</p>
+                          <div className="space-y-2">
+                            {selected.deductions
+                              .filter(d => !d.name.includes('（獎懲）'))
+                              .map((d, i) => (
+                                <div key={i} className="flex justify-between text-sm">
+                                  <span>{d.name}</span>
+                                  <span className="font-medium text-destructive">-{num(d.amount)}</span>
+                                </div>
+                              ))}
+                            {selected.deductions.filter(d => d.name.includes('（獎懲）')).length > 0 && (
+                              <>
+                                <Separator className="my-1" />
+                                <p className="text-xs font-medium text-primary">{t('罰款（來自獎懲管理）')}</p>
+                                {selected.deductions
+                                  .filter(d => d.name.includes('（獎懲）'))
+                                  .map((d, i) => (
+                                    <div key={`bp-d-${i}`} className="flex justify-between text-sm">
+                                      <span className="flex items-center gap-1">
+                                        <Badge
+                                          variant="outline"
+                                          className="text-[10px] px-1 py-0 bg-destructive/10 text-destructive border-destructive/20"
+                                        >
+                                          {t('罰')}
+                                        </Badge>
+                                        {d.name.replace('（獎懲）', '')}
+                                      </span>
+                                      <span className="font-medium text-destructive">-{num(d.amount)}</span>
+                                    </div>
+                                  ))}
+                              </>
+                            )}
+                            {selected.deductions.length === 0 && (
+                              <p className="text-sm text-muted-foreground">{t('無扣款項目')}</p>
+                            )}
+                            <Separator />
+                            <div className="flex justify-between text-sm font-semibold">
+                              <span>{t('扣款小計')}</span>
+                              <span className="text-destructive">
+                                -{num(selected.totalDeduction ?? selected.deduction)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <Separator />
+                      </>
+                    )}
+
                     <div className="bg-primary/5 rounded-lg p-4">
                       <div className="flex justify-between items-center">
                         <span className="font-semibold text-foreground">{t('實發金額')}</span>

@@ -1,5 +1,5 @@
 import type { ApiResult } from '@/api/employee';
-import type { CalcBatch } from '@/api/payrollCalc';
+import type { AmountLine, CalcBatch } from '@/api/payrollCalc';
 import request from '@/lib/request';
 
 /** 發放批次狀態：1草稿 2待審核 3已審核 4發放中 5已發放 6已取消 */
@@ -53,12 +53,18 @@ export interface DistBatch {
   updateTime?: string;
 }
 
-/** 發放明細（對齊後端 DistItemVO） */
+/** 發放明細（對齊後端 DistItemVO）；收入/扣款逐項取自來源核算明細 */
 export interface DistItem {
+  /** 收入項明細（名稱含「（獎懲）」者來自獎懲管理） */
+  allowances: AmountLine[];
   bankAccount: string | null;
   bankName: string | null;
+  /** 基本薪資（按比例/計件後），無來源核算明細時為 null */
+  baseSalary: number | null;
   batchId: number;
   deduction: number;
+  /** 扣款項明細 */
+  deductions: AmountLine[];
   departmentName: string | null;
   employeeId: number;
   employeeName: string;
@@ -67,11 +73,20 @@ export interface DistItem {
   grossSalary: number;
   id: number;
   netSalary: number;
+  overtimeAmount: number | null;
+  overtimeHours: number | null;
   paymentType: string | null;
   payrollGroup: string | null;
+  /** 適用方案名稱（來自核算明細） */
+  planName: string | null;
+  /** 薪資類型 MONTHLY/DAILY/HOURLY（來自核算明細） */
+  salaryType: string | null;
   payStatus: PayStatus;
   payTime: string | null;
   position: string | null;
+  retireScheme: string | null;
+  totalDeduction: number | null;
+  totalEarnings: number | null;
   transactionId: string | null;
 }
 
