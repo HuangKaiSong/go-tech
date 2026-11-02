@@ -1,4 +1,5 @@
 import {
+  Badge,
   Button,
   Input,
   Pagination,
@@ -26,11 +27,20 @@ interface Customer {
   companyName: string;
   custCode: string;
   custName: string;
+  /** 有效套餐數量 */
+  effectiveCount: number;
   email: string;
+  /** 過期套餐數量 */
+  expiredCount: number;
   id: number;
   phone: string;
   registerTime: string;
+  sysType: string;
+  /** 試用套餐數量 */
+  trailCount: number;
   type: string;
+
+  [k: string]: any;
 }
 
 interface Reponse {
@@ -48,6 +58,21 @@ interface SearchParams {
 }
 
 const defaultSize = 10;
+
+function getCustomerSystems(sysType: unknown): string[] {
+  if (typeof sysType !== 'string') {
+    return [];
+  }
+
+  return [
+    ...new Set(
+      sysType
+        .split(/[,/]/)
+        .map(system => system.trim().toLowerCase())
+        .filter(Boolean)
+    )
+  ];
+}
 
 function downloadCustomerWorkbook(blob: Blob, name?: string) {
   const url = URL.createObjectURL(blob);
@@ -306,6 +331,9 @@ const CustomersPage = () => {
               <TableHead className="text-center font-medium">電子郵箱</TableHead>
               <TableHead className="text-center font-medium">公司名稱</TableHead>
               <TableHead className="text-center font-medium">客戶類型</TableHead>
+              <TableHead className="text-center font-medium">系統</TableHead>
+              <TableHead className="text-center font-medium">訂閱狀態統計</TableHead>
+              <TableHead className="text-center font-medium">試用數目</TableHead>
               <TableHead className="text-center font-medium">操作</TableHead>
             </TableRow>
           </TableHeader>
@@ -319,6 +347,34 @@ const CustomersPage = () => {
                 <TableCell className="text-center">{customer.email}</TableCell>
                 <TableCell className="text-center">{customer.companyName}</TableCell>
                 <TableCell className="text-center">{customer.type}</TableCell>
+                <TableCell className="text-center">
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {getCustomerSystems(customer.sysType).map(system => (
+                      <Badge
+                        key={system}
+                        variant="outline"
+                        className={
+                          system === 'pms'
+                            ? 'rounded-md border-primary/30 bg-primary/10 text-primary'
+                            : 'rounded-md border-info/30 bg-info/10 text-info'
+                        }
+                      >
+                        {system.toUpperCase()}
+                      </Badge>
+                    ))}
+                  </div>
+                </TableCell>
+                <TableCell className="flex">
+                  <div className="flex gap-2">
+                    <div className="text-success">
+                      有效 <strong className="tabular-nums">{customer.effectiveCount || 0}</strong>
+                    </div>
+                    <div className="text-destructive">
+                      無效 <strong className="tabular-nums">{customer.expiredCount || 0}</strong>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell className="text-center font-medium tabular-nums">{customer.trailCount || 0}</TableCell>
                 <TableCell className="text-center">
                   <Button variant="link" className="text-primary p-0 h-auto" onClick={() => handleView(customer.id)}>
                     查看
