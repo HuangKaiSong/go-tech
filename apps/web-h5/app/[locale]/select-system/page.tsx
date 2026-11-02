@@ -1,5 +1,6 @@
 'use client';
 
+import type { PackageBizCode } from '@go-tech/types';
 import { Button, toast } from '@go-tech/web-ui';
 import { ArrowLeft, ArrowRight, Building2, Check, Users } from 'lucide-react';
 import { useState } from 'react';
@@ -61,7 +62,7 @@ const SelectSystem = () => {
       );
       const responseData = await response.json();
       openTrialEnvironment({
-        bizCode: 'hr',
+        bizCode: bizcode as PackageBizCode,
         code: responseData.data,
         generateCallback: openPmsCallback,
         pmsCallbackPath: 'tenantCallback'
