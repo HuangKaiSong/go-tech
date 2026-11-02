@@ -53,6 +53,11 @@ async function request(store: Store, init: RequestInit = {}) {
   return 'data' in body ? body.data : undefined;
 }
 const sourceNames = { database: '已保存', environment: '环境变量', default: '默认值' };
+const fieldDescriptions: Record<string, string> = {
+  API_INTERNAL_URL: '门户服务端访问业务后端的首选地址。',
+  NEXT_PUBLIC_API_URL:
+    '门户业务接口代理的目标地址（/go-tech、/pms-resource、/pms-admin），同时作为 API_INTERNAL_URL 未配置时的服务端回退地址。'
+};
 
 function fieldOptions(type: string) {
   if (type === 'boolean')
@@ -135,9 +140,10 @@ function ConfigForm({
   const saveLabel = needsPreview ? '确认切换并保存' : '保存并生效';
   return (
     <section className="space-y-4 rounded-lg border p-4">
-      <h2 className="text-lg font-semibold">
-        {store === 'infrastructure' ? '基础设施配置 · SQLite' : '业务配置 · MySQL'}
-      </h2>
+      <h2 className="text-lg font-semibold">{store === 'infrastructure' ? '基础设施配置 · SQLite' : '业务配置'}</h2>
+      {store === 'business' && (
+        <p className="text-sm text-muted-foreground">此处配置业务接口、支付、站点等功能；保存的配置值存储于 MySQL。</p>
+      )}
       {store === 'infrastructure' && (
         <p className="text-sm text-muted-foreground">
           切换数据库前请先完成目标库的表结构与数据迁移。切换后采用目标库配置；Redis
@@ -169,6 +175,11 @@ function ConfigForm({
                 return (
                   <div key={field.key} className="space-y-2">
                     <Label htmlFor={id}>{field.key}</Label>
+                    {fieldDescriptions[field.key] && (
+                      <p id={`${id}-description`} className="text-xs text-muted-foreground">
+                        {fieldDescriptions[field.key]}
+                      </p>
+                    )}
                     <div className="flex flex-wrap items-center gap-2">
                       {options ? (
                         <select
@@ -187,6 +198,7 @@ function ConfigForm({
                       ) : (
                         <Input
                           id={id}
+                          aria-describedby={fieldDescriptions[field.key] ? `${id}-description` : undefined}
                           type={field.secret ? 'password' : 'text'}
                           value={value}
                           disabled={busy || change === null}
