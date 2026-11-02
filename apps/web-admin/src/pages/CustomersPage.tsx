@@ -245,9 +245,9 @@ const CustomersPage = () => {
                 <SelectValue placeholder="請選擇" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="客戶">客戶</SelectItem>
-                <SelectItem value="用戶">用戶</SelectItem>
-                <SelectItem value="舊客">舊客</SelectItem>
+                <SelectItem value="正式客戶">正式客戶</SelectItem>
+                <SelectItem value="過期客戶">過期客戶</SelectItem>
+                <SelectItem value="試用客戶">試用客戶</SelectItem>
               </SelectContent>
             </Select>
           </div>
