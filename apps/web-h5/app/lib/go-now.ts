@@ -42,6 +42,10 @@ export function filterTenantsByBizCode(tenants: Tenant[], bizCode: PackageBizCod
   return tenants.filter(tenant => tenant.bizCode === bizCode);
 }
 
+export function openTrialTarget(href: string) {
+  if (window.open(href, '_blank') === null) window.location.assign(href);
+}
+
 function completeCallback(uri: string, generateCallback?: (uri: string) => void) {
   if (generateCallback) {
     generateCallback(uri);
@@ -49,7 +53,7 @@ function completeCallback(uri: string, generateCallback?: (uri: string) => void)
   }
 
   const trialHost = clientConfigValue('NEXT_PUBLIC_PMS_TRIAL_HOST');
-  window.open(`${trialHost}/oauth/${uri}`, '_blank');
+  openTrialTarget(`${trialHost}/oauth/${uri}`);
 }
 
 async function requestPlatformCode(
@@ -84,7 +88,7 @@ function openHrTrial(code: unknown, onHrTrialHostMissing?: () => void) {
 
   const targetUrl = new URL(hrTrialHost);
   targetUrl.searchParams.set('code', String(code));
-  window.open(targetUrl.toString(), '_blank');
+  openTrialTarget(targetUrl.toString());
 }
 
 export function openTrialEnvironment({
@@ -122,7 +126,7 @@ export async function enterTenant({
 
   const response = await codeResponse.json();
 
-  if (response.code !== 200) return;
+  if (response?.code !== 200 && response?.code !== '200') return;
 
   openTrialEnvironment({
     bizCode: tenant.bizCode,
@@ -158,18 +162,16 @@ export async function startFreeTrial({
   );
   if (!response) return;
 
-  if (response.ok) {
-    const result = await response.json();
-    if (result.code && result.code === 200) {
-      openTrialEnvironment({
-        bizCode,
-        code: result.data,
-        generateCallback,
-        onHrTrialHostMissing,
-        pmsCallbackPath: 'tryCallback'
-      });
-    }
-  }
+  const result = await response.json();
+  if (result?.code !== 200 && result?.code !== '200') return;
+
+  openTrialEnvironment({
+    bizCode,
+    code: result.data,
+    generateCallback,
+    onHrTrialHostMissing,
+    pmsCallbackPath: 'tryCallback'
+  });
 }
 
 export function enterOrStartTrial(options: EnterOrStartTrialOptions) {
