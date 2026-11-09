@@ -34,6 +34,10 @@ export async function getPackageMenuTree(bizCode: PackageBizCode, signal: AbortS
   return result.data;
 }
 
+export async function setTrailDays(trailDays: number) {
+  await requestPackage(`/setTrailDays?${new URLSearchParams({ trailDays: String(trailDays) })}`, { method: 'POST' });
+}
+
 export async function savePackage(draft: PackageDraft, menuTree: MenuNode[]) {
   const payload = buildPackagePayload(draft, menuTree);
 
