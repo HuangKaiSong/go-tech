@@ -3,7 +3,6 @@ import { useRuntimeConfig } from '@/lib/runtime-config/provider';
 
 import { type ReactNode, createContext, useCallback, useContext, useEffect } from 'react';
 import { toast } from 'sonner';
-import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { openTrialTarget, startFreeTrial } from '@/app/lib/go-now';
 import { clientFetch } from '@/lib/client-http/client-fetch';
 import { isNotifiedClientHttpError } from '@/lib/client-http/client-http-error';
@@ -35,11 +34,22 @@ function resolveOrderId(value: unknown): string | null {
   return typeof orderId === 'number' && Number.isSafeInteger(orderId) && orderId > 0 ? String(orderId) : null;
 }
 
+function matchesOrigin(host: string | undefined, origin: string) {
+  if (!host || origin === 'null') return false;
+  try {
+    return new URL(host).origin === origin;
+  } catch {
+    return false;
+  }
+}
+
 export function TrialWindowProvider({ children }: { children: ReactNode }) {
   const config = useRuntimeConfig().values;
-  const router = useProgressRouter();
   const { token } = useAuth();
   const { isMobile } = useViewMode();
+  const desktopHost = config.NEXT_PUBLIC_PMS_TRIAL_HOST;
+  const mobileHost = config.NEXT_PUBLIC_PMS_TRIAL_MOBILE_HOST;
+  const trialHost = isMobile ? mobileHost : desktopHost;
 
   const requestHeaders = useCallback(
     () =>
@@ -53,25 +63,26 @@ export function TrialWindowProvider({ children }: { children: ReactNode }) {
 
   const openPmsCallback = useCallback(
     (uri: string) => {
-      const trialHost = isMobile ? config.NEXT_PUBLIC_PMS_TRIAL_MOBILE_HOST : config.NEXT_PUBLIC_PMS_TRIAL_HOST;
       openTrialTarget(`${trialHost}/oauth/${uri}`);
     },
-    [isMobile, config]
+    [trialHost]
   );
 
   const applyAction = useCallback(
     async (action: PmsWindowAction, data: unknown, returnDestination: boolean) => {
+      let href: string | undefined = '/service-plan?product=pms';
       if (action === 'trial-env') {
+        href = undefined;
         await startFreeTrial({
-          generateCallback: openPmsCallback,
-          onTrialExpired: () => router.push('/service-plan'),
+          generateCallback: uri => {
+            href = new URL(`${trialHost}/oauth/${uri}`).href;
+          },
+          onTrialExpired: () => {
+            href = '/service-plan?product=pms';
+          },
           token
         });
-        return;
-      }
-
-      let href = '/service-plan?product=pms';
-      if (action === 'renew') {
+      } else if (action === 'renew') {
         if (typeof data !== 'string' && typeof data !== 'number') throw new Error('Missing PMS tenant ID');
         const query = new URLSearchParams({ tenantId: String(data) });
         const headers = requestHeaders();
@@ -82,19 +93,15 @@ export function TrialWindowProvider({ children }: { children: ReactNode }) {
         const orderId = resolveOrderId(result.data);
         href = orderId ? `/renew-order/${orderId}?product=pms` : '/my-orders?product=pms';
       } else if (action === 'order') {
-        window.open('/my-orders', '_blank');
-        router.replace('/my-orders');
-        return;
+        href = '/my-orders';
       }
 
       if (returnDestination) return href;
-      if (window.open(href, '_blank') === null) {
-        window.location.replace(href);
-      } else {
-        router.replace(href);
+      if (href && window.open(href, '_blank') === null) {
+        toast.warning('新分頁被瀏覽器攔截，請允許開啟新分頁後再試。');
       }
     },
-    [openPmsCallback, router, token, requestHeaders]
+    [trialHost, token, requestHeaders]
   );
 
   useEffect(() => {
@@ -107,7 +114,7 @@ export function TrialWindowProvider({ children }: { children: ReactNode }) {
       let href: string | undefined;
       try {
         href = await applyAction(action, data, reply?.returnDestination ?? false);
-        ok = true;
+        ok = !reply?.returnDestination || href !== undefined;
       } catch (error) {
         if (!isNotifiedClientHttpError(error)) toast.error('暫時無法完成操作，請稍後再試。');
       } finally {
@@ -117,6 +124,19 @@ export function TrialWindowProvider({ children }: { children: ReactNode }) {
     };
 
     const handleMessage = (event: MessageEvent) => {
+      const newTabAction = event.data?.pmsNewTabAction;
+      if (newTabAction === 'trial-env' || newTabAction === 'renew') {
+        const port = event.ports[0];
+        if (!port) return;
+        // 試用目的地含登入碼，只回傳給平台配置的 PMS 來源。
+        if (!matchesOrigin(desktopHost, event.origin) && !matchesOrigin(mobileHost, event.origin)) {
+          port.postMessage({ ok: false }, []);
+          port.close();
+          return;
+        }
+        runAction(newTabAction, event.data?.data, { port, returnDestination: true });
+        return;
+      }
       const command = event.data?.command;
       const action = resolveAction(command ?? event.data?.action ?? event.data?.type);
       const port = command === 'renew' || command === 'service-plan' ? event.ports[0] : undefined;
@@ -137,7 +157,7 @@ export function TrialWindowProvider({ children }: { children: ReactNode }) {
       window.removeEventListener('message', handleMessage);
       window.removeEventListener('pm2Window', handleCustomEvent as EventListener);
     };
-  }, [applyAction]);
+  }, [applyAction, desktopHost, mobileHost]);
 
   return <TrialWindowContext.Provider value={{ openPmsCallback }}>{children}</TrialWindowContext.Provider>;
 }
