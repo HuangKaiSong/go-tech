@@ -2,6 +2,7 @@
 import { useRuntimeConfig } from '@/lib/runtime-config/provider';
 
 import { type ReactNode, createContext, useCallback, useContext, useEffect, useRef } from 'react';
+import { toast } from 'sonner';
 import { useProgressRouter } from '@/app/hooks/use-progress-router';
 import { startFreeTrial } from '@/app/lib/go-now';
 import { clientFetch } from '@/lib/client-http/client-fetch';
@@ -61,7 +62,7 @@ export function TrialWindowProvider({ children }: { children: ReactNode }) {
   const applyAction = useCallback(
     async (action: PmsWindowAction, data?: unknown) => {
       if (action === 'trial-env') {
-        startFreeTrial({
+        await startFreeTrial({
           generateCallback: openPmsCallback,
           onTrialExpired: () => router.push('/service-plan'),
           token
@@ -74,18 +75,19 @@ export function TrialWindowProvider({ children }: { children: ReactNode }) {
         return;
       }
       if (action === 'renew') {
-        const tanId = data;
+        if (typeof data !== 'string' && typeof data !== 'number') throw new Error('Missing PMS tenant ID');
+        const query = new URLSearchParams({ tenantId: String(data) });
         const headers = requestHeaders();
 
         const response = await clientFetch(
-          `/go-tech/platform/packageOrder/relateOrderId?tenantId=${tanId}`,
+          `/go-tech/platform/packageOrder/relateOrderId?${query}`,
           {
             headers
           },
           { feedback: 'silent' }
         );
         const result = await response.json();
-        if (result.code !== 200) throw new Error(result.message || result.msg || response.text);
+        if (String(result?.code) !== '200') throw new Error('Invalid PMS renewal response');
         const orderId = resolveOrderId(result.data);
         const href = orderId ? `/renew-order/${orderId}?product=pms` : '/my-orders?product=pms';
         pm2Window.current = window.open(href, '_blank');
@@ -100,15 +102,30 @@ export function TrialWindowProvider({ children }: { children: ReactNode }) {
   );
 
   useEffect(() => {
+    const runAction = async (action: PmsWindowAction, data: unknown, replyPort?: MessagePort) => {
+      let ok = false;
+      try {
+        await applyAction(action, data);
+        ok = true;
+      } catch {
+        if (!replyPort) toast.error('暫時無法完成操作，請稍後再試。');
+      } finally {
+        replyPort?.postMessage({ ok }, []);
+        replyPort?.close();
+      }
+    };
+
     const handleMessage = (event: MessageEvent) => {
-      const action = resolveAction(event.data?.command ?? event.data?.action ?? event.data?.type);
-      if (action) applyAction(action, event.data?.data);
+      const command = event.data?.command;
+      const action = resolveAction(command ?? event.data?.action ?? event.data?.type);
+      const replyPort = command === 'renew' || command === 'service-plan' ? event.ports[0] : undefined;
+      if (action) runAction(action, event.data?.data, replyPort);
     };
 
     const handleCustomEvent = (event: Event) => {
       const detail = (event as CustomEvent).detail;
       const action = resolveAction(detail?.command ?? detail?.action ?? detail?.type);
-      if (action) applyAction(action, detail?.data);
+      if (action) runAction(action, detail?.data);
     };
 
     window.addEventListener('message', handleMessage);
