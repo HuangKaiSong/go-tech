@@ -364,8 +364,8 @@ const CustomersPage = () => {
                     ))}
                   </div>
                 </TableCell>
-                <TableCell className="flex">
-                  <div className="flex gap-2">
+                <TableCell className="text-center">
+                  <div className="flex justify-center gap-2">
                     <div className="text-success">
                       有效 <strong className="tabular-nums">{customer.effectiveCount || 0}</strong>
                     </div>
