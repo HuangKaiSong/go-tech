@@ -28,7 +28,7 @@ export default function OrderConfigPage() {
       >
         <h2 id="auto-activation-heading" className="mb-6 flex items-center gap-2 text-lg font-semibold">
           <Clock className="size-5 text-primary" aria-hidden="true" />
-          套餐自動激活時間設定
+          專屬試用時長設定
         </h2>
         <form
           className="space-y-6"
@@ -39,7 +39,7 @@ export default function OrderConfigPage() {
         >
           <div className="space-y-3">
             <Label htmlFor="trail-days" className="block leading-5 font-normal">
-              自動激活時間
+              設置時長
             </Label>
             <div className="flex items-center gap-3">
               <Input
