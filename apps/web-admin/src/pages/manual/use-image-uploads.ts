@@ -11,6 +11,15 @@ interface ImageUploadTask {
   status: 'error' | 'queued' | 'uploading';
 }
 
+function createIdentifier(): string {
+  if (typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  bytes[6] = (bytes[6] % 16) + 64;
+  bytes[8] = (bytes[8] % 64) + 128;
+  const hex = Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+
 /** 串行处理图片以保持选图顺序；失败项保留插入位置，重试或取消后继续后续图片。 */
 export function useImageUploads(editor: Editor | null, onPendingChange?: (count: number) => void) {
   const tasks = useRef(new Map<string, ImageUploadTask>());
@@ -89,7 +98,7 @@ export function useImageUploads(editor: Editor | null, onPendingChange?: (count:
         setNotice(`${file.name || '圖片'}：${error}`);
         return;
       }
-      const id = crypto.randomUUID();
+      const id = createIdentifier();
       tasks.current.set(id, { id, file, controller: new AbortController(), status: 'queued' });
       editor.view.dispatch(
         editor.state.tr.setMeta(imageUploadKey, { add: { id, position: at } }).setMeta('addToHistory', false)
