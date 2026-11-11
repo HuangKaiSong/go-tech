@@ -7,6 +7,13 @@ import { Toaster } from '@/components/ui/toaster';
 import { router } from './router';
 import { GlobalProvider } from './store/global';
 
+import locale from 'antd/locale/zh_HK';
+import dayjs from 'dayjs';
+// oxlint-disable-next-line import/no-unassigned-import
+import 'dayjs/locale/zh-hk';
+
+dayjs.locale('zh-hk');
+
 const queryClient = new QueryClient();
 const antdTheme = {
   token: {
@@ -21,7 +28,7 @@ const LoadingSpinner = () => (
 );
 
 const App = () => (
-  <ConfigProvider theme={antdTheme}>
+  <ConfigProvider theme={antdTheme} locale={locale}>
     <QueryClientProvider client={queryClient}>
       <GlobalProvider>
         <TooltipProvider>
