@@ -17,6 +17,7 @@ import {
 } from '@go-tech-frontend/ui';
 import { getFileNameFromHeaders } from '@go-tech/utils/web';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { Checkbox } from 'antd';
 import { Download, RotateCcw, Search, Users } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -51,6 +52,8 @@ interface Reponse {
 interface SearchParams {
   custName: string;
   email: string;
+  /** 試用數目 */
+  hasTrail?: boolean;
   phone: string;
   registerDateEnd: string;
   registerDateStart: string;
@@ -113,6 +116,8 @@ const CustomersPage = () => {
           }
           return null;
         });
+
+        console.log(url);
 
         const res = await fetch(url.toString());
         const response = await res.json();
@@ -305,6 +310,19 @@ const CustomersPage = () => {
               }
               className="w-44"
             />
+          </div>
+          <div className="flex items-center gap-2 h-10">
+            <Checkbox
+              checked={searchParams.hasTrail}
+              onChange={e => {
+                setSearchParams({
+                  ...searchParams,
+                  hasTrail: e.target.checked
+                });
+              }}
+            >
+              <label className="text-sm text-muted-foreground whitespace-nowrap">擁有試用</label>
+            </Checkbox>
           </div>
           <div className="flex gap-3 ml-auto">
             <Button className="gap-2" onClick={() => refetch()}>
