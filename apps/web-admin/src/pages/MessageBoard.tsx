@@ -105,7 +105,11 @@ const MessageBoard = () => {
                 <TableCell className="text-center w-100 overflow-hidden text-ellipsis">{customer.message}</TableCell>
               </TableRow>
             ))}
-            {!data.records.length && <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />}
+            {!data.records.length && (
+              <div className="flex justify-center items-center">
+                <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+              </div>
+            )}
           </TableBody>
         </Table>
 

@@ -397,7 +397,11 @@ const CustomersPage = () => {
                 </TableCell>
               </TableRow>
             ))}
-            {!data.records.length && <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />}
+            {!data.records.length && (
+              <div className="flex justify-center items-center">
+                <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+              </div>
+            )}
           </TableBody>
         </Table>
 
