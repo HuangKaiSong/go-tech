@@ -383,9 +383,13 @@ const OrdersPage = () => {
               </TableRow>
             ))}
             {!data.records.length && (
-              <div className="flex justify-center items-center">
-                <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
-              </div>
+              <TableRow>
+                <TableCell colSpan={11} className="py-8">
+                  <div className="flex justify-center items-center">
+                    <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                  </div>
+                </TableCell>
+              </TableRow>
             )}
           </TableBody>
         </Table>
