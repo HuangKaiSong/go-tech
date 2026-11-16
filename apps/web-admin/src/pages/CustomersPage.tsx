@@ -17,7 +17,7 @@ import {
 } from '@go-tech-frontend/ui';
 import { getFileNameFromHeaders } from '@go-tech/utils/web';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Checkbox, DatePicker, type GetProps } from 'antd';
+import { Checkbox, DatePicker, Empty, type GetProps } from 'antd';
 import { Download, RotateCcw, Search, Users } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -397,6 +397,7 @@ const CustomersPage = () => {
                 </TableCell>
               </TableRow>
             ))}
+            {!data.records.length && <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />}
           </TableBody>
         </Table>
 
