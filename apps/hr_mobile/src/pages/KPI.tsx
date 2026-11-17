@@ -168,8 +168,8 @@ const KPI = () => {
 
               {/* 三方进度 */}
               <div className="bg-card rounded-xl border border-border p-4 mb-4 space-y-2">
-                {detail.reviewers.map((r) => (
-                  <div key={`${r.reviewerId}-${r.reviewerType}`} className="flex items-center gap-2 text-sm">
+                {detail.reviewers.map((r, idx) => (
+                  <div key={`${r.reviewerType}-${idx}`} className="flex items-center gap-2 text-sm">
                     {r.submitStatus === 1
                       ? <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
                       : <Circle className="w-4 h-4 text-muted-foreground shrink-0" />}

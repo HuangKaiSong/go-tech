@@ -181,7 +181,10 @@ export interface MyPerfTask {
 
 /** 评价者进度（对齐后端 PerfReviewerVO） */
 export interface PerfReviewerProgress {
-  reviewerId: string;
+  /** 评价者分配记录id（匿名互评人为 null） */
+  id: string | null;
+  /** 匿名互评人（对被考核人/其他互评人隐藏身份）时为 null */
+  reviewerId: string | null;
   reviewerName: string;
   reviewerType: PerfReviewerType;
   reviewerTypeText: string;
@@ -314,6 +317,27 @@ export interface PerfCalibratePayload {
 /** HR 校准（确认/调整最终分与评级，任务→已完成） */
 export function calibratePerfTask(data: PerfCalibratePayload) {
   return request.post<any, ApiResult<boolean>>('performance/task/calibrate', data);
+}
+
+/** 互评人候选（被考核人同部门在职同事，排除本人与现有评价人） */
+export interface PerfPeerCandidate {
+  employeeId: string;
+  name: string;
+  position: string | null;
+}
+
+export function getPeerCandidates(taskId: string) {
+  return request.get<any, ApiResult<PerfPeerCandidate[]>>('performance/task/peerCandidates', { params: { taskId } });
+}
+
+/** 更换未提交的互评人 */
+export function replacePeerReviewer(data: { newReviewerId: string; reviewerId: string; taskId: string }) {
+  return request.post<any, ApiResult<boolean>>('performance/task/replacePeer', data);
+}
+
+/** 移除未提交的互评人 */
+export function removePeerReviewer(data: { reviewerId: string; taskId: string }) {
+  return request.post<any, ApiResult<boolean>>('performance/task/removePeer', data);
 }
 
 /** 等级分布项 */

@@ -5,9 +5,11 @@ import {
   CheckCircle2,
   Circle,
   MessageSquare,
+  RefreshCw,
   Send,
   Star,
   Target,
+  Trash2,
   User,
   UserCheck,
   Users
@@ -18,22 +20,39 @@ import { useNavigate, useParams } from 'react-router-dom';
 import {
   calibratePerfTask,
   getPerfTaskBreakdown,
+  getPeerCandidates,
   getPerfTaskDetail,
   type PerfIndicatorBreakdown,
   type PerfReviewerProgress,
   type PerfTaskStatus,
+  removePeerReviewer,
+  replacePeerReviewer,
   submitPerfScore
 } from '@/api/performance';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
+import { hasPerm } from '@/lib/auth';
+import { PERF_PERM } from '@/lib/perms';
 
 const taskStatusColors: Record<PerfTaskStatus, string> = {
   0: 'bg-warning/10 text-warning border-warning/20',
@@ -97,6 +116,11 @@ export default function PerformanceEvalDetail() {
   const [scores, setScores] = useState<Record<string, ScoreState>>({});
   const [calib, setCalib] = useState({ finalScore: '', grade: '', reason: '' });
   const [activeTab, setActiveTab] = useState('overview');
+  /** 更换互评人弹窗：目标互评人 + 选中的新人 */
+  const [replacing, setReplacing] = useState<PerfReviewerProgress | null>(null);
+  const [newPeerId, setNewPeerId] = useState('');
+  /** 待确认移除的互评人 */
+  const [removing, setRemoving] = useState<PerfReviewerProgress | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ['perfTaskDetail', evalId],
@@ -162,6 +186,39 @@ export default function PerformanceEvalDetail() {
       queryClient.invalidateQueries({ queryKey: ['perfTaskPage'] });
     },
     onError: (e: any) => toast({ title: t('校准失敗'), description: e?.message, variant: 'destructive' })
+  });
+
+  const { data: candidates = [], isFetching: loadingCandidates } = useQuery({
+    queryKey: ['perfPeerCandidates', evalId],
+    queryFn: () => getPeerCandidates(evalId!).then(r => r.data),
+    enabled: Boolean(evalId) && replacing != null
+  });
+
+  const refreshAfterPeerChange = () => {
+    queryClient.invalidateQueries({ queryKey: ['perfTaskDetail', evalId] });
+    queryClient.invalidateQueries({ queryKey: ['perfTaskBreakdown', evalId] });
+    queryClient.invalidateQueries({ queryKey: ['perfPeerCandidates', evalId] });
+    queryClient.invalidateQueries({ queryKey: ['perfTaskPage'] });
+  };
+
+  const replaceMutation = useMutation({
+    mutationFn: () => replacePeerReviewer({ taskId: evalId!, reviewerId: replacing!.reviewerId!, newReviewerId: newPeerId }),
+    onSuccess: () => {
+      toast({ title: t('已更換互評人') });
+      setReplacing(null);
+      refreshAfterPeerChange();
+    },
+    onError: (e: any) => toast({ title: t('更換失敗'), description: e?.message, variant: 'destructive' })
+  });
+
+  const removeMutation = useMutation({
+    mutationFn: () => removePeerReviewer({ taskId: evalId!, reviewerId: removing!.reviewerId! }),
+    onSuccess: () => {
+      toast({ title: t('已移除互評人') });
+      setRemoving(null);
+      refreshAfterPeerChange();
+    },
+    onError: (e: any) => toast({ title: t('移除失敗'), description: e?.message, variant: 'destructive' })
   });
 
   if (isLoading || !data) {
@@ -239,6 +296,8 @@ export default function PerformanceEvalDetail() {
   ];
 
   const categories = [...new Set(breakdown.map(c => c.categoryText))];
+  // 评价进行中（未到待校准/已完成），HR 或该任务的主管评价人可调整未提交的互评人
+  const canAdjustPeers = data.taskStatus < 3 && (hasPerm(PERF_PERM.PLAN_EDIT) || data.myReviewerType === 3);
   const peerParticipants = new Set(breakdown.flatMap(c => c.peerReviews.map(p => p.reviewerName).filter(Boolean))).size;
 
   return (
@@ -618,6 +677,47 @@ export default function PerformanceEvalDetail() {
                   {t('權重佔比：{{weight}}% · 共 {{count}} 位同事參與', { weight: wPeer, count: peerParticipants })}
                 </CardDescription>
               </CardHeader>
+              {peerR.length > 0 && (
+                <CardContent className="pt-0">
+                  <div className="divide-y rounded-md border">
+                    {peerR.map((r, idx) => (
+                      <div key={r.id ?? `anon-${idx}`} className="flex items-center justify-between gap-3 px-4 py-2.5">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="text-sm font-medium truncate">{r.reviewerName}</span>
+                          {r.submitStatus === 1 ? (
+                            <Badge variant="secondary" className="bg-success/10 text-success border-success/20">
+                              {t('已提交')}
+                            </Badge>
+                          ) : (
+                            <Badge variant="secondary" className="bg-warning/10 text-warning border-warning/20">
+                              {t('未提交')}
+                            </Badge>
+                          )}
+                        </div>
+                        {canAdjustPeers && r.reviewerId != null && r.submitStatus !== 1 && (
+                          <div className="flex items-center gap-1 shrink-0">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setNewPeerId('');
+                                setReplacing(r);
+                              }}
+                            >
+                              <RefreshCw className="h-3.5 w-3.5 mr-1" />
+                              {t('更換')}
+                            </Button>
+                            <Button variant="ghost" size="sm" className="text-destructive" onClick={() => setRemoving(r)}>
+                              <Trash2 className="h-3.5 w-3.5 mr-1" />
+                              {t('移除')}
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              )}
             </Card>
             {categories.map(cat => (
               <div key={cat}>
@@ -732,6 +832,60 @@ export default function PerformanceEvalDetail() {
           </div>
         </TabsContent>
       </Tabs>
+
+      <Dialog open={replacing != null} onOpenChange={o => !o && setReplacing(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t('更換互評人')}</DialogTitle>
+            <DialogDescription>
+              {t('將「{{name}}」更換為同部門其他在職同事，新互評人會收到通知。', { name: replacing?.reviewerName ?? '' })}
+            </DialogDescription>
+          </DialogHeader>
+          <Select value={newPeerId} onValueChange={setNewPeerId}>
+            <SelectTrigger>
+              <SelectValue placeholder={loadingCandidates ? t('載入中...') : t('選擇新的互評人')} />
+            </SelectTrigger>
+            <SelectContent>
+              {candidates.map(c => (
+                <SelectItem key={c.employeeId} value={c.employeeId}>
+                  {c.position ? `${c.name} · ${c.position}` : c.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {!loadingCandidates && candidates.length === 0 && (
+            <p className="text-sm text-muted-foreground">{t('同部門沒有可選的同事，可改為移除此互評人。')}</p>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setReplacing(null)}>
+              {t('取消')}
+            </Button>
+            <Button onClick={() => replaceMutation.mutate()} disabled={!newPeerId || replaceMutation.isPending}>
+              {t('確認更換')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={removing != null} onOpenChange={o => !o && setRemoving(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('確認移除互評人「{{name}}」？', { name: removing?.reviewerName ?? '' })}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('移除後互評分只按其餘已提交同事計算；若其餘評價都已完成，任務將自動進入下一環節。')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('取消')}</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => removeMutation.mutate()}
+            >
+              {t('移除')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

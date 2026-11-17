@@ -41,7 +41,8 @@ export interface MyPerfResult {
 
 /** 评价者进度（对齐后端 PerfReviewerVO） */
 export interface PerfReviewerProgress {
-  reviewerId: string;
+  /** 匿名互评人（对被考核人/其他互评人隐藏身份）时为 null */
+  reviewerId: string | null;
   reviewerName: string;
   reviewerType: PerfReviewerType;
   reviewerTypeText: string;

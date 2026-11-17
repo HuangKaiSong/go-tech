@@ -239,7 +239,8 @@ export default function PerformancePlanForm() {
         category: c.category,
         weight: Number.parseInt(c.weight) || 0,
         maxScore: Number.parseInt(c.maxScore) || 100,
-        scoringType: c.scoringType,
+        // 评分方式目前只支持「打分」
+        scoringType: 1,
         sort: i
       })),
       gradeRules: gradeRules.map((g, i) => ({
@@ -519,7 +520,7 @@ export default function PerformancePlanForm() {
                 {t('考核指標（共 {{count}} 項，總權重 {{weight}}%）', { count: criteria.length, weight: totalWeight })}
                 {totalWeight !== 100 && <span className="text-destructive ml-2">{t('需為 100%')}</span>}
               </CardTitle>
-              <CardDescription>{t('設定各考核指標的分類、權重與評分方式')}</CardDescription>
+              <CardDescription>{t('設定各考核指標的分類與權重')}</CardDescription>
             </div>
             <Button size="sm" variant="outline" onClick={addCriterion}>
               <Plus className="h-4 w-4 mr-1" />
@@ -547,7 +548,7 @@ export default function PerformancePlanForm() {
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="space-y-1.5">
                     <Label className="text-xs">{t('分類')}</Label>
                     <Select
@@ -584,22 +585,6 @@ export default function PerformancePlanForm() {
                       value={c.weight}
                       onChange={e => updateCriterion(c.key, { weight: e.target.value })}
                     />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-xs">{t('評分方式')}</Label>
-                    <Select
-                      value={String(c.scoringType)}
-                      onValueChange={v => updateCriterion(c.key, { scoringType: Number(v) as PerfScoringType })}
-                    >
-                      <SelectTrigger className="h-9">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="1">{t('打分')}</SelectItem>
-                        <SelectItem value="2">{t('是否')}</SelectItem>
-                        <SelectItem value="3">{t('量表')}</SelectItem>
-                      </SelectContent>
-                    </Select>
                   </div>
                 </div>
               </div>
