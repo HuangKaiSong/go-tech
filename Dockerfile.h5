@@ -67,12 +67,14 @@ ENV NODE_ENV=production
 ENV NODE_OPTIONS=--max-old-space-size=4096
 ENV PORT=3200
 ENV H5_RUNTIME_CONFIG_SQLITE_PATH=/app/data/runtime-config/config.sqlite
+ENV H5_TRANSLATIONS_DIR=/app/data/translations
 
 WORKDIR /app
 
 COPY --from=builder --chown=node:node /workspace/apps/web-h5/.next/standalone ./
 COPY --from=builder --chown=node:node /workspace/apps/web-h5/public ./apps/web-h5/public
 COPY --from=builder --chown=node:node /workspace/apps/web-h5/.next/static ./apps/web-h5/.next/static
+COPY --from=builder --chown=node:node /workspace/apps/web-h5/translations ./data/translations
 
 RUN mkdir -p /app/data/page-blocks /app/data/runtime-config && chown -R node:node /app/data
 
