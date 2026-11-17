@@ -23,10 +23,10 @@ function captureEvents() {
   return events;
 }
 
-function installWindow(open: (url?: string | URL, target?: string) => unknown) {
+function installWindow(open: (url?: string | URL, target?: string) => unknown, assign?: (url: string) => void) {
   Object.defineProperty(globalThis, 'window', {
     configurable: true,
-    value: { open },
+    value: { open, location: { assign } },
     writable: true
   });
 }
@@ -216,6 +216,36 @@ test('startFreeTrial 未指定业务类型时保持既有 PMS 试用行为', asy
   });
 
   assert.equal(callbackUri, 'tryCallback?code=trial-code');
+});
+
+test('PMS 试用接受字符串成功码并在弹窗被拦截时跳转当前页', async () => {
+  process.env.NEXT_PUBLIC_PMS_TRIAL_HOST = 'https://pms.example.com';
+  publishClientSnapshot({ version: String(Math.random()), values: publicValues(effectiveValues({})) });
+  const navigations: string[] = [];
+  installWindow(
+    () => null,
+    href => navigations.push(href)
+  );
+  globalThis.fetch = async () => jsonResponse({ code: '200', data: 'trial-code' });
+
+  await startFreeTrial({ token: 'access-token' });
+
+  assert.deepEqual(navigations, ['https://pms.example.com/oauth/tryCallback?code=trial-code']);
+});
+
+test('HR 租户进入时保留试用参数并在弹窗被拦截时跳转当前页', async () => {
+  process.env.NEXT_PUBLIC_HR_TRIAL_HOST = 'https://hr.example.com/trial?source=web';
+  publishClientSnapshot({ version: String(Math.random()), values: publicValues(effectiveValues({})) });
+  const navigations: string[] = [];
+  installWindow(
+    () => null,
+    href => navigations.push(href)
+  );
+  globalThis.fetch = async () => jsonResponse({ code: '200', data: 'tenant-code' });
+
+  await enterTenant({ tenant: { bizCode: 'hr', tenantId: 'hr-tenant', tenantName: 'HR' }, token: 'access-token' });
+
+  assert.deepEqual(navigations, ['https://hr.example.com/trial?source=web&code=tenant-code']);
 });
 
 test('startFreeTrial 遇到业务码 403 时通知调用方跳转购买套餐且不打开试用环境', async () => {

@@ -10,7 +10,7 @@ export const WhatsappService = () => {
       href={serviceUri}
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-20 right-4 z-50 group md:bottom-6 md:right-6 flex items-center gap-2 rounded-full bg-[hsl(var(--whatsapp))] text-primary-foreground shadow-lg hover:shadow-xl hover:scale-105 transition-all p-3.5"
+      className="fixed bottom-20 right-4 z-50 group md:bottom-6 md:right-6 flex items-center gap-0 hover:gap-2 rounded-full bg-[hsl(var(--whatsapp))] text-primary-foreground shadow-lg hover:shadow-xl hover:scale-105 transition-all p-3.5"
       aria-label="WhatsApp 聯絡我們"
     >
       <span className="absolute inset-0 rounded-full bg-[hsl(var(--whatsapp))] opacity-40 animate-ping group-hover:animate-none -z-10" />

@@ -17,6 +17,7 @@ import {
 } from '@go-tech-frontend/ui';
 import { getFileNameFromHeaders } from '@go-tech/utils/web';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { Checkbox, DatePicker, Empty, type GetProps } from 'antd';
 import { Download, RotateCcw, Search, Users } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -51,6 +52,8 @@ interface Reponse {
 interface SearchParams {
   custName: string;
   email: string;
+  /** 試用數目 */
+  hasTrail?: boolean;
   phone: string;
   registerDateEnd: string;
   registerDateStart: string;
@@ -89,6 +92,7 @@ const CustomersPage = () => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(defaultSize);
+  const [registerDateRange, setRegisterDateRange] = useState<GetProps<typeof DatePicker.RangePicker>['value']>(null);
   const [searchParams, setSearchParams] = useState<SearchParams>({
     custName: '',
     phone: '',
@@ -177,6 +181,7 @@ const CustomersPage = () => {
   });
 
   const handleReset = () => {
+    setRegisterDateRange(null);
     setSearchParams({
       custName: '',
       phone: '',
@@ -276,35 +281,45 @@ const CustomersPage = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <span className="text-sm text-muted-foreground">註冊時間</span>
-            <Input
-              type="date"
-              aria-label="註冊開始日期"
-              value={searchParams.registerDateStart}
-              max={searchParams.registerDateEnd || undefined}
-              onChange={event =>
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="text-sm text-muted-foreground whitespace-nowrap">註冊時間</label>
+            <DatePicker.RangePicker
+              value={registerDateRange}
+              size="large"
+              format="YYYY-MM-DD"
+              placeholder={['註冊開始日期', '註冊結束日期']}
+              allowEmpty={[true, true]}
+              onChange={(dates, dateStrings) => {
+                setRegisterDateRange(dates);
+                if (!dateStrings) {
+                  setSearchParams({
+                    ...searchParams,
+                    registerDateStart: '',
+                    registerDateEnd: ''
+                  });
+                  return;
+                }
+                const [registerDateStart, registerDateEnd] = dateStrings;
                 setSearchParams({
                   ...searchParams,
-                  registerDateStart: event.target.value
-                })
-              }
-              className="w-44"
+                  registerDateStart,
+                  registerDateEnd
+                });
+              }}
             />
-            <span className="text-sm text-muted-foreground">至</span>
-            <Input
-              type="date"
-              aria-label="註冊結束日期"
-              value={searchParams.registerDateEnd}
-              min={searchParams.registerDateStart || undefined}
-              onChange={event =>
+          </div>
+          <div className="flex items-center gap-2 h-10">
+            <Checkbox
+              checked={searchParams.hasTrail}
+              onChange={e => {
                 setSearchParams({
                   ...searchParams,
-                  registerDateEnd: event.target.value
-                })
-              }
-              className="w-44"
-            />
+                  hasTrail: e.target.checked
+                });
+              }}
+            >
+              <label className="text-sm text-muted-foreground whitespace-nowrap">擁有試用</label>
+            </Checkbox>
           </div>
           <div className="flex gap-3 ml-auto">
             <Button className="gap-2" onClick={() => refetch()}>
@@ -364,8 +379,8 @@ const CustomersPage = () => {
                     ))}
                   </div>
                 </TableCell>
-                <TableCell className="flex">
-                  <div className="flex gap-2">
+                <TableCell className="text-center">
+                  <div className="flex justify-center gap-2">
                     <div className="text-success">
                       有效 <strong className="tabular-nums">{customer.effectiveCount || 0}</strong>
                     </div>
@@ -382,6 +397,15 @@ const CustomersPage = () => {
                 </TableCell>
               </TableRow>
             ))}
+            {!data.records.length && (
+              <TableRow>
+                <TableCell colSpan={11} className="py-8">
+                  <div className="flex justify-center items-center">
+                    <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                  </div>
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
 

@@ -19,6 +19,7 @@ import {
   TableHeader,
   TableRow
 } from '@go-tech-frontend/ui';
+import { Empty } from 'antd';
 import { Calendar, Plus, Printer, Ticket, Upload } from 'lucide-react';
 import { useState } from 'react';
 
@@ -56,72 +57,72 @@ const defaultForm: CouponForm = {
   active: false
 };
 
-const mockCoupons = [
-  {
-    id: 1,
-    createdAt: '12/08/2025',
-    code: '自動生成',
-    name: '春季優惠',
-    target: '白金會員',
-    info: '滿1000減100',
-    quantity: 99,
-    used: 90,
-    startDate: '12/08/2025',
-    endDate: '12/08/2025',
-    status: 'active'
-  },
-  {
-    id: 2,
-    createdAt: '12/08/2025',
-    code: '自動生成',
-    name: '夏季優惠',
-    target: '鉑金會員',
-    info: '滿1000減100',
-    quantity: 99,
-    used: 97,
-    startDate: '12/09/2025',
-    endDate: '12/08/2025',
-    status: 'active'
-  },
-  {
-    id: 3,
-    createdAt: '12/08/2025',
-    code: '自動生成',
-    name: '秋季優惠',
-    target: '黃金會員',
-    info: '滿1000減100',
-    quantity: 99,
-    used: 24,
-    startDate: '12/08/2025',
-    endDate: '12/08/2025',
-    status: 'paused'
-  },
-  {
-    id: 4,
-    createdAt: '12/08/2025',
-    code: '自動生成',
-    name: '冬季優惠',
-    target: '鑽石會員',
-    info: '滿1000減100',
-    quantity: 99,
-    used: 50,
-    startDate: '12/09/2025',
-    endDate: '12/08/2025',
-    status: 'paused'
-  },
-  {
-    id: 5,
-    createdAt: '12/08/2025',
-    code: '自動生成',
-    name: '春季優惠',
-    target: '黃金會員',
-    info: '滿1000減100',
-    quantity: 99,
-    used: 69,
-    startDate: '12/08/2025',
-    endDate: '12/08/2025',
-    status: 'ended'
-  }
+const mockCoupons: any[] = [
+  // {
+  //   id: 1,
+  //   createdAt: '12/08/2025',
+  //   code: '自動生成',
+  //   name: '春季優惠',
+  //   target: '白金會員',
+  //   info: '滿1000減100',
+  //   quantity: 99,
+  //   used: 90,
+  //   startDate: '12/08/2025',
+  //   endDate: '12/08/2025',
+  //   status: 'active'
+  // },
+  // {
+  //   id: 2,
+  //   createdAt: '12/08/2025',
+  //   code: '自動生成',
+  //   name: '夏季優惠',
+  //   target: '鉑金會員',
+  //   info: '滿1000減100',
+  //   quantity: 99,
+  //   used: 97,
+  //   startDate: '12/09/2025',
+  //   endDate: '12/08/2025',
+  //   status: 'active'
+  // },
+  // {
+  //   id: 3,
+  //   createdAt: '12/08/2025',
+  //   code: '自動生成',
+  //   name: '秋季優惠',
+  //   target: '黃金會員',
+  //   info: '滿1000減100',
+  //   quantity: 99,
+  //   used: 24,
+  //   startDate: '12/08/2025',
+  //   endDate: '12/08/2025',
+  //   status: 'paused'
+  // },
+  // {
+  //   id: 4,
+  //   createdAt: '12/08/2025',
+  //   code: '自動生成',
+  //   name: '冬季優惠',
+  //   target: '鑽石會員',
+  //   info: '滿1000減100',
+  //   quantity: 99,
+  //   used: 50,
+  //   startDate: '12/09/2025',
+  //   endDate: '12/08/2025',
+  //   status: 'paused'
+  // },
+  // {
+  //   id: 5,
+  //   createdAt: '12/08/2025',
+  //   code: '自動生成',
+  //   name: '春季優惠',
+  //   target: '黃金會員',
+  //   info: '滿1000減100',
+  //   quantity: 99,
+  //   used: 69,
+  //   startDate: '12/08/2025',
+  //   endDate: '12/08/2025',
+  //   status: 'ended'
+  // }
 ];
 
 // const getStatusIcon = (status: string) => {
@@ -275,6 +276,15 @@ const CouponsPage = () => {
                 </TableCell>
               </TableRow>
             ))}
+            {!mockCoupons.length && (
+              <TableRow>
+                <TableCell colSpan={11} className="py-8">
+                  <div className="flex justify-center items-center">
+                    <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                  </div>
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </div>

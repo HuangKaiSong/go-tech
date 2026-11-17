@@ -8,6 +8,7 @@ import NotFound from '@/pages/NotFound';
 const OrdersPage = lazyPage(() => import('@/pages/orders/List'));
 const OrderDetailPage = lazyPage(() => import('@/pages/orders/Detail'));
 const CreateOrderPage = lazyPage(() => import('@/pages/orders/Create'));
+const OrderConfigPage = lazyPage(() => import('@/pages/orders/order-config-page'));
 const CustomersPage = lazyPage(() => import('@/pages/CustomersPage'));
 const CustomerDetailPage = lazyPage(() => import('@/pages/CustomerDetailPage'));
 const SystemUsersPage = lazyPage(() => import('@/pages/SystemUsersPage'));
@@ -131,6 +132,10 @@ export const createRoutes = (authLoader: LoaderFunction): RouteObject[] => [
       {
         path: '/settings/runtime-config',
         element: <RuntimeConfigPage />
+      },
+      {
+        path: '/settings/package',
+        element: <OrderConfigPage />
       },
       {
         path: '/settings/site/h5',

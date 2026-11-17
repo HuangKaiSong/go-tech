@@ -17,7 +17,7 @@ import {
   toast
 } from '@go-tech-frontend/ui';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Image, Modal, Space } from 'antd';
+import { Empty, Image, Modal, Space } from 'antd';
 import { Eye, FileText, Plus, Receipt, RotateCcw, Search } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -382,6 +382,15 @@ const OrdersPage = () => {
                 </TableCell>
               </TableRow>
             ))}
+            {!data.records.length && (
+              <TableRow>
+                <TableCell colSpan={11} className="py-8">
+                  <div className="flex justify-center items-center">
+                    <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                  </div>
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
 

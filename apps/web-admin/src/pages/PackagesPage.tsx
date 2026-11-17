@@ -11,6 +11,7 @@ import {
   toast
 } from '@go-tech-frontend/ui';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { Empty } from 'antd';
 import { Package, Plus } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -148,6 +149,15 @@ const PackagesPage = () => {
                 </TableCell>
               </TableRow>
             ))}
+            {!data.records.length && (
+              <TableRow>
+                <TableCell colSpan={6} className="py-8">
+                  <div className="flex justify-center items-center">
+                    <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                  </div>
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
 

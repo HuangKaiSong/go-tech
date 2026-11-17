@@ -1,5 +1,6 @@
 import { Pagination, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@go-tech-frontend/ui';
 import { useQuery } from '@tanstack/react-query';
+import { Empty } from 'antd';
 import { MessageSquareText } from 'lucide-react';
 import { useState } from 'react';
 
@@ -104,6 +105,15 @@ const MessageBoard = () => {
                 <TableCell className="text-center w-100 overflow-hidden text-ellipsis">{customer.message}</TableCell>
               </TableRow>
             ))}
+            {!data.records.length && (
+              <TableRow>
+                <TableCell colSpan={5} className="py-8">
+                  <div className="flex justify-center items-center">
+                    <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                  </div>
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
 

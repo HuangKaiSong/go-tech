@@ -1,6 +1,6 @@
 # syntax=docker.1ms.run/docker/dockerfile:1.7
 
-ARG NODE_IMAGE=node:24.22.1-bookworm-slim
+ARG NODE_IMAGE=node:24.22.1-alpine
 
 FROM ${NODE_IMAGE} AS pnpm-base
 
@@ -11,6 +11,20 @@ RUN corepack enable && corepack prepare pnpm@12.15.0 --activate
 
 WORKDIR /workspace
 
+FROM pnpm-base AS manifests
+
+# 确保安装层与工作区源代码的变更相互独立。
+RUN --mount=type=bind,target=/source <<'SH'
+set -eu
+cd /source
+find apps internal packages -type f -name package.json -exec sh -ec '
+  for manifest do
+    mkdir -p "/workspace/${manifest%/*}"
+    cp "$manifest" "/workspace/$manifest"
+  done
+' sh {} +
+SH
+
 FROM pnpm-base AS dependencies
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
@@ -19,18 +33,21 @@ RUN --mount=type=cache,id=go-tech-frontend-pnpm-12.15-store,target=/pnpm/store,s
     pnpm fetch --frozen-lockfile \
     && rm -rf /workspace/node_modules
 
+COPY --from=manifests /workspace/ ./
+
+RUN --mount=type=cache,id=go-tech-frontend-pnpm-12.15-store,target=/pnpm/store,sharing=locked \
+    CI=true pnpm install --frozen-lockfile --prefer-offline
+
 FROM dependencies AS builder
 
 ENV CI=true
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Bump to invalidate persisted Next.js output without clearing dependency caches.
+# 通过更新版本号使已持久化的 Next.js 输出失效，且无需清除依赖缓存。
 ARG H5_NEXT_CACHE_VERSION=2
 
 COPY . .
 
-RUN --mount=type=cache,id=go-tech-frontend-pnpm-12.15-store,target=/pnpm/store,sharing=locked \
-    pnpm install --frozen-lockfile --offline
 RUN --mount=type=cache,id=go-tech-frontend-turbo,target=/workspace/.turbo,sharing=locked \
     --mount=type=cache,id=go-tech-frontend-next-h5-v${H5_NEXT_CACHE_VERSION},target=/workspace/apps/web-h5/.next/cache,sharing=locked \
     --mount=type=secret,id=h5_env,target=/workspace/apps/web-h5/.env,required=true \
@@ -50,12 +67,14 @@ ENV NODE_ENV=production
 ENV NODE_OPTIONS=--max-old-space-size=4096
 ENV PORT=3200
 ENV H5_RUNTIME_CONFIG_SQLITE_PATH=/app/data/runtime-config/config.sqlite
+ENV H5_TRANSLATIONS_DIR=/app/data/translations
 
 WORKDIR /app
 
 COPY --from=builder --chown=node:node /workspace/apps/web-h5/.next/standalone ./
 COPY --from=builder --chown=node:node /workspace/apps/web-h5/public ./apps/web-h5/public
 COPY --from=builder --chown=node:node /workspace/apps/web-h5/.next/static ./apps/web-h5/.next/static
+COPY --from=builder --chown=node:node /workspace/apps/web-h5/translations ./data/translations
 
 RUN mkdir -p /app/data/page-blocks /app/data/runtime-config && chown -R node:node /app/data
 

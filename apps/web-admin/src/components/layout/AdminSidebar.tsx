@@ -50,6 +50,7 @@ const menuItems: MenuItem[] = [
       { title: '用戶管理', path: '/settings/users' },
       // { title: "圖文管理", path: "/settings/content" },
       { title: '运行配置', path: '/settings/runtime-config' },
+      { title: '專屬試用時長', path: '/settings/package' },
       { title: '站點設置', path: '/settings/site/h5' },
       { title: '國際化維護', path: '/settings/i18n' }
     ]
