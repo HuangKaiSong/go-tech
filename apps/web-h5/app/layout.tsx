@@ -4,13 +4,14 @@ import type { Metadata } from 'next';
 import { hasLocale } from 'next-intl';
 import { ThemeProvider } from 'next-themes';
 import { headers } from 'next/headers';
+import Script from 'next/script';
 import { connection } from 'next/server';
 import { routing } from '@/i18n/routing';
 import { RuntimeConfigProvider } from '@/lib/runtime-config/provider';
 import { configValue, publicSnapshot } from '@/lib/runtime-config/server';
-import { createSvgSpriteHtml } from '@/plugins/createSvgIcons';
 // oxlint-disable import/no-unassigned-import
 import './globals.css';
+import { createSvgSpriteHtml } from '@/plugins/createSvgIcons';
 
 export async function generateMetadata(): Promise<Metadata> {
   await connection();
@@ -33,6 +34,18 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 
   return (
     <html lang={language} suppressHydrationWarning>
+      <Script id="googletagmanager" strategy="afterInteractive">
+        {`(function(w, d, s, l, i) {
+          w[l] = w[l] || [];
+          w[l].push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+          var f = d.getElementsByTagName(s)[0];
+          var j = d.createElement(s);
+          var dl = l !== 'dataLayer' ? '&l=' + l : '';
+          j.async = true;
+          j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+          f.parentNode.insertBefore(j, f);
+        })(window, document, 'script', 'dataLayer', 'GTM-T6TZQGBX');`}
+      </Script>
       <body className="w-full">
         <div aria-hidden="true" dangerouslySetInnerHTML={{ __html: svgSpriteHtml }} />
         <RuntimeConfigProvider initial={initialConfig}>
