@@ -35,16 +35,19 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang={language} suppressHydrationWarning>
       <Script id="googletagmanager" strategy="afterInteractive">
-        {`(function(w, d, s, l, i) {
-          w[l] = w[l] || [];
-          w[l].push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
-          var f = d.getElementsByTagName(s)[0];
-          var j = d.createElement(s);
-          var dl = l !== 'dataLayer' ? '&l=' + l : '';
-          j.async = true;
-          j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
-          f.parentNode.insertBefore(j, f);
-        })(window, document, 'script', 'dataLayer', 'GTM-T6TZQGBX');`}
+        {`(function () {
+          window.dataLayer = window.dataLayer || [];
+          function gtag() {
+            window.dataLayer.push(arguments);
+          }
+          gtag('js', new Date());
+
+          window.dataLayer.push({ 'gtm.start': Date.now(), event: 'gtm.js' });
+          const script = document.createElement('script');
+          script.async = true;
+          script.src = 'https://www.googletagmanager.com/gtm.js?id=GTM-T6TZQGBX';
+          document.head.appendChild(script);
+        })();`}
       </Script>
       <body className="w-full">
         <div aria-hidden="true" dangerouslySetInnerHTML={{ __html: svgSpriteHtml }} />
