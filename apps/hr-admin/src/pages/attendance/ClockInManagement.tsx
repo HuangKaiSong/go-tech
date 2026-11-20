@@ -29,6 +29,16 @@ import {
   saveSchedule,
   SCHEDULE_TYPE_TEXT
 } from '@/api/attendance';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -374,6 +384,10 @@ export default function ClockInManagement() {
   const [editingSched, setEditingSched] = useState(false);
   const [editingRule, setEditingRule] = useState(false);
   const [saving, setSaving] = useState(false);
+  /** 待確認刪除的對象（地點/班次/規則） */
+  const [confirmDel, setConfirmDel] = useState<{ id: number; kind: 'loc' | 'rule' | 'sched'; name: string } | null>(
+    null
+  );
 
   // ── Location ──
   const [locForm, setLocForm] = useState<LocForm>(emptyLoc);
@@ -690,7 +704,13 @@ export default function ClockInManagement() {
                             </Button>
                           )}
                           {hasPerm(CLOCKIN_PERM.DELETE) && (
-                            <Button variant="ghost" size="icon" onClick={() => removeLoc(loc.id)}>
+                            <Button variant="ghost" size="icon" onClick={() => {
+                                if (loc.statusCode === 1) {
+                                  toast.error(t('打卡地點啟用中，請先停用後再刪除'));
+                                  return;
+                                }
+                                setConfirmDel({ id: loc.id, kind: 'loc', name: loc.name });
+                              }}>
                               <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>
                           )}
@@ -776,7 +796,7 @@ export default function ClockInManagement() {
                             </Button>
                           )}
                           {hasPerm(CLOCKIN_PERM.DELETE) && (
-                            <Button variant="ghost" size="icon" onClick={() => removeSched(s.id)}>
+                            <Button variant="ghost" size="icon" onClick={() => setConfirmDel({ id: s.id, kind: 'sched', name: s.name })}>
                               <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>
                           )}
@@ -828,7 +848,7 @@ export default function ClockInManagement() {
                             </Button>
                           )}
                           {hasPerm(CLOCKIN_PERM.DELETE) && (
-                            <Button variant="ghost" size="icon" onClick={() => removeRule(r.id)}>
+                            <Button variant="ghost" size="icon" onClick={() => setConfirmDel({ id: r.id, kind: 'rule', name: r.name })}>
                               <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>
                           )}
@@ -1084,6 +1104,31 @@ export default function ClockInManagement() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={confirmDel != null} onOpenChange={o => !o && setConfirmDel(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('確認刪除「{{name}}」？', { name: confirmDel?.name ?? '' })}</AlertDialogTitle>
+            <AlertDialogDescription>{t('此操作不可撤銷。')}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('取消')}</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (!confirmDel) return;
+                const { id, kind } = confirmDel;
+                if (kind === 'loc') removeLoc(id);
+                else if (kind === 'sched') removeSched(id);
+                else removeRule(id);
+                setConfirmDel(null);
+              }}
+            >
+              {t('刪除')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
