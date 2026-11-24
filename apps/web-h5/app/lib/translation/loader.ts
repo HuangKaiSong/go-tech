@@ -7,8 +7,9 @@ import { clearCache } from './cache';
 import type { PendingItem, TranslationDB } from './types';
 import { enqueueWrite } from './write-queue';
 
-const DB_PATH = path.join(process.cwd(), 'translations', 'dynamic.json');
-const PENDING_PATH = path.join(process.cwd(), 'translations', 'pending.json');
+const translationsDirectory = process.env.H5_TRANSLATIONS_DIR || path.join(process.cwd(), 'translations');
+const DB_PATH = path.join(translationsDirectory, 'dynamic.json');
+const PENDING_PATH = path.join(translationsDirectory, 'pending.json');
 
 // mtime 内存缓存（只读缓存，依然有效）
 const cache = {
