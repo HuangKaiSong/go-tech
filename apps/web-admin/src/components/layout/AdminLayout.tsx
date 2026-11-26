@@ -1,3 +1,4 @@
+import { cn } from '@go-tech/utils';
 import { useLayoutEffect } from 'react';
 import { Outlet, useMatch } from 'react-router-dom';
 import { useAuth } from '@/hooks/use-auth';
@@ -6,10 +7,13 @@ import AdminSidebar from './AdminSidebar';
 
 const AdminLayout = () => {
   const { token } = useAuth();
-  // 手册和博客工作区锁定视口高度，其他后台页面继续沿用原来的整页滚动。
   const isManual = useMatch('/manual') !== null;
   const isBlog = useMatch('/blog') !== null;
+  const isPackageEdit = useMatch('/packages/:packageCode/edit') !== null;
+  const isPackageCreate = useMatch('/packages/new') !== null;
   const isManualWorkspace = isManual || isBlog;
+  const isPackageEditor = isPackageEdit || isPackageCreate;
+  const hasFixedViewport = isManualWorkspace || isPackageEditor;
 
   useLayoutEffect(() => {
     const originFetch = window.fetch;
@@ -56,17 +60,24 @@ const AdminLayout = () => {
   return (
     <div
       className={
-        isManualWorkspace
+        hasFixedViewport
           ? 'flex h-dvh overflow-hidden bg-background [&>aside]:h-full [&>aside]:min-h-0 [&>aside]:shrink-0 [&>aside]:overflow-y-auto [&>aside]:overscroll-contain'
           : 'flex min-h-screen bg-background'
       }
     >
       <AdminSidebar />
       <div
-        className={`flex-1 flex flex-col ${isManualWorkspace ? 'min-h-0 min-w-0 overflow-hidden [&>header]:shrink-0' : ''}`}
+        className={`flex-1 flex flex-col ${hasFixedViewport ? 'min-h-0 min-w-0 overflow-hidden [&>header]:shrink-0' : ''}`}
       >
         <AdminHeader />
-        <main className={isManualWorkspace ? 'flex-1 min-h-0 overflow-hidden p-4 lg:p-6' : 'flex-1 p-6'}>
+        <main
+          className={cn(
+            'flex-1 p-6',
+            hasFixedViewport && 'min-h-0 overflow-hidden',
+            isManualWorkspace && 'p-4 lg:p-6',
+            isPackageEditor && 'pb-0'
+          )}
+        >
           <Outlet />
         </main>
       </div>

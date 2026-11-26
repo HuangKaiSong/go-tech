@@ -263,7 +263,7 @@ function AddonCard(props: PackageCardProps) {
           {price !== null ? (
             <>
               <strong className={cn('leading-none text-primary', compact ? 'text-2xl' : 'text-3xl')}>+${price}</strong>
-              <span className="text-xs text-muted-foreground">
+              <span className="min-w-0 break-words text-xs text-muted-foreground">
                 HKD / <Text text={getAddonBillingLabel(plan)} />
               </span>
             </>

@@ -44,6 +44,7 @@ const menuItemSchema = z
   .passthrough();
 
 const addonErrorMessages: Record<string, string> = {
+  billingLabel: '請檢查自訂計費說明的格式',
   dataCount: '數量必須為有效的非負整數',
   features: '展示賣點必須為文字列表',
   id: '附加功能標識不正確',
@@ -223,7 +224,7 @@ export const splitFeatures = (text: string) => [
   )
 ];
 
-export function toPackageCardPlan(draft: PackageDraft): PackageCardPlan {
+export function toPackageCardPlan(draft: PackageDraft, menuTree: MenuNode[] = []): PackageCardPlan {
   return {
     badge: draft.detail.badge,
     billingLabel: draft.detail.billingLabel,
@@ -232,8 +233,8 @@ export function toPackageCardPlan(draft: PackageDraft): PackageCardPlan {
     count: draft.detail.dataCount,
     features: draft.detail.features,
     isRecommended: draft.detail.isRecommended,
-    menu: draft.detail.menu,
-    note: draft.detail.remind,
+    menu: draft.detail.menu && attachMenuParents(draft.detail.menu, menuTree),
+    note: draft.detail.remind || draft.detail.note,
     originalPrice: draft.detail.originalPrice,
     packageKind: draft.detail.packageKind,
     packageName: draft.packageName || '套餐名稱',

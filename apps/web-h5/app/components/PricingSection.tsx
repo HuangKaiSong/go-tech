@@ -1,14 +1,20 @@
 'use client';
 
-import { formatPackagePrice, getAddonBillingLabel, getPackageFeatures } from '@go-tech/package-ui/model';
+import { PackageFeatureList } from '@go-tech/package-ui';
+import {
+  formatPackagePrice,
+  getAddonBillingLabel,
+  getPackageFeatures,
+  toAddonCardPlan
+} from '@go-tech/package-ui/model';
 import type { PackageCardPlan } from '@go-tech/package-ui/model';
 import { cn } from '@go-tech/web-ui';
 import { Gift } from 'lucide-react';
 import Link from '@/app/components/Link';
-import { getFeaturedPlan, toAddonCardPlan } from '@/app/lib/package-card-plan';
+import { getFeaturedPlan } from '@/app/lib/package-card-plan';
 import type { PackageCatalog } from '@/app/lib/package-catalog';
 import { useProductSelection } from '@/contexts/ProductSelectionContext';
-import { BasePackage, PackageFeatureList } from './base-package';
+import { BasePackage } from './base-package';
 import { DynamicText } from './DynamicI18nText.client';
 import SwipeRow from './SwipeRow';
 import { TrialAction } from './trial-action';
@@ -31,7 +37,7 @@ function AddonModule({ plan }: { plan: PackageCardPlan }) {
         </span>
       </div>
       <div className="mt-3 border-t border-border pt-4">
-        <PackageFeatureList singleColumn features={getPackageFeatures(plan)} />
+        <PackageFeatureList singleColumn features={getPackageFeatures(plan)} TextComponent={DynamicText} />
       </div>
     </article>
   );

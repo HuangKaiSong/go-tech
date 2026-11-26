@@ -15,12 +15,12 @@ import {
   Textarea
 } from '@go-tech-frontend/ui';
 import { PackageCard } from '@go-tech/package-ui';
-import { formatPackagePrice, getAddonBillingLabel } from '@go-tech/package-ui/model';
+import { formatPackagePrice, getAddonBillingLabel, toAddonCardPlan } from '@go-tech/package-ui/model';
 import type { PackageBizCode } from '@go-tech/types';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { useId, useState } from 'react';
 import type { PackageAddonItem } from '@/mocks/packages';
-import { NumberField } from './package-fields';
+import { FormField, NumberField } from './package-fields';
 import { PackageMenuEditor } from './package-menu-editor';
 import { splitFeatures } from './package-model';
 import type { MenuNode } from './package-model';
@@ -41,32 +41,23 @@ const createAddon = (): AddonFormValue => ({
   price: 0
 });
 
-const usesMenu = (itemType: number | string) => itemType === 2 || itemType === '2';
-const usesQuantity = (itemType: number | string) => itemType === 3 || itemType === '3';
+const usesMenu = (itemType: number) => itemType === 2;
+const usesQuantity = (itemType: number) => itemType === 3;
 const addonItemTypes = new Set([1, 2, 3]);
 
-const getAmount = (dataCount: number, price: number) => {
-  if (!Number.isSafeInteger(dataCount) || dataCount < 0 || !Number.isFinite(price) || price < 0) return null;
-  const cents = dataCount * Math.round(price * 100);
-  return Number.isSafeInteger(cents) ? cents / 100 : null;
-};
+const isValidCount = (count: number) => Number.isSafeInteger(count) && count >= 0;
 
-const getAddonFormError = (formValue: AddonFormValue, itemName: string, itemType: number) => {
+const getAddonFormError = ({ detail, itemName, itemType, price }: PackageAddonItem) => {
   const requiresQuantity = usesQuantity(itemType);
-  const requiresMenu = usesMenu(itemType);
-  const { dataCount } = formValue.detail;
   if (!itemName) return '請輸入功能名稱';
   if (itemName.length > 30) return '功能名稱不可超過 30 字';
   if (!addonItemTypes.has(itemType)) return '請選擇有效的功能類型';
-  if (requiresQuantity) {
-    if (!Number.isSafeInteger(dataCount) || dataCount < 0) return '數量必須為非負整數';
-  }
-  if (requiresMenu && !formValue.detail.menu?.length) return '請至少綁定一項菜單';
-  if (!Number.isFinite(formValue.price) || formValue.price < 0) return '價格必須為有效的非負金額';
-  if (Math.abs(formValue.price * 100 - Math.round(formValue.price * 100)) > 0.000001) {
-    return '價格最多保留兩位小數';
-  }
-  if (requiresQuantity && getAmount(dataCount, formValue.price) === null) return '數量與價格的計算結果過大';
+  if (requiresQuantity && !isValidCount(detail.dataCount)) return '數量必須為非負整數';
+  if (usesMenu(itemType) && !detail.menu?.length) return '請至少綁定一項菜單';
+  if (!Number.isFinite(price) || price < 0) return '價格必須為有效的非負金額';
+  const cents = Math.round(price * 100);
+  if (Math.abs(price * 100 - cents) > 0.000001) return '價格最多保留兩位小數';
+  if (requiresQuantity && !Number.isSafeInteger(detail.dataCount * cents)) return '數量與價格的計算結果過大';
   return null;
 };
 
@@ -75,27 +66,19 @@ const parseAddonFormValue = (
   featuresText: string,
   bizCode: PackageBizCode
 ): { error: string } | { value: PackageAddonItem } => {
-  const itemName = formValue.itemName.trim();
   const itemType = Number(formValue.itemType);
-  const { dataCount } = formValue.detail;
-  const error = getAddonFormError(formValue, itemName, itemType);
-  if (error) return { error };
-  return {
-    value: {
-      ...formValue,
-      bizCode,
-      detail: {
-        ...formValue.detail,
-        dataCount: usesQuantity(itemType) ? dataCount : 0,
-        features: splitFeatures(featuresText),
-        menu: usesMenu(itemType) ? (formValue.detail.menu ?? []) : [],
-        packageKind: 'addon',
-        summary: formValue.detail.summary?.trim() ?? ''
-      },
-      itemName,
-      itemType
-    }
+  const detail: PackageAddonItem['detail'] = {
+    ...formValue.detail,
+    billingLabel: formValue.detail.billingLabel?.trim(),
+    dataCount: usesQuantity(itemType) ? formValue.detail.dataCount : 0,
+    features: splitFeatures(featuresText),
+    menu: usesMenu(itemType) ? (formValue.detail.menu ?? []) : [],
+    packageKind: 'addon',
+    summary: formValue.detail.summary?.trim() ?? ''
   };
+  const value = { ...formValue, bizCode, detail, itemName: formValue.itemName.trim(), itemType };
+  const error = getAddonFormError(value);
+  return error ? { error } : { value };
 };
 
 export function PackageAddonsEditor({
@@ -115,6 +98,9 @@ export function PackageAddonsEditor({
   const [featuresText, setFeaturesText] = useState('');
   const [error, setError] = useState('');
   const fieldPrefix = useId();
+  const itemType = Number(formValue.itemType);
+  const requiresQuantity = usesQuantity(itemType);
+  const billingLabel = getAddonBillingLabel(toAddonCardPlan({ ...formValue, itemType }, product));
 
   const closeDialog = () => {
     setOpen(false);
@@ -164,17 +150,7 @@ export function PackageAddonsEditor({
             <PackageCard
               product={product}
               preview
-              plan={{
-                billingMode: addon.detail.billingMode ?? (product === 'hr' ? 'employee_month' : 'unit_month'),
-                count: usesQuantity(addon.itemType) ? addon.detail.dataCount : undefined,
-                features: addon.detail.features,
-                itemType: addon.itemType,
-                menu: addon.detail.menu,
-                packageKind: 'addon',
-                packageName: addon.itemName,
-                price: addon.price,
-                summary: addon.detail.summary
-              }}
+              plan={toAddonCardPlan(addon, product)}
               addonActions={
                 <>
                   <Button
@@ -213,7 +189,7 @@ export function PackageAddonsEditor({
         <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>{editingIndex === null ? '新增附加功能' : '編輯附加功能'}</DialogTitle>
-            <DialogDescription>設定名稱、摘要、展示賣點、類型、綁定菜單、數量與價格</DialogDescription>
+            <DialogDescription>設定附加功能的展示內容、類型與計費資訊</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-2">
@@ -287,8 +263,8 @@ export function PackageAddonsEditor({
                 </SelectContent>
               </Select>
             </div>
-            <div className={usesQuantity(formValue.itemType) ? 'grid grid-cols-2 gap-4' : undefined}>
-              {usesQuantity(formValue.itemType) && (
+            <div className={requiresQuantity ? 'grid grid-cols-2 gap-4' : undefined}>
+              {requiresQuantity && (
                 <NumberField
                   id={`${fieldPrefix}-count`}
                   label="數量"
@@ -305,7 +281,7 @@ export function PackageAddonsEditor({
               )}
               <NumberField
                 id={`${fieldPrefix}-price`}
-                label={usesQuantity(formValue.itemType) ? '單價' : '價格'}
+                label={requiresQuantity ? '單價' : '價格'}
                 required
                 price
                 value={formValue.price}
@@ -315,19 +291,26 @@ export function PackageAddonsEditor({
                 }}
               />
             </div>
-            {usesQuantity(formValue.itemType) && (
-              <div className="flex items-center justify-between rounded-lg bg-primary/5 px-4 py-3 text-sm">
-                <output aria-live="polite" className="font-semibold tabular-nums text-primary">
-                  + ${formatPackagePrice(formValue.price)} HKD /{' '}
-                  {getAddonBillingLabel({
-                    billingMode: formValue.bizCode === 'hr' ? 'employee_month' : 'unit_month',
-                    itemType: Number.parseInt(formValue.itemType, 10),
-                    count: formValue.detail.dataCount
-                  })}
-                </output>
-              </div>
-            )}
-            {usesMenu(formValue.itemType) && (
+            <FormField id={`${fieldPrefix}-billing-label`} label="自訂計費說明">
+              <Input
+                id={`${fieldPrefix}-billing-label`}
+                placeholder="留空時依功能類型顯示"
+                value={formValue.detail.billingLabel ?? ''}
+                onChange={event => {
+                  setFormValue(previous => ({
+                    ...previous,
+                    detail: { ...previous.detail, billingLabel: event.target.value }
+                  }));
+                  setError('');
+                }}
+              />
+            </FormField>
+            <div className="rounded-lg bg-primary/5 px-4 py-3 text-sm">
+              <output aria-live="polite" className="break-words font-semibold tabular-nums text-primary">
+                +${formatPackagePrice(formValue.price) ?? '—'} HKD / {billingLabel}
+              </output>
+            </div>
+            {usesMenu(itemType) && (
               <div className="space-y-2">
                 <div>
                   <p className="text-sm font-medium">綁定菜單</p>

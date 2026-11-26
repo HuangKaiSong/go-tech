@@ -1,13 +1,12 @@
 import assert from 'node:assert/strict';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { test } from 'vitest';
-import { PackageCard } from '../src/index';
+import { BasePackageCard, PackageCard, ServiceAddonCard } from '../src/index';
 import type { PackageLinkProps, PackageTextProps } from '../src/index';
 import { formatPackagePrice, getAddonBillingLabel, getPackageFeatures } from '../src/model';
 import type { PackageCardPlan } from '../src/model';
 
 const plan: PackageCardPlan = {
-  addUnitPrice: 8,
   billingMode: 'employee_month',
   count: 50,
   features: ['租約管理', '單位管理'],
@@ -43,10 +42,12 @@ test('customer and preview cards share content and layout while only navigation 
 test('HR base and addon variants use shared pricing and feature rendering', () => {
   const base = renderToStaticMarkup(<PackageCard product="hr" plan={plan} />);
   assert.ok(base.includes('必選基礎套餐'));
-  assert.ok(base.includes('包含 50 名員工'));
-  assert.ok(base.includes('超額員工 / 月'));
+  assert.ok(base.includes('每名員工 / 月'));
+  assert.ok(base.includes('完整業務流程'));
   assert.ok(base.includes('href="/service-plan?product=hr"'));
-  const addon = renderToStaticMarkup(<PackageCard product="hr" plan={{ ...plan, packageKind: 'addon' }} preview />);
+  const addon = renderToStaticMarkup(
+    <PackageCard product="hr" plan={{ ...plan, itemType: 3, packageKind: 'addon' }} preview />
+  );
   assert.ok(addon.includes('+$1,200.5'));
   assert.ok(addon.includes('HKD / 50名員工 / 月'));
   assert.ok(addon.includes('完整業務流程'));
@@ -57,7 +58,11 @@ test('HR base and addon variants use shared pricing and feature rendering', () =
 
 test('PMS addons use the same compact addon card without a plan action', () => {
   const addon = renderToStaticMarkup(
-    <PackageCard product="pms" plan={{ ...plan, billingMode: 'unit_month', packageKind: 'addon' }} preview />
+    <PackageCard
+      product="pms"
+      plan={{ ...plan, billingMode: 'unit_month', itemType: 3, packageKind: 'addon' }}
+      preview
+    />
   );
   assert.ok(addon.includes('+$1,200.5'));
   assert.ok(addon.includes('HKD / 50個單位 / 月'));
@@ -66,9 +71,35 @@ test('PMS addons use the same compact addon card without a plan action', () => {
 });
 
 test('addon quantity labels follow itemType without changing saved fields', () => {
-  assert.equal(getAddonBillingLabel({ billingMode: 'unit_month', count: 8, itemType: 2 }), '8個單位 / 月');
+  assert.equal(getAddonBillingLabel({ billingMode: 'unit_month', count: 8, itemType: 2 }).trim(), '月');
   assert.equal(getAddonBillingLabel({ billingMode: 'employee_month', count: 12, itemType: 3 }), '12名員工 / 月');
   assert.equal(getAddonBillingLabel({ billingMode: 'unit_month', count: 8, itemType: 1 }), '每個單位 / 月');
+});
+
+test('custom addon billing labels override the defaults across all item types and both card layouts', () => {
+  for (const itemType of [1, 2, 3]) {
+    const addon: PackageCardPlan = { ...plan, itemType, packageKind: 'addon', billingLabel: '  每組 / 季  ' };
+    assert.equal(getAddonBillingLabel(addon), '每組 / 季');
+    assert.equal(getAddonBillingLabel({ ...addon, billingLabel: '   ' }), getAddonBillingLabel({ ...plan, itemType }));
+    const editor = renderToStaticMarkup(<PackageCard plan={addon} product="hr" preview />);
+    const service = renderToStaticMarkup(<ServiceAddonCard plan={addon} />);
+    assert.match(editor, /HKD \/ 每組 \/ 季/);
+    assert.match(service, /HKD \/ 每組 \/ 季/);
+  }
+});
+
+test('service base card shares the same content between live and preview and disables the preview action', () => {
+  const href = '/select-plan/PI000003?product=pms';
+  const live = renderToStaticMarkup(<BasePackageCard plan={plan} product="pms" href={href} LinkComponent={Link} />);
+  const preview = renderToStaticMarkup(<BasePackageCard plan={plan} product="pms" />);
+
+  assert.match(live, /href="\/zh-TW\/select-plan\/PI000003\?product=pms"/);
+  assert.match(preview, /<button[^>]+disabled=""/);
+  assert.equal(live.split('<a ')[0], preview.split('<button ')[0]);
+  for (const html of [live, preview]) {
+    assert.match(html, /選擇基礎版並加購模組/);
+    assert.match(html, /租約管理/);
+  }
 });
 
 test('hosts can supply translation and navigation without Next.js dependencies', () => {

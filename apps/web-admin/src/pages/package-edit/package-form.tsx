@@ -1,6 +1,12 @@
 import {
   Badge,
   Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
   Input,
   Label,
   Select,
@@ -96,14 +102,14 @@ export function PackageForm({ initialData }: { initialData: PackageDraft }) {
 
   return (
     <form
-      className="space-y-6 pb-12"
+      className="flex h-full min-h-0 flex-col gap-6"
       onSubmit={event => {
         event.preventDefault();
         if (!saveMutation.isPending) saveMutation.mutate(plan);
       }}
     >
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
+      <header className="flex shrink-0 flex-wrap items-center justify-between gap-4">
+        <div className="flex min-w-0 flex-wrap items-center gap-3">
           <Button
             type="button"
             variant="ghost"
@@ -114,7 +120,7 @@ export function PackageForm({ initialData }: { initialData: PackageDraft }) {
             <ArrowLeft className="mr-1 h-4 w-4" aria-hidden="true" />
             返回
           </Button>
-          <h1 className="text-2xl font-bold">
+          <h1 className="min-w-0 break-words text-2xl font-bold">
             {draft.packageName || (draft.id === undefined ? '新增套餐' : '編輯套餐')}
           </h1>
           <Badge variant={draft.status === 1 ? 'default' : 'secondary'}>
@@ -131,15 +137,32 @@ export function PackageForm({ initialData }: { initialData: PackageDraft }) {
               disabled={saveMutation.isPending}
             />
           </div> */}
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button type="button" variant="outline" disabled={saveMutation.isPending}>
+                <Eye aria-hidden="true" />
+                預覽
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="flex w-[calc(100%_-_2rem)] max-w-6xl flex-col gap-0 overflow-hidden p-0">
+              <DialogHeader className="shrink-0 border-b border-border p-4 pr-12 text-left">
+                <DialogTitle>即時預覽</DialogTitle>
+                <DialogDescription>查看目前草稿在客戶端的展示效果</DialogDescription>
+              </DialogHeader>
+              <div className="min-h-0 overflow-y-auto overscroll-contain p-4 sm:p-6" tabIndex={0}>
+                <PackagePreview menuTree={menuQuery.data} plan={plan} />
+              </div>
+            </DialogContent>
+          </Dialog>
           <Button type="submit" loading={saveMutation.isPending} disabled={saveMutation.isPending}>
             {saveMutation.isPending ? '保存中…' : '保存'}
           </Button>
         </div>
-      </div>
+      </header>
 
       <fieldset
         disabled={saveMutation.isPending}
-        className="grid min-w-0 grid-cols-1 items-start gap-6 lg:grid-cols-2 2xl:grid-cols-3"
+        className="-mx-6 grid min-h-0 min-w-0 flex-1 grid-cols-1 content-start items-start gap-6 overflow-y-auto overscroll-contain px-6 pb-12 lg:grid-cols-2"
       >
         <div className="min-w-0 space-y-6">
           <SectionCard icon={Package} title="基本設定" description="套餐資料、容量及基礎價格">
@@ -282,7 +305,7 @@ export function PackageForm({ initialData }: { initialData: PackageDraft }) {
                 rows={5}
                 value={featuresText}
                 onChange={event => setFeaturesText(event.target.value)}
-                placeholder="留空時展示所選功能，優先使用重點功能，最多六項"
+                placeholder="留空時按功能模組展示所選功能"
               />
             </FormField>
           </SectionCard>
@@ -338,14 +361,6 @@ export function PackageForm({ initialData }: { initialData: PackageDraft }) {
                 </Button>
               </div>
             )}
-          </SectionCard>
-        </div>
-
-        <div className="min-w-0 lg:col-span-2 2xl:sticky 2xl:top-6 2xl:col-span-1">
-          <SectionCard icon={Eye} title="即時預覽" description="參照客戶端套餐展示，內容隨編輯即時更新">
-            <div className="mx-auto max-w-lg break-words">
-              <PackagePreview plan={plan} />
-            </div>
           </SectionCard>
         </div>
       </fieldset>

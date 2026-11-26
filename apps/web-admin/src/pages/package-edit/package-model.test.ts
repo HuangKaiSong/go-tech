@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { getBillingLabel, getCapacityLabel, getPackageFeatures } from '@go-tech/package-ui/model';
+import { getBillingLabel, getCapacityLabel, getPackageFeatures, getPmsFeatureGroups } from '@go-tech/package-ui/model';
 import {
   buildPackagePayload,
   createPackageDraft,
@@ -331,6 +331,9 @@ test('fills parent relationships when saving an untouched legacy selection', () 
   assert.equal(loaded.detail.menu?.[0].parentId, undefined);
   assert.equal(loaded.detail.menu?.[2].parentId, 999);
   assert.deepEqual(getPackageFeatures(toPackageCardPlan(payload)), [action.menuTitle]);
+  assert.deepEqual(getPmsFeatureGroups(toPackageCardPlan(loaded, tree).menu), [
+    { id: '1', title: root.menuTitle, features: [group.menuTitle] }
+  ]);
   const reloaded = parsePackage(JSON.parse(JSON.stringify(payload)));
   assert.deepEqual(reloaded.detail.menu, payload.detail.menu);
   assert.equal(getMenuChecked(feature, new Set(reloaded.detail.menu?.map(item => item.menuId))), true);

@@ -1,11 +1,10 @@
-import { Card, CardContent, CardHeader } from '@go-tech-frontend/ui';
-import { formatPackagePrice, getAddonBillingLabel, getPackageFeatures } from '@go-tech/package-ui/model';
+import { ServiceAddonCard } from '@go-tech/package-ui';
+import { toAddonCardPlan } from '@go-tech/package-ui/model';
 import type { PackageBizCode, Packages } from '@go-tech/types';
 import { SquareCheckBig } from 'lucide-react';
 import { BasePackage } from '@/app/components/base-package';
 import { DynamicText } from '@/app/components/DynamicI18nText.client';
 import SwipeRow from '@/app/components/SwipeRow';
-import { toAddonCardPlan } from '@/app/lib/package-card-plan';
 
 function FeatureIcon({ icon }: { icon?: string }) {
   if (!icon) return <SquareCheckBig className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />;
@@ -53,51 +52,14 @@ export function ServicePackages({
         </div>
         {addons.length > 0 ? (
           <SwipeRow className="flex md:grid md:grid-cols-3 md:gap-5 overflow-x-auto md:overflow-visible snap-x snap-mandatory -mx-4 px-4 md:mx-auto md:px-0 gap-4 pb-3 md:pb-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&>*]:shrink-0 [&>*]:basis-[85%] [&>*]:snap-center md:[&>*]:basis-auto">
-            {addons.map((addon, index) => {
-              const card = toAddonCardPlan(addon, product);
-              const addonPrice = formatPackagePrice(card.price);
-              const addonFeatures = getPackageFeatures(card);
-              return (
-                <Card
-                  key={addon.id ?? `${addon.itemName}-${index}`}
-                  className="flex min-w-0 flex-col border-border bg-card transition-shadow hover:shadow-md"
-                >
-                  <CardHeader className="p-5 pb-6">
-                    <h4 className="break-words text-base font-bold text-foreground">
-                      <DynamicText text={card.packageName} />
-                    </h4>
-                    <p className="min-h-10 text-xs leading-5 text-muted-foreground">
-                      <DynamicText text={card.summary || ''} />
-                    </p>
-                  </CardHeader>
-                  <CardContent className="flex-1 px-5 pb-6">
-                    <div className="mb-4 flex flex-wrap items-baseline gap-1">
-                      <strong className="text-2xl font-bold text-primary">
-                        {addonPrice !== null ? `+$${addonPrice}` : <DynamicText text="敬請期待" />}
-                      </strong>
-                      <span className="text-xs text-muted-foreground">
-                        HKD / <DynamicText text={getAddonBillingLabel(card)} />
-                      </span>
-                    </div>
-                    {addonFeatures.length > 0 && (
-                      <ul className="space-y-2.5 border-t border-border pt-4">
-                        {addonFeatures.map((feature, featureIndex) => (
-                          <li
-                            key={`${feature}-${featureIndex}`}
-                            className="flex items-start gap-2.5 text-sm text-muted-foreground"
-                          >
-                            <FeatureIcon
-                              icon={addon.detail?.menu?.find(item => item.menuTitle === feature)?.menuIcon}
-                            />
-                            <DynamicText text={feature} />
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </CardContent>
-                </Card>
-              );
-            })}
+            {addons.map((addon, index) => (
+              <ServiceAddonCard
+                key={addon.id ?? `${addon.itemName}-${index}`}
+                FeatureIcon={FeatureIcon}
+                plan={toAddonCardPlan(addon, product)}
+                TextComponent={DynamicText}
+              />
+            ))}
           </SwipeRow>
         ) : (
           <div className="rounded-lg border border-dashed border-border bg-muted/20 px-6 py-12 text-center text-sm text-muted-foreground">

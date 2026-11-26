@@ -10,6 +10,7 @@ import { DynamicText } from '@/app/components/DynamicI18nText.client';
 import Footer from '@/app/components/Footer';
 import Header from '@/app/components/v2/Header';
 import { useProgressRouter } from '@/app/hooks/use-progress-router';
+import { sortAddons } from '@/app/lib/package-catalog';
 import {
   DEFAULT_ADDON_QUANTITY,
   getPurchaseAddonKey,
@@ -87,7 +88,7 @@ const SelectPlan = ({ plan: inputPlan, planId }: { plan: Packages; planId?: stri
   const router = useProgressRouter();
   const { product } = useProductSelection();
   const plan = { ...inputPlan, bizCode: inputPlan.bizCode ?? product };
-  const addons = plan.additionalItems ?? [];
+  const addons = sortAddons(plan.additionalItems ?? []);
   const [needAddons, setNeedAddons] = useAtom(needAddonsAtom);
   const [selectedMonths, setSelectedMonths] = useAtom(selectedMonthsAtom);
   const [customPeriod, setCustomPeriod] = useState(!periods.includes(selectedMonths));
@@ -113,7 +114,7 @@ const SelectPlan = ({ plan: inputPlan, planId }: { plan: Packages; planId?: stri
   const selectAll = () =>
     setSelectedServices(
       Object.fromEntries(
-        addons.flatMap((addon, index) => {
+        (addons || []).flatMap((addon, index) => {
           const quantity = DEFAULT_ADDON_QUANTITY;
           return quantity > 0 ? [[getPurchaseAddonKey(plan, addon, index), quantity]] : [];
         })
@@ -244,7 +245,7 @@ const SelectPlan = ({ plan: inputPlan, planId }: { plan: Packages; planId?: stri
                   <DynamicText text="附加模塊 / 增值服務" />
                 </SectionTitle>
                 <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
-                  已選 {selectedCount} / {addons.length}
+                  已選 {selectedCount} / {addons?.length || 0}
                 </span>
               </div>
               <div className="flex flex-wrap items-center gap-3">
@@ -289,13 +290,13 @@ const SelectPlan = ({ plan: inputPlan, planId }: { plan: Packages; planId?: stri
                     <DynamicText text={`（可多選，依套餐開通月份計算 ${selectedMonths} 個月）`} />
                   </span>
                 </p>
-                {addons.length === 0 && (
+                {addons?.length === 0 && (
                   <p className="rounded-lg border border-dashed border-border py-8 text-center text-sm text-muted-foreground">
                     <DynamicText text="此套餐暫無附加服務" />
                   </p>
                 )}
                 <div className="grid gap-4 sm:grid-cols-2">
-                  {addons.map((service, index) => {
+                  {addons?.map((service, index) => {
                     const key = getPurchaseAddonKey(plan, service, index);
                     const line = totals.lines.find(item => item.key === key);
                     const selected = Boolean(line);
@@ -305,6 +306,7 @@ const SelectPlan = ({ plan: inputPlan, planId }: { plan: Packages; planId?: stri
                       menu: service.detail?.menu
                     });
                     const unit = '份';
+                    const billingLabel = service.detail?.billingLabel;
                     return (
                       <div
                         key={key}
@@ -330,8 +332,10 @@ const SelectPlan = ({ plan: inputPlan, planId }: { plan: Packages; planId?: stri
                             </span>
                             <span className="mt-0.5 block text-sm font-bold text-primary">
                               +${money(service.price)} HKD{' '}
-                              <span className="text-xs font-normal text-muted-foreground">
-                                <DynamicText text={`每${unit} / 月`} />
+                              <span className="break-words text-xs font-normal text-muted-foreground">
+                                <DynamicText
+                                  text={(typeof billingLabel === 'string' && billingLabel.trim()) || `每${unit} / 月`}
+                                />
                               </span>
                             </span>
                             {service.detail?.summary && (

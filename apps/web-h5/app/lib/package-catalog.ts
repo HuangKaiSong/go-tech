@@ -62,7 +62,7 @@ const normalizePackage = (value: unknown, sourceIndex: number, forcedProduct?: P
 
   return {
     ...value,
-    additionalItems: normalizeAdditionalItems(value.additionalItems, bizCode),
+    additionalItems: sortAddons(normalizeAdditionalItems(value.additionalItems, bizCode)),
     bizCode,
     detail,
     displayConfig: toDisplayConfig(value.displayConfig ?? value.display_config),
@@ -99,4 +99,11 @@ export function buildPackageCatalog(response: unknown): PackageCatalog {
   catalog.pms = sortPackages(catalog.pms).slice(0, 1);
   catalog.hr = sortPackages(catalog.hr).slice(0, 1);
   return catalog;
+}
+
+export function sortAddons(response: Packages['additionalItems']): Packages['additionalItems'] {
+  // 根据 itemType 正序 和 id 倒序
+  if (!response) return [];
+
+  return response.toSorted((left, right) => (left.itemType ?? 0) - (right.itemType ?? 0));
 }

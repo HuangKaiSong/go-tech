@@ -1,13 +1,13 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import type { Packages } from '@go-tech/types';
 import {
-  getFeaturedPlan,
+  getAddonBillingLabel,
   getHrFeatureGroups,
   getPmsFeatureGroups,
-  toAddonCardPlan,
-  toPackageCardPlan
-} from './package-card-plan';
+  toAddonCardPlan
+} from '@go-tech/package-ui/model';
+import type { Packages } from '@go-tech/types';
+import { getFeaturedPlan, toPackageCardPlan } from './package-card-plan';
 import { buildPackageCatalog } from './package-catalog';
 
 const plan: Packages = {
@@ -156,6 +156,7 @@ test('parses a serialized detail before adapting H5 package cards', () => {
 test('explicit values retain precedence, including zero prices and false recommendation', () => {
   const adapted = toPackageCardPlan({
     ...plan,
+    detail: { ...plan.detail, isRecommended: false },
     originalPrice: 0,
     subtitle: '直接副標題',
     displayFeatures: [],
@@ -188,7 +189,12 @@ test('HR modules use the featured parent and retain nested names and serialized 
             itemName: '日常管理模塊',
             itemType: '1',
             price: 20,
-            detail: JSON.stringify({ summary: '考勤與審批', features: ['打卡管理'], dataCount: 0 })
+            detail: JSON.stringify({
+              summary: '考勤與審批',
+              features: ['打卡管理'],
+              dataCount: 0,
+              billingLabel: '每組 / 季'
+            })
           },
           { itemName: '增加員工', itemType: 2, price: 100, detail: { dataCount: 8 } }
         ]
@@ -205,6 +211,7 @@ test('HR modules use the featured parent and retain nested names and serialized 
   assert.equal(permission.packageName, '日常管理模塊');
   assert.equal(permission.packageKind, 'addon');
   assert.equal(permission.billingMode, 'employee_month');
+  assert.equal(getAddonBillingLabel(permission), '每組 / 季');
   assert.equal(permission.count, undefined);
   assert.equal(permission.summary, '考勤與審批');
   assert.deepEqual(permission.features, ['打卡管理']);
