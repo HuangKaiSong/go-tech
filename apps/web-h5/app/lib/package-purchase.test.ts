@@ -79,7 +79,7 @@ test('isolates other plans, allows id-less modules, and avoids decimal accumulat
 
 test('all product and item types start at one and allow quantities above dataCount', () => {
   for (const bizCode of ['hr', 'pms'] as const) {
-    for (const itemType of [1, 2, 3]) {
+    for (const itemType of [1, 2, 3, 4, 5]) {
       const variant = {
         ...plan,
         bizCode,

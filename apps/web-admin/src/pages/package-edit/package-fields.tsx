@@ -1,4 +1,5 @@
 import { Input, Label } from '@go-tech-frontend/ui';
+import { cn } from '@go-tech/utils';
 import type { LucideIcon } from 'lucide-react';
 import type { ComponentProps, ReactNode } from 'react';
 
@@ -41,6 +42,8 @@ export function FormField({ children, id, label }: { children: ReactNode; id: st
 }
 
 export function NumberField({
+  byte = false,
+  className,
   id,
   label,
   onChange,
@@ -48,6 +51,7 @@ export function NumberField({
   value,
   ...props
 }: {
+  byte?: boolean;
   id: string;
   label: string;
   onChange: (value: number | undefined) => void;
@@ -64,10 +68,21 @@ export function NumberField({
           type="number"
           min={0}
           step={price ? '0.01' : '1'}
-          className={price ? 'pl-12' : undefined}
+          className={cn(
+            'peer',
+            price && 'pl-12',
+            byte &&
+              'appearance-[textfield] pr-12 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none',
+            className
+          )}
           value={value ?? ''}
           onChange={event => onChange(event.target.value === '' ? undefined : event.target.valueAsNumber)}
         />
+        {byte && (
+          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 select-none text-xs text-muted-foreground transition-colors peer-focus-visible:text-foreground peer-disabled:opacity-50">
+            GB
+          </span>
+        )}
       </div>
     </FormField>
   );

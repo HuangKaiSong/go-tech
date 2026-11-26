@@ -248,3 +248,24 @@ test('catalog preserves empty product arrays when no valid packages exist', () =
   assert.deepEqual(buildPackageCatalog({ data: [] }), { pms: [], hr: [] });
   assert.deepEqual(buildPackageCatalog({ data: { pms: [null], hr: [] } }), { pms: [], hr: [] });
 });
+
+test('catalog retains numeric and string capacity and entry types for card display', () => {
+  const additionalItems = [4, '4', 5, '5', 6].map(itemType => ({
+    itemName: `資源${itemType}`,
+    itemType,
+    price: 1.25,
+    detail: JSON.stringify({ dataCount: 10 })
+  }));
+  const catalog = buildPackageCatalog({ data: [{ ...plan, bizCode: 'hr', additionalItems }] });
+  const addons = catalog.hr[0].additionalItems ?? [];
+  assert.deepEqual(
+    addons.map(addon => addon.itemType),
+    [4, 4, 5, 5]
+  );
+  for (const addon of addons) {
+    const card = toAddonCardPlan(addon, 'hr');
+    assert.equal(card.itemType, addon.itemType);
+    assert.equal(card.count, 10);
+    assert.equal(card.price, 1.25);
+  }
+});

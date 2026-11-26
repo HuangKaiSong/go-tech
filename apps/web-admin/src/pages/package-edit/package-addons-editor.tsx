@@ -15,7 +15,7 @@ import {
   Textarea
 } from '@go-tech-frontend/ui';
 import { PackageCard } from '@go-tech/package-ui';
-import { formatPackagePrice, getAddonBillingLabel, toAddonCardPlan } from '@go-tech/package-ui/model';
+import { formatPackagePrice, getAddonBillingLabel, getAddonCount, toAddonCardPlan } from '@go-tech/package-ui/model';
 import type { PackageBizCode } from '@go-tech/types';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { useId, useState } from 'react';
@@ -41,9 +41,17 @@ const createAddon = (): AddonFormValue => ({
   price: 0
 });
 
+const entryCountFields = [
+  { key: 'customerCount', label: '客户条目数量' },
+  { key: 'consultCount', label: '问盘条目数量' },
+  { key: 'contractCount', label: '合同条目数量' },
+  { key: 'followCount', label: '跟进单条目数量' },
+  { key: 'invoiceCount', label: '发票条目数量' }
+] as const;
+
 const usesMenu = (itemType: number) => itemType === 2;
-const usesQuantity = (itemType: number) => itemType === 3;
-const addonItemTypes = new Set([1, 2, 3]);
+const usesQuantity = (itemType: number) => itemType === 3 || itemType === 4 || itemType === 5;
+const addonItemTypes = new Set([2, 3, 4, 5]);
 
 const isValidCount = (count: number) => Number.isSafeInteger(count) && count >= 0;
 
@@ -52,6 +60,13 @@ const getAddonFormError = ({ detail, itemName, itemType, price }: PackageAddonIt
   if (!itemName) return '請輸入功能名稱';
   if (itemName.length > 30) return '功能名稱不可超過 30 字';
   if (!addonItemTypes.has(itemType)) return '請選擇有效的功能類型';
+  if (itemType === 4) {
+    for (const { key, label } of entryCountFields) {
+      const count = detail[key];
+      if (count !== undefined && !isValidCount(count)) return `${label}必須為有效的非負整數`;
+    }
+    if (!Number.isSafeInteger(detail.dataCount)) return '合計条目數量過大';
+  }
   if (requiresQuantity && !isValidCount(detail.dataCount)) return '數量必須為非負整數';
   if (usesMenu(itemType) && !detail.menu?.length) return '請至少綁定一項菜單';
   if (!Number.isFinite(price) || price < 0) return '價格必須為有效的非負金額';
@@ -70,12 +85,15 @@ const parseAddonFormValue = (
   const detail: PackageAddonItem['detail'] = {
     ...formValue.detail,
     billingLabel: formValue.detail.billingLabel?.trim(),
-    dataCount: usesQuantity(itemType) ? formValue.detail.dataCount : 0,
+    dataCount: usesQuantity(itemType) ? (getAddonCount(formValue.detail, itemType) ?? 0) : 0,
     features: splitFeatures(featuresText),
     menu: usesMenu(itemType) ? (formValue.detail.menu ?? []) : [],
     packageKind: 'addon',
     summary: formValue.detail.summary?.trim() ?? ''
   };
+  if (itemType !== 4) {
+    for (const { key } of entryCountFields) delete detail[key];
+  }
   const value = { ...formValue, bizCode, detail, itemName: formValue.itemName.trim(), itemType };
   const error = getAddonFormError(value);
   return error ? { error } : { value };
@@ -259,12 +277,30 @@ export function PackageAddonsEditor({
                 <SelectContent>
                   <SelectItem value="2">權限</SelectItem>
                   <SelectItem value="3">數量</SelectItem>
+                  <SelectItem value="4">条目</SelectItem>
+                  <SelectItem value="5">容量</SelectItem>
                   {/* <SelectItem value="3">權限／數量</SelectItem> */}
                 </SelectContent>
               </Select>
             </div>
             <div className={requiresQuantity ? 'grid grid-cols-2 gap-4' : undefined}>
-              {requiresQuantity && (
+              {itemType === 4 &&
+                entryCountFields.map(({ key, label }) => (
+                  <NumberField
+                    key={key}
+                    id={`${fieldPrefix}-${key}`}
+                    label={label}
+                    value={formValue.detail[key]}
+                    onChange={value => {
+                      setFormValue(previous => ({
+                        ...previous,
+                        detail: { ...previous.detail, [key]: value, dataCount: 0 }
+                      }));
+                      setError('');
+                    }}
+                  />
+                ))}
+              {requiresQuantity && itemType !== 4 && (
                 <NumberField
                   id={`${fieldPrefix}-count`}
                   label="數量"

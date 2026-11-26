@@ -77,7 +77,7 @@ test('addon quantity labels follow itemType without changing saved fields', () =
 });
 
 test('custom addon billing labels override the defaults across all item types and both card layouts', () => {
-  for (const itemType of [1, 2, 3]) {
+  for (const itemType of [1, 2, 3, 4, 5]) {
     const addon: PackageCardPlan = { ...plan, itemType, packageKind: 'addon', billingLabel: '  每組 / 季  ' };
     assert.equal(getAddonBillingLabel(addon), '每組 / 季');
     assert.equal(getAddonBillingLabel({ ...addon, billingLabel: '   ' }), getAddonBillingLabel({ ...plan, itemType }));
@@ -120,4 +120,39 @@ test('preserves zero pricing and prioritizes explicit features over sorted menu 
   ];
   assert.deepEqual(getPackageFeatures({ menu }), ['重點A', '重點B']);
   assert.deepEqual(getPackageFeatures({ menu, features: ['自訂功能'] }), ['自訂功能']);
+});
+
+test('capacity and entry addons share unit labels across products and card modes', () => {
+  for (const [itemType, unit] of [
+    [5, 'GB'],
+    [4, '条']
+  ] as const) {
+    for (const product of ['hr', 'pms'] as const) {
+      const addonPlan: PackageCardPlan = {
+        packageName: '額外資源',
+        packageKind: 'addon',
+        price: 1.25,
+        itemType,
+        billingMode: product === 'hr' ? 'employee_month' : 'unit_month',
+        count: 10
+      };
+      assert.equal(getAddonBillingLabel(addonPlan), `10${unit} / 月`);
+      assert.equal(getAddonBillingLabel({ ...addonPlan, count: 1 }), `1${unit} / 月`);
+      assert.equal(
+        getAddonBillingLabel({ ...addonPlan, count: Number.MAX_SAFE_INTEGER }),
+        `${Number.MAX_SAFE_INTEGER}${unit} / 月`
+      );
+      for (const count of [undefined, 0, -1, 1.5, Number.NaN, Infinity, -Infinity, Number.MAX_SAFE_INTEGER + 1]) {
+        assert.equal(getAddonBillingLabel({ ...addonPlan, count }), `每${unit} / 月`);
+      }
+      for (const preview of [false, true]) {
+        const html = renderToStaticMarkup(<PackageCard product={product} plan={addonPlan} preview={preview} />);
+        assert.ok(html.includes(`HKD / 10${unit} / 月`));
+        const fallback = renderToStaticMarkup(
+          <PackageCard product={product} plan={{ ...addonPlan, count: 0 }} preview={preview} />
+        );
+        assert.ok(fallback.includes(`HKD / 每${unit} / 月`));
+      }
+    }
+  }
 });

@@ -218,6 +218,57 @@ export function PackageForm({ initialData }: { initialData: PackageDraft }) {
               value={draft.price}
               onChange={value => updateField('price', value)}
             />
+
+            <NumberField
+              id="capacitySize"
+              label="容量大小限制"
+              byte
+              required
+              value={draft.detail.capacitySize}
+              onChange={value => updateDetail('capacitySize', value)}
+            />
+            {/* <NumberField
+              id="entrySize"
+              label="条目数量限制"
+              required
+              value={draft.detail.entrySize}
+              onChange={value => updateDetail('entrySize', value)}
+            /> */}
+            <NumberField
+              id="customerCount"
+              label="客户条目数量限制"
+              required
+              value={draft.detail.customerCount}
+              onChange={value => updateDetail('customerCount', value)}
+            />
+            <NumberField
+              id="consultCount"
+              label=" 问盘条目数量限制"
+              required
+              value={draft.detail.consultCount}
+              onChange={value => updateDetail('consultCount', value)}
+            />
+            <NumberField
+              id="contractCount"
+              label="合同条目数量限制"
+              required
+              value={draft.detail.contractCount}
+              onChange={value => updateDetail('contractCount', value)}
+            />
+            <NumberField
+              id="followCount"
+              label="跟进单条目数量限制"
+              required
+              value={draft.detail.followCount}
+              onChange={value => updateDetail('followCount', value)}
+            />
+            <NumberField
+              id="invoiceCount"
+              label="发票条目数量限制"
+              required
+              value={draft.detail.invoiceCount}
+              onChange={value => updateDetail('invoiceCount', value)}
+            />
           </SectionCard>
 
           <SectionCard icon={CalendarClock} title="訂閱天數定價" description="依不同訂閱週期設定價格">

@@ -45,7 +45,7 @@ const normalizeAdditionalItems = (value: unknown, bizCode: PackageBizCode): Pack
   return value.flatMap(item => {
     if (!isRecord(item) || typeof item.itemName !== 'string' || typeof item.price !== 'number') return [];
     const itemType = Number(item.itemType);
-    if (![1, 2, 3].includes(itemType)) return [];
+    if (![1, 2, 3, 4, 5].includes(itemType)) return [];
     return [
       { ...item, itemName: item.itemName, price: item.price, itemType, bizCode, detail: toPackageDetail(item.detail) }
     ];

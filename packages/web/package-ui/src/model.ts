@@ -30,18 +30,31 @@ export interface PackageCardPlan {
   summary?: string;
 }
 
+const entryCountKeys = ['customerCount', 'consultCount', 'contractCount', 'followCount', 'invoiceCount'] as const;
+type AddonCounts = Pick<PackageDetail, 'dataCount'> & Partial<Record<(typeof entryCountKeys)[number], number>>;
+
 type AddonCardSource = Pick<PackageAddon, 'itemName' | 'itemType' | 'price'> & {
-  detail?: Pick<PackageDetail, 'billingLabel' | 'billingMode' | 'dataCount' | 'features' | 'summary'> & {
-    menu?: readonly PackageCardMenuItem[];
-  };
+  detail?: Pick<PackageDetail, 'billingLabel' | 'billingMode' | 'features' | 'summary'> &
+    AddonCounts & { menu?: readonly PackageCardMenuItem[] };
 };
+
+export function getAddonCount(detail: AddonCounts, itemType: number) {
+  if (itemType !== 4) return detail.dataCount;
+
+  let total: number | undefined;
+  for (const key of entryCountKeys) {
+    const count = detail[key];
+    if (typeof count === 'number') total = (total ?? 0) + count;
+  }
+  return total ?? detail.dataCount;
+}
 
 export function toAddonCardPlan(addon: AddonCardSource, product: PackageBizCode): PackageCardPlan {
   const detail = addon.detail ?? {};
   return {
     billingLabel: detail.billingLabel,
     billingMode: detail.billingMode ?? (product === 'hr' ? 'employee_month' : 'unit_month'),
-    count: addon.itemType === 2 || addon.itemType === 3 ? detail.dataCount : undefined,
+    count: [2, 3, 4, 5].includes(addon.itemType) ? getAddonCount(detail, addon.itemType) : undefined,
     features: detail.features,
     itemType: addon.itemType,
     menu: detail.menu,
@@ -123,6 +136,10 @@ export function getAddonBillingLabel({
   if (customLabel) return customLabel;
 
   const hasCount = typeof count === 'number' && Number.isSafeInteger(count) && count > 0;
+  if (itemType === 4 || itemType === 5) {
+    const unit = itemType === 5 ? 'GB' : '条';
+    return hasCount ? `${count}${unit} / 月` : `每${unit} / 月`;
+  }
   if (itemType === 2) return ' 月';
   if (itemType === 3 && hasCount) {
     if (billingMode === 'employee_month') return `${count}名員工 / 月`;

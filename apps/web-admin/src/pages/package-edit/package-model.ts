@@ -69,7 +69,14 @@ const detailSchema = z
     originalPrice: optionalNumber,
     packageKind: z.enum(['addon', 'plan']).optional(),
     remind: descriptionText,
-    summary: descriptionText
+    summary: descriptionText,
+    capacitySize: z.preprocess(value => (value === null ? undefined : value), identifier.optional()),
+    // entrySize: z.preprocess(value => (value === null ? undefined : value), identifier.optional())
+    customerCount: z.preprocess(value => (value === null ? undefined : value), identifier.optional()),
+    consultCount: z.preprocess(value => (value === null ? undefined : value), identifier.optional()),
+    contractCount: z.preprocess(value => (value === null ? undefined : value), identifier.optional()),
+    followCount: z.preprocess(value => (value === null ? undefined : value), identifier.optional()),
+    invoiceCount: z.preprocess(value => (value === null ? undefined : value), identifier.optional())
   })
   .passthrough();
 
@@ -81,6 +88,13 @@ const detailErrorMessages: Record<string, string> = {
   billingMode: '請選擇有效的計費方式',
   capacityLabel: '請檢查自訂容量說明的格式',
   dataCount: '數量必須為有效的非負整數',
+  capacitySize: '容量大小必須為有效的非負整數',
+  // entrySize: '条目大小必須為有效的非負整數',
+  customerCount: '客户条目大小必須為有效的非負整數',
+  consultCount: '问盘条目大小必須為有效的非負整數',
+  contractCount: '合同条目大小必須為有效的非負整數',
+  followCount: '跟进单条目大小必須為有效的非負整數',
+  invoiceCount: '发票条目大小必須為有效的非負整數',
   features: '展示賣點必須為文字列表',
   isRecommended: '請檢查推薦套餐的設定',
   menu: '請檢查套餐功能內容的格式',
@@ -110,7 +124,7 @@ const addonItemSchema = z
   })
   .loose()
   .superRefine((addon, context) => {
-    if (addon.itemType !== 2 && addon.itemType !== 3) {
+    if (![2, 3, 4, 5].includes(addon.itemType)) {
       context.addIssue({ code: 'custom', message: 'Invalid item type', path: ['itemType'] });
     }
     if (addon.itemType === 2 && addon.detail.menu.length === 0) {
@@ -173,7 +187,16 @@ export function parsePackage(value: unknown): PackageItem {
 export function createPackageDraft(): PackageDraft {
   return {
     bizCode: 'pms',
-    detail: { billingMode: 'month', menu: [], packageKind: 'plan', applyTo: '', remind: '', summary: '' },
+    detail: {
+      // entrySize: 1000,
+      capacitySize: 5,
+      billingMode: 'month',
+      menu: [],
+      packageKind: 'plan',
+      applyTo: '',
+      remind: '',
+      summary: ''
+    },
     itemName: '',
     itemType: 1,
     packageCode: '',

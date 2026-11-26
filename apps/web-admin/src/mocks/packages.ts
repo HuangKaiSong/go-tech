@@ -21,7 +21,14 @@ export interface PackageMenuItem {
 export interface PackageDetail extends PackageDisplayConfig {
   applyTo?: string;
   billingMode?: PackageBillingMode;
+  capacitySize?: number;
+  consultCount?: number;
+  contractCount?: number;
+  // entrySize?: number;
+  customerCount?: number;
   dataCount?: number;
+  followCount?: number;
+  invoiceCount?: number;
   menu?: PackageMenuItem[];
   packageKind?: PackageKind;
   remind?: string;

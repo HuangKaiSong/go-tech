@@ -269,7 +269,7 @@ test('uses itemType to control addon quantity and menu requirements', () => {
     () =>
       buildPackagePayload({
         ...plan,
-        additionalItems: [{ itemName: '未知類型', itemType: 4, price: 20, detail: { dataCount: 1, menu: [] } }]
+        additionalItems: [{ itemName: '未知類型', itemType: 6, price: 20, detail: { dataCount: 1, menu: [] } }]
       }),
     /功能類型/
   );
@@ -460,3 +460,22 @@ test('uses detail billing and capacity labels for both products', () => {
     '不限數量'
   );
 });
+
+for (const itemType of [4, 5]) {
+  test(`round-trips capacity and entry addon type ${itemType} with quantity validation`, () => {
+    const addon = { itemName: '額外資源', itemType, price: 1.25, detail: { dataCount: 10, menu: [] } };
+    const loaded = parsePackage({ ...plan, additionalItems: [{ ...addon, itemType: String(itemType) }] });
+    const saved = buildPackagePayload(loaded).additionalItems[0];
+    assert.equal(saved.itemType, itemType);
+    assert.equal(saved.price, 1.25);
+    assert.equal(saved.detail.dataCount, 10);
+    assert.deepEqual(saved.detail.menu, []);
+    assert.equal(saved.bizCode, plan.bizCode);
+    for (const dataCount of [-1, 1.5, Number.POSITIVE_INFINITY]) {
+      assert.throws(
+        () => buildPackagePayload({ ...plan, additionalItems: [{ ...addon, detail: { dataCount, menu: [] } }] }),
+        /數量.*非負整數/
+      );
+    }
+  });
+}
